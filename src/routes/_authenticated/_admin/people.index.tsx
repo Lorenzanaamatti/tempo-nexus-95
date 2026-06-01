@@ -11,9 +11,13 @@ import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
-  validateSearch: (s: Record<string, unknown>) => ({
-    role: (typeof s.role === "string" ? s.role : "all") as PersonRole | "all",
-  }),
+  validateSearch: (s: Record<string, unknown>): { role: PersonRole | "all" } => {
+    const allowed: ReadonlyArray<PersonRole | "all"> = [
+      "all", "ic_team", "composer", "artist", "supervisor", "specialist", "curator", "other",
+    ];
+    const v = typeof s.role === "string" ? s.role : "all";
+    return { role: (allowed.includes(v as PersonRole | "all") ? v : "all") as PersonRole | "all" };
+  },
 });
 
 type PersonRole = "ic_team" | "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
