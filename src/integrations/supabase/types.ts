@@ -14,7 +14,244 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      budget_lines: {
+        Row: {
+          budget_id: string
+          category: string | null
+          concept: string
+          created_at: string
+          id: string
+          irpf_rate: number
+          net: number | null
+          notes: string | null
+          position: number
+          quantity: number
+          unit_price: number
+          user_id: string
+          vat_rate: number
+        }
+        Insert: {
+          budget_id: string
+          category?: string | null
+          concept: string
+          created_at?: string
+          id?: string
+          irpf_rate?: number
+          net?: number | null
+          notes?: string | null
+          position?: number
+          quantity?: number
+          unit_price?: number
+          user_id: string
+          vat_rate?: number
+        }
+        Update: {
+          budget_id?: string
+          category?: string | null
+          concept?: string
+          created_at?: string
+          id?: string
+          irpf_rate?: number
+          net?: number | null
+          notes?: string | null
+          position?: number
+          quantity?: number
+          unit_price?: number
+          user_id?: string
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          name: string
+          notes: string | null
+          project_id: string | null
+          scope: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          name: string
+          notes?: string | null
+          project_id?: string | null
+          scope?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          scope?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          budget_id: string | null
+          created_at: string
+          currency: string
+          direction: Database["public"]["Enums"]["invoice_direction"]
+          due_date: string | null
+          id: string
+          irpf: number
+          issue_date: string
+          issuer: string | null
+          net: number
+          notes: string | null
+          number: string | null
+          project_id: string | null
+          receiver: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          total: number
+          updated_at: string
+          user_id: string
+          vat: number
+        }
+        Insert: {
+          budget_id?: string | null
+          created_at?: string
+          currency?: string
+          direction?: Database["public"]["Enums"]["invoice_direction"]
+          due_date?: string | null
+          id?: string
+          irpf?: number
+          issue_date?: string
+          issuer?: string | null
+          net?: number
+          notes?: string | null
+          number?: string | null
+          project_id?: string | null
+          receiver?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          total?: number
+          updated_at?: string
+          user_id: string
+          vat?: number
+        }
+        Update: {
+          budget_id?: string | null
+          created_at?: string
+          currency?: string
+          direction?: Database["public"]["Enums"]["invoice_direction"]
+          due_date?: string | null
+          id?: string
+          irpf?: number
+          issue_date?: string
+          issuer?: string | null
+          net?: number
+          notes?: string | null
+          number?: string | null
+          project_id?: string | null
+          receiver?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          total?: number
+          updated_at?: string
+          user_id?: string
+          vat?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          artist: string | null
+          color: string | null
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist?: string | null
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist?: string | null
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +260,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      invoice_direction: "income" | "expense"
+      invoice_status: "pending" | "paid" | "grouped" | "overdue" | "draft"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +388,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      invoice_direction: ["income", "expense"],
+      invoice_status: ["pending", "paid", "grouped", "overdue", "draft"],
+    },
   },
 } as const
