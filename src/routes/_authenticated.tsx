@@ -1,9 +1,9 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useCurrentRole } from "@/lib/use-role";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
@@ -11,12 +11,12 @@ export const Route = createFileRoute("/_authenticated")({
 
 function Shell() {
   const { loading, user } = useAuth();
+  const { role, loading: roleLoading } = useCurrentRole();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      // soft redirect on the client
       window.location.replace("/login");
       return;
     }
@@ -25,8 +25,8 @@ function Shell() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Cargando workspace…
+      <div className="flex min-h-screen items-center justify-center font-display italic text-muted-foreground">
+        Abriendo el archivo…
       </div>
     );
   }
@@ -34,13 +34,14 @@ function Shell() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <AppSidebar />
+        <AppSidebar role={role} />
         <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b border-border bg-background/70 px-3 backdrop-blur">
+          <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
-            <span className="font-display text-sm text-muted-foreground">
-              Lorenzana · Workspace
-            </span>
+            <span className="smallcaps text-muted-foreground">Interesante Compañía</span>
+            {!roleLoading && role && (
+              <span className="ml-auto smallcaps text-muted-foreground">{role === "admin" ? "Equipo IC" : "Compositor"}</span>
+            )}
           </header>
           <main className="flex-1">
             <Outlet />
