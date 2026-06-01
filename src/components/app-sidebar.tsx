@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +24,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const { user, signOut } = useAuth();
 
   const composerActive = pathname.startsWith("/composers");
+  const composersRole = composerActive ? (search?.role ?? "composer") : null;
   const isPeople = pathname.startsWith("/people");
   const peopleRole = isPeople ? search?.role ?? "all" : null;
 
@@ -35,12 +36,13 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     active: boolean;
   };
   const rosterItems: NavItem[] = [
-    { title: "Compositores", to: "/composers", icon: Music, active: composerActive },
-    { title: "Artistas", to: "/people", search: { role: "artist" }, icon: Mic2, active: peopleRole === "artist" },
-    { title: "Supervisores musicales", to: "/people", search: { role: "supervisor" }, icon: Headphones, active: peopleRole === "supervisor" },
-    { title: "Especialistas", to: "/people", search: { role: "specialist" }, icon: Sparkles, active: peopleRole === "specialist" },
-    { title: "Curadores musicales", to: "/people", search: { role: "curator" }, icon: ListMusic, active: peopleRole === "curator" },
-    { title: "Otros", to: "/people", search: { role: "other" }, icon: MoreHorizontal, active: peopleRole === "other" },
+    { title: "Roster completo", to: "/roster", icon: LibraryBig, active: pathname.startsWith("/roster") },
+    { title: "Compositores",        to: "/composers", search: { role: "composer" },   icon: Music,            active: composersRole === "composer" },
+    { title: "Artistas",            to: "/composers", search: { role: "artist" },     icon: Mic2,             active: composersRole === "artist" },
+    { title: "Supervisores musicales", to: "/composers", search: { role: "supervisor" }, icon: Headphones,    active: composersRole === "supervisor" },
+    { title: "Especialistas",       to: "/composers", search: { role: "specialist" }, icon: Sparkles,         active: composersRole === "specialist" },
+    { title: "Curadores musicales", to: "/composers", search: { role: "curator" },    icon: ListMusic,        active: composersRole === "curator" },
+    { title: "Otros",               to: "/composers", search: { role: "other" },      icon: MoreHorizontal,   active: composersRole === "other" },
   ];
   const otherItems: NavItem[] = [
     { title: "Equipo IC", to: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
