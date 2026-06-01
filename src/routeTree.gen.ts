@@ -18,6 +18,7 @@ import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
+import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
@@ -69,6 +70,12 @@ const AuthenticatedAdminComposersIndexRoute =
     path: '/composers/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminProductionsProductionIdRoute =
+  AuthenticatedAdminProductionsProductionIdRouteImport.update({
+    id: '/productions/$productionId',
+    path: '/productions/$productionId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPeoplePersonIdRoute =
   AuthenticatedAdminPeoplePersonIdRouteImport.update({
     id: '/people/$personId',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
+    | '/productions/$productionId'
     | '/composers/'
     | '/people/'
     | '/productions/'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
+    | '/productions/$productionId'
     | '/composers'
     | '/people'
     | '/productions'
@@ -163,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/people/$personId'
+    | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/people/'
     | '/_authenticated/_admin/productions/'
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/productions/$productionId': {
+      id: '/_authenticated/_admin/productions/$productionId'
+      path: '/productions/$productionId'
+      fullPath: '/productions/$productionId'
+      preLoaderRoute: typeof AuthenticatedAdminProductionsProductionIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/people/$personId': {
       id: '/_authenticated/_admin/people/$personId'
       path: '/people/$personId'
@@ -267,6 +287,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
+  AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
@@ -278,6 +299,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
   AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,
+  AuthenticatedAdminProductionsProductionIdRoute:
+    AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminPeopleIndexRoute: AuthenticatedAdminPeopleIndexRoute,
   AuthenticatedAdminProductionsIndexRoute:
