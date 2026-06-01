@@ -14,7 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
-import { Route as AuthenticatedAdminComposersRouteImport } from './routes/_authenticated/_admin/composers'
+import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 
@@ -41,40 +41,40 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAdminComposersRoute =
-  AuthenticatedAdminComposersRouteImport.update({
-    id: '/composers',
-    path: '/composers',
+const AuthenticatedAdminComposersIndexRoute =
+  AuthenticatedAdminComposersIndexRouteImport.update({
+    id: '/composers/',
+    path: '/composers/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminComposersNewRoute =
   AuthenticatedAdminComposersNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AuthenticatedAdminComposersRoute,
+    id: '/composers/new',
+    path: '/composers/new',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminComposersComposerIdRoute =
   AuthenticatedAdminComposersComposerIdRouteImport.update({
-    id: '/$composerId',
-    path: '/$composerId',
-    getParentRoute: () => AuthenticatedAdminComposersRoute,
+    id: '/composers/$composerId',
+    path: '/composers/$composerId',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/me': typeof AuthenticatedMeRoute
-  '/composers': typeof AuthenticatedAdminComposersRouteWithChildren
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/composers/': typeof AuthenticatedAdminComposersIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AuthenticatedIndexRoute
   '/me': typeof AuthenticatedMeRoute
-  '/composers': typeof AuthenticatedAdminComposersRouteWithChildren
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/composers': typeof AuthenticatedAdminComposersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +83,9 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/_admin/composers': typeof AuthenticatedAdminComposersRouteWithChildren
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -93,17 +93,17 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/me'
-    | '/composers'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/composers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/'
     | '/me'
-    | '/composers'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/composers'
   id:
     | '__root__'
     | '/_authenticated'
@@ -111,9 +111,9 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin'
     | '/_authenticated/me'
     | '/_authenticated/'
-    | '/_authenticated/_admin/composers'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
+    | '/_authenticated/_admin/composers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,54 +158,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/_admin/composers': {
-      id: '/_authenticated/_admin/composers'
+    '/_authenticated/_admin/composers/': {
+      id: '/_authenticated/_admin/composers/'
       path: '/composers'
-      fullPath: '/composers'
-      preLoaderRoute: typeof AuthenticatedAdminComposersRouteImport
+      fullPath: '/composers/'
+      preLoaderRoute: typeof AuthenticatedAdminComposersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/composers/new': {
       id: '/_authenticated/_admin/composers/new'
-      path: '/new'
+      path: '/composers/new'
       fullPath: '/composers/new'
       preLoaderRoute: typeof AuthenticatedAdminComposersNewRouteImport
-      parentRoute: typeof AuthenticatedAdminComposersRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/composers/$composerId': {
       id: '/_authenticated/_admin/composers/$composerId'
-      path: '/$composerId'
+      path: '/composers/$composerId'
       fullPath: '/composers/$composerId'
       preLoaderRoute: typeof AuthenticatedAdminComposersComposerIdRouteImport
-      parentRoute: typeof AuthenticatedAdminComposersRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
   }
 }
 
-interface AuthenticatedAdminComposersRouteChildren {
+interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
-}
-
-const AuthenticatedAdminComposersRouteChildren: AuthenticatedAdminComposersRouteChildren =
-  {
-    AuthenticatedAdminComposersComposerIdRoute:
-      AuthenticatedAdminComposersComposerIdRoute,
-    AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
-  }
-
-const AuthenticatedAdminComposersRouteWithChildren =
-  AuthenticatedAdminComposersRoute._addFileChildren(
-    AuthenticatedAdminComposersRouteChildren,
-  )
-
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminComposersRoute: typeof AuthenticatedAdminComposersRouteWithChildren
+  AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminComposersRoute:
-    AuthenticatedAdminComposersRouteWithChildren,
+  AuthenticatedAdminComposersComposerIdRoute:
+    AuthenticatedAdminComposersComposerIdRoute,
+  AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
+  AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -234,3 +221,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
