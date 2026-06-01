@@ -11,23 +11,45 @@ import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
+  validateSearch: (s: Record<string, unknown>) => ({
+    role: (typeof s.role === "string" ? s.role : "all") as PersonRole | "all",
+  }),
 });
 
-type PersonRole = "ic_team" | "composer" | "artist" | "supervisor";
+type PersonRole = "ic_team" | "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
 const ROLE_LABEL: Record<PersonRole, string> = {
   ic_team: "Equipo IC",
   composer: "Compositor",
   artist: "Artista",
   supervisor: "Supervisor",
+  specialist: "Especialista",
+  curator: "Curador musical",
+  other: "Otros",
+};
+const ROLE_TITLE: Record<PersonRole | "all", string> = {
+  all: "Personas",
+  ic_team: "Equipo IC",
+  composer: "Compositores",
+  artist: "Artistas",
+  supervisor: "Supervisores musicales",
+  specialist: "Especialistas",
+  curator: "Curadores musicales",
+  other: "Otros",
 };
 
 function PeopleIndex() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [q, setQ] = useState("");
-  const [roleFilter, setRoleFilter] = useState<PersonRole | "all">("all");
+  const roleFilter = search.role;
+  const setRoleFilter = (v: PersonRole | "all") =>
+    navigate({ search: { role: v }, replace: true });
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newRole, setNewRole] = useState<PersonRole>("ic_team");
+  const [newRole, setNewRole] = useState<PersonRole>(
+    roleFilter !== "all" && roleFilter !== "composer" ? roleFilter : "ic_team",
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ["people", q, roleFilter],
@@ -59,10 +81,10 @@ function PeopleIndex() {
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
-          <p className="smallcaps text-muted-foreground">Directorio</p>
-          <h1 className="mt-1 font-display text-5xl italic">Personas</h1>
+          <p className="smallcaps text-muted-foreground">Roster</p>
+          <h1 className="mt-1 font-display text-5xl italic">{ROLE_TITLE[roleFilter]}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Equipo IC, compositores, artistas y supervisores. Los compositores aparecen automáticamente.
+            Directorio del roster. Los compositores aparecen automáticamente desde su módulo.
           </p>
         </div>
         <div className="flex items-center gap-2">
