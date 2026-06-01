@@ -246,6 +246,20 @@ function Inner({
           <Field label="Nombre completo">
             <Input value={c.full_name ?? ""} onChange={(e) => field("full_name", e.target.value)} />
           </Field>
+          <Field label="Rol en el roster">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={(c as { roster_role?: string }).roster_role ?? "composer"}
+              onChange={(e) => field("roster_role" as never, e.target.value as never)}
+            >
+              <option value="composer">Compositor</option>
+              <option value="artist">Artista</option>
+              <option value="supervisor">Supervisor musical</option>
+              <option value="specialist">Especialista</option>
+              <option value="curator">Curador musical</option>
+              <option value="other">Otros</option>
+            </select>
+          </Field>
           <Field label="Año de nacimiento">
             <Input
               type="number"
