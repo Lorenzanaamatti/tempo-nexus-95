@@ -8,18 +8,36 @@ import { Button } from "@/components/ui/button";
 import { photoUrl } from "@/lib/composers-api";
 import { Plus } from "lucide-react";
 
+type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: string }> = {
+  composer:   { title: "Compositores",         singular: "compositor",         intro: "Catálogo interno del equipo de Interesante Compañía." },
+  artist:     { title: "Artistas",             singular: "artista",            intro: "Artistas representados por Interesante Compañía." },
+  supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Supervisores musicales del roster." },
+  specialist: { title: "Especialistas",        singular: "especialista",       intro: "Especialistas que colaboran con la compañía." },
+  curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
+  other:      { title: "Otros",                singular: "perfil",             intro: "Otros perfiles del roster." },
+};
+const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
+
 export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
+  validateSearch: (s: Record<string, unknown>): { role: RosterRole } => {
+    const v = typeof s.role === "string" ? s.role : "composer";
+    return { role: (ALL_ROLES.includes(v as RosterRole) ? v : "composer") as RosterRole };
+  },
 });
 
 function ComposersIndex() {
+  const { role } = Route.useSearch();
+  const meta = ROLE_TITLE[role];
   const [q, setQ] = useState("");
   const { data, isLoading } = useQuery({
-    queryKey: ["composers", q],
+    queryKey: ["composers", role, q],
     queryFn: async () => {
       let query = supabase
         .from("composers")
-        .select("id, full_name, city, country, availability, tags, photo_path")
+        .select("id, full_name, city, country, availability, tags, photo_path, roster_role")
+        .eq("roster_role", role)
         .order("full_name", { ascending: true });
       if (q.trim()) {
         query = query.textSearch("search_tsv", q.trim(), { type: "plain", config: "spanish" });
@@ -35,10 +53,8 @@ function ComposersIndex() {
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl italic">Compositores</h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Catálogo interno del equipo de Interesante Compañía. Filtra, busca y propón.
-          </p>
+          <h1 className="mt-1 font-display text-5xl italic">{meta.title}</h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
         </div>
         <div className="flex items-center gap-3">
           <Input
@@ -48,7 +64,7 @@ function ComposersIndex() {
             className="w-72 rounded-sm"
           />
           <Button asChild size="sm">
-            <Link to="/composers/new"><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
+            <Link to="/composers/new" search={{ role }}><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
           </Button>
         </div>
       </div>
@@ -57,12 +73,12 @@ function ComposersIndex() {
         <p className="font-display italic text-muted-foreground">Cargando archivo…</p>
       ) : !data?.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
-          <p className="font-display text-2xl italic">Aún no hay compositores en el archivo.</p>
+          <p className="font-display text-2xl italic">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Empieza añadiendo el primer compositor a la cartera.
+            Empieza añadiendo el primer {meta.singular} a la cartera.
           </p>
           <Button asChild className="mt-6">
-            <Link to="/composers/new"><Plus className="mr-1 h-4 w-4" /> Añadir compositor</Link>
+            <Link to="/composers/new" search={{ role }}><Plus className="mr-1 h-4 w-4" /> Añadir {meta.singular}</Link>
           </Button>
         </div>
       ) : (
