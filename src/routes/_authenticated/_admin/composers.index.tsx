@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { photoUrl } from "@/lib/composers-api";
 import { Plus } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/_admin/composers")({
+export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
 });
 
