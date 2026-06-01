@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          kind: Database["public"]["Enums"]["availability_kind"]
+          note: string | null
+          start_date: string
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          kind?: Database["public"]["Enums"]["availability_kind"]
+          note?: string | null
+          start_date: string
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["availability_kind"]
+          note?: string | null
+          start_date?: string
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       composer_availability: {
         Row: {
           composer_id: string
@@ -570,6 +609,140 @@ export type Database = {
         }
         Relationships: []
       }
+      people: {
+        Row: {
+          composer_id: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["person_role"]
+          updated_at: string
+        }
+        Insert: {
+          composer_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          role: Database["public"]["Enums"]["person_role"]
+          updated_at?: string
+        }
+        Update: {
+          composer_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["person_role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: true
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_assignments: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          note: string | null
+          person_id: string
+          production_id: string
+          role_in_project: string | null
+          start_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          note?: string | null
+          person_id: string
+          production_id: string
+          role_in_project?: string | null
+          start_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          note?: string | null
+          person_id?: string
+          production_id?: string
+          role_in_project?: string | null
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_assignments_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      productions: {
+        Row: {
+          color: string | null
+          created_at: string
+          director: string | null
+          id: string
+          kind: string | null
+          notes: string | null
+          platform: string | null
+          production_company: string | null
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          director?: string | null
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          platform?: string | null
+          production_company?: string | null
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          director?: string | null
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          platform?: string | null
+          production_company?: string | null
+          title?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -635,8 +808,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "composer"
-      availability_kind: "libre" | "ocupado" | "vacaciones" | "personal"
+      availability_kind:
+        | "libre"
+        | "ocupado"
+        | "vacaciones"
+        | "personal"
+        | "produccion"
       availability_status: "available" | "partial" | "unavailable"
+      calendar_subject_type: "person" | "production"
       film_format:
         | "feature"
         | "series"
@@ -645,6 +824,7 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      person_role: "ic_team" | "composer" | "artist" | "supervisor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -773,8 +953,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "composer"],
-      availability_kind: ["libre", "ocupado", "vacaciones", "personal"],
+      availability_kind: [
+        "libre",
+        "ocupado",
+        "vacaciones",
+        "personal",
+        "produccion",
+      ],
       availability_status: ["available", "partial", "unavailable"],
+      calendar_subject_type: ["person", "production"],
       film_format: [
         "feature",
         "series",
@@ -784,6 +971,7 @@ export const Constants = {
         "game",
         "other",
       ],
+      person_role: ["ic_team", "composer", "artist", "supervisor"],
     },
   },
 } as const
