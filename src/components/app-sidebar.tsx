@@ -27,21 +27,27 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const isPeople = pathname.startsWith("/people");
   const peopleRole = isPeople ? search?.role ?? "all" : null;
 
-  const rosterItems = [
+  type NavItem = {
+    title: string;
+    to: string;
+    search?: Record<string, string>;
+    icon: typeof Music;
+    active: boolean;
+  };
+  const rosterItems: NavItem[] = [
     { title: "Compositores", to: "/composers", icon: Music, active: composerActive },
     { title: "Artistas", to: "/people", search: { role: "artist" }, icon: Mic2, active: peopleRole === "artist" },
     { title: "Supervisores musicales", to: "/people", search: { role: "supervisor" }, icon: Headphones, active: peopleRole === "supervisor" },
     { title: "Especialistas", to: "/people", search: { role: "specialist" }, icon: Sparkles, active: peopleRole === "specialist" },
     { title: "Curadores musicales", to: "/people", search: { role: "curator" }, icon: ListMusic, active: peopleRole === "curator" },
     { title: "Otros", to: "/people", search: { role: "other" }, icon: MoreHorizontal, active: peopleRole === "other" },
-  ] as const;
-
-  const otherItems = [
-    { title: "Equipo IC", url: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
-    { title: "Producciones", url: "/productions", icon: Film, active: pathname.startsWith("/productions") },
-    { title: "Calendario", url: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
-    { title: "Directorio completo", url: "/people", search: { role: "all" }, icon: Users, active: peopleRole === "all" },
-  ] as const;
+  ];
+  const otherItems: NavItem[] = [
+    { title: "Equipo IC", to: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
+    { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
+    { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
+    { title: "Directorio completo", to: "/people", search: { role: "all" }, icon: Users, active: peopleRole === "all" },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -85,7 +91,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
                   {otherItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={item.active}>
-                        <Link to={item.url} search={item.search as never} className="flex items-center gap-2">
+                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
                           <item.icon className="h-4 w-4" />
                           {!collapsed && <span>{item.title}</span>}
                         </Link>
