@@ -30,14 +30,14 @@ export function computeRange(view: CalendarView, anchor: Date) {
     case "day":
       start = a;
       end = addDays(a, 1);
-      ticks = [{ date: a, label: format(a, "EEEE d MMM yyyy", { locale: es }), major: true }];
+      ticks = [{ date: a, label: format(a, "dd/MM/yyyy", { locale: es }), major: true }];
       break;
     case "week": {
       start = startOfWeek(a, { locale: es });
       end = addDays(start, 7);
       ticks = eachDayOfInterval({ start, end: addDays(end, -1) }).map((d) => ({
         date: d,
-        label: format(d, "EEE d", { locale: es }),
+        label: format(d, "dd/MM", { locale: es }),
       }));
       break;
     }
@@ -46,7 +46,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       end = addMonths(start, 1);
       ticks = eachWeekOfInterval({ start, end: addDays(end, -1) }, { locale: es }).map((d) => ({
         date: d,
-        label: format(d, "d MMM", { locale: es }),
+        label: format(d, "dd/MM", { locale: es }),
       }));
       break;
     }
@@ -55,7 +55,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       end = addQuarters(start, 1);
       ticks = eachMonthOfInterval({ start, end: addDays(end, -1) }).map((d) => ({
         date: d,
-        label: format(d, "MMM yyyy", { locale: es }),
+        label: format(d, "MM/yyyy", { locale: es }),
         major: true,
       }));
       break;
@@ -66,7 +66,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       end = addMonths(start, 6);
       ticks = eachMonthOfInterval({ start, end: addDays(end, -1) }).map((d) => ({
         date: d,
-        label: format(d, "MMM", { locale: es }),
+        label: format(d, "MM/yyyy", { locale: es }),
       }));
       break;
     }
@@ -75,7 +75,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       end = addYears(start, 1);
       ticks = eachMonthOfInterval({ start, end: addDays(end, -1) }).map((d) => ({
         date: d,
-        label: format(d, "MMM", { locale: es }),
+        label: format(d, "MM/yyyy", { locale: es }),
       }));
       break;
     }
@@ -85,7 +85,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       ticks = [];
       for (let i = 0; i < 8; i++) {
         const d = addQuarters(start, i);
-        ticks.push({ date: d, label: format(d, "QQQ yyyy", { locale: es }), major: i % 4 === 0 });
+        ticks.push({ date: d, label: format(d, "MM/yyyy", { locale: es }), major: i % 4 === 0 });
       }
       break;
     }
@@ -95,7 +95,7 @@ export function computeRange(view: CalendarView, anchor: Date) {
       ticks = [];
       for (let i = 0; i < 12; i++) {
         const d = addQuarters(start, i);
-        ticks.push({ date: d, label: format(d, "QQQ yy", { locale: es }), major: i % 4 === 0 });
+        ticks.push({ date: d, label: format(d, "MM/yy", { locale: es }), major: i % 4 === 0 });
       }
       break;
     }
@@ -105,12 +105,12 @@ export function computeRange(view: CalendarView, anchor: Date) {
 }
 
 export function rangeLabel(view: CalendarView, start: Date, end: Date) {
-  if (view === "day") return format(start, "EEEE d MMMM yyyy", { locale: es });
+  if (view === "day") return format(start, "dd/MM/yyyy", { locale: es });
   if (view === "week")
-    return `${format(start, "d MMM", { locale: es })} – ${format(addDays(end, -1), "d MMM yyyy", { locale: es })}`;
-  if (view === "month") return format(start, "MMMM yyyy", { locale: es });
+    return `${format(start, "dd/MM/yyyy", { locale: es })} – ${format(addDays(end, -1), "dd/MM/yyyy", { locale: es })}`;
+  if (view === "month") return format(start, "MM/yyyy", { locale: es });
   if (view === "year") return format(start, "yyyy", { locale: es });
-  return `${format(start, "MMM yyyy", { locale: es })} – ${format(addDays(end, -1), "MMM yyyy", { locale: es })}`;
+  return `${format(start, "MM/yyyy", { locale: es })} – ${format(addDays(end, -1), "MM/yyyy", { locale: es })}`;
 }
 
 export function stepAnchor(view: CalendarView, anchor: Date, dir: 1 | -1) {
