@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { fetchCatalogs, type Availability } from "@/lib/composers-api";
 import { PhotoUploader } from "@/components/photo-uploader";
+import { PhotoGallery } from "@/components/photo-gallery";
 import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
 import { toast } from "sonner";
@@ -130,6 +131,15 @@ function Inner({
         reel_url: c.reel_url,
         internal_notes: c.internal_notes,
         tags: c.tags ?? [],
+        nif: c.nif,
+        address: c.address,
+        postal_code: c.postal_code,
+        province: c.province,
+        phone: c.phone,
+        email: c.email,
+        email_secondary: c.email_secondary,
+        team_name: c.team_name,
+        team_email: c.team_email,
       })
       .eq("id", c.id);
     setSaving(false);
@@ -251,12 +261,6 @@ function Inner({
               onChange={(e) => field("birth_year", e.target.value ? Number(e.target.value) : null)}
             />
           </Field>
-          <Field label="Ciudad">
-            <Input value={c.city ?? ""} onChange={(e) => field("city", e.target.value || null)} />
-          </Field>
-          <Field label="País">
-            <Input value={c.country ?? ""} onChange={(e) => field("country", e.target.value || null)} />
-          </Field>
           <Field label="Bio breve (≤300)" className="sm:col-span-2">
             <Textarea
               maxLength={300}
@@ -271,6 +275,66 @@ function Inner({
               value={c.bio_long ?? ""}
               onChange={(e) => field("bio_long", e.target.value || null)}
             />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Galería */}
+      <Section title="Galería fotográfica (máx. 12)">
+        <PhotoGallery composerId={c.id} />
+      </Section>
+
+      {/* Datos fiscales y dirección */}
+      <Section title="Datos fiscales y dirección">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="NIF / DNI">
+            <Input value={c.nif ?? ""} onChange={(e) => field("nif", e.target.value || null)} />
+          </Field>
+          <Field label="Domicilio" className="sm:col-span-2">
+            <Input
+              value={c.address ?? ""}
+              onChange={(e) => field("address", e.target.value || null)}
+              placeholder="Calle, número, piso, puerta"
+            />
+          </Field>
+          <Field label="Código postal">
+            <Input value={c.postal_code ?? ""} onChange={(e) => field("postal_code", e.target.value || null)} />
+          </Field>
+          <Field label="Ciudad">
+            <Input value={c.city ?? ""} onChange={(e) => field("city", e.target.value || null)} />
+          </Field>
+          <Field label="Provincia">
+            <Input value={c.province ?? ""} onChange={(e) => field("province", e.target.value || null)} />
+          </Field>
+          <Field label="País">
+            <Input value={c.country ?? ""} onChange={(e) => field("country", e.target.value || null)} />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Contacto */}
+      <Section title="Contacto">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Teléfono">
+            <Input type="tel" value={c.phone ?? ""} onChange={(e) => field("phone", e.target.value || null)} />
+          </Field>
+          <Field label="Email">
+            <Input type="email" value={c.email ?? ""} onChange={(e) => field("email", e.target.value || null)} />
+          </Field>
+          <Field label="Email secundario">
+            <Input type="email" value={c.email_secondary ?? ""} onChange={(e) => field("email_secondary", e.target.value || null)} />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Equipo */}
+      <Section title="Equipo / Representación">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Nombre del equipo">
+            <Input value={c.team_name ?? ""} onChange={(e) => field("team_name", e.target.value || null)} />
+          </Field>
+          <Field label="Email del equipo">
+            <Input type="email" value={c.team_email ?? ""} onChange={(e) => field("team_email", e.target.value || null)} />
           </Field>
         </div>
       </Section>
