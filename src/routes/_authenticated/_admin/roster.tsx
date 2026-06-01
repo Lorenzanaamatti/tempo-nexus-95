@@ -1,0 +1,120 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { photoUrl } from "@/lib/composers-api";
+
+export const Route = createFileRoute("/_authenticated/_admin/roster")({
+  component: RosterAll,
+});
+
+type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+const ROLE_LABEL: Record<RosterRole, string> = {
+  composer: "Compositores",
+  artist: "Artistas",
+  supervisor: "Supervisores musicales",
+  specialist: "Especialistas",
+  curator: "Curadores musicales",
+  other: "Otros",
+};
+const ORDER: RosterRole[] = ["composer", "artist", "supervisor", "specialist", "curator", "other"];
+
+function RosterAll() {
+  const [q, setQ] = useState("");
+  const { data, isLoading } = useQuery({
+    queryKey: ["roster-all", q],
+    queryFn: async () => {
+      let query = supabase
+        .from("composers")
+        .select("id, full_name, city, country, availability, photo_path, roster_role")
+        .order("full_name");
+      if (q.trim()) query = query.ilike("full_name", `%${q.trim()}%`);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const grouped = (data ?? []).reduce<Record<RosterRole, typeof data>>((acc, row) => {
+    const r = (row.roster_role as RosterRole) ?? "other";
+    (acc[r] ||= [] as never).push(row);
+    return acc;
+  }, { composer: [], artist: [], supervisor: [], specialist: [], curator: [], other: [] } as never);
+
+  const total = data?.length ?? 0;
+
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
+        <div>
+          <p className="smallcaps text-muted-foreground">Roster</p>
+          <h1 className="mt-1 font-display text-5xl italic">Directorio completo</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Todas las personas representadas, agrupadas por categoría. {total} ficha{total === 1 ? "" : "s"} en total.
+          </p>
+        </div>
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar por nombre…"
+          className="w-72 rounded-sm"
+        />
+      </div>
+
+      {isLoading ? (
+        <p className="font-display italic text-muted-foreground">Cargando archivo…</p>
+      ) : !total ? (
+        <p className="text-sm text-muted-foreground">Sin fichas en el roster.</p>
+      ) : (
+        <div className="space-y-12">
+          {ORDER.map((r) => {
+            const rows = grouped[r] ?? [];
+            if (!rows.length) return null;
+            return (
+              <section key={r}>
+                <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
+                  <h2 className="font-display text-3xl italic">{ROLE_LABEL[r]}</h2>
+                  <Link to="/composers" search={{ role: r }} className="smallcaps text-xs text-muted-foreground hover:text-foreground">
+                    Ver categoría →
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {rows.map((c) => {
+                    const url = photoUrl(c.photo_path as string | null);
+                    return (
+                      <Link
+                        key={c.id}
+                        to="/composers/$composerId"
+                        params={{ composerId: c.id }}
+                        className="group flex items-center gap-4 rounded-sm border border-border p-3 transition hover:border-primary/60"
+                      >
+                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
+                          {url ? (
+                            <img src={url} alt={c.full_name} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center font-display text-xl italic text-muted-foreground">
+                              {c.full_name?.[0] ?? "·"}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display text-lg italic">{c.full_name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "—"}</p>
+                        </div>
+                        <Badge variant="outline" className="rounded-sm text-[10px]">
+                          {ROLE_LABEL[r].replace(/s$/, "")}
+                        </Badge>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

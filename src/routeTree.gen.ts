@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
+import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
@@ -46,6 +47,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRosterRoute =
+  AuthenticatedAdminRosterRouteImport.update({
+    id: '/roster',
+    path: '/roster',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCalendarRoute =
   AuthenticatedAdminCalendarRouteImport.update({
     id: '/calendar',
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/me': typeof AuthenticatedMeRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/roster': typeof AuthenticatedAdminRosterRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/me': typeof AuthenticatedMeRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/roster': typeof AuthenticatedAdminRosterRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -129,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/me'
     | '/calendar'
+    | '/roster'
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/calendar'
+    | '/roster'
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
@@ -172,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/'
     | '/_authenticated/_admin/calendar'
+    | '/_authenticated/_admin/roster'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/people/$personId'
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/_admin/roster': {
+      id: '/_authenticated/_admin/roster'
+      path: '/roster'
+      fullPath: '/roster'
+      preLoaderRoute: typeof AuthenticatedAdminRosterRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/calendar': {
       id: '/_authenticated/_admin/calendar'
@@ -284,6 +304,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
+  AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -295,6 +316,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
+  AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
@@ -333,3 +355,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
