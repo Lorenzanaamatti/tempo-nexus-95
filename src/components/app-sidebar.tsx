@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,17 +20,28 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const search = useRouterState({ select: (r) => r.location.search as { role?: string } });
   const { user, signOut } = useAuth();
 
-  const items =
-    role === "admin"
-      ? [
-          { title: "Roster", url: "/composers", icon: Users },
-          { title: "Personas", url: "/people", icon: UserCircle2 },
-          { title: "Producciones", url: "/productions", icon: Film },
-          { title: "Calendario", url: "/calendar", icon: CalendarDays },
-        ]
-      : [{ title: "Mi ficha", url: "/me", icon: User }];
+  const composerActive = pathname.startsWith("/composers");
+  const isPeople = pathname.startsWith("/people");
+  const peopleRole = isPeople ? search?.role ?? "all" : null;
+
+  const rosterItems = [
+    { title: "Compositores", to: "/composers", icon: Music, active: composerActive },
+    { title: "Artistas", to: "/people", search: { role: "artist" }, icon: Mic2, active: peopleRole === "artist" },
+    { title: "Supervisores musicales", to: "/people", search: { role: "supervisor" }, icon: Headphones, active: peopleRole === "supervisor" },
+    { title: "Especialistas", to: "/people", search: { role: "specialist" }, icon: Sparkles, active: peopleRole === "specialist" },
+    { title: "Curadores musicales", to: "/people", search: { role: "curator" }, icon: ListMusic, active: peopleRole === "curator" },
+    { title: "Otros", to: "/people", search: { role: "other" }, icon: MoreHorizontal, active: peopleRole === "other" },
+  ] as const;
+
+  const otherItems = [
+    { title: "Equipo IC", url: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
+    { title: "Producciones", url: "/productions", icon: Film, active: pathname.startsWith("/productions") },
+    { title: "Calendario", url: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
+    { title: "Directorio completo", url: "/people", search: { role: "all" }, icon: Users, active: peopleRole === "all" },
+  ] as const;
 
   return (
     <Sidebar collapsible="icon">
@@ -48,26 +59,60 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="smallcaps">Catálogo</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const active = pathname.startsWith(item.url);
-                return (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {role === "admin" ? (
+          <>
+            <SidebarGroup>
+              {!collapsed && <SidebarGroupLabel className="smallcaps">Roster</SidebarGroupLabel>}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {rosterItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={item.active}>
+                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarGroup>
+              {!collapsed && <SidebarGroupLabel className="smallcaps">Gestión</SidebarGroupLabel>}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {otherItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={item.active}>
+                        <Link to={item.url} search={item.search as never} className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        ) : (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel className="smallcaps">Catálogo</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname.startsWith("/me")}>
+                    <Link to="/me" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {!collapsed && <span>Mi ficha</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
