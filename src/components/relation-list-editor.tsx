@@ -36,7 +36,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
 
   async function add() {
     setBusy(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from(table)
       .insert({
         composer_id: composerId,
@@ -52,7 +52,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
 
   async function update(id: string, patch: Record<string, unknown>) {
     onChange(rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-    const { error } = await supabase.from(table).update(patch).eq("id", id);
+    const { error } = await (supabase as any).from(table).update(patch).eq("id", id);
     if (error) toast.error(error.message);
   }
 
@@ -60,7 +60,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
     if (!confirm("¿Eliminar este elemento?")) return;
     const prev = rows;
     onChange(rows.filter((r) => r.id !== id));
-    const { error } = await supabase.from(table).delete().eq("id", id);
+    const { error } = await (supabase as any).from(table).delete().eq("id", id);
     if (error) {
       onChange(prev);
       toast.error(error.message);
