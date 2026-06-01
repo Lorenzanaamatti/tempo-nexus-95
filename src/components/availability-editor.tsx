@@ -12,13 +12,14 @@ import {
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export type AvailabilityKind = "libre" | "ocupado" | "vacaciones" | "personal";
+export type AvailabilityKind = "libre" | "ocupado" | "vacaciones" | "personal" | "produccion";
 
 export const AVAILABILITY_LABELS: Record<AvailabilityKind, string> = {
   libre: "Libre",
   ocupado: "Ocupado",
   vacaciones: "Vacaciones",
   personal: "Personal",
+  produccion: "Producción",
 };
 
 export const AVAILABILITY_COLORS: Record<AvailabilityKind, string> = {
@@ -26,6 +27,7 @@ export const AVAILABILITY_COLORS: Record<AvailabilityKind, string> = {
   ocupado: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40",
   vacaciones: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40",
   personal: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/40",
+  produccion: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/40",
 };
 
 type Period = {
