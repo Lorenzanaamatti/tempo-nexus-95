@@ -7,19 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { fetchCatalogs, type Availability } from "@/lib/composers-api";
+import { fetchCatalogs } from "@/lib/composers-api";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
+import { AvailabilityEditor } from "@/components/availability-editor";
+import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
@@ -125,9 +120,6 @@ function Inner({
         birth_year: c.birth_year,
         bio_short: c.bio_short,
         bio_long: c.bio_long,
-        availability: c.availability,
-        next_available_on: c.next_available_on,
-        fee_range_id: c.fee_range_id,
         reel_url: c.reel_url,
         internal_notes: c.internal_notes,
         tags: c.tags ?? [],
@@ -339,43 +331,20 @@ function Inner({
         </div>
       </Section>
 
-      {/* Disponibilidad & Tarifa */}
-      <Section title="Disponibilidad & Tarifa">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Field label="Disponibilidad">
-            <Select
-              value={c.availability ?? "available"}
-              onValueChange={(v) => field("availability", v as Availability)}
-            >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="available">Disponible</SelectItem>
-                <SelectItem value="partial">Parcial</SelectItem>
-                <SelectItem value="unavailable">No disponible</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Próxima disponibilidad">
-            <Input
-              type="date"
-              value={c.next_available_on ?? ""}
-              onChange={(e) => field("next_available_on", e.target.value || null)}
-            />
-          </Field>
-          <Field label="Rango de tarifa">
-            <Select
-              value={c.fee_range_id ?? ""}
-              onValueChange={(v) => field("fee_range_id", v || null)}
-            >
-              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent>
-                {catalogs.fees.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
+      {/* Disponibilidad por periodos */}
+      <Section title="Disponibilidad">
+        <p className="text-xs text-muted-foreground">
+          Periodos que se reflejan en el calendario del compositor y en el calendario general de Interesante Compañía.
+        </p>
+        <AvailabilityEditor composerId={c.id} />
+      </Section>
+
+      {/* Tarifa: histórico económico de proyectos */}
+      <Section title="Tarifa — histórico económico">
+        <p className="text-xs text-muted-foreground">
+          Acumulado de proyectos pasados con detalle económico por producción.
+        </p>
+        <ProjectsHistoryEditor composerId={c.id} />
       </Section>
 
       {/* Reel */}
