@@ -14,190 +14,405 @@ export type Database = {
   }
   public: {
     Tables: {
-      budget_lines: {
+      av_genres: {
         Row: {
-          budget_id: string
-          category: string | null
-          concept: string
-          created_at: string
           id: string
-          irpf_rate: number
-          net: number | null
-          notes: string | null
+          label_ca: string | null
+          label_en: string | null
+          label_es: string
           position: number
-          quantity: number
-          unit_price: number
-          user_id: string
-          vat_rate: number
+          slug: string
         }
         Insert: {
-          budget_id: string
-          category?: string | null
-          concept: string
-          created_at?: string
           id?: string
-          irpf_rate?: number
-          net?: number | null
-          notes?: string | null
+          label_ca?: string | null
+          label_en?: string | null
+          label_es: string
           position?: number
-          quantity?: number
-          unit_price?: number
-          user_id: string
-          vat_rate?: number
+          slug: string
         }
         Update: {
-          budget_id?: string
-          category?: string | null
-          concept?: string
+          id?: string
+          label_ca?: string | null
+          label_en?: string | null
+          label_es?: string
+          position?: number
+          slug?: string
+        }
+        Relationships: []
+      }
+      composer_awards: {
+        Row: {
+          composer_id: string
+          created_at: string
+          id: string
+          note: string | null
+          position: number
+          title: string
+          year: number | null
+        }
+        Insert: {
+          composer_id: string
           created_at?: string
           id?: string
-          irpf_rate?: number
-          net?: number | null
-          notes?: string | null
+          note?: string | null
           position?: number
-          quantity?: number
-          unit_price?: number
-          user_id?: string
-          vat_rate?: number
+          title: string
+          year?: number | null
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          position?: number
+          title?: string
+          year?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "budget_lines_budget_id_fkey"
-            columns: ["budget_id"]
+            foreignKeyName: "composer_awards_composer_id_fkey"
+            columns: ["composer_id"]
             isOneToOne: false
-            referencedRelation: "budgets"
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
         ]
       }
-      budgets: {
+      composer_demos: {
         Row: {
+          category: string | null
+          composer_id: string
           created_at: string
-          currency: string
+          description: string | null
+          duration_seconds: number | null
           id: string
-          name: string
-          notes: string | null
-          project_id: string | null
-          scope: string
-          updated_at: string
-          user_id: string
+          position: number
+          title: string
+          url: string | null
         }
         Insert: {
+          category?: string | null
+          composer_id: string
           created_at?: string
-          currency?: string
+          description?: string | null
+          duration_seconds?: number | null
           id?: string
-          name: string
-          notes?: string | null
-          project_id?: string | null
-          scope?: string
-          updated_at?: string
-          user_id: string
+          position?: number
+          title: string
+          url?: string | null
         }
         Update: {
+          category?: string | null
+          composer_id?: string
           created_at?: string
-          currency?: string
+          description?: string | null
+          duration_seconds?: number | null
           id?: string
-          name?: string
-          notes?: string | null
-          project_id?: string | null
-          scope?: string
-          updated_at?: string
-          user_id?: string
+          position?: number
+          title?: string
+          url?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "budgets_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "composer_demos_composer_id_fkey"
+            columns: ["composer_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
         ]
       }
-      invoices: {
+      composer_filmography: {
         Row: {
-          budget_id: string | null
+          composer_id: string
+          country: string | null
           created_at: string
-          currency: string
-          direction: Database["public"]["Enums"]["invoice_direction"]
-          due_date: string | null
+          director: string | null
+          format: Database["public"]["Enums"]["film_format"]
           id: string
-          irpf: number
-          issue_date: string
-          issuer: string | null
-          net: number
-          notes: string | null
-          number: string | null
-          project_id: string | null
-          receiver: string | null
-          status: Database["public"]["Enums"]["invoice_status"]
-          total: number
-          updated_at: string
-          user_id: string
-          vat: number
+          position: number
+          production_company: string | null
+          title: string
+          url: string | null
+          year: number | null
         }
         Insert: {
-          budget_id?: string | null
+          composer_id: string
+          country?: string | null
           created_at?: string
-          currency?: string
-          direction?: Database["public"]["Enums"]["invoice_direction"]
-          due_date?: string | null
+          director?: string | null
+          format?: Database["public"]["Enums"]["film_format"]
           id?: string
-          irpf?: number
-          issue_date?: string
-          issuer?: string | null
-          net?: number
-          notes?: string | null
-          number?: string | null
-          project_id?: string | null
-          receiver?: string | null
-          status?: Database["public"]["Enums"]["invoice_status"]
-          total?: number
-          updated_at?: string
-          user_id: string
-          vat?: number
+          position?: number
+          production_company?: string | null
+          title: string
+          url?: string | null
+          year?: number | null
         }
         Update: {
-          budget_id?: string | null
+          composer_id?: string
+          country?: string | null
           created_at?: string
-          currency?: string
-          direction?: Database["public"]["Enums"]["invoice_direction"]
-          due_date?: string | null
+          director?: string | null
+          format?: Database["public"]["Enums"]["film_format"]
           id?: string
-          irpf?: number
-          issue_date?: string
-          issuer?: string | null
-          net?: number
-          notes?: string | null
-          number?: string | null
-          project_id?: string | null
-          receiver?: string | null
-          status?: Database["public"]["Enums"]["invoice_status"]
-          total?: number
-          updated_at?: string
-          user_id?: string
-          vat?: number
+          position?: number
+          production_company?: string | null
+          title?: string
+          url?: string | null
+          year?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_budget_id_fkey"
-            columns: ["budget_id"]
+            foreignKeyName: "composer_filmography_composer_id_fkey"
+            columns: ["composer_id"]
             isOneToOne: false
-            referencedRelation: "budgets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
         ]
+      }
+      composer_genres: {
+        Row: {
+          composer_id: string
+          genre_id: string
+        }
+        Insert: {
+          composer_id: string
+          genre_id: string
+        }
+        Update: {
+          composer_id?: string
+          genre_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_genres_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_genres_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "av_genres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      composer_languages: {
+        Row: {
+          composer_id: string
+          language_code: string
+        }
+        Insert: {
+          composer_id: string
+          language_code: string
+        }
+        Update: {
+          composer_id?: string
+          language_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_languages_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_languages_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      composer_styles: {
+        Row: {
+          composer_id: string
+          style_id: string
+        }
+        Insert: {
+          composer_id: string
+          style_id: string
+        }
+        Update: {
+          composer_id?: string
+          style_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_styles_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_styles_style_id_fkey"
+            columns: ["style_id"]
+            isOneToOne: false
+            referencedRelation: "music_styles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      composers: {
+        Row: {
+          availability: Database["public"]["Enums"]["availability_status"]
+          bio_long: string | null
+          bio_short: string | null
+          birth_year: number | null
+          city: string | null
+          country: string | null
+          created_at: string
+          fee_range_id: string | null
+          full_name: string
+          id: string
+          internal_notes: string | null
+          next_available_on: string | null
+          owner_email: string | null
+          owner_user_id: string | null
+          photo_path: string | null
+          reel_url: string | null
+          search_tsv: unknown
+          slug: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          availability?: Database["public"]["Enums"]["availability_status"]
+          bio_long?: string | null
+          bio_short?: string | null
+          birth_year?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          fee_range_id?: string | null
+          full_name: string
+          id?: string
+          internal_notes?: string | null
+          next_available_on?: string | null
+          owner_email?: string | null
+          owner_user_id?: string | null
+          photo_path?: string | null
+          reel_url?: string | null
+          search_tsv?: unknown
+          slug: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          availability?: Database["public"]["Enums"]["availability_status"]
+          bio_long?: string | null
+          bio_short?: string | null
+          birth_year?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          fee_range_id?: string | null
+          full_name?: string
+          id?: string
+          internal_notes?: string | null
+          next_available_on?: string | null
+          owner_email?: string | null
+          owner_user_id?: string | null
+          photo_path?: string | null
+          reel_url?: string | null
+          search_tsv?: unknown
+          slug?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composers_fee_range_id_fkey"
+            columns: ["fee_range_id"]
+            isOneToOne: false
+            referencedRelation: "fee_ranges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_ranges: {
+        Row: {
+          code: string
+          id: string
+          label: string
+          position: number
+        }
+        Insert: {
+          code: string
+          id?: string
+          label: string
+          position?: number
+        }
+        Update: {
+          code?: string
+          id?: string
+          label?: string
+          position?: number
+        }
+        Relationships: []
+      }
+      languages: {
+        Row: {
+          code: string
+          label_ca: string | null
+          label_en: string | null
+          label_es: string
+        }
+        Insert: {
+          code: string
+          label_ca?: string | null
+          label_en?: string | null
+          label_es: string
+        }
+        Update: {
+          code?: string
+          label_ca?: string | null
+          label_en?: string | null
+          label_es?: string
+        }
+        Relationships: []
+      }
+      music_styles: {
+        Row: {
+          id: string
+          label_ca: string | null
+          label_en: string | null
+          label_es: string
+          position: number
+          slug: string
+        }
+        Insert: {
+          id?: string
+          label_ca?: string | null
+          label_en?: string | null
+          label_es: string
+          position?: number
+          slug: string
+        }
+        Update: {
+          id?: string
+          label_ca?: string | null
+          label_en?: string | null
+          label_es?: string
+          position?: number
+          slug?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
           avatar_url: string | null
+          composer_id: string | null
           created_at: string
           display_name: string | null
           id: string
@@ -205,6 +420,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          composer_id?: string | null
           created_at?: string
           display_name?: string | null
           id: string
@@ -212,6 +428,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          composer_id?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
@@ -219,35 +436,23 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      user_roles: {
         Row: {
-          artist: string | null
-          color: string | null
           created_at: string
           id: string
-          kind: string
-          name: string
-          updated_at: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          artist?: string | null
-          color?: string | null
           created_at?: string
           id?: string
-          kind?: string
-          name: string
-          updated_at?: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          artist?: string | null
-          color?: string | null
           created_at?: string
           id?: string
-          kind?: string
-          name?: string
-          updated_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -257,11 +462,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
+      current_user_is_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      invoice_direction: "income" | "expense"
-      invoice_status: "pending" | "paid" | "grouped" | "overdue" | "draft"
+      app_role: "admin" | "composer"
+      availability_status: "available" | "partial" | "unavailable"
+      film_format:
+        | "feature"
+        | "series"
+        | "doc"
+        | "short"
+        | "spot"
+        | "game"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -389,8 +610,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      invoice_direction: ["income", "expense"],
-      invoice_status: ["pending", "paid", "grouped", "overdue", "draft"],
+      app_role: ["admin", "composer"],
+      availability_status: ["available", "partial", "unavailable"],
+      film_format: [
+        "feature",
+        "series",
+        "doc",
+        "short",
+        "spot",
+        "game",
+        "other",
+      ],
     },
   },
 } as const

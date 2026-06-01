@@ -46,14 +46,14 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary font-display text-xl font-bold text-primary-foreground">L</div>
-          <h1 className="font-display text-3xl font-semibold"><span className="text-gradient">Lorenzana</span></h1>
-          <p className="mt-2 text-sm text-muted-foreground">Music management OS para artistas y sellos.</p>
+          <p className="smallcaps text-muted-foreground">Interesante Compañía</p>
+          <h1 className="mt-2 font-display text-4xl italic">Roster &amp; oportunidades</h1>
+          <p className="mt-3 text-sm text-muted-foreground">Acceso restringido al equipo y a los compositores representados.</p>
         </div>
-        <div className="glass-panel rounded-2xl p-6">
+        <div className="glass-panel rounded-sm p-6">
           <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 text-sm">
             {(["signin", "signup"] as const).map((m) => (
-              <button key={m} onClick={() => setMode(m)} className={`flex-1 rounded-md px-3 py-1.5 transition ${mode === m ? "bg-card text-foreground shadow" : "text-muted-foreground hover:text-foreground"}`}>
+              <button key={m} type="button" onClick={() => setMode(m)} className={`flex-1 rounded-sm px-3 py-1.5 transition ${mode === m ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                 {m === "signin" ? "Entrar" : "Crear cuenta"}
               </button>
             ))}
