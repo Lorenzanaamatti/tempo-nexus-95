@@ -233,6 +233,44 @@ export type Database = {
           },
         ]
       }
+      composer_photos: {
+        Row: {
+          composer_id: string
+          copyright: string | null
+          created_at: string
+          id: string
+          position: number
+          storage_path: string
+          year: number | null
+        }
+        Insert: {
+          composer_id: string
+          copyright?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          storage_path: string
+          year?: number | null
+        }
+        Update: {
+          composer_id?: string
+          copyright?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          storage_path?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_photos_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_styles: {
         Row: {
           composer_id: string
@@ -265,6 +303,7 @@ export type Database = {
       }
       composers: {
         Row: {
+          address: string | null
           availability: Database["public"]["Enums"]["availability_status"]
           bio_long: string | null
           bio_short: string | null
@@ -272,21 +311,30 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          email: string | null
+          email_secondary: string | null
           fee_range_id: string | null
           full_name: string
           id: string
           internal_notes: string | null
           next_available_on: string | null
+          nif: string | null
           owner_email: string | null
           owner_user_id: string | null
+          phone: string | null
           photo_path: string | null
+          postal_code: string | null
+          province: string | null
           reel_url: string | null
           search_tsv: unknown
           slug: string
           tags: string[]
+          team_email: string | null
+          team_name: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
           availability?: Database["public"]["Enums"]["availability_status"]
           bio_long?: string | null
           bio_short?: string | null
@@ -294,21 +342,30 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
+          email_secondary?: string | null
           fee_range_id?: string | null
           full_name: string
           id?: string
           internal_notes?: string | null
           next_available_on?: string | null
+          nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
+          phone?: string | null
           photo_path?: string | null
+          postal_code?: string | null
+          province?: string | null
           reel_url?: string | null
           search_tsv?: unknown
           slug: string
           tags?: string[]
+          team_email?: string | null
+          team_name?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
           availability?: Database["public"]["Enums"]["availability_status"]
           bio_long?: string | null
           bio_short?: string | null
@@ -316,18 +373,26 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
+          email_secondary?: string | null
           fee_range_id?: string | null
           full_name?: string
           id?: string
           internal_notes?: string | null
           next_available_on?: string | null
+          nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
+          phone?: string | null
           photo_path?: string | null
+          postal_code?: string | null
+          province?: string | null
           reel_url?: string | null
           search_tsv?: unknown
           slug?: string
           tags?: string[]
+          team_email?: string | null
+          team_name?: string | null
           updated_at?: string
         }
         Relationships: [
