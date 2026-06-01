@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
 import { Route as AuthenticatedAdminComposersRouteImport } from './routes/_authenticated/_admin/composers'
+import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -45,18 +46,26 @@ const AuthenticatedAdminComposersRoute =
     path: '/composers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminComposersNewRoute =
+  AuthenticatedAdminComposersNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAdminComposersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/me': typeof AuthenticatedMeRoute
-  '/composers': typeof AuthenticatedAdminComposersRoute
+  '/composers': typeof AuthenticatedAdminComposersRouteWithChildren
+  '/composers/new': typeof AuthenticatedAdminComposersNewRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AuthenticatedIndexRoute
   '/me': typeof AuthenticatedMeRoute
-  '/composers': typeof AuthenticatedAdminComposersRoute
+  '/composers': typeof AuthenticatedAdminComposersRouteWithChildren
+  '/composers/new': typeof AuthenticatedAdminComposersNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,13 +74,14 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/_admin/composers': typeof AuthenticatedAdminComposersRoute
+  '/_authenticated/_admin/composers': typeof AuthenticatedAdminComposersRouteWithChildren
+  '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/me' | '/composers'
+  fullPaths: '/' | '/login' | '/me' | '/composers' | '/composers/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/me' | '/composers'
+  to: '/login' | '/' | '/me' | '/composers' | '/composers/new'
   id:
     | '__root__'
     | '/_authenticated'
@@ -80,6 +90,7 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/'
     | '/_authenticated/_admin/composers'
+    | '/_authenticated/_admin/composers/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,15 +142,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/composers/new': {
+      id: '/_authenticated/_admin/composers/new'
+      path: '/new'
+      fullPath: '/composers/new'
+      preLoaderRoute: typeof AuthenticatedAdminComposersNewRouteImport
+      parentRoute: typeof AuthenticatedAdminComposersRoute
+    }
   }
 }
 
+interface AuthenticatedAdminComposersRouteChildren {
+  AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
+}
+
+const AuthenticatedAdminComposersRouteChildren: AuthenticatedAdminComposersRouteChildren =
+  {
+    AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
+  }
+
+const AuthenticatedAdminComposersRouteWithChildren =
+  AuthenticatedAdminComposersRoute._addFileChildren(
+    AuthenticatedAdminComposersRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminComposersRoute: typeof AuthenticatedAdminComposersRoute
+  AuthenticatedAdminComposersRoute: typeof AuthenticatedAdminComposersRouteWithChildren
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminComposersRoute: AuthenticatedAdminComposersRoute,
+  AuthenticatedAdminComposersRoute:
+    AuthenticatedAdminComposersRouteWithChildren,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -168,3 +201,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
