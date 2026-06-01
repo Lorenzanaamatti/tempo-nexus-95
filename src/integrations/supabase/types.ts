@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      composer_availability: {
+        Row: {
+          composer_id: string
+          created_at: string
+          end_date: string
+          id: string
+          kind: Database["public"]["Enums"]["availability_kind"]
+          note: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          kind?: Database["public"]["Enums"]["availability_kind"]
+          note?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["availability_kind"]
+          note?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       composer_awards: {
         Row: {
           composer_id: string
@@ -270,6 +303,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      composer_projects: {
+        Row: {
+          agency_commission: number | null
+          composer_id: string
+          composer_profit: number | null
+          created_at: string
+          director: string | null
+          id: string
+          music_type: string | null
+          net_margin: number | null
+          notes: string | null
+          platform: string | null
+          position: number
+          price_charged: number | null
+          production: string
+          production_company: string | null
+          production_cost: number | null
+          production_type: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          agency_commission?: number | null
+          composer_id: string
+          composer_profit?: number | null
+          created_at?: string
+          director?: string | null
+          id?: string
+          music_type?: string | null
+          net_margin?: number | null
+          notes?: string | null
+          platform?: string | null
+          position?: number
+          price_charged?: number | null
+          production: string
+          production_company?: string | null
+          production_cost?: number | null
+          production_type?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          agency_commission?: number | null
+          composer_id?: string
+          composer_profit?: number | null
+          created_at?: string
+          director?: string | null
+          id?: string
+          music_type?: string | null
+          net_margin?: number | null
+          notes?: string | null
+          platform?: string | null
+          position?: number
+          price_charged?: number | null
+          production?: string
+          production_company?: string | null
+          production_cost?: number | null
+          production_type?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
       }
       composer_styles: {
         Row: {
@@ -539,6 +635,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "composer"
+      availability_kind: "libre" | "ocupado" | "vacaciones" | "personal"
       availability_status: "available" | "partial" | "unavailable"
       film_format:
         | "feature"
@@ -676,6 +773,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "composer"],
+      availability_kind: ["libre", "ocupado", "vacaciones", "personal"],
       availability_status: ["available", "partial", "unavailable"],
       film_format: [
         "feature",
