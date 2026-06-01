@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/_admin/composers/")({
 });
 
 function ComposersIndex() {
-  const { role } = Route.useSearch();
+  const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
   const [q, setQ] = useState("");
   const { data, isLoading } = useQuery({
