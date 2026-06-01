@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,8 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     role === "admin"
       ? [
           { title: "Roster", url: "/composers", icon: Users },
+          { title: "Personas", url: "/people", icon: UserCircle2 },
+          { title: "Producciones", url: "/productions", icon: Film },
           { title: "Calendario", url: "/calendar", icon: CalendarDays },
         ]
       : [{ title: "Mi ficha", url: "/me", icon: User }];

@@ -15,7 +15,11 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
+import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
+import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
+import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
+import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 
@@ -48,10 +52,34 @@ const AuthenticatedAdminCalendarRoute =
     path: '/calendar',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminProductionsIndexRoute =
+  AuthenticatedAdminProductionsIndexRouteImport.update({
+    id: '/productions/',
+    path: '/productions/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPeopleIndexRoute =
+  AuthenticatedAdminPeopleIndexRouteImport.update({
+    id: '/people/',
+    path: '/people/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminComposersIndexRoute =
   AuthenticatedAdminComposersIndexRouteImport.update({
     id: '/composers/',
     path: '/composers/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProductionsProductionIdRoute =
+  AuthenticatedAdminProductionsProductionIdRouteImport.update({
+    id: '/productions/$productionId',
+    path: '/productions/$productionId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPeoplePersonIdRoute =
+  AuthenticatedAdminPeoplePersonIdRouteImport.update({
+    id: '/people/$personId',
+    path: '/people/$personId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminComposersNewRoute =
@@ -74,7 +102,11 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof AuthenticatedAdminCalendarRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/people/': typeof AuthenticatedAdminPeopleIndexRoute
+  '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -83,7 +115,11 @@ export interface FileRoutesByTo {
   '/calendar': typeof AuthenticatedAdminCalendarRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
+  '/people': typeof AuthenticatedAdminPeopleIndexRoute
+  '/productions': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,7 +131,11 @@ export interface FileRoutesById {
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
+  '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
+  '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,7 +146,11 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/people/$personId'
+    | '/productions/$productionId'
     | '/composers/'
+    | '/people/'
+    | '/productions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -115,7 +159,11 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/people/$personId'
+    | '/productions/$productionId'
     | '/composers'
+    | '/people'
+    | '/productions'
   id:
     | '__root__'
     | '/_authenticated'
@@ -126,7 +174,11 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/calendar'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
+    | '/_authenticated/_admin/people/$personId'
+    | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
+    | '/_authenticated/_admin/people/'
+    | '/_authenticated/_admin/productions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -178,11 +230,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCalendarRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/productions/': {
+      id: '/_authenticated/_admin/productions/'
+      path: '/productions'
+      fullPath: '/productions/'
+      preLoaderRoute: typeof AuthenticatedAdminProductionsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/people/': {
+      id: '/_authenticated/_admin/people/'
+      path: '/people'
+      fullPath: '/people/'
+      preLoaderRoute: typeof AuthenticatedAdminPeopleIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/composers/': {
       id: '/_authenticated/_admin/composers/'
       path: '/composers'
       fullPath: '/composers/'
       preLoaderRoute: typeof AuthenticatedAdminComposersIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/productions/$productionId': {
+      id: '/_authenticated/_admin/productions/$productionId'
+      path: '/productions/$productionId'
+      fullPath: '/productions/$productionId'
+      preLoaderRoute: typeof AuthenticatedAdminProductionsProductionIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/people/$personId': {
+      id: '/_authenticated/_admin/people/$personId'
+      path: '/people/$personId'
+      fullPath: '/people/$personId'
+      preLoaderRoute: typeof AuthenticatedAdminPeoplePersonIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/composers/new': {
@@ -206,7 +286,11 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
+  AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
+  AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
+  AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
+  AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -214,7 +298,13 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
+  AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,
+  AuthenticatedAdminProductionsProductionIdRoute:
+    AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
+  AuthenticatedAdminPeopleIndexRoute: AuthenticatedAdminPeopleIndexRoute,
+  AuthenticatedAdminProductionsIndexRoute:
+    AuthenticatedAdminProductionsIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
