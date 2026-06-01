@@ -824,7 +824,14 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
-      person_role: "ic_team" | "composer" | "artist" | "supervisor"
+      person_role:
+        | "ic_team"
+        | "composer"
+        | "artist"
+        | "supervisor"
+        | "specialist"
+        | "curator"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -971,7 +978,15 @@ export const Constants = {
         "game",
         "other",
       ],
-      person_role: ["ic_team", "composer", "artist", "supervisor"],
+      person_role: [
+        "ic_team",
+        "composer",
+        "artist",
+        "supervisor",
+        "specialist",
+        "curator",
+        "other",
+      ],
     },
   },
 } as const
