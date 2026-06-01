@@ -4,7 +4,7 @@ import { photoUrl, uploadComposerPhoto } from "@/lib/composers-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const MAX_PHOTOS = 12;
@@ -59,10 +59,13 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
     }
   }
 
-  async function updatePhoto(id: string, patch: Partial<Photo>) {
-    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  async function savePhoto(id: string, patch: Partial<Photo>) {
     const { error } = await supabase.from("composer_photos").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      throw error;
+    }
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   }
 
   async function removePhoto(p: Photo) {
@@ -84,39 +87,14 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
         <p className="text-sm italic text-muted-foreground">Cargando…</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {photos.map((p) => {
-            const url = photoUrl(p.storage_path);
-            return (
-              <div key={p.id} className="space-y-2 rounded-sm border border-border p-3">
-                <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-                  {url && <img src={url} alt="" className="h-full w-full object-cover" />}
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1">
-                    <Label className="text-[10px] text-muted-foreground">Año</Label>
-                    <Input
-                      type="number"
-                      value={p.year ?? ""}
-                      onChange={(e) =>
-                        updatePhoto(p.id, { year: e.target.value ? Number(e.target.value) : null })
-                      }
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label className="text-[10px] text-muted-foreground">© Copyright</Label>
-                    <Input
-                      value={p.copyright ?? ""}
-                      onChange={(e) => updatePhoto(p.id, { copyright: e.target.value || null })}
-                      placeholder="© Autor, Año"
-                    />
-                  </div>
-                </div>
-                <Button size="sm" variant="ghost" onClick={() => removePhoto(p)}>
-                  <Trash2 className="mr-1 h-3 w-3" /> Eliminar
-                </Button>
-              </div>
-            );
-          })}
+          {photos.map((p) => (
+            <PhotoCard
+              key={p.id}
+              photo={p}
+              onSave={(patch) => savePhoto(p.id, patch)}
+              onRemove={() => removePhoto(p)}
+            />
+          ))}
           {empty > 0 && (
             <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-foreground">
               <Plus className="h-5 w-5" />
@@ -136,6 +114,94 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function PhotoCard({
+  photo,
+  onSave,
+  onRemove,
+}: {
+  photo: Photo;
+  onSave: (patch: Partial<Photo>) => Promise<void>;
+  onRemove: () => void;
+}) {
+  const url = photoUrl(photo.storage_path);
+  const [year, setYear] = useState<string>(photo.year != null ? String(photo.year) : "");
+  const [copyright, setCopyright] = useState<string>(photo.copyright ?? "");
+  const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    setYear(photo.year != null ? String(photo.year) : "");
+    setCopyright(photo.copyright ?? "");
+  }, [photo.id, photo.year, photo.copyright]);
+
+  const dirty =
+    (year === "" ? null : Number(year)) !== (photo.year ?? null) ||
+    (copyright.trim() === "" ? null : copyright) !== (photo.copyright ?? null);
+
+  async function save() {
+    if (!dirty || saving) return;
+    setSaving(true);
+    try {
+      await onSave({
+        year: year === "" ? null : Number(year),
+        copyright: copyright.trim() === "" ? null : copyright,
+      });
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 1200);
+    } catch {
+      /* toast in parent */
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-2 rounded-sm border border-border p-3">
+      <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+        {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="col-span-1">
+          <Label className="text-[10px] text-muted-foreground">Año</Label>
+          <Input
+            type="number"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            onBlur={save}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void save(); } }}
+          />
+        </div>
+        <div className="col-span-2">
+          <Label className="text-[10px] text-muted-foreground">© Copyright</Label>
+          <Input
+            value={copyright}
+            onChange={(e) => setCopyright(e.target.value)}
+            onBlur={save}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void save(); } }}
+            placeholder="© Autor, Año"
+          />
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <Button size="sm" variant="ghost" onClick={onRemove}>
+          <Trash2 className="mr-1 h-3 w-3" /> Eliminar
+        </Button>
+        {saving ? (
+          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Guardando
+          </span>
+        ) : dirty ? (
+          <Button size="sm" onClick={save}>Guardar</Button>
+        ) : justSaved ? (
+          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Check className="h-3 w-3" /> Guardado
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
