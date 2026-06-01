@@ -1,0 +1,479 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { fetchCatalogs, type Availability } from "@/lib/composers-api";
+import { PhotoUploader } from "@/components/photo-uploader";
+import { MultiChipSelect } from "@/components/multi-chip-select";
+import { RelationListEditor } from "@/components/relation-list-editor";
+import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
+
+export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
+  component: ComposerEditPage,
+});
+
+function ComposerEditPage() {
+  const { composerId } = Route.useParams();
+  const navigate = useNavigate();
+
+  const composerQ = useQuery({
+    queryKey: ["composer", composerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("composers")
+        .select("*")
+        .eq("id", composerId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const catalogsQ = useQuery({ queryKey: ["catalogs"], queryFn: fetchCatalogs });
+
+  const relationsQ = useQuery({
+    queryKey: ["composer-relations", composerId],
+    queryFn: async () => {
+      const [demos, films, awards, styles, genres, langs] = await Promise.all([
+        supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
+        supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
+        supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
+        supabase.from("composer_styles").select("style_id").eq("composer_id", composerId),
+        supabase.from("composer_genres").select("genre_id").eq("composer_id", composerId),
+        supabase.from("composer_languages").select("language_code").eq("composer_id", composerId),
+      ]);
+      return {
+        demos: demos.data ?? [],
+        films: films.data ?? [],
+        awards: awards.data ?? [],
+        styleIds: new Set((styles.data ?? []).map((r: any) => r.style_id)),
+        genreIds: new Set((genres.data ?? []).map((r: any) => r.genre_id)),
+        langCodes: new Set((langs.data ?? []).map((r: any) => r.language_code)),
+      };
+    },
+  });
+
+  if (composerQ.isLoading || catalogsQ.isLoading || relationsQ.isLoading) {
+    return <div className="p-10 font-display italic text-muted-foreground">Cargando ficha…</div>;
+  }
+  if (composerQ.error || !composerQ.data) {
+    return <div className="p-10 text-destructive">No se encontró el compositor.</div>;
+  }
+
+  return (
+    <Inner
+      initial={composerQ.data as any}
+      catalogs={catalogsQ.data!}
+      initialRelations={relationsQ.data!}
+      onDeleted={() => navigate({ to: "/composers" })}
+    />
+  );
+}
+
+type CatalogShape = Awaited<ReturnType<typeof fetchCatalogs>>;
+
+function Inner({
+  initial,
+  catalogs,
+  initialRelations,
+  onDeleted,
+}: {
+  initial: any;
+  catalogs: CatalogShape;
+  initialRelations: any;
+  onDeleted: () => void;
+}) {
+  const [c, setC] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [styleIds, setStyleIds] = useState<Set<string>>(initialRelations.styleIds);
+  const [genreIds, setGenreIds] = useState<Set<string>>(initialRelations.genreIds);
+  const [langCodes, setLangCodes] = useState<Set<string>>(initialRelations.langCodes);
+  const [demos, setDemos] = useState<any[]>(initialRelations.demos);
+  const [films, setFilms] = useState<any[]>(initialRelations.films);
+  const [awards, setAwards] = useState<any[]>(initialRelations.awards);
+  const [tagInput, setTagInput] = useState("");
+
+  function field<K extends string>(k: K, v: any) {
+    setC((prev: any) => ({ ...prev, [k]: v }));
+    setDirty(true);
+  }
+
+  async function saveCore() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("composers")
+      .update({
+        full_name: c.full_name,
+        city: c.city,
+        country: c.country,
+        birth_year: c.birth_year,
+        bio_short: c.bio_short,
+        bio_long: c.bio_long,
+        availability: c.availability,
+        next_available_on: c.next_available_on,
+        fee_range_id: c.fee_range_id,
+        reel_url: c.reel_url,
+        internal_notes: c.internal_notes,
+        tags: c.tags ?? [],
+      })
+      .eq("id", c.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Ficha guardada");
+    setDirty(false);
+  }
+
+  async function toggleStyle(id: string) {
+    const next = new Set(styleIds);
+    const exists = next.has(id);
+    exists ? next.delete(id) : next.add(id);
+    setStyleIds(next);
+    if (exists) {
+      await supabase.from("composer_styles").delete().eq("composer_id", c.id).eq("style_id", id);
+    } else {
+      await supabase.from("composer_styles").insert({ composer_id: c.id, style_id: id });
+    }
+  }
+  async function toggleGenre(id: string) {
+    const next = new Set(genreIds);
+    const exists = next.has(id);
+    exists ? next.delete(id) : next.add(id);
+    setGenreIds(next);
+    if (exists) {
+      await supabase.from("composer_genres").delete().eq("composer_id", c.id).eq("genre_id", id);
+    } else {
+      await supabase.from("composer_genres").insert({ composer_id: c.id, genre_id: id });
+    }
+  }
+  async function toggleLang(code: string) {
+    const next = new Set(langCodes);
+    const exists = next.has(code);
+    exists ? next.delete(code) : next.add(code);
+    setLangCodes(next);
+    if (exists) {
+      await supabase
+        .from("composer_languages")
+        .delete()
+        .eq("composer_id", c.id)
+        .eq("language_code", code);
+    } else {
+      await supabase
+        .from("composer_languages")
+        .insert({ composer_id: c.id, language_code: code });
+    }
+  }
+
+  function addTag() {
+    const t = tagInput.trim();
+    if (!t) return;
+    if ((c.tags ?? []).includes(t)) return;
+    field("tags", [...(c.tags ?? []), t]);
+    setTagInput("");
+  }
+  function removeTag(t: string) {
+    field("tags", (c.tags ?? []).filter((x: string) => x !== t));
+  }
+
+  async function deleteComposer() {
+    if (!confirm(`¿Eliminar la ficha de ${c.full_name}? Esta acción no se puede deshacer.`)) return;
+    const { error } = await supabase.from("composers").delete().eq("id", c.id);
+    if (error) return toast.error(error.message);
+    toast.success("Ficha eliminada");
+    onDeleted();
+  }
+
+  const styleOpts = useMemo(
+    () => catalogs.styles.map((s) => ({ id: s.id, label: s.label_es })),
+    [catalogs.styles],
+  );
+  const genreOpts = useMemo(
+    () => catalogs.genres.map((g) => ({ id: g.id, label: g.label_es })),
+    [catalogs.genres],
+  );
+  const langOpts = useMemo(
+    () => catalogs.languages.map((l) => ({ code: l.code, label: l.label_es })),
+    [catalogs.languages],
+  );
+
+  return (
+    <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mb-6 flex items-center justify-between">
+        <p className="smallcaps text-muted-foreground">
+          <Link to="/composers" className="hover:text-foreground">Roster</Link> · Ficha
+        </p>
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" onClick={deleteComposer}>
+            <Trash2 className="mr-1 h-3 w-3" /> Eliminar
+          </Button>
+          <Button size="sm" onClick={saveCore} disabled={!dirty || saving}>
+            {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Guardado"}
+          </Button>
+        </div>
+      </div>
+
+      <header className="mb-10 border-b border-border pb-6">
+        <h1 className="font-display text-5xl italic">{c.full_name}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
+        </p>
+      </header>
+
+      {/* Identidad */}
+      <Section title="Identidad">
+        <PhotoUploader
+          composerId={c.id}
+          photoPath={c.photo_path}
+          onChange={(p) => field("photo_path", p)}
+        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Nombre completo">
+            <Input value={c.full_name ?? ""} onChange={(e) => field("full_name", e.target.value)} />
+          </Field>
+          <Field label="Año de nacimiento">
+            <Input
+              type="number"
+              value={c.birth_year ?? ""}
+              onChange={(e) => field("birth_year", e.target.value ? Number(e.target.value) : null)}
+            />
+          </Field>
+          <Field label="Ciudad">
+            <Input value={c.city ?? ""} onChange={(e) => field("city", e.target.value || null)} />
+          </Field>
+          <Field label="País">
+            <Input value={c.country ?? ""} onChange={(e) => field("country", e.target.value || null)} />
+          </Field>
+          <Field label="Bio breve (≤300)" className="sm:col-span-2">
+            <Textarea
+              maxLength={300}
+              rows={2}
+              value={c.bio_short ?? ""}
+              onChange={(e) => field("bio_short", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Bio extendida" className="sm:col-span-2">
+            <Textarea
+              rows={6}
+              value={c.bio_long ?? ""}
+              onChange={(e) => field("bio_long", e.target.value || null)}
+            />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Disponibilidad & Tarifa */}
+      <Section title="Disponibilidad & Tarifa">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field label="Disponibilidad">
+            <Select
+              value={c.availability ?? "available"}
+              onValueChange={(v) => field("availability", v as Availability)}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="available">Disponible</SelectItem>
+                <SelectItem value="partial">Parcial</SelectItem>
+                <SelectItem value="unavailable">No disponible</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Próxima disponibilidad">
+            <Input
+              type="date"
+              value={c.next_available_on ?? ""}
+              onChange={(e) => field("next_available_on", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Rango de tarifa">
+            <Select
+              value={c.fee_range_id ?? ""}
+              onValueChange={(v) => field("fee_range_id", v || null)}
+            >
+              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+              <SelectContent>
+                {catalogs.fees.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+      </Section>
+
+      {/* Reel */}
+      <Section title="Reel principal">
+        <Field label="URL (YouTube, Vimeo, SoundCloud…)">
+          <Input
+            type="url"
+            value={c.reel_url ?? ""}
+            onChange={(e) => field("reel_url", e.target.value || null)}
+          />
+        </Field>
+      </Section>
+
+      {/* Estilos / Géneros / Idiomas */}
+      <Section title="Estilos musicales">
+        <MultiChipSelect
+          options={styleOpts}
+          selected={styleIds}
+          onToggle={toggleStyle}
+          getKey={(o) => o.id!}
+        />
+      </Section>
+      <Section title="Géneros audiovisuales">
+        <MultiChipSelect
+          options={genreOpts}
+          selected={genreIds}
+          onToggle={toggleGenre}
+          getKey={(o) => o.id!}
+        />
+      </Section>
+      <Section title="Idiomas">
+        <MultiChipSelect
+          options={langOpts}
+          selected={langCodes}
+          onToggle={toggleLang}
+          getKey={(o) => o.code!}
+        />
+      </Section>
+
+      {/* Tags */}
+      <Section title="Tags libres">
+        <div className="flex flex-wrap gap-1.5">
+          {(c.tags ?? []).map((t: string) => (
+            <Badge key={t} variant="outline" className="rounded-sm">
+              {t}
+              <button onClick={() => removeTag(t)} className="ml-2 text-muted-foreground hover:text-foreground">×</button>
+            </Badge>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+            placeholder="Añadir tag y pulsar Enter"
+            className="max-w-xs"
+          />
+          <Button type="button" size="sm" variant="outline" onClick={addTag}>Añadir</Button>
+        </div>
+      </Section>
+
+      {/* Demos */}
+      <Section>
+        <RelationListEditor
+          title="Demos"
+          table="composer_demos"
+          composerId={c.id}
+          rows={demos}
+          onChange={setDemos}
+          newDefaults={{ title: "Nuevo demo" }}
+          fields={[
+            { key: "title", label: "Título" },
+            { key: "category", label: "Categoría", placeholder: "p.ej. Drama, Acción" },
+            { key: "url", label: "URL", type: "url" },
+            { key: "duration_seconds", label: "Duración (s)", type: "number" },
+            { key: "description", label: "Notas", type: "textarea", className: "sm:col-span-2" },
+          ]}
+        />
+      </Section>
+
+      {/* Filmografía */}
+      <Section>
+        <RelationListEditor
+          title="Filmografía"
+          table="composer_filmography"
+          composerId={c.id}
+          rows={films}
+          onChange={setFilms}
+          newDefaults={{ title: "Nuevo título", format: "feature" }}
+          fields={[
+            { key: "title", label: "Título" },
+            { key: "year", label: "Año", type: "number" },
+            { key: "director", label: "Dirección" },
+            { key: "production_company", label: "Productora" },
+            { key: "country", label: "País" },
+            { key: "url", label: "URL", type: "url" },
+          ]}
+        />
+      </Section>
+
+      {/* Awards */}
+      <Section>
+        <RelationListEditor
+          title="Premios y nominaciones"
+          table="composer_awards"
+          composerId={c.id}
+          rows={awards}
+          onChange={setAwards}
+          newDefaults={{ title: "Nuevo premio" }}
+          fields={[
+            { key: "title", label: "Título" },
+            { key: "year", label: "Año", type: "number" },
+            { key: "note", label: "Nota", type: "textarea", className: "sm:col-span-2" },
+          ]}
+        />
+      </Section>
+
+      <Section title="Notas internas (solo IC)">
+        <Textarea
+          rows={5}
+          value={c.internal_notes ?? ""}
+          onChange={(e) => field("internal_notes", e.target.value || null)}
+          placeholder="Información confidencial, contactos, condiciones…"
+        />
+      </Section>
+
+      <div className="sticky bottom-4 mt-12 flex justify-end">
+        <Button onClick={saveCore} disabled={!dirty || saving} size="lg">
+          {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Todo guardado"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-4 py-8">
+      {title && (
+        <>
+          <h2 className="font-display text-2xl italic">{title}</h2>
+          <Separator />
+        </>
+      )}
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={"space-y-1.5 " + (className ?? "")}>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      {children}
+    </div>
+  );
+}
