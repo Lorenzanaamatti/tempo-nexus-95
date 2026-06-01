@@ -461,6 +461,7 @@ export type Database = {
           postal_code: string | null
           province: string | null
           reel_url: string | null
+          roster_role: Database["public"]["Enums"]["roster_role"]
           search_tsv: unknown
           slug: string
           tags: string[]
@@ -492,6 +493,7 @@ export type Database = {
           postal_code?: string | null
           province?: string | null
           reel_url?: string | null
+          roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug: string
           tags?: string[]
@@ -523,6 +525,7 @@ export type Database = {
           postal_code?: string | null
           province?: string | null
           reel_url?: string | null
+          roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug?: string
           tags?: string[]
@@ -832,6 +835,13 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      roster_role:
+        | "composer"
+        | "artist"
+        | "supervisor"
+        | "specialist"
+        | "curator"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -980,6 +990,14 @@ export const Constants = {
       ],
       person_role: [
         "ic_team",
+        "composer",
+        "artist",
+        "supervisor",
+        "specialist",
+        "curator",
+        "other",
+      ],
+      roster_role: [
         "composer",
         "artist",
         "supervisor",
