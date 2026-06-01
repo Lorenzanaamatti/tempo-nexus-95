@@ -115,6 +115,7 @@ function Inner({
       .from("composers")
       .update({
         full_name: c.full_name,
+        roster_role: (c as { roster_role?: string }).roster_role ?? "composer",
         city: c.city,
         country: c.country,
         birth_year: c.birth_year,
