@@ -46,6 +46,7 @@ import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 import { Route as AuthenticatedAdminMarketingTemplatesIndexRouteImport } from './routes/_authenticated/_admin/marketing.templates.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
+import { Route as AuthenticatedAdminMarketingSocialIndexRouteImport } from './routes/_authenticated/_admin/marketing.social.index'
 import { Route as AuthenticatedAdminMarketingPressKitsIndexRouteImport } from './routes/_authenticated/_admin/marketing.press-kits.index'
 import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './routes/_authenticated/_admin/marketing.decks.index'
 import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
@@ -265,6 +266,12 @@ const AuthenticatedAdminMarketingTargetAccountsIndexRoute =
     path: '/marketing/target-accounts/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingSocialIndexRoute =
+  AuthenticatedAdminMarketingSocialIndexRouteImport.update({
+    id: '/marketing/social/',
+    path: '/marketing/social/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingPressKitsIndexRoute =
   AuthenticatedAdminMarketingPressKitsIndexRouteImport.update({
     id: '/marketing/press-kits/',
@@ -342,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/press-kits/': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
+  '/marketing/social/': typeof AuthenticatedAdminMarketingSocialIndexRoute
   '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
@@ -384,6 +392,7 @@ export interface FileRoutesByTo {
   '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/press-kits': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
+  '/marketing/social': typeof AuthenticatedAdminMarketingSocialIndexRoute
   '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/marketing/templates': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
@@ -430,6 +439,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/_authenticated/_admin/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/_authenticated/_admin/marketing/press-kits/': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
+  '/_authenticated/_admin/marketing/social/': typeof AuthenticatedAdminMarketingSocialIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/_authenticated/_admin/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
@@ -475,6 +485,7 @@ export interface FileRouteTypes {
     | '/marketing/clippings/'
     | '/marketing/decks/'
     | '/marketing/press-kits/'
+    | '/marketing/social/'
     | '/marketing/target-accounts/'
     | '/marketing/templates/'
   fileRoutesByTo: FileRoutesByTo
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/marketing/clippings'
     | '/marketing/decks'
     | '/marketing/press-kits'
+    | '/marketing/social'
     | '/marketing/target-accounts'
     | '/marketing/templates'
   id:
@@ -562,6 +574,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/clippings/'
     | '/_authenticated/_admin/marketing/decks/'
     | '/_authenticated/_admin/marketing/press-kits/'
+    | '/_authenticated/_admin/marketing/social/'
     | '/_authenticated/_admin/marketing/target-accounts/'
     | '/_authenticated/_admin/marketing/templates/'
   fileRoutesById: FileRoutesById
@@ -832,6 +845,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/social/': {
+      id: '/_authenticated/_admin/marketing/social/'
+      path: '/marketing/social'
+      fullPath: '/marketing/social/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingSocialIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/press-kits/': {
       id: '/_authenticated/_admin/marketing/press-kits/'
       path: '/marketing/press-kits'
@@ -903,6 +923,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMarketingClippingsIndexRoute: typeof AuthenticatedAdminMarketingClippingsIndexRoute
   AuthenticatedAdminMarketingDecksIndexRoute: typeof AuthenticatedAdminMarketingDecksIndexRoute
   AuthenticatedAdminMarketingPressKitsIndexRoute: typeof AuthenticatedAdminMarketingPressKitsIndexRoute
+  AuthenticatedAdminMarketingSocialIndexRoute: typeof AuthenticatedAdminMarketingSocialIndexRoute
   AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   AuthenticatedAdminMarketingTemplatesIndexRoute: typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
@@ -948,6 +969,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketingDecksIndexRoute,
   AuthenticatedAdminMarketingPressKitsIndexRoute:
     AuthenticatedAdminMarketingPressKitsIndexRoute,
+  AuthenticatedAdminMarketingSocialIndexRoute:
+    AuthenticatedAdminMarketingSocialIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsIndexRoute:
     AuthenticatedAdminMarketingTargetAccountsIndexRoute,
   AuthenticatedAdminMarketingTemplatesIndexRoute:

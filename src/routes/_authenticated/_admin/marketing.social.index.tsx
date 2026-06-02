@@ -56,7 +56,7 @@ type Post = {
 function SocialIndex() {
   const qc = useQueryClient();
   const search = useRouterState({ select: (s) => s.location.search as { channel?: SocialChannel; composer?: string; production?: string; tab?: string } });
-  const channel: SocialChannel | "all" = (search?.channel as SocialChannel) || "all";
+  const channel: SocialChannel | "all" = (search?.channel as SocialChannel | undefined) ?? "all";
   const composerFilter = search?.composer || "all";
   const productionFilter = search?.production || "all";
   const tab = search?.tab || "posts";
@@ -81,7 +81,7 @@ function SocialIndex() {
     queryKey: ["social-posts", channel, composerFilter, productionFilter],
     queryFn: async () => {
       let q = supabase.from("social_posts").select("*").order("scheduled_for", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
-      if (channel !== "all") q = q.eq("channel", channel);
+      if (channel !== "all") q = q.eq("channel", channel as SocialChannel);
       if (composerFilter !== "all") q = q.eq("composer_id", composerFilter);
       if (productionFilter !== "all") q = q.eq("production_id", productionFilter);
       const { data, error } = await q;
@@ -94,7 +94,7 @@ function SocialIndex() {
     const { data, error } = await supabase
       .from("social_posts")
       .insert({
-        channel: channel === "all" ? "instagram" : channel,
+        channel: channel === "all" ? "instagram" : (channel as SocialChannel),
         format: "feed",
         status: "borrador",
         composer_id: composerFilter !== "all" ? composerFilter : null,
