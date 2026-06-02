@@ -442,6 +442,10 @@ function ProductionEdit() {
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <ProductionEventsEditor productionId={productionId} />
       </div>
+      <div className="mt-10">
+        <h2 className="mb-3 font-display text-2xl">Actividad en redes sociales</h2>
+        <SocialActivityPanel productionId={productionId} />
+      </div>
       <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
