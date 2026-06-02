@@ -1,12 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ExternalLink } from "lucide-react";
-import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { ExternalLink, Plus } from "lucide-react";
+import { useState } from "react";
+import { PRODUCTION_KIND_LABEL, PRODUCTION_KINDS, type ProductionKind } from "@/lib/production-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/directors/$directorId")({
   component: DirectorDetail,
@@ -15,6 +18,38 @@ export const Route = createFileRoute("/_authenticated/_admin/directors/$director
 function DirectorDetail() {
   const { directorId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [newTitle, setNewTitle] = useState("");
+  const [newYear, setNewYear] = useState<string>(String(new Date().getFullYear()));
+  const [newKind, setNewKind] = useState<ProductionKind>("cine");
+  const [creating, setCreating] = useState(false);
+
+  async function createProduction(openAfter: boolean) {
+    if (!newTitle.trim()) {
+      toast.error("Indica un título");
+      return;
+    }
+    setCreating(true);
+    const { data, error } = await (supabase as any)
+      .from("productions")
+      .insert({
+        title: newTitle.trim(),
+        year: newYear ? parseInt(newYear, 10) : null,
+        project_type: newKind,
+        kind: PRODUCTION_KIND_LABEL[newKind],
+        director_id: directorId,
+      })
+      .select("id")
+      .single();
+    setCreating(false);
+    if (error) return toast.error(error.message);
+    setNewTitle("");
+    toast.success("Producción creada");
+    qc.invalidateQueries({ queryKey: ["director-history", directorId] });
+    if (openAfter && data?.id) {
+      navigate({ to: "/productions/$productionId", params: { productionId: data.id } });
+    }
+  }
 
   const directorQ = useQuery({
     queryKey: ["director", directorId],
