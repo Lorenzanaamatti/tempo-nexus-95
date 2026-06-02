@@ -133,6 +133,9 @@ function Inner({
   const [docs, setDocs] = useState<any[]>(initialRelations.docs);
   const projects: any[] = initialRelations.projects ?? [];
   const agents: { id: string; full_name: string; email: string | null }[] = initialRelations.agents ?? [];
+  const candidacies: any[] = initialRelations.candidacies ?? [];
+  const productionsRel: any[] = initialRelations.productions ?? [];
+  const contractsRel: any[] = initialRelations.contracts ?? [];
   const [tagInput, setTagInput] = useState("");
 
   function field<K extends string>(k: K, v: any) {
