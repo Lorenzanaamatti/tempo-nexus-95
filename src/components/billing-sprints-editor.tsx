@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
-import { formatEUR, parseAmount } from "@/lib/money";
+import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 
 const STATUS_LABEL = {
   pendiente: "Pendiente",
@@ -128,7 +128,8 @@ export function BillingSprintsEditor({
                 <div>
                   <Label className="text-xs text-muted-foreground">Importe (€)</Label>
                   <Input
-                    defaultValue={r.amount != null ? String(r.amount).replace(".", ",") : ""}
+                    key={`amt-${r.id}-${r.amount ?? ""}`}
+                    defaultValue={r.amount != null ? formatNumberEs(r.amount) : ""}
                     placeholder="0,00"
                     onBlur={(e) => {
                       const parsed = parseAmount(e.target.value);
