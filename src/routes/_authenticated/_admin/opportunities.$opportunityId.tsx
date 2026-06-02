@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Trash2, Plus, Check } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
+import { EntityActionsEditor } from "@/components/entity-actions-editor";
+import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/$opportunityId")({
   component: OpportunityDetail,
@@ -39,21 +40,6 @@ function OpportunityDetail() {
         .from("opportunity_candidates")
         .select("id, note, composer:composers(id, full_name, artistic_name)")
         .eq("opportunity_id", opportunityId);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const actionsQ = useQuery({
-    queryKey: ["opportunity-actions", opportunityId],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("opportunity_actions")
-        .select("*")
-        .eq("opportunity_id", opportunityId)
-        .order("done", { ascending: true })
-        .order("due_date", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -171,32 +157,6 @@ function OpportunityDetail() {
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["opportunity-candidates", opportunityId] });
     qc.invalidateQueries({ queryKey: ["opportunities"] });
-  }
-
-  // actions
-  const [newActionTitle, setNewActionTitle] = useState("");
-  const [newActionDate, setNewActionDate] = useState("");
-  async function addAction() {
-    if (!newActionTitle.trim()) return;
-    const { error } = await (supabase as any).from("opportunity_actions").insert({
-      opportunity_id: opportunityId,
-      title: newActionTitle.trim(),
-      due_date: newActionDate || null,
-    });
-    if (error) return toast.error(error.message);
-    setNewActionTitle("");
-    setNewActionDate("");
-    qc.invalidateQueries({ queryKey: ["opportunity-actions", opportunityId] });
-  }
-  async function toggleActionDone(id: string, done: boolean) {
-    const { error } = await (supabase as any).from("opportunity_actions").update({ done, done_at: done ? new Date().toISOString() : null }).eq("id", id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["opportunity-actions", opportunityId] });
-  }
-  async function removeAction(id: string) {
-    const { error } = await (supabase as any).from("opportunity_actions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["opportunity-actions", opportunityId] });
   }
 
   if (oppQ.isLoading || !oppQ.data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
@@ -333,35 +293,11 @@ function OpportunityDetail() {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-3 font-display text-2xl">Próximas acciones</h2>
-        <p className="mb-3 text-xs text-muted-foreground">Cada acción queda registrada con su fecha. Marca como hecha cuando se complete; el histórico se mantiene visible.</p>
-        <div className="mb-3 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
-          <div className="flex-1 min-w-[240px]">
-            <Label className="text-xs">Acción</Label>
-            <Input value={newActionTitle} onChange={(e) => setNewActionTitle(e.target.value)} placeholder="Ej. Llamar a productora" />
-          </div>
-          <div>
-            <Label className="text-xs">Fecha</Label>
-            <Input type="date" value={newActionDate} onChange={(e) => setNewActionDate(e.target.value)} />
-          </div>
-          <Button onClick={addAction}><Plus className="mr-1 h-4 w-4" /> Añadir acción</Button>
-        </div>
-        {!actionsQ.data?.length ? (
-          <p className="text-sm text-muted-foreground">Sin acciones registradas.</p>
-        ) : (
-          <ul className="divide-y divide-border rounded-sm border border-border">
-            {actionsQ.data.map((a: any) => (
-              <li key={a.id} className={`flex items-center gap-3 px-3 py-2 ${a.done ? "opacity-60" : ""}`}>
-                <Checkbox checked={a.done} onCheckedChange={(v) => toggleActionDone(a.id, !!v)} />
-                <div className="flex-1">
-                  <p className={`text-sm ${a.done ? "line-through" : ""}`}>{a.title}</p>
-                  {a.due_date && <p className="smallcaps text-[10px] text-muted-foreground">{a.due_date}</p>}
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => removeAction(a.id)}><Trash2 className="h-4 w-4" /></Button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <EntityActionsEditor subjectType="opportunity" subjectId={opportunityId} title="Próximas acciones" />
+      </section>
+
+      <section className="mt-10">
+        <EntityDocumentsEditor subjectType="opportunity" subjectId={opportunityId} />
       </section>
       <SaveButton floating onClick={save} saving={saving} />
     </div>

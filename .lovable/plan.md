@@ -1,110 +1,127 @@
-## Objetivo
+# Plan: Transversal → Personas → Marketing
 
-Ampliar el módulo Calendario para que muestre la disponibilidad y asignaciones de **personas** (Equipo IC, Compositores, Artistas, Supervisores) y de **producciones**, con filtros combinables y vistas de duración variable (día → 3 años) en formato **timeline horizontal**.
-
----
-
-## 1. Base de datos (nueva migración)
-
-### Tabla `people`
-Tabla unificada para todas las personas del ecosistema.
-- `role`: enum `person_role` con valores `ic_team`, `composer`, `artist`, `supervisor`
-- `full_name`, `email`, `phone`, `notes`
-- `composer_id` (opcional, FK lógica): para enlazar una fila `person` con un compositor ya existente sin duplicar datos
-- Para los compositores actuales: trigger/seed que cree automáticamente una fila en `people` con `role = 'composer'` y `composer_id` apuntando al original
-
-### Tabla `productions`
-- `title`, `kind` (película, serie, doc, spot, videojuego, otros), `year`, `production_company`, `director`, `platform`, `notes`, `color` (para distinguir en el calendario)
-
-### Tabla `production_assignments`
-Relaciona personas con producciones:
-- `production_id`, `person_id`, `role_in_project` (compositor, artista invitado, supervisor, etc.), `start_date`, `end_date`
-
-### Tabla `calendar_events`
-Reemplaza el uso exclusivo de `composer_availability` para el calendario global. Mantiene `composer_availability` intacta (sigue alimentando la ficha del compositor) pero añadimos una tabla más general:
-- `subject_type`: enum (`person`, `production`)
-- `subject_id`: uuid (apunta a `people.id` o `productions.id`)
-- `kind`: enum reutilizado (`libre`, `ocupado`, `vacaciones`, `personal`, `produccion`)
-- `start_date`, `end_date`, `title`, `note`
-
-Los periodos existentes de `composer_availability` se siguen mostrando en la ficha del compositor; el calendario global los lee uniendo ambas fuentes via vista SQL `calendar_entries_v`.
-
-### RLS
-- `people`, `productions`, `production_assignments`, `calendar_events`: lectura para `authenticated`, escritura solo `current_user_is_admin()`.
+Tres fases secuenciales. Cada fase deja la app funcionando y abre la siguiente.
 
 ---
 
-## 2. Nuevos módulos admin
+## FASE C — Unificar tablas transversales
 
-### `/people`
-CRUD simple: lista filtrable por rol, ficha con datos básicos. Para personas con `role = 'composer'` enlazadas, botón "Abrir ficha de compositor".
+Objetivo: que cualquier entidad (productora, compositor, festival, premio, plataforma, campaña…) pueda tener acciones y documentos sin duplicar tablas.
 
-### `/productions`
-Lista + ficha con: datos de la producción, asignaciones de personal (añadir/quitar personas y fechas), eventos del calendario asociados.
+### C1. Tabla `actions` (polimórfica)
+Sustituye / unifica `opportunity_actions` y futuras tareas dispersas.
 
-Ambos módulos se enlazan desde el sidebar (solo admin).
+Campos clave:
+- `subject_type` (enum compartido con `calendar_events`: `production | composer | opportunity | contract | production_company | platform | festival | award | grant | campaign | person`)
+- `subject_id`
+- `title`, `notes`
+- `due_date`, `done`, `done_at`
+- `assignee_person_id` (miembro de IC responsable)
+- `kind` (`tarea | seguimiento | llamada | email | reunión | marketing`)
+
+Migración de datos: copiar `opportunity_actions` → `actions` con `subject_type='opportunity'`. Mantener la tabla vieja como `view` o eliminarla tras adaptar la UI.
+
+### C2. Tabla `documents` (polimórfica)
+Unifica `composer_documents` y `production_documents`.
+
+Campos clave: `subject_type`, `subject_id`, `title`, `kind`, `url`, `storage_path`, `position`, `notes`.
+
+Migración: copiar ambas tablas con su `subject_type` correspondiente. Adaptar `photo-gallery` y editores existentes a la tabla nueva.
+
+### C3. Componentes reutilizables
+- `<EntityActionsEditor subjectType subjectId />`
+- `<EntityDocumentsEditor subjectType subjectId />`
+- `<EntityCalendarPanel subjectType subjectId />` (envoltorio del `TimelineCalendar` ya existente)
+- `<EntityContractsPanel subjectType subjectId />` (filtra `contracts` + `contract_counterparties`)
+
+### C4. Calendario general
+Añadir las acciones (`actions`) como nueva fuente en `src/lib/calendar-sources.ts`, con toggle.
 
 ---
 
-## 3. Calendario rediseñado (`/calendar`)
+## FASE A — Reorganizar PERSONAS Y EQUIPOS
 
-### Filtros (barra superior, multi-selección combinable)
-- Toggles por categoría: **IC**, **Compositores**, **Artistas**, **Supervisores**, **Producciones**
-- Multi-select de personas concretas (chips)
-- Multi-select de producciones concretas (chips)
-- Toggle por tipo de evento (libre, ocupado, vacaciones, personal, producción)
+Objetivo: tres entradas claras en el sidebar, mismo modelo `people`/`composers` por debajo.
 
-### Selector de rango de vista
-Botones: **Día · Semana · Mes · Trimestre · Semestre · Año · 2 años · 3 años**
-Navegación: ‹ hoy ›
+### A1. Sidebar
+Reemplazar la entrada actual por un grupo:
 
-### Layout timeline horizontal
 ```text
-                  ┌─ rango temporal (cabecera con escala según vista) ─┐
-Equipo IC
-  Marta           │      ████ vacaciones        │
-  Joan            │  ██ personal │              │
-Compositores
-  Compositor A    │       ████████ ocupado      │
-  Compositor B    │ ████ libre │   ██ vacaciones│
-Producciones
-  "Película X"    │      ████████████████       │
-  "Serie Y"      │ █████████ │                 │
+PERSONAS Y EQUIPOS
+  ├─ Roster          → /roster
+  ├─ Equipo IC       → /team
+  └─ Contactos CRM   → /people
 ```
 
-- Filas agrupadas por categoría (cabecera colapsable).
-- Cada fila = una persona o una producción.
-- Barras de colores según `kind` (mismos colores que el editor de disponibilidad).
-- Click en barra → navega a la ficha correspondiente.
-- Hover → tooltip con título + rango + nota.
-- Densidad de cabecera adaptada al rango (días para vista día/semana; semanas para mes/trimestre; meses para semestre/año+).
+### A2. Rutas
 
-### Implementación
-- Componente `TimelineCalendar` con virtualización ligera (filas) y cálculo de offsets con `date-fns`.
-- Hook `useCalendarRange(view, anchor)` que devuelve `{ start, end, ticks, label }`.
-- Query única que carga eventos solapando `[start, end]` aplicando filtros del lado del cliente (el volumen esperado es bajo).
+- `/roster` — listado segmentado de `composers` con filtros por: `roster_role` (compositor/artista/…), `tier`, `representation_status`, disponibilidad, estilos musicales, idiomas, rango de fees. Reutiliza la ficha existente `/composers/$id`.
+- `/team` — listado de `people` con `role = 'ic_team'`. Doble vista:
+  - "A quién represento" (agrupa por miembro IC → `composer_team_assignments`).
+  - "Quién me lleva" (vista cruzada por representado).
+  - Ficha de miembro IC en `/team/$personId` con pestañas Resumen, Asignaciones, Calendario, Acciones, Documentos (usando los componentes de C3).
+- `/people` — listado actual, filtrado para excluir `ic_team` y `composer` por defecto (CRM externo: supervisores, productores, contactos).
 
----
-
-## 4. Cambios menores
-
-- `availability-editor.tsx`: añadir nuevo `kind` `produccion` (opcional, solo si el usuario quiere etiquetar un periodo como producción concreta).
-- `app-sidebar.tsx`: añadir entradas "Personas", "Producciones" (solo admin); "Calendario" se queda.
-- Mantener `composer_availability` y la ficha actual sin tocar la UX existente; el calendario global solo amplía su alcance.
+### A3. Filtros del Roster
+Añadir barra de filtros con chips persistidos en URL (`validateSearch`). Reutilizar catálogos existentes (`music_styles`, `fee_ranges`, `languages`).
 
 ---
 
-## 5. Entregables
+## FASE B — Módulo MARKETING
 
-- 1 migración SQL (people, productions, production_assignments, calendar_events, vista, enums, RLS, grants, seed people desde composers).
-- Rutas nuevas: `/_authenticated/_admin/people(.index|.new|.$id)`, `/_authenticated/_admin/productions(.index|.new|.$id)`.
-- Componentes: `TimelineCalendar`, `CalendarFilters`, `PeopleEditor`, `ProductionEditor`, `ProductionAssignmentsEditor`.
-- Reescritura de `calendar.tsx` para usar timeline + filtros + rangos.
-- Sidebar actualizado.
+Objetivo: capa transversal nueva, mismo patrón que Producciones/Contratos, integrada con calendario y finanzas.
+
+### B1. Tablas
+
+- `campaigns` — entidad de primer nivel: `name`, `objective`, `status` (`borrador|activa|pausada|cerrada`), `start_date`, `end_date`, `budget_amount`, `responsible_person_id`, `notes`.
+- `campaign_targets` — N:N polimórfica (`campaign_id`, `subject_type`, `subject_id`) para apuntar a producciones, compositores, festivales, premios…
+- `marketing_assets` — `campaign_id?`, `subject_type?`, `subject_id?`, `title`, `kind` (`reel|foto|nota_prensa|epk|social_post|otro`), `url`, `storage_path`, `published_at`.
+- `media_outlets` — fichas de medios (nombre, tipo: prensa/radio/podcast/online, web, contactos).
+- `media_coverage` — clipping: `media_outlet_id`, `subject_type`, `subject_id`, `title`, `url`, `published_at`, `notes`.
+- `public_appearances` — entrevistas/charlas: `composer_id?`, `production_id?`, `media_outlet_id?`, `festival_id?`, `date`, `title`, `notes`.
+
+Todas con RLS estándar: lectura por autenticados, escritura sólo admin (`current_user_is_admin()`).
+
+### B2. Rutas
+
+```text
+MARKETING
+  ├─ Campañas         → /marketing/campaigns
+  ├─ Assets           → /marketing/assets
+  ├─ Cobertura        → /marketing/coverage
+  ├─ Apariciones      → /marketing/appearances
+  └─ Medios           → /marketing/outlets
+```
+
+Ficha de campaña `/marketing/campaigns/$id` con pestañas Resumen, Targets (qué/quién promociona), Assets, Calendario, Acciones, Cobertura asociada, Finanzas (sprints de presupuesto).
+
+### B3. Integración transversal
+
+- `calendar-sources.ts`: añadir fuentes `campaign` (inicio/fin), `marketing_asset` (publicación), `media_coverage` (publicación), `public_appearance`.
+- `billing_sprints` ya soporta cualquier subject vía `production_id`; ampliar a `subject_type` para vincular sprints a campañas.
+- En la ficha de cualquier entidad (productora, compositor, festival, premio) aparece una pestaña **Marketing** que pregunta "campañas y coberturas donde aparezco" usando `campaign_targets` y `media_coverage`.
 
 ---
 
-## Notas
+## Detalles técnicos
 
-- Se conserva la lista por meses como vista de respaldo (botón "Lista") por si en pantallas pequeñas el timeline es estrecho.
-- Si más adelante quieres edición inline en el propio calendario (arrastrar barras), se puede añadir en una segunda iteración; ahora la creación/edición se hace desde la ficha de la persona o de la producción.
+- Enum `subject_type` ampliado: añadir `opportunity, contract, production_company, platform, festival, award, grant, campaign, media_outlet, person` al enum existente usado por `calendar_events`.
+- `contracts` recibe también `subject_type`/`subject_id` opcional para poder vincularse a entidades distintas de productora/compositor (festival, campaña…).
+- Botón de guardado en todas las nuevas fichas: `<SaveButton floating />` (regla ya en memoria del proyecto).
+- Migraciones siempre con `GRANT` a `authenticated` y `service_role`, RLS activa, políticas `current_user_is_admin()` para escritura.
+- No tocar `src/integrations/supabase/client.ts` ni `types.ts` (auto-generados). Las queries usan `(supabase as any)` cuando golpean tablas recién creadas hasta que se regeneran los tipos.
+
+---
+
+## Orden de entrega
+
+Cada fase = una entrega cerrada y revisable.
+
+1. **C1+C2** migraciones + componentes reutilizables + adaptar lo que ya usa `opportunity_actions`/`composer_documents`/`production_documents`.
+2. **C3+C4** integración en fichas existentes + calendario.
+3. **A1+A2+A3** sidebar, tres rutas, filtros del Roster, ficha de miembro IC.
+4. **B1** migraciones de Marketing.
+5. **B2** rutas e índices.
+6. **B3** integración con calendario, finanzas y pestañas cruzadas.
+
+Después de la fase C confirmamos antes de seguir, por si quieres ajustar nomenclatura o campos.

@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions: {
+        Row: {
+          assignee_person_id: string | null
+          created_at: string
+          done: boolean
+          done_at: string | null
+          due_date: string | null
+          id: string
+          kind: string
+          notes: string | null
+          position: number
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_person_id?: string | null
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          position?: number
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_person_id?: string | null
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          position?: number
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       av_genres: {
         Row: {
           id: string
@@ -847,6 +895,48 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string | null
+          notes: string | null
+          position: number
+          storage_path: string | null
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       fee_ranges: {
         Row: {
           code: string
@@ -1595,7 +1685,21 @@ export type Database = {
       availability_status: "available" | "partial" | "unavailable"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
-      calendar_subject_type: "person" | "production"
+      calendar_subject_type:
+        | "person"
+        | "production"
+        | "opportunity"
+        | "composer"
+        | "contract"
+        | "production_company"
+        | "platform"
+        | "festival"
+        | "award"
+        | "grant"
+        | "campaign"
+        | "media_outlet"
+        | "media_coverage"
+        | "public_appearance"
       composer_team_role:
         | "agente"
         | "manager"
@@ -1816,7 +1920,22 @@ export const Constants = {
       availability_status: ["available", "partial", "unavailable"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
-      calendar_subject_type: ["person", "production"],
+      calendar_subject_type: [
+        "person",
+        "production",
+        "opportunity",
+        "composer",
+        "contract",
+        "production_company",
+        "platform",
+        "festival",
+        "award",
+        "grant",
+        "campaign",
+        "media_outlet",
+        "media_coverage",
+        "public_appearance",
+      ],
       composer_team_role: [
         "agente",
         "manager",
