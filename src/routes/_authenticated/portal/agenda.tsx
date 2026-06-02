@@ -13,21 +13,26 @@ function Agenda() {
     queryKey: ["portal-agenda", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const today = new Date().toISOString().slice(0, 10);
       const { data: person } = await supabase
         .from("people")
         .select("id")
         .eq("composer_id", composerId!)
         .maybeSingle();
-      if (!person) return [];
+      if (!person) return { upcoming: [], past: [] };
       const { data } = await supabase
         .from("calendar_events")
         .select("id, title, note, kind, start_date, end_date")
         .eq("subject_type", "person")
         .eq("subject_id", person.id)
-        .gte("end_date", today)
         .order("start_date");
-      return data ?? [];
+      const today = new Date().toISOString().slice(0, 10);
+      const all = data ?? [];
+      return {
+        upcoming: all.filter((e) => (e.end_date ?? e.start_date) >= today),
+        past: all
+          .filter((e) => (e.end_date ?? e.start_date) < today && e.note)
+          .reverse(),
+      };
     },
   });
 
@@ -39,23 +44,48 @@ function Agenda() {
       </header>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
-      ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">No hay eventos próximos.</p>
       ) : (
-        <ul className="space-y-3">
-          {data.map((e) => (
-            <li key={e.id} className="rounded-sm border border-border p-4">
-              <div className="flex items-baseline justify-between gap-4">
-                <p className="font-display text-lg">{e.title || "Sin título"}</p>
-                <span className="smallcaps text-xs text-muted-foreground">{e.kind}</span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {e.start_date}{e.end_date && e.end_date !== e.start_date ? ` → ${e.end_date}` : ""}
-              </p>
-              {e.note && <p className="mt-2 whitespace-pre-wrap text-sm">{e.note}</p>}
-            </li>
-          ))}
-        </ul>
+        <>
+          <section className="space-y-3">
+            <h3 className="font-display text-xl">Reuniones futuras</h3>
+            {!data?.upcoming.length ? (
+              <p className="text-sm text-muted-foreground">No hay eventos próximos.</p>
+            ) : (
+              <ul className="space-y-3">
+                {data.upcoming.map((e) => (
+                  <li key={e.id} className="rounded-sm border border-border p-4">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <p className="font-display text-lg">{e.title || "Sin título"}</p>
+                      <span className="smallcaps text-xs text-muted-foreground">{e.kind}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {e.start_date}{e.end_date && e.end_date !== e.start_date ? ` → ${e.end_date}` : ""}
+                    </p>
+                    {e.note && <p className="mt-2 whitespace-pre-wrap text-sm">{e.note}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section className="space-y-3">
+            <h3 className="font-display text-xl">Actas de reuniones</h3>
+            {!data?.past.length ? (
+              <p className="text-sm text-muted-foreground">Aún no hay actas registradas.</p>
+            ) : (
+              <ul className="space-y-3">
+                {data.past.map((e) => (
+                  <li key={e.id} className="rounded-sm border border-border p-4">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <p className="font-display text-lg">{e.title || "Reunión"}</p>
+                      <span className="smallcaps text-xs text-muted-foreground">{e.start_date}</span>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm">{e.note}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
       )}
     </div>
   );

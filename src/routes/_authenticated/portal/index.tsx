@@ -13,16 +13,53 @@ function PortalHome() {
     queryKey: ["portal-home", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("composers")
-        .select("full_name, artistic_name, tier, representation_status, renewal_date")
-        .eq("id", composerId!)
-        .maybeSingle();
-      return data;
+      const year = new Date().getFullYear();
+      const today = new Date().toISOString().slice(0, 10);
+      const [composer, projects, nextEvent] = await Promise.all([
+        supabase
+          .from("composers")
+          .select("full_name, artistic_name, tier, representation_status, renewal_date")
+          .eq("id", composerId!)
+          .maybeSingle(),
+        supabase
+          .from("composer_projects")
+          .select("id, production, year, price_charged, net_margin")
+          .eq("composer_id", composerId!),
+        (async () => {
+          const { data: person } = await supabase
+            .from("people")
+            .select("id")
+            .eq("composer_id", composerId!)
+            .maybeSingle();
+          if (!person) return null;
+          const { data: ev } = await supabase
+            .from("calendar_events")
+            .select("id, title, start_date, kind")
+            .eq("subject_type", "person")
+            .eq("subject_id", person.id)
+            .gte("start_date", today)
+            .order("start_date")
+            .limit(1)
+            .maybeSingle();
+          return ev;
+        })(),
+      ]);
+      const all = projects.data ?? [];
+      const yearProjects = all.filter((p) => p.year === year);
+      const revenue = yearProjects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
+      const margin = yearProjects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
+      return {
+        composer: composer.data,
+        kpis: { year, count: yearProjects.length, revenue, margin, total: all.length },
+        nextEvent,
+      };
     },
   });
 
-  const name = data?.artistic_name || data?.full_name || "Bienvenido/a";
+  const composer = data?.composer;
+  const name = composer?.artistic_name || composer?.full_name || "Bienvenido/a";
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="space-y-8">
@@ -35,9 +72,31 @@ function PortalHome() {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <Card label="Estado" value={data?.representation_status ?? "—"} />
-        <Card label="Tier" value={data?.tier ?? "—"} />
-        <Card label="Renovación" value={data?.renewal_date ?? "—"} />
+        <Card label="Estado" value={composer?.representation_status ?? "—"} />
+        <Card label="Tier" value={composer?.tier ?? "—"} />
+        <Card label="Renovación" value={composer?.renewal_date ?? "—"} />
+      </section>
+
+      <section>
+        <h3 className="mb-3 font-display text-xl">KPIs del año {data?.kpis.year}</h3>
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Card label="Proyectos del año" value={String(data?.kpis.count ?? 0)} />
+          <Card label="Total histórico" value={String(data?.kpis.total ?? 0)} />
+          <Card label="Facturación año" value={data ? fmt(data.kpis.revenue) : "—"} />
+          <Card label="Margen neto año" value={data ? fmt(data.kpis.margin) : "—"} />
+        </div>
+      </section>
+
+      <section className="rounded-sm border border-border bg-card/40 p-5">
+        <p className="smallcaps text-xs text-muted-foreground">Próximo hito</p>
+        {data?.nextEvent ? (
+          <div className="mt-1 flex items-baseline justify-between gap-4">
+            <p className="font-display text-xl">{data.nextEvent.title || "Sin título"}</p>
+            <span className="text-sm text-muted-foreground">{data.nextEvent.start_date}</span>
+          </div>
+        ) : (
+          <p className="mt-1 text-sm text-muted-foreground">No hay hitos próximos programados.</p>
+        )}
       </section>
 
       <section>

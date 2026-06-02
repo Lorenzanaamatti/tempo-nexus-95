@@ -35,7 +35,13 @@ function Carrera() {
       <Block title="Reel" value={data?.reel_url} link />
       <Block title="Biografía breve" value={data?.bio_short} multiline />
       <Block title="Biografía extendida" value={data?.bio_long} multiline />
-      <Block title="Notas de carrera" value={data?.career_notes} multiline />
+      <Block title="Plan de carrera vigente" value={data?.career_notes} multiline />
+      <section className="rounded-sm border border-border p-4">
+        <p className="smallcaps text-xs text-muted-foreground">Mercados y objetivos</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Los mercados estratégicos y objetivos anuales se definen junto con tu agente. Consulta la última versión acordada en la sección de Contratos y derechos o solicita una revisión.
+        </p>
+      </section>
     </div>
   );
 }

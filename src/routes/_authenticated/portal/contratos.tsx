@@ -22,6 +22,17 @@ function Contratos() {
     },
   });
 
+  const isSettlement = (k?: string | null) =>
+    !!k && /liquidaci|settle|royalt/i.test(k);
+  const isContract = (k?: string | null) =>
+    !!k && /contrat|acuerdo|addendum|anexo/i.test(k);
+
+  const contratos = (data ?? []).filter((d) => isContract(d.kind));
+  const liquidaciones = (data ?? []).filter((d) => isSettlement(d.kind));
+  const otros = (data ?? []).filter(
+    (d) => !isContract(d.kind) && !isSettlement(d.kind),
+  );
+
   return (
     <div className="space-y-6">
       <header>
@@ -32,11 +43,28 @@ function Contratos() {
       </header>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
-      ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">Aún no hay documentos disponibles.</p>
+      ) : (
+        <>
+          <DocSection title="Contratos firmados" docs={contratos} empty="Aún no hay contratos registrados." />
+          <DocSection title="Liquidaciones trimestrales" docs={liquidaciones} empty="Aún no hay liquidaciones publicadas." />
+          <DocSection title="Otros documentos" docs={otros} empty="No hay documentos adicionales." />
+        </>
+      )}
+    </div>
+  );
+}
+
+type Doc = { id: string; title: string; kind: string | null; url: string | null; notes: string | null };
+
+function DocSection({ title, docs, empty }: { title: string; docs: Doc[]; empty: string }) {
+  return (
+    <section className="space-y-3">
+      <h3 className="font-display text-xl">{title}</h3>
+      {!docs.length ? (
+        <p className="text-sm text-muted-foreground">{empty}</p>
       ) : (
         <ul className="space-y-3">
-          {data.map((d) => (
+          {docs.map((d) => (
             <li key={d.id} className="rounded-sm border border-border p-4">
               <div className="flex items-baseline justify-between gap-4">
                 <p className="font-display text-lg">{d.title}</p>
@@ -52,6 +80,6 @@ function Contratos() {
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }
