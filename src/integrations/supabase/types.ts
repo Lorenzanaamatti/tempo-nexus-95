@@ -480,6 +480,66 @@ export type Database = {
           },
         ]
       }
+      composer_team_assignments: {
+        Row: {
+          composer_id: string
+          created_at: string
+          id: string
+          kpi_review: string | null
+          kpi_review_date: string | null
+          objectives: string | null
+          person_id: string
+          position: number
+          role_other: string | null
+          start_date: string | null
+          team_role: Database["public"]["Enums"]["composer_team_role"]
+          updated_at: string
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          id?: string
+          kpi_review?: string | null
+          kpi_review_date?: string | null
+          objectives?: string | null
+          person_id: string
+          position?: number
+          role_other?: string | null
+          start_date?: string | null
+          team_role: Database["public"]["Enums"]["composer_team_role"]
+          updated_at?: string
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          id?: string
+          kpi_review?: string | null
+          kpi_review_date?: string | null
+          objectives?: string | null
+          person_id?: string
+          position?: number
+          role_other?: string | null
+          start_date?: string | null
+          team_role?: Database["public"]["Enums"]["composer_team_role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_team_assignments_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_team_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composers: {
         Row: {
           address: string | null
@@ -897,6 +957,14 @@ export type Database = {
         | "produccion"
       availability_status: "available" | "partial" | "unavailable"
       calendar_subject_type: "person" | "production"
+      composer_team_role:
+        | "agente"
+        | "manager"
+        | "producer"
+        | "comunicacion"
+        | "facturacion"
+        | "pagos"
+        | "otro"
       film_format:
         | "feature"
         | "series"
@@ -1063,6 +1131,15 @@ export const Constants = {
       ],
       availability_status: ["available", "partial", "unavailable"],
       calendar_subject_type: ["person", "production"],
+      composer_team_role: [
+        "agente",
+        "manager",
+        "producer",
+        "comunicacion",
+        "facturacion",
+        "pagos",
+        "otro",
+      ],
       film_format: [
         "feature",
         "series",

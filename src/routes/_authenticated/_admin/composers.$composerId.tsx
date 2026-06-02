@@ -15,6 +15,7 @@ import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
+import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
 
@@ -665,6 +666,10 @@ function Inner({
           onChange={(e) => field("internal_notes", e.target.value || null)}
           placeholder="Información confidencial, contactos, condiciones…"
         />
+      </Section>
+
+      <Section title="Equipo asignado a este representado">
+        <ComposerTeamEditor composerId={c.id} />
       </Section>
 
       {/* Documentos y materiales */}
