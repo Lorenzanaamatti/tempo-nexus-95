@@ -1771,7 +1771,7 @@ export type Database = {
         | "pausa"
         | "en_negociacion"
         | "finalizado"
-      representation_tier: "A" | "B" | "C" | "desarrollo"
+      representation_tier: "A" | "B" | "C" | "desarrollo" | "D" | "E"
       roster_role:
         | "composer"
         | "artist"
@@ -2015,7 +2015,7 @@ export const Constants = {
         "en_negociacion",
         "finalizado",
       ],
-      representation_tier: ["A", "B", "C", "desarrollo"],
+      representation_tier: ["A", "B", "C", "desarrollo", "D", "E"],
       roster_role: [
         "composer",
         "artist",

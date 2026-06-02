@@ -9,6 +9,24 @@ import { photoUrl } from "@/lib/composers-api";
 import { Plus } from "lucide-react";
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
+const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
+const TIER_LABEL: Record<Tier, string> = {
+  A: "Tier A",
+  B: "Tier B",
+  C: "Tier C",
+  D: "Tier D",
+  E: "Tier E",
+  desarrollo: "En desarrollo",
+};
+const TIER_HINT: Record<Tier, string> = {
+  A: "Top — referentes consolidados con máxima prioridad.",
+  B: "Sólidos — proyectos recurrentes y alta demanda.",
+  C: "Activos — trayectoria estable, en crecimiento.",
+  D: "Emergentes — perfiles en consolidación.",
+  E: "Periféricos — colaboraciones puntuales o reserva.",
+  desarrollo: "Sin tier asignado todavía.",
+};
 const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: string }> = {
   composer:   { title: "Compositores",         singular: "compositor",         intro: "Catálogo interno del equipo de Interesante Compañía." },
   artist:     { title: "Artistas",             singular: "artista",            intro: "Artistas representados por Interesante Compañía." },
@@ -36,7 +54,7 @@ function ComposersIndex() {
     queryFn: async () => {
       let query = supabase
         .from("composers")
-        .select("id, full_name, city, country, availability, tags, photo_path, roster_role")
+        .select("id, full_name, city, country, availability, tags, photo_path, roster_role, tier")
         .eq("roster_role", role)
         .order("full_name", { ascending: true });
       if (q.trim()) {
@@ -47,6 +65,16 @@ function ComposersIndex() {
       return data ?? [];
     },
   });
+
+  const grouped = (() => {
+    const map = new Map<Tier, typeof data>();
+    for (const c of data ?? []) {
+      const t = (TIER_ORDER.includes(c.tier as Tier) ? (c.tier as Tier) : "desarrollo") as Tier;
+      if (!map.has(t)) map.set(t, [] as never);
+      (map.get(t) as any[]).push(c);
+    }
+    return TIER_ORDER.filter((t) => map.has(t)).map((t) => ({ tier: t, items: map.get(t)! }));
+  })();
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
@@ -82,8 +110,18 @@ function ComposersIndex() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((c) => {
+        <div className="space-y-12">
+          {grouped.map(({ tier, items }) => (
+            <section key={tier}>
+              <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-3">
+                <div className="flex items-baseline gap-3">
+                  <h2 className="font-display text-3xl">{TIER_LABEL[tier]}</h2>
+                  <span className="smallcaps text-muted-foreground">{items.length}</span>
+                </div>
+                <p className="hidden max-w-md text-right text-xs text-muted-foreground sm:block">{TIER_HINT[tier]}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((c: any) => {
             const url = photoUrl(c.photo_path as string | null);
             return (
               <Link
@@ -107,7 +145,10 @@ function ComposersIndex() {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col p-5">
-                    <h2 className="font-display text-2xl">{c.full_name}</h2>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
+                      <Badge variant="outline" className="shrink-0 rounded-sm font-mono">{c.tier ?? "—"}</Badge>
+                    </div>
                     <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
                     <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
                       {(c.tags ?? []).slice(0, 4).map((t: string) => (
@@ -121,7 +162,10 @@ function ComposersIndex() {
                 </article>
               </Link>
             );
-          })}
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </div>
