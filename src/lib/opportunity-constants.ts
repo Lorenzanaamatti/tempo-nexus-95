@@ -1,0 +1,19 @@
+export const OPPORTUNITY_STATUS_LABEL = {
+  identificado: "Identificado",
+  primer_contacto: "Primer contacto",
+  propuesta_enviada: "Propuesta enviada",
+  negociacion: "Negociación",
+  cerrado: "Cerrado",
+  descartado: "Descartado",
+} as const;
+
+export type OpportunityStatus = keyof typeof OPPORTUNITY_STATUS_LABEL;
+
+export const OPPORTUNITY_STATUS_TONE: Record<OpportunityStatus, string> = {
+  identificado: "bg-muted text-foreground",
+  primer_contacto: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  propuesta_enviada: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  negociacion: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+  cerrado: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  descartado: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+};
