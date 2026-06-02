@@ -7,6 +7,7 @@ import {
   type AvailabilityKind,
 } from "@/components/availability-editor";
 import type { TimelineRow } from "@/lib/calendar-api";
+import { EXTRA_KIND_BAR, EXTRA_KIND_LABELS, type ExtraKind } from "@/lib/calendar-sources";
 
 const KIND_BAR: Record<AvailabilityKind, string> = {
   libre: "bg-emerald-500/70 border-emerald-700/40 text-emerald-50",
@@ -18,6 +19,9 @@ const KIND_BAR: Record<AvailabilityKind, string> = {
   pago: "bg-violet-500/80 border-violet-700/50 text-violet-50",
   cobro: "bg-emerald-600/85 border-emerald-800/50 text-emerald-50",
 };
+
+const ALL_BAR: Record<string, string> = { ...KIND_BAR, ...EXTRA_KIND_BAR };
+const ALL_LABELS: Record<string, string> = { ...AVAILABILITY_LABELS, ...EXTRA_KIND_LABELS };
 
 export function TimelineCalendar({
   rows,
@@ -126,12 +130,12 @@ export function TimelineCalendar({
                       return (
                         <div
                           key={e.id}
-                          title={`${e.title ?? AVAILABILITY_LABELS[e.kind]} · ${e.start.toLocaleDateString("es-ES")} → ${e.end.toLocaleDateString("es-ES")}${e.note ? "\n" + e.note : ""}`}
-                          className={`absolute top-1.5 bottom-1.5 overflow-hidden rounded-sm border px-1.5 text-[10px] leading-[9px] flex items-center ${KIND_BAR[e.kind]}`}
+                          title={`${e.title ?? ALL_LABELS[e.kind] ?? e.kind} · ${e.start.toLocaleDateString("es-ES")} → ${e.end.toLocaleDateString("es-ES")}${e.note ? "\n" + e.note : ""}`}
+                          className={`absolute top-1.5 bottom-1.5 overflow-hidden rounded-sm border px-1.5 text-[10px] leading-[9px] flex items-center ${ALL_BAR[e.kind] ?? "bg-muted border-border text-foreground"}`}
                           style={{ left: `${left}%`, width: `${width}%` }}
                         >
                           <span className="truncate">
-                            {e.title ?? AVAILABILITY_LABELS[e.kind]}
+                            {e.title ?? ALL_LABELS[e.kind] ?? e.kind}
                           </span>
                         </div>
                       );
