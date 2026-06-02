@@ -18,7 +18,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) window.location.replace("/dashboard");
+    if (user) window.location.replace("/");
   }, [user]);
 
   const onSubmit = async (e: React.FormEvent) => {
