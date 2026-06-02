@@ -5,9 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Interesante Compañía — Editorial dark
- * Warm neutrals, Cormorant serif display, burdeos accent.
- * Inspiration: Sight & Sound, Cahiers du Cinéma, MUBI Notebook.
+ * Interesante Compañía — Premium cultural SaaS
+ * Warm paper neutrals, dark ink, restrained oxblood accent.
+ * Cormorant serif for display, Inter Tight for UI.
+ * Inspired by Linear/Notion structure with editorial typography
+ * (Sight & Sound, Cahiers du Cinéma, MUBI Notebook).
  */
 
 @theme inline {
@@ -56,49 +58,50 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --font-sans: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", "Cormorant", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 :root {
-  /* Light editorial. White bg, black text, gray tags, coral red accent. */
-  --radius: 0.25rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.16 0.005 60);
+  /* Premium cultural SaaS: paper bg, deep ink, oxblood accent, ink sidebar. */
+  --radius: 0.375rem;
+  --background: oklch(0.985 0.004 75);
+  --foreground: oklch(0.20 0.012 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.005 60);
+  --card-foreground: oklch(0.20 0.012 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.005 60);
-  --primary: oklch(0.66 0.19 25);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.955 0.003 60);
-  --secondary-foreground: oklch(0.22 0.005 60);
-  --muted: oklch(0.955 0.003 60);
-  --muted-foreground: oklch(0.48 0.006 60);
-  --accent: oklch(0.96 0.025 25);
-  --accent-foreground: oklch(0.40 0.16 25);
-  --destructive: oklch(0.58 0.20 25);
-  --destructive-foreground: oklch(1 0 0);
-  --success: oklch(0.62 0.12 150);
-  --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.78 0.14 80);
-  --warning-foreground: oklch(0.18 0.01 70);
-  --border: oklch(0.90 0.004 60);
-  --input: oklch(0.93 0.004 60);
-  --ring: oklch(0.66 0.19 25);
-  --chart-1: oklch(0.66 0.19 25);
-  --chart-2: oklch(0.55 0.08 120);
-  --chart-3: oklch(0.72 0.10 70);
-  --chart-4: oklch(0.60 0.04 60);
-  --chart-5: oklch(0.45 0.06 240);
-  --sidebar: oklch(0.985 0.002 60);
-  --sidebar-foreground: oklch(0.22 0.005 60);
-  --sidebar-primary: oklch(0.66 0.19 25);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0.003 60);
-  --sidebar-accent-foreground: oklch(0.16 0.005 60);
-  --sidebar-border: oklch(0.90 0.004 60);
-  --sidebar-ring: oklch(0.66 0.19 25);
+  --popover-foreground: oklch(0.20 0.012 60);
+  --primary: oklch(0.42 0.13 22);
+  --primary-foreground: oklch(0.985 0.004 75);
+  --secondary: oklch(0.955 0.005 70);
+  --secondary-foreground: oklch(0.26 0.010 60);
+  --muted: oklch(0.955 0.005 70);
+  --muted-foreground: oklch(0.50 0.010 60);
+  --accent: oklch(0.945 0.020 30);
+  --accent-foreground: oklch(0.38 0.13 22);
+  --destructive: oklch(0.52 0.18 25);
+  --destructive-foreground: oklch(0.985 0.004 75);
+  --success: oklch(0.52 0.10 155);
+  --success-foreground: oklch(0.985 0.004 75);
+  --warning: oklch(0.72 0.13 75);
+  --warning-foreground: oklch(0.20 0.012 60);
+  --border: oklch(0.91 0.006 70);
+  --input: oklch(0.93 0.005 70);
+  --ring: oklch(0.42 0.13 22);
+  --chart-1: oklch(0.42 0.13 22);
+  --chart-2: oklch(0.55 0.07 200);
+  --chart-3: oklch(0.68 0.10 75);
+  --chart-4: oklch(0.50 0.06 145);
+  --chart-5: oklch(0.40 0.04 60);
+  /* Ink sidebar — deep charcoal with warm undertone */
+  --sidebar: oklch(0.20 0.012 60);
+  --sidebar-foreground: oklch(0.86 0.008 70);
+  --sidebar-primary: oklch(0.62 0.14 25);
+  --sidebar-primary-foreground: oklch(0.985 0.004 75);
+  --sidebar-accent: oklch(0.26 0.012 60);
+  --sidebar-accent-foreground: oklch(0.97 0.005 75);
+  --sidebar-border: oklch(0.28 0.010 60);
+  --sidebar-ring: oklch(0.62 0.14 25);
 }
 
 .dark {
@@ -119,11 +122,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
-  h1, h2, h3, h4 {
+  h1, h2 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
-    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-weight: 500;
     font-style: normal;
+  }
+  h3, h4 {
+    font-family: var(--font-sans);
+    letter-spacing: -0.012em;
+    font-weight: 600;
   }
   .font-display {
     font-family: var(--font-display);
@@ -141,7 +149,14 @@
   }
   .smallcaps {
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    font-size: 0.68rem;
+    font-weight: 500;
+  }
+  .premium-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 0 oklch(0.20 0.012 60 / 0.04), 0 1px 2px oklch(0.20 0.012 60 / 0.04);
   }
 }
