@@ -2,13 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
-import {
-  AVAILABILITY_LABELS,
-  type AvailabilityKind,
-} from "@/components/availability-editor";
+import { ChevronLeft, ChevronRight, User2 } from "lucide-react";
 import { TimelineCalendar } from "@/components/timeline-calendar";
 import {
   computeRange,
@@ -20,89 +16,81 @@ import {
 } from "@/lib/calendar-api";
 import {
   CALENDAR_SOURCE_LABELS,
-  EXTRA_KIND_LABELS,
   FAMILY_DOT,
   KIND_FAMILY,
   type CalendarSource,
-  type ExtraKind,
 } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/_admin/calendar")({
   component: GlobalCalendar,
 });
 
-type PersonRole = "ic_team" | "composer" | "artist" | "supervisor";
-const ROLE_GROUP: Record<PersonRole, string> = {
-  ic_team: "Equipo IC",
+type Category = "operativo" | "marketing" | "facturacion" | "personal";
+const CATEGORY_LABEL: Record<Category, string> = {
+  operativo: "Operativo",
+  marketing: "Marketing",
+  facturacion: "Facturación",
+  personal: "Personal",
+};
+const CATEGORY_DOT: Record<Category, string> = {
+  operativo: "bg-violet-500",
+  marketing: "bg-sky-500",
+  facturacion: "bg-amber-500",
+  personal: "bg-emerald-500",
+};
+
+const SUBJECT_GROUP_LABEL: Record<string, string> = {
+  person: "Equipo & Roster",
   composer: "Compositores",
-  artist: "Artistas",
-  supervisor: "Supervisores",
+  production: "Producciones",
+  opportunity: "Oportunidades",
+  contract: "Contratos",
+  production_company: "Productoras",
+  platform: "Plataformas",
+};
+
+const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
+  composer: { to: "/composers/$composerId", param: "composerId" },
+  production: { to: "/productions/$productionId", param: "productionId" },
+  opportunity: { to: "/opportunities/$opportunityId", param: "opportunityId" },
+  contract: { to: "/contracts/$contractId", param: "contractId" },
+  person: { to: "/people/$personId", param: "personId" },
 };
 
 function GlobalCalendar() {
+  const { user } = useAuth();
   const [view, setView] = useState<CalendarView>("month");
   const [anchor, setAnchor] = useState<Date>(new Date());
-  const [activeRoles, setActiveRoles] = useState<Record<PersonRole, boolean>>({
-    ic_team: true,
-    composer: true,
-    artist: true,
-    supervisor: true,
+  const [onlyMine, setOnlyMine] = useState(false);
+  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>({
+    operativo: true, marketing: true, facturacion: true, personal: true,
   });
   const [activeSources, setActiveSources] = useState<Record<CalendarSource, boolean>>({
-    people: true,
-    productions: true,
-    billing: true,
-    opportunities: true,
-    contracts: true,
-    tasks: true,
-  });
-  const [activeKinds, setActiveKinds] = useState<Record<AvailabilityKind, boolean>>({
-    libre: true, ocupado: true, vacaciones: true, personal: true, produccion: true,
-    facturacion: true, pago: true, cobro: true,
-  });
-  const [activeExtras, setActiveExtras] = useState<Record<ExtraKind, boolean>>({
-    oportunidad_detectada: true,
-    oportunidad_contacto: true,
-    oportunidad_cierre: true,
-    contrato_firma: true,
-    contrato_fin: true,
-    contrato_preaviso: true,
-    tarea: true,
-    estreno: true,
-    entrega: true,
+    people: true, productions: true, billing: true, opportunities: true, contracts: true, tasks: true,
   });
 
   const range = useMemo(() => computeRange(view, anchor), [view, anchor]);
-
-  const peopleQ = useQuery({
-    queryKey: ["calendar-people"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("people")
-        .select("id, full_name, role, composer_id")
-        .order("full_name");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const productionsQ = useQuery({
-    queryKey: ["calendar-productions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("productions")
-        .select("id, title, color, premiere_date, delivery_date")
-        .order("title");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   const startIso = range.start.toISOString().slice(0, 10);
   const endIso = range.end.toISOString().slice(0, 10);
 
+  // Match current user to a `people` row (by email) for "Mis tareas".
+  const myPersonQ = useQuery({
+    queryKey: ["calendar-my-person", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("people")
+        .select("id, full_name")
+        .ilike("email", user!.email!)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  // Single source of truth: calendar_events. Triggers mirror actions,
+  // contracts, opportunities, productions, sprints and composer onboarding.
   const eventsQ = useQuery({
-    queryKey: ["calendar-events", startIso, endIso],
+    queryKey: ["calendar-events-all", startIso, endIso],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("calendar_events")
@@ -114,7 +102,7 @@ function GlobalCalendar() {
     },
   });
 
-  // composer_availability still feeds the global calendar so existing data shows up
+  // composer_availability has no calendar_events mirror yet; merge as virtual.
   const composerAvailQ = useQuery({
     queryKey: ["calendar-composer-availability", startIso, endIso],
     queryFn: async () => {
@@ -128,205 +116,156 @@ function GlobalCalendar() {
     },
   });
 
+  // Subject name lookups (small tables, cached aggressively).
+  const composersQ = useQuery({
+    queryKey: ["calendar-composers-min"],
+    queryFn: async () => (await supabase.from("composers").select("id, full_name")).data ?? [],
+  });
+  const peopleQ = useQuery({
+    queryKey: ["calendar-people-min"],
+    queryFn: async () => (await supabase.from("people").select("id, full_name, role, composer_id")).data ?? [],
+  });
+  const productionsQ = useQuery({
+    queryKey: ["calendar-productions-min"],
+    queryFn: async () => (await supabase.from("productions").select("id, title")).data ?? [],
+  });
   const opportunitiesQ = useQuery({
-    queryKey: ["calendar-opportunities"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("opportunities")
-        .select("id, title, detected_date, last_contact_date, expected_close_date, partner_name");
-      if (error) throw error;
-      return data ?? [];
-    },
+    queryKey: ["calendar-opportunities-min"],
+    queryFn: async () => (await supabase.from("opportunities").select("id, title, partner_name")).data ?? [],
   });
-
-  const opportunityActionsQ = useQuery({
-    queryKey: ["calendar-actions"],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("actions")
-        .select("id, title, due_date, done, subject_type, subject_id, kind");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   const contractsQ = useQuery({
-    queryKey: ["calendar-contracts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contracts")
-        .select("id, title, signed_date, end_date, notice_date, counterparty, sign_status");
-      if (error) throw error;
-      return data ?? [];
-    },
+    queryKey: ["calendar-contracts-min"],
+    queryFn: async () => (await supabase.from("contracts").select("id, title, counterparty")).data ?? [],
   });
 
   const rows: TimelineRow[] = useMemo(() => {
-    const people = peopleQ.data ?? [];
-    const productions = productionsQ.data ?? [];
-    const events = eventsQ.data ?? [];
-    const composerAvail = composerAvailQ.data ?? [];
-    const opportunities = opportunitiesQ.data ?? [];
-    const oppActions = opportunityActionsQ.data ?? [];
-    const contracts = contractsQ.data ?? [];
+    const events = (eventsQ.data ?? []) as any[];
+    const avail = (composerAvailQ.data ?? []) as any[];
+    const myPersonId = myPersonQ.data?.id ?? null;
 
-    // Index people by composer_id for joining composer_availability
-    const personByComposer = new Map<string, any>();
-    for (const p of people) if (p.composer_id) personByComposer.set(p.composer_id, p);
+    const peopleMap = new Map<string, any>((peopleQ.data ?? []).map((p: any) => [p.id, p]));
+    const composersMap = new Map<string, any>((composersQ.data ?? []).map((c: any) => [c.id, c]));
+    const productionsMap = new Map<string, any>((productionsQ.data ?? []).map((p: any) => [p.id, p]));
+    const opportunitiesMap = new Map<string, any>((opportunitiesQ.data ?? []).map((o: any) => [o.id, o]));
+    const contractsMap = new Map<string, any>((contractsQ.data ?? []).map((c: any) => [c.id, c]));
+
+    type Bag = { subject_type: string; subject_id: string; events: any[] };
+    const byKey = new Map<string, Bag>();
+    const push = (subject_type: string, subject_id: string, ev: any) => {
+      const key = `${subject_type}::${subject_id}`;
+      if (!byKey.has(key)) byKey.set(key, { subject_type, subject_id, events: [] });
+      byKey.get(key)!.events.push(ev);
+    };
+
+    for (const e of events) {
+      const cat = (e.calendar_category ?? "operativo") as Category;
+      if (!activeCategories[cat]) continue;
+      const fam = KIND_FAMILY[e.kind] as CalendarSource | undefined;
+      if (fam && !activeSources[fam]) continue;
+      if (onlyMine) {
+        if (!myPersonId) continue;
+        const assignedToMe = e.assignee_person_id === myPersonId;
+        const aboutMe = e.subject_type === "person" && e.subject_id === myPersonId;
+        if (!assignedToMe && !aboutMe) continue;
+      }
+      push(e.subject_type, e.subject_id, {
+        id: e.id,
+        start: new Date(e.start_date + "T00:00:00"),
+        end: new Date(e.end_date + "T23:59:59"),
+        kind: e.kind,
+        title: e.title ?? undefined,
+        note: e.note,
+      });
+    }
+
+    // Merge composer_availability as virtual events on the composer subject.
+    if (!onlyMine && activeSources.people) {
+      for (const a of avail) {
+        const fam = KIND_FAMILY[a.kind] as CalendarSource | undefined;
+        if (fam && !activeSources[fam]) continue;
+        push("composer", a.composer_id, {
+          id: "ca-" + a.id,
+          start: new Date(a.start_date + "T00:00:00"),
+          end: new Date(a.end_date + "T23:59:59"),
+          kind: a.kind,
+          title: undefined,
+          note: a.note,
+        });
+      }
+    }
 
     const out: TimelineRow[] = [];
+    for (const { subject_type, subject_id, events: evs } of byKey.values()) {
+      let label = subject_id.slice(0, 8);
+      let sublabel: string | undefined;
+      let toPath: string | undefined;
+      let params: Record<string, string> | undefined;
 
-    // People rows
-    if (activeSources.people)
-    for (const p of people) {
-      const role = p.role as PersonRole;
-      if (!activeRoles[role]) continue;
-      const personEvents = events
-        .filter((e: any) => e.subject_type === "person" && e.subject_id === p.id)
-        .filter((e: any) => activeKinds[e.kind as AvailabilityKind])
-        .map((e: any) => ({
-          id: e.id,
-          start: new Date(e.start_date + "T00:00:00"),
-          end: new Date(e.end_date + "T23:59:59"),
-          kind: e.kind as AvailabilityKind,
-          title: e.title ?? undefined,
-          note: e.note,
-        }));
-
-      // also pull composer_availability for composer-linked people
-      if (p.composer_id) {
-        for (const a of composerAvail) {
-          if (a.composer_id !== p.composer_id) continue;
-          if (!activeKinds[a.kind as AvailabilityKind]) continue;
-          personEvents.push({
-            id: "ca-" + a.id,
-            start: new Date(a.start_date + "T00:00:00"),
-            end: new Date(a.end_date + "T23:59:59"),
-            kind: a.kind as AvailabilityKind,
-            title: undefined,
-            note: a.note,
-          });
+      if (subject_type === "person") {
+        const p = peopleMap.get(subject_id);
+        if (p) {
+          label = p.full_name;
+          if (p.composer_id) {
+            toPath = "/composers/$composerId";
+            params = { composerId: p.composer_id };
+          } else {
+            toPath = "/people/$personId";
+            params = { personId: p.id };
+          }
+        }
+      } else if (subject_type === "composer") {
+        const c = composersMap.get(subject_id);
+        if (c) {
+          label = c.full_name;
+          toPath = "/composers/$composerId";
+          params = { composerId: c.id };
+        }
+      } else if (subject_type === "production") {
+        const p = productionsMap.get(subject_id);
+        if (p) {
+          label = p.title;
+          toPath = "/productions/$productionId";
+          params = { productionId: p.id };
+        }
+      } else if (subject_type === "opportunity") {
+        const o = opportunitiesMap.get(subject_id);
+        if (o) {
+          label = o.title;
+          sublabel = o.partner_name ?? undefined;
+          toPath = "/opportunities/$opportunityId";
+          params = { opportunityId: o.id };
+        }
+      } else if (subject_type === "contract") {
+        const c = contractsMap.get(subject_id);
+        if (c) {
+          label = c.title;
+          sublabel = c.counterparty ?? undefined;
+          toPath = "/contracts/$contractId";
+          params = { contractId: c.id };
+        }
+      } else {
+        const link = SUBJECT_LINK[subject_type];
+        if (link) {
+          toPath = link.to;
+          params = { [link.param]: subject_id };
         }
       }
 
       out.push({
-        id: p.id,
-        group: ROLE_GROUP[role],
-        label: p.full_name,
-        sublabel: ROLE_GROUP[role],
-        to: p.composer_id ? "/composers/$composerId" : "/people/$personId",
-        params: p.composer_id ? { composerId: p.composer_id } : { personId: p.id },
-        events: personEvents,
+        id: `${subject_type}-${subject_id}`,
+        group: SUBJECT_GROUP_LABEL[subject_type] ?? subject_type,
+        label,
+        sublabel,
+        to: toPath,
+        params,
+        events: evs,
       });
     }
+    out.sort((a, b) => a.group.localeCompare(b.group) || a.label.localeCompare(b.label));
+    return out;
+  }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, activeSources, onlyMine]);
 
-    // Production rows
-    if (activeSources.productions || activeSources.billing) {
-      for (const pr of productions) {
-        const prEvents: any[] = events
-          .filter((e: any) => e.subject_type === "production" && e.subject_id === pr.id)
-          .filter((e: any) => {
-            const k = e.kind as AvailabilityKind;
-            const isBilling = k === "facturacion" || k === "pago" || k === "cobro";
-            if (isBilling && !activeSources.billing) return false;
-            if (!isBilling && !activeSources.productions) return false;
-            return activeKinds[k];
-          })
-          .map((e: any) => ({
-            id: e.id,
-            start: new Date(e.start_date + "T00:00:00"),
-            end: new Date(e.end_date + "T23:59:59"),
-            kind: e.kind as AvailabilityKind,
-            title: e.title ?? pr.title,
-            note: e.note,
-          }));
-        // Hitos de producción (estreno / entrega) desde la propia tabla productions
-        if (activeSources.productions) {
-          if ((pr as any).premiere_date && activeExtras.estreno) {
-            const d = new Date((pr as any).premiere_date + "T00:00:00");
-            prEvents.push({ id: `pr-pre-${pr.id}`, start: d, end: d, kind: "estreno", title: `Estreno · ${pr.title}`, note: null });
-          }
-          if ((pr as any).delivery_date && activeExtras.entrega) {
-            const d = new Date((pr as any).delivery_date + "T00:00:00");
-            prEvents.push({ id: `pr-del-${pr.id}`, start: d, end: d, kind: "entrega", title: `Entrega · ${pr.title}`, note: null });
-          }
-        }
-        out.push({
-          id: pr.id,
-          group: "Producciones",
-          label: pr.title,
-          to: "/productions/$productionId",
-          params: { productionId: pr.id },
-          events: prEvents,
-        });
-      }
-    }
-
-    // Oportunidades
-    if (activeSources.opportunities) {
-      for (const o of opportunities) {
-        const evs: any[] = [];
-        const push = (date: string | null, kind: ExtraKind, label: string) => {
-          if (!date || !activeExtras[kind]) return;
-          const d = new Date(date + "T00:00:00");
-          evs.push({ id: `op-${kind}-${o.id}`, start: d, end: d, kind, title: `${label} · ${o.title}`, note: o.partner_name });
-        };
-        push(o.detected_date, "oportunidad_detectada", "Detectada");
-        push(o.last_contact_date, "oportunidad_contacto", "Último contacto");
-        push(o.expected_close_date, "oportunidad_cierre", "Cierre estimado");
-        // tareas asociadas
-        if (activeSources.tasks && activeExtras.tarea) {
-          for (const a of oppActions) {
-            if (a.subject_type !== "opportunity" || a.subject_id !== o.id || !a.due_date) continue;
-            const d = new Date(a.due_date + "T00:00:00");
-            evs.push({ id: `act-${a.id}`, start: d, end: d, kind: "tarea", title: `${a.done ? "✓ " : ""}${a.title}`, note: o.title });
-          }
-        }
-        if (!evs.length) continue;
-        out.push({
-          id: `opp-${o.id}`,
-          group: "Oportunidades",
-          label: o.title,
-          sublabel: o.partner_name ?? undefined,
-          to: "/opportunities/$opportunityId",
-          params: { opportunityId: o.id },
-          events: evs,
-        });
-      }
-    }
-
-    // Contratos
-    if (activeSources.contracts) {
-      for (const c of contracts) {
-        const evs: any[] = [];
-        const push = (date: string | null, kind: ExtraKind, label: string) => {
-          if (!date || !activeExtras[kind]) return;
-          const d = new Date(date + "T00:00:00");
-          evs.push({ id: `ct-${kind}-${c.id}`, start: d, end: d, kind, title: `${label} · ${c.title}`, note: c.counterparty });
-        };
-        push(c.signed_date, "contrato_firma", "Firma");
-        push(c.notice_date, "contrato_preaviso", "Preaviso");
-        push(c.end_date, "contrato_fin", "Fin");
-        if (!evs.length) continue;
-        out.push({
-          id: `ct-${c.id}`,
-          group: "Contratos",
-          label: c.title,
-          sublabel: c.counterparty ?? undefined,
-          to: "/contracts/$contractId",
-          params: { contractId: c.id },
-          events: evs,
-        });
-      }
-    }
-
-    // Drop rows with no events in range (cleaner view)
-    return out.filter((r) =>
-      r.events.some((e) => e.end >= range.start && e.start <= range.end)
-    );
-  }, [peopleQ.data, productionsQ.data, eventsQ.data, composerAvailQ.data, opportunitiesQ.data, opportunityActionsQ.data, contractsQ.data, activeRoles, activeKinds, activeSources, activeExtras, range.start, range.end]);
-
-  const loading = peopleQ.isLoading || productionsQ.isLoading || eventsQ.isLoading || composerAvailQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || opportunityActionsQ.isLoading;
+  const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
@@ -335,7 +274,8 @@ function GlobalCalendar() {
           <p className="smallcaps text-muted-foreground">Interesante Compañía</p>
           <h1 className="mt-1 font-display text-5xl">Calendario general</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Vista cruzada de equipo, compositores, artistas, supervisores y producciones.
+            Una sola fuente: <span className="font-mono">calendar_events</span>. Tareas, contratos,
+            entregas, estrenos, check-ins y publicaciones aparecen automáticamente.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -367,7 +307,32 @@ function GlobalCalendar() {
         ))}
       </div>
 
-      {/* Source family filters — one row, color-coded by family */}
+      {/* Category chips + Mis tareas */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
+          <FamilyChip
+            key={c}
+            active={activeCategories[c]}
+            dotClass={CATEGORY_DOT[c]}
+            onClick={() => setActiveCategories((p) => ({ ...p, [c]: !p[c] }))}
+          >
+            {CATEGORY_LABEL[c]}
+          </FamilyChip>
+        ))}
+        <button
+          type="button"
+          onClick={() => setOnlyMine((m) => !m)}
+          disabled={!myPersonQ.data}
+          title={myPersonQ.data ? `Solo tareas asignadas a ${myPersonQ.data.full_name}` : "No hay persona asociada a tu usuario"}
+          className={`ml-2 inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs transition ${
+            onlyMine ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
+          } disabled:opacity-30`}
+        >
+          <User2 className="h-3 w-3" /> Mis tareas
+        </button>
+      </div>
+
+      {/* Source family filters — secondary axis */}
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {(Object.keys(CALENDAR_SOURCE_LABELS) as CalendarSource[]).map((s) => (
           <FamilyChip
@@ -379,82 +344,6 @@ function GlobalCalendar() {
             {CALENDAR_SOURCE_LABELS[s]}
           </FamilyChip>
         ))}
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="ml-1 inline-flex items-center gap-1.5 rounded-sm border border-border px-3 py-1 text-xs opacity-70 hover:opacity-100 transition"
-            >
-              <SlidersHorizontal className="h-3 w-3" />
-              Más filtros
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 max-h-[70vh] overflow-y-auto p-4 space-y-4">
-            <div>
-              <p className="smallcaps mb-2 text-[10px] text-muted-foreground">Roles del equipo</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(Object.keys(ROLE_GROUP) as PersonRole[]).map((r) => (
-                  <SubChip
-                    key={r}
-                    active={activeRoles[r]}
-                    onClick={() => setActiveRoles((s) => ({ ...s, [r]: !s[r] }))}
-                  >
-                    {ROLE_GROUP[r]}
-                  </SubChip>
-                ))}
-              </div>
-            </div>
-
-            <SubtypeGroup
-              title="Personas — disponibilidad"
-              family="people"
-              items={(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
-                .filter((k) => KIND_FAMILY[k] === "people")
-                .map((k) => ({ k, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) }))}
-            />
-            <SubtypeGroup
-              title="Producciones"
-              family="productions"
-              items={[
-                ...(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
-                  .filter((k) => KIND_FAMILY[k] === "productions")
-                  .map((k) => ({ k: k as string, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) })),
-                ...(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
-                  .filter((k) => KIND_FAMILY[k] === "productions")
-                  .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) })),
-              ]}
-            />
-            <SubtypeGroup
-              title="Facturación"
-              family="billing"
-              items={(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
-                .filter((k) => KIND_FAMILY[k] === "billing")
-                .map((k) => ({ k, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) }))}
-            />
-            <SubtypeGroup
-              title="Oportunidades"
-              family="opportunities"
-              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
-                .filter((k) => KIND_FAMILY[k] === "opportunities")
-                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
-            />
-            <SubtypeGroup
-              title="Contratos"
-              family="contracts"
-              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
-                .filter((k) => KIND_FAMILY[k] === "contracts")
-                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
-            />
-            <SubtypeGroup
-              title="Tareas"
-              family="tasks"
-              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
-                .filter((k) => KIND_FAMILY[k] === "tasks")
-                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
-            />
-          </PopoverContent>
-        </Popover>
       </div>
 
       {loading ? (
@@ -490,54 +379,5 @@ function FamilyChip({
       <span className={`h-2 w-2 rounded-full ${dotClass} ${active ? "" : "opacity-40"}`} />
       {children}
     </button>
-  );
-}
-
-function SubChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-sm border px-2.5 py-0.5 text-[11px] transition ${
-        active ? "border-foreground" : "border-border opacity-50 hover:opacity-90"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function SubtypeGroup({
-  title,
-  family,
-  items,
-}: {
-  title: string;
-  family: CalendarSource;
-  items: { k: string; label: string; active: boolean; toggle: () => void }[];
-}) {
-  if (!items.length) return null;
-  return (
-    <div>
-      <div className="mb-1.5 flex items-center gap-2">
-        <span className={`h-2 w-2 rounded-full ${FAMILY_DOT[family]}`} />
-        <p className="smallcaps text-[10px] text-muted-foreground">{title}</p>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((it) => (
-          <SubChip key={it.k} active={it.active} onClick={it.toggle}>
-            {it.label}
-          </SubChip>
-        ))}
-      </div>
-    </div>
   );
 }
