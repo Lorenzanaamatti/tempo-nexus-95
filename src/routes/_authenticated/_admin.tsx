@@ -12,7 +12,7 @@ function AdminLayout() {
     if (!loading && role && role !== "admin") window.location.replace("/me");
   }, [role, loading]);
   if (loading) {
-    return <div className="p-10 font-display italic text-muted-foreground">Comprobando permisos…</div>;
+    return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
   }
   if (role !== "admin") return null;
   return <Outlet />;

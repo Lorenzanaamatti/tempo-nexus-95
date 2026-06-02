@@ -77,7 +77,7 @@ function EventsEditor({ subjectType, subjectId }: { subjectType: "person" | "pro
   return (
     <div className="space-y-3">
       {loading ? (
-        <p className="text-sm italic text-muted-foreground">Cargando…</p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sin eventos. Añade uno para que aparezca en el calendario.</p>
       ) : (

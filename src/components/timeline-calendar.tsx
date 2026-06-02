@@ -88,12 +88,12 @@ export function TimelineCalendar({
                     <Link
                       to={row.to}
                       params={row.params as never}
-                      className="font-display text-sm italic hover:underline"
+                      className="font-display text-sm hover:underline"
                     >
                       {row.label}
                     </Link>
                   ) : (
-                    <span className="font-display text-sm italic">{row.label}</span>
+                    <span className="font-display text-sm">{row.label}</span>
                   )}
                   {row.sublabel && (
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">

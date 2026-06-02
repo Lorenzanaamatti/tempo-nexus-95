@@ -49,7 +49,7 @@ function ProductionsIndex() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Producciones</p>
-          <h1 className="mt-1 font-display text-5xl italic">Películas y series</h1>
+          <h1 className="mt-1 font-display text-5xl">PRODUCCIONES EN CURSO</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Cada producción puede tener compositores, artistas y supervisores asignados.
           </p>
@@ -66,7 +66,7 @@ function ProductionsIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display italic text-muted-foreground">Cargando…</p>
+        <p className="font-display text-muted-foreground">Cargando…</p>
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin producciones.</p>
       ) : (
@@ -79,7 +79,7 @@ function ProductionsIndex() {
               className="flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-muted/40"
             >
               <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: p.color ?? "#6366f1" }} />
-              <span className="font-display text-lg italic">{p.title}</span>
+              <span className="font-display text-lg">{p.title}</span>
               {p.kind && <Badge variant="outline" className="rounded-sm">{p.kind}</Badge>}
               {p.year && <span className="text-xs text-muted-foreground">{p.year}</span>}
               {p.director && <span className="text-xs text-muted-foreground">dir. {p.director}</span>}

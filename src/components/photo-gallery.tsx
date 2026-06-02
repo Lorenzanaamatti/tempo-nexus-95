@@ -84,7 +84,7 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
         {photos.length} / {MAX_PHOTOS} fotografías. Cada imagen lleva año y pie de copyright.
       </p>
       {loading ? (
-        <p className="text-sm italic text-muted-foreground">Cargando…</p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((p) => (

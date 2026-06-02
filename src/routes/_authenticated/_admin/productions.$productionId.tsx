@@ -74,14 +74,14 @@ function ProductionEdit() {
     navigate({ to: "/productions" });
   }
 
-  if (isLoading || !data) return <div className="p-10 font-display italic text-muted-foreground">Cargando…</div>;
+  if (isLoading || !data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
           <Link to="/productions" className="smallcaps text-xs text-muted-foreground hover:underline">← Producciones</Link>
-          <h1 className="mt-1 font-display text-4xl italic">{form.title || "—"}</h1>
+          <h1 className="mt-1 font-display text-4xl">{form.title || "—"}</h1>
         </div>
         <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
       </div>
@@ -105,12 +105,12 @@ function ProductionEdit() {
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 font-display text-2xl italic">Personal asignado</h2>
+        <h2 className="mb-3 font-display text-2xl">Personal asignado</h2>
         <AssignmentsEditor productionId={productionId} />
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 font-display text-2xl italic">Eventos en el calendario</h2>
+        <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <ProductionEventsEditor productionId={productionId} />
       </div>
     </div>
@@ -187,7 +187,7 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
         <div className="divide-y divide-border rounded-sm border border-border">
           {(assignsQ.data ?? []).map((a: any) => (
             <div key={a.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
-              <span className="font-display italic">{a.people?.full_name}</span>
+              <span className="font-display">{a.people?.full_name}</span>
               {a.role_in_project && <span className="text-xs text-muted-foreground">{a.role_in_project}</span>}
               {(a.start_date || a.end_date) && (
                 <span className="text-xs text-muted-foreground">{a.start_date ?? "?"} → {a.end_date ?? "?"}</span>

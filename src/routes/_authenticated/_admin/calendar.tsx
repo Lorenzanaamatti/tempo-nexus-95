@@ -194,7 +194,7 @@ function GlobalCalendar() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Interesante Compañía</p>
-          <h1 className="mt-1 font-display text-5xl italic">Calendario general</h1>
+          <h1 className="mt-1 font-display text-5xl">Calendario general</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Vista cruzada de equipo, compositores, artistas, supervisores y producciones.
           </p>
@@ -207,7 +207,7 @@ function GlobalCalendar() {
           <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(view, anchor, 1))}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <span className="ml-3 font-display text-xl italic capitalize min-w-[14ch]">
+          <span className="ml-3 font-display text-xl capitalize min-w-[14ch]">
             {rangeLabel(view, range.start, range.end)}
           </span>
         </div>
@@ -259,7 +259,7 @@ function GlobalCalendar() {
       </div>
 
       {loading ? (
-        <p className="font-display italic text-muted-foreground">Cargando calendario…</p>
+        <p className="font-display text-muted-foreground">Cargando calendario…</p>
       ) : (
         <TimelineCalendar rows={rows} start={range.start} end={range.end} ticks={range.ticks} />
       )}

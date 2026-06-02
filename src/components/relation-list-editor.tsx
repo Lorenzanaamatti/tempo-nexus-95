@@ -70,13 +70,13 @@ export function RelationListEditor<T extends { id: string; position: number }>({
   return (
     <section className="space-y-4">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-display text-2xl italic">{title}</h2>
+        <h2 className="font-display text-2xl">{title}</h2>
         <Button type="button" size="sm" variant="outline" onClick={add} disabled={busy}>
           + Añadir
         </Button>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm italic text-muted-foreground">Sin entradas.</p>
+        <p className="text-sm text-muted-foreground">Sin entradas.</p>
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

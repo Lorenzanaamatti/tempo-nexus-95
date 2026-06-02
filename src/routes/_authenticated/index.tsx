@@ -13,7 +13,7 @@ function Index() {
     window.location.replace(role === "admin" ? "/composers" : "/me");
   }, [role, loading]);
   return (
-    <div className="flex min-h-screen items-center justify-center font-display text-2xl italic text-muted-foreground">
+    <div className="flex min-h-screen items-center justify-center font-display text-2xl text-muted-foreground">
       Interesante Compañía
     </div>
   );

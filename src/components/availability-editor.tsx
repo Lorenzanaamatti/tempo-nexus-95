@@ -86,7 +86,7 @@ export function AvailabilityEditor({ composerId }: { composerId: string }) {
   return (
     <div className="space-y-4">
       {loading ? (
-        <p className="text-sm italic text-muted-foreground">Cargando periodos…</p>
+        <p className="text-sm text-muted-foreground">Cargando periodos…</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Sin periodos. Pulsa “Añadir periodo” para registrar disponibilidad.

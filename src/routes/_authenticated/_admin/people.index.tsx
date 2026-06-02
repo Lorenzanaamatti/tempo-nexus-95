@@ -98,7 +98,7 @@ function PeopleIndex() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl italic">{ROLE_TITLE[roleFilter as PersonRole | "all"]}</h1>
+          <h1 className="mt-1 font-display text-5xl">{ROLE_TITLE[roleFilter as PersonRole | "all"]}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Directorio del roster. Los compositores aparecen automáticamente desde su módulo.
           </p>
@@ -135,13 +135,13 @@ function PeopleIndex() {
         <Button onClick={create} disabled={creating || !newName.trim()}>
           <Plus className="mr-1 h-4 w-4" /> Añadir persona
         </Button>
-        <p className="ml-auto text-xs italic text-muted-foreground">
+        <p className="ml-auto text-xs text-muted-foreground">
           Para crear un compositor usa el módulo Roster.
         </p>
       </div>
 
       {isLoading ? (
-        <p className="font-display italic text-muted-foreground">Cargando…</p>
+        <p className="font-display text-muted-foreground">Cargando…</p>
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin personas.</p>
       ) : (
@@ -153,7 +153,7 @@ function PeopleIndex() {
               params={{ personId: p.id }}
               className="flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-muted/40"
             >
-              <span className="font-display text-lg italic">{p.full_name}</span>
+              <span className="font-display text-lg">{p.full_name}</span>
               <Badge variant="outline" className="rounded-sm">{ROLE_LABEL[p.role as PersonRole]}</Badge>
               {p.email && <span className="text-xs text-muted-foreground">{p.email}</span>}
               {p.composer_id && <span className="ml-auto text-[10px] uppercase tracking-wider text-muted-foreground">↪ ficha de compositor</span>}
