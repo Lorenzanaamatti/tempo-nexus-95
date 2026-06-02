@@ -15,6 +15,7 @@ import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { SuggestInput } from "@/components/suggest-input";
 import { SaveButton } from "@/components/save-button";
+import { SocialActivityPanel } from "@/components/social-activity-panel";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
