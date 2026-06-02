@@ -830,6 +830,45 @@ export type Database = {
           },
         ]
       }
+      platforms: {
+        Row: {
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       production_assignments: {
         Row: {
           created_at: string
@@ -880,12 +919,17 @@ export type Database = {
       }
       production_companies: {
         Row: {
+          address: string | null
+          area_managers: string | null
+          cif: string | null
           city: string | null
           contact_name: string | null
+          contract_notes: string | null
           country: string | null
           created_at: string
           email: string | null
           id: string
+          legal_name: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -893,12 +937,17 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          address?: string | null
+          area_managers?: string | null
+          cif?: string | null
           city?: string | null
           contact_name?: string | null
+          contract_notes?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          legal_name?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -906,12 +955,17 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          address?: string | null
+          area_managers?: string | null
+          cif?: string | null
           city?: string | null
           contact_name?: string | null
+          contract_notes?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          legal_name?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
@@ -976,12 +1030,18 @@ export type Database = {
           ic_commission: number | null
           id: string
           kind: string | null
+          music_supervisor_person_id: string | null
           negotiator_person_id: string | null
           notes: string | null
+          other_responsibles: string | null
           partner: string | null
           partner_company_id: string | null
           platform: string | null
+          platform_id: string | null
+          postproduction_supervisor_person_id: string | null
+          premiere_date: string | null
           production_company: string | null
+          production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
           status: Database["public"]["Enums"]["production_status"] | null
           title: string
@@ -999,12 +1059,18 @@ export type Database = {
           ic_commission?: number | null
           id?: string
           kind?: string | null
+          music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           notes?: string | null
+          other_responsibles?: string | null
           partner?: string | null
           partner_company_id?: string | null
           platform?: string | null
+          platform_id?: string | null
+          postproduction_supervisor_person_id?: string | null
+          premiere_date?: string | null
           production_company?: string | null
+          production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title: string
@@ -1022,12 +1088,18 @@ export type Database = {
           ic_commission?: number | null
           id?: string
           kind?: string | null
+          music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           notes?: string | null
+          other_responsibles?: string | null
           partner?: string | null
           partner_company_id?: string | null
           platform?: string | null
+          platform_id?: string | null
+          postproduction_supervisor_person_id?: string | null
+          premiere_date?: string | null
           production_company?: string | null
+          production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title?: string
@@ -1050,6 +1122,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "productions_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "productions_negotiator_fk"
             columns: ["negotiator_person_id"]
             isOneToOne: false
@@ -1061,6 +1140,27 @@ export type Database = {
             columns: ["partner_company_id"]
             isOneToOne: false
             referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "platforms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_postproduction_supervisor_person_id_fkey"
+            columns: ["postproduction_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_production_director_person_id_fkey"
+            columns: ["production_director_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
