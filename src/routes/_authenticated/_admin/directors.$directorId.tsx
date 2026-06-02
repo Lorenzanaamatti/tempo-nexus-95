@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ExternalLink, Plus } from "lucide-react";
 import { useState } from "react";
-import { PRODUCTION_KIND_LABEL, PRODUCTION_KINDS, type ProductionKind } from "@/lib/production-constants";
+import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/directors/$directorId")({
   component: DirectorDetail,
