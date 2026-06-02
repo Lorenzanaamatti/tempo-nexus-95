@@ -684,6 +684,66 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          composer_id: string | null
+          contract_type: string | null
+          counterparty: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          language: Database["public"]["Enums"]["contract_language"]
+          notes: string | null
+          notice_date: string | null
+          partner_company_id: string | null
+          sign_status: Database["public"]["Enums"]["contract_sign_status"]
+          signed_date: string | null
+          signer_name: string | null
+          storage_path: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          composer_id?: string | null
+          contract_type?: string | null
+          counterparty?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["contract_language"]
+          notes?: string | null
+          notice_date?: string | null
+          partner_company_id?: string | null
+          sign_status?: Database["public"]["Enums"]["contract_sign_status"]
+          signed_date?: string | null
+          signer_name?: string | null
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          composer_id?: string | null
+          contract_type?: string | null
+          counterparty?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["contract_language"]
+          notes?: string | null
+          notice_date?: string | null
+          partner_company_id?: string | null
+          sign_status?: Database["public"]["Enums"]["contract_sign_status"]
+          signed_date?: string | null
+          signer_name?: string | null
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       directors: {
         Row: {
           agent: string | null
@@ -1483,6 +1543,14 @@ export type Database = {
         | "facturacion"
         | "pagos"
         | "otro"
+      contract_language: "ca" | "es" | "en"
+      contract_sign_status:
+        | "borrador"
+        | "enviado"
+        | "en_revision"
+        | "firmado"
+        | "vencido"
+        | "cancelado"
       film_format:
         | "feature"
         | "series"
@@ -1696,6 +1764,15 @@ export const Constants = {
         "facturacion",
         "pagos",
         "otro",
+      ],
+      contract_language: ["ca", "es", "en"],
+      contract_sign_status: [
+        "borrador",
+        "enviado",
+        "en_revision",
+        "firmado",
+        "vencido",
+        "cancelado",
       ],
       film_format: [
         "feature",
