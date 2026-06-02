@@ -48,7 +48,7 @@ function ComposerEditPage() {
   const relationsQ = useQuery({
     queryKey: ["composer-relations", composerId],
     queryFn: async () => {
-      const [demos, films, awards, styles, genres, langs, docs, projects, agents] = await Promise.all([
+      const [demos, films, awards, styles, genres, langs, docs, projects, agents, candidacies, productions, contracts] = await Promise.all([
         supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
@@ -58,6 +58,21 @@ function ComposerEditPage() {
         supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
         supabase.from("people").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
+        (supabase as any)
+          .from("opportunity_candidates")
+          .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
+          .eq("composer_id", composerId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("productions")
+          .select("id, title, year, status, platform, director, premiere_date, delivery_date")
+          .eq("composer_id", composerId)
+          .order("year", { ascending: false }),
+        supabase
+          .from("contracts")
+          .select("id, title, contract_type, sign_status, signed_date, end_date, notice_date")
+          .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
+          .order("signed_date", { ascending: false, nullsFirst: false }),
       ]);
       return {
         demos: demos.data ?? [],
@@ -69,6 +84,9 @@ function ComposerEditPage() {
         docs: docs.data ?? [],
         projects: projects.data ?? [],
         agents: agents.data ?? [],
+        candidacies: (candidacies as any).data ?? [],
+        productions: productions.data ?? [],
+        contracts: contracts.data ?? [],
       };
     },
   });
@@ -115,6 +133,9 @@ function Inner({
   const [docs, setDocs] = useState<any[]>(initialRelations.docs);
   const projects: any[] = initialRelations.projects ?? [];
   const agents: { id: string; full_name: string; email: string | null }[] = initialRelations.agents ?? [];
+  const candidacies: any[] = initialRelations.candidacies ?? [];
+  const productionsRel: any[] = initialRelations.productions ?? [];
+  const contractsRel: any[] = initialRelations.contracts ?? [];
   const [tagInput, setTagInput] = useState("");
 
   function field<K extends string>(k: K, v: any) {
@@ -379,6 +400,77 @@ function Inner({
                 {p.price_charged != null && (
                   <div className="text-sm text-muted-foreground">{Number(p.price_charged).toLocaleString("es-ES")} €</div>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* Oportunidades y relaciones */}
+      <Section title="Oportunidades">
+        {candidacies.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aún no figura como candidato en ninguna oportunidad.</p>
+        ) : (
+          <ul className="space-y-2">
+            {candidacies.map((c: any) => (
+              <li key={c.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <Link to="/opportunities/$opportunityId" params={{ opportunityId: c.opportunity?.id }} className="text-sm hover:underline">
+                    {c.opportunity?.title ?? "—"}
+                  </Link>
+                  <div className="text-xs text-muted-foreground">
+                    {[c.opportunity?.partner_name, (c.opportunity?.statuses ?? []).join(" · "), c.opportunity?.expected_close_date].filter(Boolean).join(" · ")}
+                  </div>
+                  {c.note && <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>}
+                </div>
+                {c.opportunity?.estimated_value != null && (
+                  <div className="text-sm text-muted-foreground whitespace-nowrap">{Number(c.opportunity.estimated_value).toLocaleString("es-ES")} €</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Producciones">
+        {productionsRel.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin producciones asociadas.</p>
+        ) : (
+          <ul className="space-y-2">
+            {productionsRel.map((p: any) => (
+              <li key={p.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <Link to="/productions/$productionId" params={{ productionId: p.id }} className="text-sm hover:underline">{p.title}</Link>
+                  <div className="text-xs text-muted-foreground">
+                    {[p.status, p.platform, p.director, p.year].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {p.premiere_date ? `Estreno ${p.premiere_date}` : p.delivery_date ? `Entrega ${p.delivery_date}` : ""}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Contratos">
+        {contractsRel.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin contratos.</p>
+        ) : (
+          <ul className="space-y-2">
+            {contractsRel.map((k: any) => (
+              <li key={k.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="text-sm">{k.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {[k.contract_type, k.sign_status].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {k.signed_date ? `Firmado ${k.signed_date}` : ""}
+                  {k.end_date ? ` · Fin ${k.end_date}` : ""}
+                </div>
               </li>
             ))}
           </ul>
