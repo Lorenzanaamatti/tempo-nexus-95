@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import {
-  AVAILABILITY_COLORS,
   AVAILABILITY_LABELS,
   type AvailabilityKind,
 } from "@/components/availability-editor";
@@ -20,8 +20,9 @@ import {
 } from "@/lib/calendar-api";
 import {
   CALENDAR_SOURCE_LABELS,
-  EXTRA_KIND_CHIP,
   EXTRA_KIND_LABELS,
+  FAMILY_DOT,
+  KIND_FAMILY,
   type CalendarSource,
   type ExtraKind,
 } from "@/lib/calendar-sources";
