@@ -262,6 +262,18 @@ function OpportunityDetail() {
             </SelectContent>
           </Select>
         </div>
+        <div>
+          <Label>Fecha de detección</Label>
+          <Input type="date" value={form.detected_date} onChange={(e) => setForm({ ...form, detected_date: e.target.value })} />
+        </div>
+        <div>
+          <Label>Último contacto</Label>
+          <Input type="date" value={form.last_contact_date} onChange={(e) => setForm({ ...form, last_contact_date: e.target.value })} />
+        </div>
+        <div className="sm:col-span-2">
+          <Label>Cierre estimado</Label>
+          <Input type="date" value={form.expected_close_date} onChange={(e) => setForm({ ...form, expected_close_date: e.target.value })} />
+        </div>
         <div className="sm:col-span-2">
           <Label>Estado (multi-opción)</Label>
           <div className="mt-2 flex flex-wrap gap-2">
