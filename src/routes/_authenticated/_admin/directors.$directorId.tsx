@@ -1,11 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Plus } from "lucide-react";
+import { useState } from "react";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/directors/$directorId")({
@@ -15,6 +18,38 @@ export const Route = createFileRoute("/_authenticated/_admin/directors/$director
 function DirectorDetail() {
   const { directorId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [newTitle, setNewTitle] = useState("");
+  const [newYear, setNewYear] = useState<string>(String(new Date().getFullYear()));
+  const [newKind, setNewKind] = useState<ProductionKind>("cine");
+  const [creating, setCreating] = useState(false);
+
+  async function createProduction(openAfter: boolean) {
+    if (!newTitle.trim()) {
+      toast.error("Indica un título");
+      return;
+    }
+    setCreating(true);
+    const { data, error } = await (supabase as any)
+      .from("productions")
+      .insert({
+        title: newTitle.trim(),
+        year: newYear ? parseInt(newYear, 10) : null,
+        project_type: newKind,
+        kind: PRODUCTION_KIND_LABEL[newKind],
+        director_id: directorId,
+      })
+      .select("id")
+      .single();
+    setCreating(false);
+    if (error) return toast.error(error.message);
+    setNewTitle("");
+    toast.success("Producción creada");
+    qc.invalidateQueries({ queryKey: ["director-history", directorId] });
+    if (openAfter && data?.id) {
+      navigate({ to: "/productions/$productionId", params: { productionId: data.id } });
+    }
+  }
 
   const directorQ = useQuery({
     queryKey: ["director", directorId],
@@ -70,6 +105,36 @@ function DirectorDetail() {
 
       <section className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Histórico de producciones</h2>
+        <div className="mb-4 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
+          <div className="flex-1 min-w-[200px]">
+            <Label className="text-xs">Título</Label>
+            <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Nueva producción" />
+          </div>
+          <div>
+            <Label className="text-xs">Año</Label>
+            <Input value={newYear} onChange={(e) => setNewYear(e.target.value)} className="w-24" />
+          </div>
+          <div>
+            <Label className="text-xs">Tipo</Label>
+            <Select value={newKind} onValueChange={(v) => setNewKind(v as ProductionKind)}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(PRODUCTION_KIND_LABEL) as ProductionKind[]).map((k) => (
+                  <SelectItem key={k} value={k}>{PRODUCTION_KIND_LABEL[k]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={() => createProduction(false)} disabled={creating} variant="outline">
+            <Plus className="mr-1 h-4 w-4" /> Añadir
+          </Button>
+          <Button onClick={() => createProduction(true)} disabled={creating}>
+            Crear y abrir ficha
+          </Button>
+        </div>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Crea la producción aquí (queda vinculada a este director) y abre su ficha para completar productora, plataforma, compositor (del roster o externo), fees, sprints y documentos.
+        </p>
         {historyQ.isLoading ? (
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : !historyQ.data?.length ? (
