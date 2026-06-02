@@ -35,7 +35,7 @@ function ProductionEdit() {
   });
 
   const [form, setForm] = useState({
-    title: "", kind: "", year: "" as string | number, production_company: "", director: "", platform: "", notes: "", color: "#6366f1",
+    title: "", kind: "", year: "" as string | number, production_company: "", director: "", platform: "", notes: "",
     project_type: "" as ProductionKind | "",
     status: "" as ProductionStatus | "",
     partner: "",
@@ -130,7 +130,6 @@ function ProductionEdit() {
         director: d.director ?? "",
         platform: d.platform ?? "",
         notes: d.notes ?? "",
-        color: d.color ?? "#6366f1",
         project_type: d.project_type ?? "",
         status: d.status ?? "",
         partner: d.partner ?? "",
@@ -167,7 +166,6 @@ function ProductionEdit() {
       director: form.director || null,
       platform: form.platform || null,
       notes: form.notes || null,
-      color: form.color || null,
       project_type: (form.project_type || null) as any,
       status: (form.status || null) as any,
       partner: form.partner || null,
@@ -410,10 +408,6 @@ function ProductionEdit() {
             }}><Plus className="h-3 w-3" /></Button>
           </div>
           <Link to="/platforms" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar plataformas →</Link>
-        </div>
-        <div>
-          <Label>Color en calendario</Label>
-          <Input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className="h-10 w-20 p-1" />
         </div>
         <div className="sm:col-span-2"><Label>Otros responsables</Label><Textarea value={form.other_responsibles} onChange={(e) => setForm({ ...form, other_responsibles: e.target.value })} rows={2} placeholder="Cualquier otro responsable o contacto relevante" /></div>
         <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} /></div>

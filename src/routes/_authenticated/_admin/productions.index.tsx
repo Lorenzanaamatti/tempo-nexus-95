@@ -26,7 +26,7 @@ function ProductionsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("productions")
-        .select("id, title, kind, project_type, status, partner, year, production_company, director, color, composer_id, composers(full_name, artistic_name)")
+        .select("id, title, kind, project_type, status, partner, year, production_company, director, composer_id, composers(full_name, artistic_name)")
         .order("title");
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
       const { data, error } = await query;
@@ -91,7 +91,6 @@ function ProductionsIndex() {
               params={{ productionId: p.id }}
               className="flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-muted/40"
             >
-              <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: p.color ?? "#6366f1" }} />
               <span className="font-display text-lg">{p.title}</span>
               {p.project_type && <Badge variant="outline" className="rounded-sm">{PRODUCTION_KIND_LABEL[p.project_type as ProductionKind]}</Badge>}
               {!p.project_type && p.kind && <Badge variant="outline" className="rounded-sm">{p.kind}</Badge>}
