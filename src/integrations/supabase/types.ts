@@ -689,9 +689,11 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          imdb_url: string | null
           notes: string | null
           phone: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           agent?: string | null
@@ -700,9 +702,11 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          imdb_url?: string | null
           notes?: string | null
           phone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           agent?: string | null
@@ -711,9 +715,11 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          imdb_url?: string | null
           notes?: string | null
           phone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -1082,10 +1088,12 @@ export type Database = {
           delivery_date: string | null
           director: string | null
           director_id: string | null
+          external_composer: string | null
           fee_amount: number | null
           ic_commission: number | null
           ic_commission_pct: number | null
           id: string
+          imdb_url: string | null
           kind: string | null
           music_supervisor_person_id: string | null
           negotiator_person_id: string | null
@@ -1112,10 +1120,12 @@ export type Database = {
           delivery_date?: string | null
           director?: string | null
           director_id?: string | null
+          external_composer?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
           id?: string
+          imdb_url?: string | null
           kind?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
@@ -1142,10 +1152,12 @@ export type Database = {
           delivery_date?: string | null
           director?: string | null
           director_id?: string | null
+          external_composer?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
           id?: string
+          imdb_url?: string | null
           kind?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
