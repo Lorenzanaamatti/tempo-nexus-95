@@ -5,7 +5,8 @@ export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalLayout,
 });
 
-const NAV = [
+type NavItem = { to: string; label: string; icon: typeof Home; exact?: boolean };
+const NAV: NavItem[] = [
   { to: "/portal", label: "Inicio", icon: Home, exact: true },
   { to: "/portal/carrera", label: "Mi carrera", icon: User },
   { to: "/portal/proyectos", label: "Proyectos activos", icon: FolderKanban },
@@ -13,7 +14,7 @@ const NAV = [
   { to: "/portal/contratos", label: "Contratos y derechos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda y reuniones", icon: CalendarDays },
   { to: "/portal/mensajes", label: "Mensajes y actualizaciones", icon: MessagesSquare },
-] as const;
+];
 
 function PortalLayout() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -29,7 +30,7 @@ function PortalLayout() {
           return (
             <Link
               key={n.to}
-              to={n.to}
+              to={n.to as string}
               className={`flex items-center gap-2 border-b-2 px-3 py-2 text-sm transition ${
                 active
                   ? "border-primary text-foreground"
