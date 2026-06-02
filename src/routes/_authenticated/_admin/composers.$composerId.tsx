@@ -18,6 +18,7 @@ import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
+import { SaveButton } from "@/components/save-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
   component: ComposerEditPage,
