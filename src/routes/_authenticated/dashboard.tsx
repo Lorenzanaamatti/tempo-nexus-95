@@ -11,7 +11,7 @@ function DashboardRedirect() {
 
   useEffect(() => {
     if (loading) return;
-    window.location.replace(role === "admin" ? "/composers" : "/me");
+    window.location.replace(role === "admin" ? "/composers" : "/portal");
   }, [role, loading]);
 
   return (
