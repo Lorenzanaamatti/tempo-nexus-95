@@ -792,6 +792,146 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          created_at: string
+          estimated_value: number | null
+          id: string
+          notes: string | null
+          partner_company_id: string | null
+          partner_name: string | null
+          probability_pct: number | null
+          responsible_person_id: string | null
+          statuses: Database["public"]["Enums"]["opportunity_status"][]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_value?: number | null
+          id?: string
+          notes?: string | null
+          partner_company_id?: string | null
+          partner_name?: string | null
+          probability_pct?: number | null
+          responsible_person_id?: string | null
+          statuses?: Database["public"]["Enums"]["opportunity_status"][]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_value?: number | null
+          id?: string
+          notes?: string | null
+          partner_company_id?: string | null
+          partner_name?: string | null
+          probability_pct?: number | null
+          responsible_person_id?: string | null
+          statuses?: Database["public"]["Enums"]["opportunity_status"][]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_partner_company_id_fkey"
+            columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_responsible_person_id_fkey"
+            columns: ["responsible_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_actions: {
+        Row: {
+          created_at: string
+          done: boolean
+          done_at: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          opportunity_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_actions_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_candidates: {
+        Row: {
+          composer_id: string
+          created_at: string
+          id: string
+          note: string | null
+          opportunity_id: string
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          opportunity_id: string
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          opportunity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_candidates_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_candidates_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       people: {
         Row: {
           composer_id: string | null
@@ -1336,6 +1476,13 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      opportunity_status:
+        | "identificado"
+        | "primer_contacto"
+        | "propuesta_enviada"
+        | "negociacion"
+        | "cerrado"
+        | "descartado"
       person_role:
         | "ic_team"
         | "composer"
@@ -1540,6 +1687,14 @@ export const Constants = {
         "spot",
         "game",
         "other",
+      ],
+      opportunity_status: [
+        "identificado",
+        "primer_contacto",
+        "propuesta_enviada",
+        "negociacion",
+        "cerrado",
+        "descartado",
       ],
       person_role: [
         "ic_team",
