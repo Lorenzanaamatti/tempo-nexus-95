@@ -42,6 +42,12 @@ function ProductionEdit() {
     delivery_date: "",
     partner_company_id: "" as string,
     director_id: "" as string,
+    platform_id: "" as string,
+    production_director_person_id: "" as string,
+    postproduction_supervisor_person_id: "" as string,
+    music_supervisor_person_id: "" as string,
+    other_responsibles: "",
+    premiere_date: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -85,6 +91,24 @@ function ProductionEdit() {
     },
   });
 
+  const platformsQ = useQuery({
+    queryKey: ["platforms-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("platforms").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const peopleAllQ = useQuery({
+    queryKey: ["people-all-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   useEffect(() => {
     if (data) {
       const d = data as any;
@@ -107,6 +131,12 @@ function ProductionEdit() {
         delivery_date: d.delivery_date ?? "",
         partner_company_id: d.partner_company_id ?? "",
         director_id: d.director_id ?? "",
+        platform_id: d.platform_id ?? "",
+        production_director_person_id: d.production_director_person_id ?? "",
+        postproduction_supervisor_person_id: d.postproduction_supervisor_person_id ?? "",
+        music_supervisor_person_id: d.music_supervisor_person_id ?? "",
+        other_responsibles: d.other_responsibles ?? "",
+        premiere_date: d.premiere_date ?? "",
       });
     }
   }, [data]);
@@ -132,6 +162,12 @@ function ProductionEdit() {
       delivery_date: form.delivery_date || null,
       partner_company_id: form.partner_company_id || null,
       director_id: form.director_id || null,
+      platform_id: form.platform_id || null,
+      production_director_person_id: form.production_director_person_id || null,
+      postproduction_supervisor_person_id: form.postproduction_supervisor_person_id || null,
+      music_supervisor_person_id: form.music_supervisor_person_id || null,
+      other_responsibles: form.other_responsibles || null,
+      premiere_date: form.premiere_date || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -230,7 +266,40 @@ function ProductionEdit() {
           </Select>
         </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
-        <div><Label>Productora</Label><Input value={form.production_company} onChange={(e) => setForm({ ...form, production_company: e.target.value })} /></div>
+        <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
+        <div>
+          <Label>Director de Producción</Label>
+          <Select value={form.production_director_person_id || undefined} onValueChange={(v) => setForm({ ...form, production_director_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Responsable de Postproducción</Label>
+          <Select value={form.postproduction_supervisor_person_id || undefined} onValueChange={(v) => setForm({ ...form, postproduction_supervisor_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Supervisor Musical</Label>
+          <Select value={form.music_supervisor_person_id || undefined} onValueChange={(v) => setForm({ ...form, music_supervisor_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label>Director</Label>
           <div className="flex gap-2">
@@ -253,11 +322,33 @@ function ProductionEdit() {
           </div>
           <Link to="/directors" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar directores →</Link>
         </div>
-        <div><Label>Plataforma</Label><Input value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })} /></div>
+        <div>
+          <Label>Plataforma</Label>
+          <div className="flex gap-2">
+            <Select value={form.platform_id || undefined} onValueChange={(v) => setForm({ ...form, platform_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona plataforma…" /></SelectTrigger>
+              <SelectContent>
+                {(platformsQ.data ?? []).map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" size="sm" onClick={async () => {
+              const name = window.prompt("Nombre de la plataforma");
+              if (!name?.trim()) return;
+              const { data, error } = await supabase.from("platforms").insert({ name: name.trim() }).select("id").single();
+              if (error) return toast.error(error.message);
+              setForm((f) => ({ ...f, platform_id: data.id }));
+              qc.invalidateQueries({ queryKey: ["platforms-mini"] });
+            }}><Plus className="h-3 w-3" /></Button>
+          </div>
+          <Link to="/platforms" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar plataformas →</Link>
+        </div>
         <div>
           <Label>Color en calendario</Label>
           <Input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className="h-10 w-20 p-1" />
         </div>
+        <div className="sm:col-span-2"><Label>Otros responsables</Label><Textarea value={form.other_responsibles} onChange={(e) => setForm({ ...form, other_responsibles: e.target.value })} rows={2} placeholder="Cualquier otro responsable o contacto relevante" /></div>
         <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} /></div>
       </div>
 
