@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { photoUrl } from "@/lib/composers-api";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
@@ -100,12 +99,11 @@ function RosterAll() {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-display text-lg">{c.full_name}</p>
-                          <p className="truncate text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "—"}</p>
+                          <p className="font-display text-lg leading-tight">{c.full_name}</p>
+                          <p className="mt-1 truncate text-xs text-muted-foreground">
+                            {[c.city, c.country].filter(Boolean).join(" · ") || "—"}
+                          </p>
                         </div>
-                        <Badge variant="outline" className="rounded-sm text-[10px]">
-                          {ROLE_LABEL[r].replace(/s$/, "")}
-                        </Badge>
                       </Link>
                     );
                   })}
