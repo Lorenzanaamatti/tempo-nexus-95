@@ -128,7 +128,8 @@ export function BillingSprintsEditor({
                 <div>
                   <Label className="text-xs text-muted-foreground">Importe (€)</Label>
                   <Input
-                    defaultValue={r.amount != null ? String(r.amount).replace(".", ",") : ""}
+                    key={`amt-${r.id}-${r.amount ?? ""}`}
+                    defaultValue={r.amount != null ? formatNumberEsLocal(r.amount) : ""}
                     placeholder="0,00"
                     onBlur={(e) => {
                       const parsed = parseAmount(e.target.value);
