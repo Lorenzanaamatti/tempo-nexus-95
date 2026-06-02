@@ -65,7 +65,7 @@ function ComposerEditPage() {
           .order("created_at", { ascending: false }),
         supabase
           .from("productions")
-          .select("id, title, year, status, platform, director, premiere_date, delivery_date")
+          .select("id, title, year, status, platform, director, premiere_date, delivery_date, fee_amount, ic_commission, ic_commission_pct, billing_sprints:production_billing_sprints(id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url)")
           .eq("composer_id", composerId)
           .order("year", { ascending: false }),
         supabase
