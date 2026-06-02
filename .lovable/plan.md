@@ -1,74 +1,93 @@
-## Módulo Marketing y Ventas — plan de construcción
 
-Ya tenemos: **Cuentas objetivo** (con creación de oportunidad). Faltan **14 módulos**. Para no entregar 14 páginas a medias, los agrupo en 3 fases por afinidad funcional. Cada fase es independiente, así que podemos pausar/iterar entre fase y fase.
+# Vídeos en ficha + Módulo Redes Sociales IC
 
-### Estructura común
+## 1. Vídeos en ficha de compositor
 
-- Nuevo grupo en sidebar **Marketing y Ventas** (ya creado) con todos los enlaces.
-- Las rutas viven en `src/routes/_authenticated/_admin/marketing.*.tsx`.
-- Cada módulo: pantalla listado + ficha de detalle.
-- Para repositorios documentales reutilizamos el bucket privado existente `composer-assets` con un prefijo `marketing/` (o creamos `marketing-assets` si prefieres separación dura — recomiendo separado).
-- Toda la escritura: admin; lectura: cualquier usuario autenticado.
+Reutilizamos la tabla existente `composer_demos` (que ya soporta `url`) extendida con almacenamiento propio. Mejor: una tabla limpia análoga a `composer_photos`.
 
----
+**Nueva tabla `composer_videos`** (paralela a `composer_photos`, cap 12):
+- `composer_id`, `storage_path` (bucket privado), `external_url` (YouTube/Vimeo opcional), `poster_path` (miniatura opcional), `title`, `duration_seconds`, `year`, `copyright`, `position`
 
-### FASE 1 — Repositorios documentales y de contenido (la "base" del módulo)
+Subida al bucket `composer-assets` (ya existe). Reproductor `<video>` nativo o embed si es URL externa.
 
-Son los que más usaréis a diario y comparten el mismo patrón (CRUD + adjunto + tags).
+**UI**: nueva sección "Vídeos" en la ficha admin del compositor, debajo de "Fotografías". Mismo patrón de grid + drag-reorder + borrar. En el portal del representado, se muestran en lectura.
 
-1. **Decks de venta** — tabla `marketing_decks` (titulo, propósito[corto/largo/genérico/por cliente], idioma, versión, audiencia, fecha, archivo, enlace público opcional, notas). Vista lista filtrable por propósito/idioma.
-2. **Clipping** — tabla `press_clippings` (medio, titular, autor, fecha, idioma, url, screenshot, compositor relacionado opcional, etiquetas, destacado sí/no). Vista lista con filtros + grid de portadas.
-3. **Libro de estilo / Brand** — tabla `brand_guidelines` (sección, contenido richtext, orden, versión) + área de descarga de logos/tipografías. Vista tipo página única con secciones.
-4. **Casos de éxito** — tabla `case_studies` (cliente, compositor, problema, propuesta, resultado, métricas, año, assets, visibilidad interna/externa). Vista lista + ficha.
-5. **Plantillas de propuesta y email** — tabla `outreach_templates` (tipo[cold/follow-up/propuesta económica/NDA], idioma, asunto, cuerpo markdown, variables disponibles). Vista lista + editor.
-6. **Press kits / EPK** — tabla `press_kits` (alcance[compositor/IC global], compositor_id opcional, idioma, versión, archivo, enlace público). Reutiliza compositores existentes.
+## 2. Módulo Redes Sociales IC
 
-**Storage:** un único bucket privado `marketing-assets` con subcarpetas por tipo.
+Nueva sección en `/marketing/social` con sub-navegación por canal: **Instagram · Facebook · LinkedIn · YouTube · TikTok · Otras**.
 
----
+Cada canal es un feed editorial de **posts planificables**, filtrables por **representado** y por **producción**.
 
-### FASE 2 — Planificación y eventos
+### Modelo de post (`social_posts`)
+- `channel`: enum (`instagram` | `facebook` | `linkedin` | `youtube` | `tiktok` | `otra`)
+- `format`: enum (`feed` | `reel` | `story` | `carousel` | `video` | `live` | `articulo`)
+- `composer_id` (nullable — opcional)
+- `production_id` (nullable — opcional)
+- `title` (interno)
+- `copy_es`, `copy_en`, `copy_ca` — textos por idioma
+- `hashtags` (text[])
+- `cta` (texto + URL)
+- `scheduled_for` (fecha y hora prevista)
+- `published_at` (fecha real)
+- `published_url` (link al post en la red)
+- `status`: enum (`borrador` | `en_revision` | `aprobado` | `programado` | `publicado` | `archivado`)
+- `owner_person_id` (responsable interno)
+- `notes`
 
-Todo lo que es temporal/calendario.
+### Adjuntos (`social_post_assets`)
+N por post:
+- `kind`: `image` | `video` | `audio` | `gif` | `documento`
+- `storage_path` o `external_url`
+- `caption`, `alt_text`, `position`
 
-7. **Calendario de marketing** — tabla `marketing_events` (tipo[publicación/newsletter/evento/campaña], fecha, canal, estado[idea/programado/publicado], responsable, asset_id opcional, notas) + integración con `calendar_events` (subject_type='marketing') para verse en el calendario global existente.
-8. **Calendario editorial** — usamos la misma tabla `marketing_events` con tipo `contenido` (tema, formato[blog/entrevista/post], borrador, fecha publicación). Vista separada centrada en pipeline editorial (idea → borrador → revisión → publicado).
-9. **Eventos y ferias** — tabla `industry_events` (nombre, ciudad, país, fechas, web, tipo[festival/mercado/congreso], coste estimado, asistentes IC, objetivo, próximas acciones, notas). Vista anual + ficha.
+### Otros recursos sugeridos (parte del módulo, no separado)
+Propongo añadir, además del post en sí:
+- **Variantes por canal**: un mismo concepto con copies distintos para IG/LinkedIn/etc. (campo `parent_post_id` para agrupar).
+- **Stories y Reels**: como formatos del mismo modelo.
+- **Campañas** (`social_campaigns`): agrupador de posts con objetivo, fechas y KPIs (alcance, engagement, leads).
+- **Plantillas de copy** (`social_copy_templates`): copies tipo por tipo de hito (estreno, premio, BSO publicada, entrevista, evento) con variables `{compositor}`, `{producción}`, `{director}`, `{plataforma}`.
+- **Calendario editorial**: vista mensual de `social_posts.scheduled_for` con filtro por canal/representado/producción.
+- **Briefs de contenido**: nota corta interna para grabar/diseñar (qué se necesita y para cuándo).
+- **Hashtags maestros**: banco reutilizable (`social_hashtag_sets`) con sets por canal y por género.
+- **Métricas post-publicación** (`social_post_metrics`): impresiones, alcance, likes, comentarios, guardados, clics — entrada manual.
+- **Embajadores/menciones**: enlazar otros perfiles tagueados (productoras, directores).
 
----
+## 3. Navegación
 
-### FASE 3 — Distribución, métricas y ecosistema
+- Sidebar Marketing → nuevo grupo "Redes sociales": calendario, posts, campañas, plantillas de copy, hashtags.
+- Filtros globales por **representado** y por **producción** en cada vista.
+- Cada ficha de representado y cada ficha de producción incorpora un panel "Actividad en redes" con sus posts y métricas agregadas.
 
-10. **Newsletter** — tablas `newsletter_issues` (número, fecha, asunto, contenido, segmento, métricas[enviados/abiertos/clics]) + `newsletter_subscribers` (email, nombre, segmentos, alta, baja, fuente). Vista archivo + suscriptores + composición.
-11. **KPIs de marketing con analytics** — tabla `marketing_kpi_snapshots` (fecha, canal[IG/LinkedIn/YouTube/web/newsletter], métrica[seguidores/engagement/leads/decks_abiertos/NPS], valor, nota). Vista dashboard con gráficos (Recharts) + carga manual mensual + comparativas.
-12. **Activos visuales** — tabla `marketing_visual_assets` (tipo[reel/showreel/foto/vídeo/gif], compositor opcional, archivo o url, miniatura, derechos, etiquetas, fecha). Vista grid con previews.
-13. **Colaboraciones / Partners** — tabla `partnerships` (nombre socio, tipo[medio/marca/festival/cross-promo], estado, contacto, contraprestación, fecha inicio/fin, notas, documentos). Vista lista + ficha.
-14. **SEO / Web backlog** — tabla `seo_backlog` (tipo[keyword/página/backlink/contenido], título, url destino, prioridad, estado[idea/en progreso/publicado], métrica objetivo, responsable, notas). Vista kanban por estado.
+## 4. Esquema de datos (resumen)
 
----
+```text
+composer_videos          (foto, pero vídeo · cap 12)
+social_posts             (post planificable, por canal)
+social_post_assets       (N imágenes/vídeos por post)
+social_campaigns         (agrupador con objetivo y KPIs)
+social_copy_templates    (plantillas con variables)
+social_hashtag_sets      (banco de hashtags por canal/género)
+social_post_metrics      (1:1 con post tras publicación)
+```
 
-### Detalles técnicos (sección para no técnicos puedes saltar)
+RLS: admin escribe todo; lectura para `authenticated`. Compositor lee sólo posts donde `composer_id` = el suyo (vía `can_access_composer`).
 
-- Cada tabla: PK uuid, timestamps, `GRANT SELECT ... TO authenticated`, RLS lectura abierta a autenticado + escritura solo admin (mismo patrón que `target_accounts`).
-- Constantes y enums en `src/lib/marketing-constants.ts`.
-- Sidebar: añadir todos los enlaces dentro del grupo "Marketing y Ventas" creando submenu por fase para no saturar.
-- Calendarios reutilizan `calendar_events` cuando aplican, vía triggers que sincronizan desde `marketing_events`.
-- KPIs usan `recharts` (ya presente) para los gráficos.
+Bucket: `marketing-assets` (ya existe) para imágenes/vídeos de los posts.
 
----
+## 5. UI clave
 
-### Estimación de migraciones
+- **`/marketing/social`**: tabs por canal + filtros (representado, producción, estado, fechas).
+- **Editor de post**: dos columnas — izquierda copies por idioma + hashtags + CTA + scheduling; derecha adjuntos (drag & drop), preview tipo mock del canal.
+- **`/marketing/social/calendario`**: calendario mensual con códigos por canal.
+- **`/marketing/social/campañas`**: tabla con objetivos y KPIs agregados.
+- **`/marketing/social/plantillas`**: editor de copies con sustitución de variables.
 
-Fase 1: 1 migración (6 tablas + bucket). Fase 2: 1 migración (2 tablas + sincronización con calendar_events). Fase 3: 1 migración (6 tablas).
+## Entregable si apruebas
 
----
+1. Migración: `composer_videos` + 6 tablas `social_*` + RLS + grants.
+2. Editor de vídeos en ficha compositor (subida al bucket).
+3. Módulo Marketing → Redes sociales: posts, calendario, campañas, plantillas, hashtags.
+4. Filtros por representado y producción en todas las vistas.
+5. Paneles "Actividad en redes" en fichas de representado y producción.
 
-### ¿Cómo procedemos?
-
-**Opción A (recomendada):** Construyo **Fase 1 ahora** (6 módulos documentales, los más usables y la base del módulo). Cuando confirmes que funciona, sigo con Fase 2 y luego Fase 3. Reduce riesgo y permite ajustar el patrón antes de replicarlo.
-
-**Opción B:** Construyo las 3 fases seguidas en un solo paso. Más rápido pero menos margen para ajustes.
-
-**Opción C:** Reordenamos prioridades — dime qué módulos quieres primero y construyo esos.
-
-¿Vamos con A, B o C?
+¿Avanzo con todo el alcance o prefieres acotar a fase 1 (vídeos + posts + calendario) y dejar campañas/plantillas/hashtags/métricas para una segunda iteración?
