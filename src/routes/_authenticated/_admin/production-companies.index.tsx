@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
@@ -31,12 +30,6 @@ function ProductionCompaniesIndex() {
     if (error) return toast.error(error.message);
     setName("");
     qc.invalidateQueries({ queryKey: ["production-companies"] });
-  }
-
-  async function update(id: string, patch: Record<string, string | null>) {
-    const { error } = await supabase.from("production_companies").update(patch as any).eq("id", id);
-    if (error) toast.error(error.message);
-    else qc.invalidateQueries({ queryKey: ["production-companies"] });
   }
 
   async function remove(id: string) {
