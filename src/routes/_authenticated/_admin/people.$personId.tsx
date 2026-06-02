@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { PersonEventsEditor } from "@/components/person-events-editor";
 import { PersonAssignmentsEditor } from "@/components/person-assignments-editor";
+import { SaveButton } from "@/components/save-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -141,6 +142,7 @@ function PersonEdit() {
         </p>
         <PersonAssignmentsEditor personId={personId} />
       </div>
+      <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, ty
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { SuggestInput } from "@/components/suggest-input";
+import { SaveButton } from "@/components/save-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -447,6 +448,7 @@ function ProductionEdit() {
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <ProductionEventsEditor productionId={productionId} />
       </div>
+      <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
 }
