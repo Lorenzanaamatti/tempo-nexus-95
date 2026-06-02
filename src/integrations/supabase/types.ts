@@ -684,6 +684,61 @@ export type Database = {
           },
         ]
       }
+      contract_counterparties: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          name: string | null
+          partner_company_id: string | null
+          person_id: string | null
+          position: number
+          role: string | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          partner_company_id?: string | null
+          person_id?: string | null
+          position?: number
+          role?: string | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          partner_company_id?: string | null
+          person_id?: string | null
+          position?: number
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_counterparties_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_counterparties_partner_company_id_fkey"
+            columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_counterparties_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           composer_id: string | null
@@ -698,7 +753,9 @@ export type Database = {
           partner_company_id: string | null
           sign_status: Database["public"]["Enums"]["contract_sign_status"]
           signed_date: string | null
+          signer_composer_id: string | null
           signer_name: string | null
+          signer_person_id: string | null
           storage_path: string | null
           title: string
           updated_at: string
@@ -717,7 +774,9 @@ export type Database = {
           partner_company_id?: string | null
           sign_status?: Database["public"]["Enums"]["contract_sign_status"]
           signed_date?: string | null
+          signer_composer_id?: string | null
           signer_name?: string | null
+          signer_person_id?: string | null
           storage_path?: string | null
           title: string
           updated_at?: string
@@ -736,7 +795,9 @@ export type Database = {
           partner_company_id?: string | null
           sign_status?: Database["public"]["Enums"]["contract_sign_status"]
           signed_date?: string | null
+          signer_composer_id?: string | null
           signer_name?: string | null
+          signer_person_id?: string | null
           storage_path?: string | null
           title?: string
           updated_at?: string
