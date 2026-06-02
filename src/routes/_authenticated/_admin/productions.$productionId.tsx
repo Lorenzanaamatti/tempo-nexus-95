@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 import { ProductionEventsEditor } from "@/components/person-events-editor";
+import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -31,20 +32,55 @@ function ProductionEdit() {
 
   const [form, setForm] = useState({
     title: "", kind: "", year: "" as string | number, production_company: "", director: "", platform: "", notes: "", color: "#6366f1",
+    project_type: "" as ProductionKind | "",
+    status: "" as ProductionStatus | "",
+    partner: "",
+    composer_id: "" as string,
+    negotiator_person_id: "" as string,
+    fee_amount: "" as string | number,
+    ic_commission: "" as string | number,
+    delivery_date: "",
   });
   const [saving, setSaving] = useState(false);
 
+  const composersQ = useQuery({
+    queryKey: ["composers-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("composers").select("id, full_name, artistic_name").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const peopleQ = useQuery({
+    queryKey: ["people-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   useEffect(() => {
     if (data) {
+      const d = data as any;
       setForm({
-        title: data.title ?? "",
-        kind: data.kind ?? "",
-        year: data.year ?? "",
-        production_company: data.production_company ?? "",
-        director: data.director ?? "",
-        platform: data.platform ?? "",
-        notes: data.notes ?? "",
-        color: data.color ?? "#6366f1",
+        title: d.title ?? "",
+        kind: d.kind ?? "",
+        year: d.year ?? "",
+        production_company: d.production_company ?? "",
+        director: d.director ?? "",
+        platform: d.platform ?? "",
+        notes: d.notes ?? "",
+        color: d.color ?? "#6366f1",
+        project_type: d.project_type ?? "",
+        status: d.status ?? "",
+        partner: d.partner ?? "",
+        composer_id: d.composer_id ?? "",
+        negotiator_person_id: d.negotiator_person_id ?? "",
+        fee_amount: d.fee_amount ?? "",
+        ic_commission: d.ic_commission ?? "",
+        delivery_date: d.delivery_date ?? "",
       });
     }
   }, [data]);
@@ -60,6 +96,14 @@ function ProductionEdit() {
       platform: form.platform || null,
       notes: form.notes || null,
       color: form.color || null,
+      project_type: (form.project_type || null) as any,
+      status: (form.status || null) as any,
+      partner: form.partner || null,
+      composer_id: form.composer_id || null,
+      negotiator_person_id: form.negotiator_person_id || null,
+      fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
+      ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
+      delivery_date: form.delivery_date || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -88,7 +132,54 @@ function ProductionEdit() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div><Label>Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-        <div><Label>Tipo</Label><Input value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })} placeholder="Película, Serie, Doc…" /></div>
+        <div>
+          <Label>Tipo</Label>
+          <Select value={form.project_type || undefined} onValueChange={(v) => setForm({ ...form, project_type: v as ProductionKind })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona tipo…" /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(PRODUCTION_KIND_LABEL).map(([k, label]) => (
+                <SelectItem key={k} value={k}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Representado asignado</Label>
+          <Select value={form.composer_id || undefined} onValueChange={(v) => setForm({ ...form, composer_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+            <SelectContent>
+              {(composersQ.data ?? []).map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>{c.artistic_name || c.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Partner / Productora</Label><Input value={form.partner} onChange={(e) => setForm({ ...form, partner: e.target.value })} placeholder="Nombre del partner externo" /></div>
+        <div>
+          <Label>Estado</Label>
+          <Select value={form.status || undefined} onValueChange={(v) => setForm({ ...form, status: v as ProductionStatus })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona estado…" /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(PRODUCTION_STATUS_LABEL).map(([k, label]) => (
+                <SelectItem key={k} value={k}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Fee acordado (€)</Label><Input type="number" step="0.01" value={form.fee_amount} onChange={(e) => setForm({ ...form, fee_amount: e.target.value })} /></div>
+        <div><Label>Comisión IC (€)</Label><Input type="number" step="0.01" value={form.ic_commission} onChange={(e) => setForm({ ...form, ic_commission: e.target.value })} /></div>
+        <div><Label>Fecha de entrega</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>
+        <div>
+          <Label>Responsable de negociación</Label>
+          <Select value={form.negotiator_person_id || undefined} onValueChange={(v) => setForm({ ...form, negotiator_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
         <div><Label>Productora</Label><Input value={form.production_company} onChange={(e) => setForm({ ...form, production_company: e.target.value })} /></div>
         <div><Label>Director</Label><Input value={form.director} onChange={(e) => setForm({ ...form, director: e.target.value })} /></div>
@@ -105,6 +196,11 @@ function ProductionEdit() {
       </div>
 
       <div className="mt-10">
+        <h2 className="mb-3 font-display text-2xl">Documentos asociados</h2>
+        <ProductionDocumentsEditor productionId={productionId} />
+      </div>
+
+      <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Personal asignado</h2>
         <AssignmentsEditor productionId={productionId} />
       </div>
@@ -113,6 +209,75 @@ function ProductionEdit() {
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <ProductionEventsEditor productionId={productionId} />
       </div>
+    </div>
+  );
+}
+
+function ProductionDocumentsEditor({ productionId }: { productionId: string }) {
+  const qc = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [kind, setKind] = useState("");
+  const [url, setUrl] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const docsQ = useQuery({
+    queryKey: ["prod-docs", productionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("production_documents")
+        .select("*")
+        .eq("production_id", productionId)
+        .order("position");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  async function add() {
+    if (!title.trim()) return;
+    const { error } = await supabase.from("production_documents").insert({
+      production_id: productionId,
+      title: title.trim(),
+      kind: kind || null,
+      url: url || null,
+      notes: notes || null,
+      position: (docsQ.data?.length ?? 0),
+    });
+    if (error) return toast.error(error.message);
+    setTitle(""); setKind(""); setUrl(""); setNotes("");
+    qc.invalidateQueries({ queryKey: ["prod-docs", productionId] });
+  }
+
+  async function remove(id: string) {
+    const { error } = await supabase.from("production_documents").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["prod-docs", productionId] });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_140px_1fr_auto]">
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" />
+        <Input value={kind} onChange={(e) => setKind(e.target.value)} placeholder="Tipo (contrato, brief…)" />
+        <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL" />
+        <Button onClick={add} disabled={!title.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir</Button>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notas (opcional)" rows={2} className="sm:col-span-4" />
+      </div>
+      {(docsQ.data ?? []).length === 0 ? (
+        <p className="text-sm text-muted-foreground">Sin documentos.</p>
+      ) : (
+        <div className="divide-y divide-border rounded-sm border border-border">
+          {(docsQ.data ?? []).map((d: any) => (
+            <div key={d.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
+              <span className="font-display">{d.title}</span>
+              {d.kind && <span className="text-xs text-muted-foreground">{d.kind}</span>}
+              {d.url && <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">abrir</a>}
+              {d.notes && <span className="text-xs text-muted-foreground">— {d.notes}</span>}
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={() => remove(d.id)}><Trash2 className="h-3 w-3" /></Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
