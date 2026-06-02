@@ -18,6 +18,13 @@ import {
   type CalendarView,
   type TimelineRow,
 } from "@/lib/calendar-api";
+import {
+  CALENDAR_SOURCE_LABELS,
+  EXTRA_KIND_CHIP,
+  EXTRA_KIND_LABELS,
+  type CalendarSource,
+  type ExtraKind,
+} from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/_admin/calendar")({
   component: GlobalCalendar,
@@ -40,10 +47,28 @@ function GlobalCalendar() {
     artist: true,
     supervisor: true,
   });
-  const [showProductions, setShowProductions] = useState(true);
+  const [activeSources, setActiveSources] = useState<Record<CalendarSource, boolean>>({
+    people: true,
+    productions: true,
+    billing: true,
+    opportunities: true,
+    contracts: true,
+    tasks: true,
+  });
   const [activeKinds, setActiveKinds] = useState<Record<AvailabilityKind, boolean>>({
     libre: true, ocupado: true, vacaciones: true, personal: true, produccion: true,
     facturacion: true, pago: true, cobro: true,
+  });
+  const [activeExtras, setActiveExtras] = useState<Record<ExtraKind, boolean>>({
+    oportunidad_detectada: true,
+    oportunidad_contacto: true,
+    oportunidad_cierre: true,
+    contrato_firma: true,
+    contrato_fin: true,
+    contrato_preaviso: true,
+    tarea: true,
+    estreno: true,
+    entrega: true,
   });
 
   const range = useMemo(() => computeRange(view, anchor), [view, anchor]);
@@ -102,11 +127,47 @@ function GlobalCalendar() {
     },
   });
 
+  const opportunitiesQ = useQuery({
+    queryKey: ["calendar-opportunities"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select("id, title, detected_date, last_contact_date, expected_close_date, partner_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const opportunityActionsQ = useQuery({
+    queryKey: ["calendar-opp-actions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("opportunity_actions")
+        .select("id, title, due_date, done, opportunity_id");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const contractsQ = useQuery({
+    queryKey: ["calendar-contracts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("id, title, signed_date, end_date, notice_date, counterparty, sign_status");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const rows: TimelineRow[] = useMemo(() => {
     const people = peopleQ.data ?? [];
     const productions = productionsQ.data ?? [];
     const events = eventsQ.data ?? [];
     const composerAvail = composerAvailQ.data ?? [];
+    const opportunities = opportunitiesQ.data ?? [];
+    const oppActions = opportunityActionsQ.data ?? [];
+    const contracts = contractsQ.data ?? [];
 
     // Index people by composer_id for joining composer_availability
     const personByComposer = new Map<string, any>();
@@ -115,6 +176,7 @@ function GlobalCalendar() {
     const out: TimelineRow[] = [];
 
     // People rows
+    if (activeSources.people)
     for (const p of people) {
       const role = p.role as PersonRole;
       if (!activeRoles[role]) continue;
@@ -158,11 +220,17 @@ function GlobalCalendar() {
     }
 
     // Production rows
-    if (showProductions) {
+    if (activeSources.productions || activeSources.billing) {
       for (const pr of productions) {
         const prEvents = events
           .filter((e: any) => e.subject_type === "production" && e.subject_id === pr.id)
-          .filter((e: any) => activeKinds[e.kind as AvailabilityKind])
+          .filter((e: any) => {
+            const k = e.kind as AvailabilityKind;
+            const isBilling = k === "facturacion" || k === "pago" || k === "cobro";
+            if (isBilling && !activeSources.billing) return false;
+            if (!isBilling && !activeSources.productions) return false;
+            return activeKinds[k];
+          })
           .map((e: any) => ({
             id: e.id,
             start: new Date(e.start_date + "T00:00:00"),
@@ -171,6 +239,17 @@ function GlobalCalendar() {
             title: e.title ?? pr.title,
             note: e.note,
           }));
+        // Hitos de producción (estreno / entrega) desde la propia tabla productions
+        if (activeSources.productions) {
+          if ((pr as any).premiere_date && activeExtras.estreno) {
+            const d = new Date((pr as any).premiere_date + "T00:00:00");
+            prEvents.push({ id: `pr-pre-${pr.id}`, start: d, end: d, kind: "estreno", title: `Estreno · ${pr.title}`, note: null });
+          }
+          if ((pr as any).delivery_date && activeExtras.entrega) {
+            const d = new Date((pr as any).delivery_date + "T00:00:00");
+            prEvents.push({ id: `pr-del-${pr.id}`, start: d, end: d, kind: "entrega", title: `Entrega · ${pr.title}`, note: null });
+          }
+        }
         out.push({
           id: pr.id,
           group: "Producciones",
@@ -182,13 +261,71 @@ function GlobalCalendar() {
       }
     }
 
+    // Oportunidades
+    if (activeSources.opportunities) {
+      for (const o of opportunities) {
+        const evs: any[] = [];
+        const push = (date: string | null, kind: ExtraKind, label: string) => {
+          if (!date || !activeExtras[kind]) return;
+          const d = new Date(date + "T00:00:00");
+          evs.push({ id: `op-${kind}-${o.id}`, start: d, end: d, kind, title: `${label} · ${o.title}`, note: o.partner_name });
+        };
+        push(o.detected_date, "oportunidad_detectada", "Detectada");
+        push(o.last_contact_date, "oportunidad_contacto", "Último contacto");
+        push(o.expected_close_date, "oportunidad_cierre", "Cierre estimado");
+        // tareas asociadas
+        if (activeSources.tasks && activeExtras.tarea) {
+          for (const a of oppActions) {
+            if (a.opportunity_id !== o.id || !a.due_date) continue;
+            const d = new Date(a.due_date + "T00:00:00");
+            evs.push({ id: `act-${a.id}`, start: d, end: d, kind: "tarea", title: `${a.done ? "✓ " : ""}${a.title}`, note: o.title });
+          }
+        }
+        if (!evs.length) continue;
+        out.push({
+          id: `opp-${o.id}`,
+          group: "Oportunidades",
+          label: o.title,
+          sublabel: o.partner_name ?? undefined,
+          to: "/opportunities/$opportunityId",
+          params: { opportunityId: o.id },
+          events: evs,
+        });
+      }
+    }
+
+    // Contratos
+    if (activeSources.contracts) {
+      for (const c of contracts) {
+        const evs: any[] = [];
+        const push = (date: string | null, kind: ExtraKind, label: string) => {
+          if (!date || !activeExtras[kind]) return;
+          const d = new Date(date + "T00:00:00");
+          evs.push({ id: `ct-${kind}-${c.id}`, start: d, end: d, kind, title: `${label} · ${c.title}`, note: c.counterparty });
+        };
+        push(c.signed_date, "contrato_firma", "Firma");
+        push(c.notice_date, "contrato_preaviso", "Preaviso");
+        push(c.end_date, "contrato_fin", "Fin");
+        if (!evs.length) continue;
+        out.push({
+          id: `ct-${c.id}`,
+          group: "Contratos",
+          label: c.title,
+          sublabel: c.counterparty ?? undefined,
+          to: "/contracts/$contractId",
+          params: { contractId: c.id },
+          events: evs,
+        });
+      }
+    }
+
     // Drop rows with no events in range (cleaner view)
     return out.filter((r) =>
       r.events.some((e) => e.end >= range.start && e.start <= range.end)
     );
-  }, [peopleQ.data, productionsQ.data, eventsQ.data, composerAvailQ.data, activeRoles, activeKinds, showProductions, range.start, range.end]);
+  }, [peopleQ.data, productionsQ.data, eventsQ.data, composerAvailQ.data, opportunitiesQ.data, opportunityActionsQ.data, contractsQ.data, activeRoles, activeKinds, activeSources, activeExtras, range.start, range.end]);
 
-  const loading = peopleQ.isLoading || productionsQ.isLoading || eventsQ.isLoading || composerAvailQ.isLoading;
+  const loading = peopleQ.isLoading || productionsQ.isLoading || eventsQ.isLoading || composerAvailQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || opportunityActionsQ.isLoading;
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
@@ -229,8 +366,26 @@ function GlobalCalendar() {
         ))}
       </div>
 
+      {/* Source filters (qué módulos aparecen en el calendario) */}
+      <div className="mb-3">
+        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Fuentes</p>
+        <div className="flex flex-wrap gap-1.5">
+          {(Object.keys(CALENDAR_SOURCE_LABELS) as CalendarSource[]).map((s) => (
+            <FilterChip
+              key={s}
+              active={activeSources[s]}
+              onClick={() => setActiveSources((p) => ({ ...p, [s]: !p[s] }))}
+            >
+              {CALENDAR_SOURCE_LABELS[s]}
+            </FilterChip>
+          ))}
+        </div>
+      </div>
+
       {/* Category filters */}
-      <div className="mb-3 flex flex-wrap gap-1.5">
+      <div className="mb-3">
+        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Roles del equipo</p>
+        <div className="flex flex-wrap gap-1.5">
         {(Object.keys(ROLE_GROUP) as PersonRole[]).map((r) => (
           <FilterChip
             key={r}
@@ -240,13 +395,13 @@ function GlobalCalendar() {
             {ROLE_GROUP[r]}
           </FilterChip>
         ))}
-        <FilterChip active={showProductions} onClick={() => setShowProductions((v) => !v)}>
-          Producciones
-        </FilterChip>
+        </div>
       </div>
 
       {/* Kind filters */}
-      <div className="mb-6 flex flex-wrap gap-1.5">
+      <div className="mb-3">
+        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Tipos de evento</p>
+        <div className="flex flex-wrap gap-1.5">
         {(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[]).map((k) => (
           <FilterChip
             key={k}
@@ -257,6 +412,17 @@ function GlobalCalendar() {
             {AVAILABILITY_LABELS[k]}
           </FilterChip>
         ))}
+        {(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[]).map((k) => (
+          <FilterChip
+            key={k}
+            active={activeExtras[k]}
+            onClick={() => setActiveExtras((s) => ({ ...s, [k]: !s[k] }))}
+            className={activeExtras[k] ? EXTRA_KIND_CHIP[k] : ""}
+          >
+            {EXTRA_KIND_LABELS[k]}
+          </FilterChip>
+        ))}
+        </div>
       </div>
 
       {loading ? (
