@@ -60,13 +60,13 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-primary/50 bg-primary/15 font-display text-base text-primary-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-sm border border-sidebar-primary/60 bg-sidebar-primary/20 font-display text-lg italic text-sidebar-primary-foreground">
             ic
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-base">Interesante</span>
-              <span className="smallcaps text-muted-foreground">Compañía</span>
+              <span className="font-display text-lg text-sidebar-foreground">Interesante</span>
+              <span className="smallcaps text-sidebar-foreground/60">Compañía</span>
             </div>
           )}
         </Link>
