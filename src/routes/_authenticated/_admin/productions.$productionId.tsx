@@ -13,6 +13,7 @@ import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { formatEUR, parseAmount } from "@/lib/money";
+import { SuggestInput } from "@/components/suggest-input";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -49,6 +50,9 @@ function ProductionEdit() {
     production_director_person_id: "" as string,
     postproduction_supervisor_person_id: "" as string,
     music_supervisor_person_id: "" as string,
+    production_director_name: "",
+    postproduction_supervisor_name: "",
+    music_supervisor_name: "",
     other_responsibles: "",
     premiere_date: "",
     imdb_url: "",
@@ -141,6 +145,9 @@ function ProductionEdit() {
         production_director_person_id: d.production_director_person_id ?? "",
         postproduction_supervisor_person_id: d.postproduction_supervisor_person_id ?? "",
         music_supervisor_person_id: d.music_supervisor_person_id ?? "",
+        production_director_name: d.production_director_name ?? "",
+        postproduction_supervisor_name: d.postproduction_supervisor_name ?? "",
+        music_supervisor_name: d.music_supervisor_name ?? "",
         other_responsibles: d.other_responsibles ?? "",
         premiere_date: d.premiere_date ?? "",
         imdb_url: d.imdb_url ?? "",
@@ -175,6 +182,9 @@ function ProductionEdit() {
       production_director_person_id: form.production_director_person_id || null,
       postproduction_supervisor_person_id: form.postproduction_supervisor_person_id || null,
       music_supervisor_person_id: form.music_supervisor_person_id || null,
+      production_director_name: form.production_director_name || null,
+      postproduction_supervisor_name: form.postproduction_supervisor_name || null,
+      music_supervisor_name: form.music_supervisor_name || null,
       other_responsibles: form.other_responsibles || null,
       premiere_date: form.premiere_date || null,
       imdb_url: form.imdb_url || null,
