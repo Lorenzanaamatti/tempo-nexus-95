@@ -12,6 +12,7 @@ import { fetchCatalogs } from "@/lib/composers-api";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { VideoGallery } from "@/components/video-gallery";
+import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
@@ -476,6 +477,10 @@ function Inner({
 
       <Section title="Vídeos (máx. 12)">
         <VideoGallery composerId={c.id} />
+      </Section>
+
+      <Section title="Actividad en redes sociales">
+        <SocialActivityPanel composerId={c.id} />
       </Section>
 
       {/* Datos fiscales y dirección */}
