@@ -105,6 +105,36 @@ function DirectorDetail() {
 
       <section className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Histórico de producciones</h2>
+        <div className="mb-4 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
+          <div className="flex-1 min-w-[200px]">
+            <Label className="text-xs">Título</Label>
+            <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Nueva producción" />
+          </div>
+          <div>
+            <Label className="text-xs">Año</Label>
+            <Input value={newYear} onChange={(e) => setNewYear(e.target.value)} className="w-24" />
+          </div>
+          <div>
+            <Label className="text-xs">Tipo</Label>
+            <Select value={newKind} onValueChange={(v) => setNewKind(v as ProductionKind)}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(PRODUCTION_KIND_LABEL) as ProductionKind[]).map((k) => (
+                  <SelectItem key={k} value={k}>{PRODUCTION_KIND_LABEL[k]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={() => createProduction(false)} disabled={creating} variant="outline">
+            <Plus className="mr-1 h-4 w-4" /> Añadir
+          </Button>
+          <Button onClick={() => createProduction(true)} disabled={creating}>
+            Crear y abrir ficha
+          </Button>
+        </div>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Crea la producción aquí (queda vinculada a este director) y abre su ficha para completar productora, plataforma, compositor (del roster o externo), fees, sprints y documentos.
+        </p>
         {historyQ.isLoading ? (
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : !historyQ.data?.length ? (
