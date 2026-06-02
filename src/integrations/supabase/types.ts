@@ -681,6 +681,42 @@ export type Database = {
           },
         ]
       }
+      directors: {
+        Row: {
+          agent: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fee_ranges: {
         Row: {
           code: string
@@ -842,6 +878,48 @@ export type Database = {
           },
         ]
       }
+      production_companies: {
+        Row: {
+          city: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       production_documents: {
         Row: {
           created_at: string
@@ -893,6 +971,7 @@ export type Database = {
           created_at: string
           delivery_date: string | null
           director: string | null
+          director_id: string | null
           fee_amount: number | null
           ic_commission: number | null
           id: string
@@ -900,6 +979,7 @@ export type Database = {
           negotiator_person_id: string | null
           notes: string | null
           partner: string | null
+          partner_company_id: string | null
           platform: string | null
           production_company: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
@@ -914,6 +994,7 @@ export type Database = {
           created_at?: string
           delivery_date?: string | null
           director?: string | null
+          director_id?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
           id?: string
@@ -921,6 +1002,7 @@ export type Database = {
           negotiator_person_id?: string | null
           notes?: string | null
           partner?: string | null
+          partner_company_id?: string | null
           platform?: string | null
           production_company?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
@@ -935,6 +1017,7 @@ export type Database = {
           created_at?: string
           delivery_date?: string | null
           director?: string | null
+          director_id?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
           id?: string
@@ -942,6 +1025,7 @@ export type Database = {
           negotiator_person_id?: string | null
           notes?: string | null
           partner?: string | null
+          partner_company_id?: string | null
           platform?: string | null
           production_company?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
@@ -959,10 +1043,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "productions_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "productions_negotiator_fk"
             columns: ["negotiator_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_partner_company_id_fkey"
+            columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
             referencedColumns: ["id"]
           },
         ]

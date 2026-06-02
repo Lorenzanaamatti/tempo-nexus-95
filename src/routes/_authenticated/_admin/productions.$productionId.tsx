@@ -40,6 +40,8 @@ function ProductionEdit() {
     fee_amount: "" as string | number,
     ic_commission: "" as string | number,
     delivery_date: "",
+    partner_company_id: "" as string,
+    director_id: "" as string,
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,9 +55,31 @@ function ProductionEdit() {
   });
 
   const peopleQ = useQuery({
-    queryKey: ["people-mini"],
+    queryKey: ["people-ic"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      const { data, error } = await supabase
+        .from("people")
+        .select("id, full_name, role")
+        .eq("role", "ic_team")
+        .order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const companiesQ = useQuery({
+    queryKey: ["production-companies-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const directorsQ = useQuery({
+    queryKey: ["directors-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
       if (error) throw error;
       return data ?? [];
     },
@@ -81,6 +105,8 @@ function ProductionEdit() {
         fee_amount: d.fee_amount ?? "",
         ic_commission: d.ic_commission ?? "",
         delivery_date: d.delivery_date ?? "",
+        partner_company_id: d.partner_company_id ?? "",
+        director_id: d.director_id ?? "",
       });
     }
   }, [data]);
@@ -104,6 +130,8 @@ function ProductionEdit() {
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
       delivery_date: form.delivery_date || null,
+      partner_company_id: form.partner_company_id || null,
+      director_id: form.director_id || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -154,7 +182,28 @@ function ProductionEdit() {
             </SelectContent>
           </Select>
         </div>
-        <div><Label>Partner / Productora</Label><Input value={form.partner} onChange={(e) => setForm({ ...form, partner: e.target.value })} placeholder="Nombre del partner externo" /></div>
+        <div>
+          <Label>Partner / Productora</Label>
+          <div className="flex gap-2">
+            <Select value={form.partner_company_id || undefined} onValueChange={(v) => setForm({ ...form, partner_company_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona productora…" /></SelectTrigger>
+              <SelectContent>
+                {(companiesQ.data ?? []).map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" size="sm" onClick={async () => {
+              const name = window.prompt("Nombre de la productora");
+              if (!name?.trim()) return;
+              const { data, error } = await supabase.from("production_companies").insert({ name: name.trim() }).select("id").single();
+              if (error) return toast.error(error.message);
+              setForm((f) => ({ ...f, partner_company_id: data.id }));
+              qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
+            }}><Plus className="h-3 w-3" /></Button>
+          </div>
+          <Link to="/production-companies" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar productoras →</Link>
+        </div>
         <div>
           <Label>Estado</Label>
           <Select value={form.status || undefined} onValueChange={(v) => setForm({ ...form, status: v as ProductionStatus })}>
@@ -182,7 +231,28 @@ function ProductionEdit() {
         </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
         <div><Label>Productora</Label><Input value={form.production_company} onChange={(e) => setForm({ ...form, production_company: e.target.value })} /></div>
-        <div><Label>Director</Label><Input value={form.director} onChange={(e) => setForm({ ...form, director: e.target.value })} /></div>
+        <div>
+          <Label>Director</Label>
+          <div className="flex gap-2">
+            <Select value={form.director_id || undefined} onValueChange={(v) => setForm({ ...form, director_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona director…" /></SelectTrigger>
+              <SelectContent>
+                {(directorsQ.data ?? []).map((d: any) => (
+                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" size="sm" onClick={async () => {
+              const name = window.prompt("Nombre del director");
+              if (!name?.trim()) return;
+              const { data, error } = await supabase.from("directors").insert({ full_name: name.trim() }).select("id").single();
+              if (error) return toast.error(error.message);
+              setForm((f) => ({ ...f, director_id: data.id }));
+              qc.invalidateQueries({ queryKey: ["directors-mini"] });
+            }}><Plus className="h-3 w-3" /></Button>
+          </div>
+          <Link to="/directors" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar directores →</Link>
+        </div>
         <div><Label>Plataforma</Label><Input value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })} /></div>
         <div>
           <Label>Color en calendario</Label>
