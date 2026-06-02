@@ -411,10 +411,6 @@ function ProductionEdit() {
           </div>
           <Link to="/platforms" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar plataformas →</Link>
         </div>
-        <div>
-          <Label>Color en calendario</Label>
-          <Input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className="h-10 w-20 p-1" />
-        </div>
         <div className="sm:col-span-2"><Label>Otros responsables</Label><Textarea value={form.other_responsibles} onChange={(e) => setForm({ ...form, other_responsibles: e.target.value })} rows={2} placeholder="Cualquier otro responsable o contacto relevante" /></div>
         <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} /></div>
       </div>
