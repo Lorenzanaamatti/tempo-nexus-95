@@ -1635,6 +1635,60 @@ export type Database = {
         }
         Relationships: []
       }
+      target_accounts: {
+        Row: {
+          created_at: string
+          decks_sent: number
+          id: string
+          last_contact_date: string | null
+          name: string
+          next_step: string | null
+          next_step_date: string | null
+          notes: string | null
+          priority: Database["public"]["Enums"]["target_account_priority"]
+          production_company_id: string | null
+          responsible_person_id: string | null
+          sector: string | null
+          status: Database["public"]["Enums"]["target_account_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          decks_sent?: number
+          id?: string
+          last_contact_date?: string | null
+          name: string
+          next_step?: string | null
+          next_step_date?: string | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["target_account_priority"]
+          production_company_id?: string | null
+          responsible_person_id?: string | null
+          sector?: string | null
+          status?: Database["public"]["Enums"]["target_account_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          decks_sent?: number
+          id?: string
+          last_contact_date?: string | null
+          name?: string
+          next_step?: string | null
+          next_step_date?: string | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["target_account_priority"]
+          production_company_id?: string | null
+          responsible_person_id?: string | null
+          sector?: string | null
+          status?: Database["public"]["Enums"]["target_account_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1779,6 +1833,15 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      target_account_priority: "alta" | "media" | "baja"
+      target_account_status:
+        | "sin_contacto"
+        | "contactado"
+        | "reunion"
+        | "propuesta_enviada"
+        | "cliente_activo"
+        | "en_pausa"
+        | "descartado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2023,6 +2086,16 @@ export const Constants = {
         "specialist",
         "curator",
         "other",
+      ],
+      target_account_priority: ["alta", "media", "baja"],
+      target_account_status: [
+        "sin_contacto",
+        "contactado",
+        "reunion",
+        "propuesta_enviada",
+        "cliente_activo",
+        "en_pausa",
+        "descartado",
       ],
     },
   },

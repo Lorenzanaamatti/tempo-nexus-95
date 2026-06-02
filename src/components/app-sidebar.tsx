@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText } from "lucide-react";
+import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText, Crosshair } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -55,6 +55,9 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
     { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
   ];
+  const marketingItems: NavItem[] = [
+    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -96,6 +99,23 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {otherItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={item.active}>
+                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarGroup>
+              {!collapsed && <SidebarGroupLabel className="smallcaps">Marketing y Ventas</SidebarGroupLabel>}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {marketingItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={item.active}>
                         <Link to={item.to} search={item.search as never} className="flex items-center gap-2">

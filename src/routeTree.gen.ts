@@ -42,6 +42,8 @@ import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './rou
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
+import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
+import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -232,6 +234,18 @@ const AuthenticatedAdminComposersComposerIdRoute =
     path: '/composers/$composerId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingTargetAccountsIndexRoute =
+  AuthenticatedAdminMarketingTargetAccountsIndexRouteImport.update({
+    id: '/marketing/target-accounts/',
+    path: '/marketing/target-accounts/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminMarketingTargetAccountsAccountIdRoute =
+  AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport.update({
+    id: '/marketing/target-accounts/$accountId',
+    path: '/marketing/target-accounts/$accountId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -265,6 +279,8 @@ export interface FileRoutesByFullPath {
   '/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -297,6 +313,8 @@ export interface FileRoutesByTo {
   '/platforms': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
+  '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -333,6 +351,8 @@ export interface FileRoutesById {
   '/_authenticated/_admin/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -368,6 +388,8 @@ export interface FileRouteTypes {
     | '/platforms/'
     | '/production-companies/'
     | '/productions/'
+    | '/marketing/target-accounts/$accountId'
+    | '/marketing/target-accounts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -400,6 +422,8 @@ export interface FileRouteTypes {
     | '/platforms'
     | '/production-companies'
     | '/productions'
+    | '/marketing/target-accounts/$accountId'
+    | '/marketing/target-accounts'
   id:
     | '__root__'
     | '/_authenticated'
@@ -435,6 +459,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/platforms/'
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
+    | '/_authenticated/_admin/marketing/target-accounts/$accountId'
+    | '/_authenticated/_admin/marketing/target-accounts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -675,6 +701,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersComposerIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/target-accounts/': {
+      id: '/_authenticated/_admin/marketing/target-accounts/'
+      path: '/marketing/target-accounts'
+      fullPath: '/marketing/target-accounts/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/marketing/target-accounts/$accountId': {
+      id: '/_authenticated/_admin/marketing/target-accounts/$accountId'
+      path: '/marketing/target-accounts/$accountId'
+      fullPath: '/marketing/target-accounts/$accountId'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
@@ -698,6 +738,8 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPlatformsIndexRoute: typeof AuthenticatedAdminPlatformsIndexRoute
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
+  AuthenticatedAdminMarketingTargetAccountsAccountIdRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -729,6 +771,10 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionCompaniesIndexRoute,
   AuthenticatedAdminProductionsIndexRoute:
     AuthenticatedAdminProductionsIndexRoute,
+  AuthenticatedAdminMarketingTargetAccountsAccountIdRoute:
+    AuthenticatedAdminMarketingTargetAccountsAccountIdRoute,
+  AuthenticatedAdminMarketingTargetAccountsIndexRoute:
+    AuthenticatedAdminMarketingTargetAccountsIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
