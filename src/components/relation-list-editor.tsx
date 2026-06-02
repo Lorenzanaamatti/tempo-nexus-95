@@ -25,7 +25,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
   onChange,
 }: {
   title: string;
-  table: "composer_demos" | "composer_filmography" | "composer_awards";
+  table: "composer_demos" | "composer_filmography" | "composer_awards" | "composer_documents";
   composerId: string;
   rows: T[];
   fields: FieldDef[];
