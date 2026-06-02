@@ -917,6 +917,62 @@ export type Database = {
           },
         ]
       }
+      production_billing_sprints: {
+        Row: {
+          amount: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          invoiced_date: string | null
+          kind: Database["public"]["Enums"]["billing_sprint_kind"]
+          label: string | null
+          notes: string | null
+          paid_date: string | null
+          production_id: string
+          sprint_number: number
+          status: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoiced_date?: string | null
+          kind: Database["public"]["Enums"]["billing_sprint_kind"]
+          label?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          production_id: string
+          sprint_number: number
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoiced_date?: string | null
+          kind?: Database["public"]["Enums"]["billing_sprint_kind"]
+          label?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          production_id?: string
+          sprint_number?: number
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_billing_sprints_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_companies: {
         Row: {
           address: string | null
@@ -1028,6 +1084,7 @@ export type Database = {
           director_id: string | null
           fee_amount: number | null
           ic_commission: number | null
+          ic_commission_pct: number | null
           id: string
           kind: string | null
           music_supervisor_person_id: string | null
@@ -1057,6 +1114,7 @@ export type Database = {
           director_id?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
+          ic_commission_pct?: number | null
           id?: string
           kind?: string | null
           music_supervisor_person_id?: string | null
@@ -1086,6 +1144,7 @@ export type Database = {
           director_id?: string | null
           fee_amount?: number | null
           ic_commission?: number | null
+          ic_commission_pct?: number | null
           id?: string
           kind?: string | null
           music_supervisor_person_id?: string | null
@@ -1237,6 +1296,8 @@ export type Database = {
         | "personal"
         | "produccion"
       availability_status: "available" | "partial" | "unavailable"
+      billing_sprint_kind: "trabajo" | "comision"
+      billing_sprint_status: "pendiente" | "facturado" | "cobrado"
       calendar_subject_type: "person" | "production"
       composer_team_role:
         | "agente"
@@ -1438,6 +1499,8 @@ export const Constants = {
         "produccion",
       ],
       availability_status: ["available", "partial", "unavailable"],
+      billing_sprint_kind: ["trabajo", "comision"],
+      billing_sprint_status: ["pendiente", "facturado", "cobrado"],
       calendar_subject_type: ["person", "production"],
       composer_team_role: [
         "agente",
