@@ -51,6 +51,8 @@ function ProductionEdit() {
     music_supervisor_person_id: "" as string,
     other_responsibles: "",
     premiere_date: "",
+    imdb_url: "",
+    external_composer: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -141,6 +143,8 @@ function ProductionEdit() {
         music_supervisor_person_id: d.music_supervisor_person_id ?? "",
         other_responsibles: d.other_responsibles ?? "",
         premiere_date: d.premiere_date ?? "",
+        imdb_url: d.imdb_url ?? "",
+        external_composer: d.external_composer ?? "",
       });
     }
   }, [data]);
@@ -173,6 +177,8 @@ function ProductionEdit() {
       music_supervisor_person_id: form.music_supervisor_person_id || null,
       other_responsibles: form.other_responsibles || null,
       premiere_date: form.premiere_date || null,
+      imdb_url: form.imdb_url || null,
+      external_composer: form.external_composer || null,
     } as any).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -317,6 +323,8 @@ function ProductionEdit() {
         </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
         <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
+        <div className="sm:col-span-2"><Label>Enlace IMDb</Label><Input value={form.imdb_url} onChange={(e) => setForm({ ...form, imdb_url: e.target.value })} placeholder="https://www.imdb.com/title/…" /></div>
+        <div className="sm:col-span-2"><Label>Compositor externo (si no es del roster IC)</Label><Input value={form.external_composer} onChange={(e) => setForm({ ...form, external_composer: e.target.value })} placeholder="Nombre del compositor externo" /></div>
         <div>
           <Label>Director de Producción</Label>
           <Select value={form.production_director_person_id || undefined} onValueChange={(v) => setForm({ ...form, production_director_person_id: v })}>
