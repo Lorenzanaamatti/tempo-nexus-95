@@ -2048,6 +2048,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      link_composer_to_user: {
+        Args: { _composer_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "composer"
