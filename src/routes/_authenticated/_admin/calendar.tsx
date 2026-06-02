@@ -222,7 +222,7 @@ function GlobalCalendar() {
     // Production rows
     if (activeSources.productions || activeSources.billing) {
       for (const pr of productions) {
-        const prEvents = events
+        const prEvents: any[] = events
           .filter((e: any) => e.subject_type === "production" && e.subject_id === pr.id)
           .filter((e: any) => {
             const k = e.kind as AvailabilityKind;
