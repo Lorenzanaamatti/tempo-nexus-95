@@ -90,7 +90,7 @@ function GlobalCalendar() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("productions")
-        .select("id, title, color")
+        .select("id, title, color, premiere_date, delivery_date")
         .order("title");
       if (error) throw error;
       return data ?? [];
