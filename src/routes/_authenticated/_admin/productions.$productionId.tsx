@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
+import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
+import { formatEUR, parseAmount } from "@/lib/money";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -39,6 +41,7 @@ function ProductionEdit() {
     negotiator_person_id: "" as string,
     fee_amount: "" as string | number,
     ic_commission: "" as string | number,
+    ic_commission_pct: "" as string | number,
     delivery_date: "",
     partner_company_id: "" as string,
     director_id: "" as string,
@@ -128,6 +131,7 @@ function ProductionEdit() {
         negotiator_person_id: d.negotiator_person_id ?? "",
         fee_amount: d.fee_amount ?? "",
         ic_commission: d.ic_commission ?? "",
+        ic_commission_pct: d.ic_commission_pct ?? "",
         delivery_date: d.delivery_date ?? "",
         partner_company_id: d.partner_company_id ?? "",
         director_id: d.director_id ?? "",
@@ -159,6 +163,7 @@ function ProductionEdit() {
       negotiator_person_id: form.negotiator_person_id || null,
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
+      ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
       delivery_date: form.delivery_date || null,
       partner_company_id: form.partner_company_id || null,
       director_id: form.director_id || null,
@@ -183,6 +188,10 @@ function ProductionEdit() {
   }
 
   if (isLoading || !data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
+
+  const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
+  const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
+  const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -251,8 +260,49 @@ function ProductionEdit() {
             </SelectContent>
           </Select>
         </div>
-        <div><Label>Fee acordado (€)</Label><Input type="number" step="0.01" value={form.fee_amount} onChange={(e) => setForm({ ...form, fee_amount: e.target.value })} /></div>
-        <div><Label>Comisión IC (€)</Label><Input type="number" step="0.01" value={form.ic_commission} onChange={(e) => setForm({ ...form, ic_commission: e.target.value })} /></div>
+        <div>
+          <Label>Fee acordado (€)</Label>
+          <Input
+            defaultValue={form.fee_amount !== "" ? String(form.fee_amount).replace(".", ",") : ""}
+            placeholder="0,00"
+            onBlur={(e) => {
+              const v = parseAmount(e.target.value);
+              setForm({ ...form, fee_amount: v == null ? "" : v });
+            }}
+          />
+          {feeNum != null && <p className="mt-1 text-xs text-muted-foreground">{formatEUR(feeNum)}</p>}
+        </div>
+        <div>
+          <Label>Comisión IC (%)</Label>
+          <Input
+            type="number"
+            step="0.01"
+            min={0}
+            max={100}
+            value={form.ic_commission_pct}
+            onChange={(e) => {
+              const pct = e.target.value;
+              const f = Number(form.fee_amount);
+              const auto = pct !== "" && Number.isFinite(f) ? (f * Number(pct)) / 100 : "";
+              setForm({ ...form, ic_commission_pct: pct, ic_commission: auto === "" ? "" : Number(auto.toFixed(2)) });
+            }}
+            placeholder="Ej. 15"
+          />
+        </div>
+        <div>
+          <Label>Comisión IC (€)</Label>
+          <Input
+            defaultValue={form.ic_commission !== "" ? String(form.ic_commission).replace(".", ",") : ""}
+            placeholder="0,00"
+            onBlur={(e) => {
+              const v = parseAmount(e.target.value);
+              setForm({ ...form, ic_commission: v == null ? "" : v });
+            }}
+          />
+          {computedCommission != null && (
+            <p className="mt-1 text-xs text-muted-foreground">Calculado: {formatEUR(computedCommission)}</p>
+          )}
+        </div>
         <div><Label>Fecha de entrega</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>
         <div>
           <Label>Responsable de negociación</Label>
@@ -359,6 +409,21 @@ function ProductionEdit() {
       <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Documentos asociados</h2>
         <ProductionDocumentsEditor productionId={productionId} />
+      </div>
+
+      <div className="mt-10 space-y-8">
+        <BillingSprintsEditor
+          productionId={productionId}
+          kind="trabajo"
+          title="Sprints de facturación · Trabajo del representado"
+          totalReference={feeNum}
+        />
+        <BillingSprintsEditor
+          productionId={productionId}
+          kind="comision"
+          title="Sprints de facturación · Comisión IC"
+          totalReference={computedCommission ?? (form.ic_commission === "" ? null : Number(form.ic_commission))}
+        />
       </div>
 
       <div className="mt-10">
