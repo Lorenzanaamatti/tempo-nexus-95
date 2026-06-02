@@ -43,6 +43,7 @@ function GlobalCalendar() {
   const [showProductions, setShowProductions] = useState(true);
   const [activeKinds, setActiveKinds] = useState<Record<AvailabilityKind, boolean>>({
     libre: true, ocupado: true, vacaciones: true, personal: true, produccion: true,
+    facturacion: true, pago: true, cobro: true,
   });
 
   const range = useMemo(() => computeRange(view, anchor), [view, anchor]);

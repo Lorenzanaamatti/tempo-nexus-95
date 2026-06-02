@@ -48,6 +48,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["availability_kind"]
           note: string | null
+          source_sprint_id: string | null
           start_date: string
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
@@ -60,6 +61,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["availability_kind"]
           note?: string | null
+          source_sprint_id?: string | null
           start_date: string
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
@@ -72,6 +74,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["availability_kind"]
           note?: string | null
+          source_sprint_id?: string | null
           start_date?: string
           subject_id?: string
           subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
@@ -1456,6 +1459,9 @@ export type Database = {
         | "vacaciones"
         | "personal"
         | "produccion"
+        | "facturacion"
+        | "pago"
+        | "cobro"
       availability_status: "available" | "partial" | "unavailable"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
@@ -1665,6 +1671,9 @@ export const Constants = {
         "vacaciones",
         "personal",
         "produccion",
+        "facturacion",
+        "pago",
+        "cobro",
       ],
       availability_status: ["available", "partial", "unavailable"],
       billing_sprint_kind: ["trabajo", "comision"],

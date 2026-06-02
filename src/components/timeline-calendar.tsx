@@ -14,6 +14,9 @@ const KIND_BAR: Record<AvailabilityKind, string> = {
   vacaciones: "bg-amber-500/70 border-amber-700/40 text-amber-50",
   personal: "bg-sky-500/70 border-sky-700/40 text-sky-50",
   produccion: "bg-indigo-500/70 border-indigo-700/40 text-indigo-50",
+  facturacion: "bg-amber-600/80 border-amber-800/50 text-amber-50",
+  pago: "bg-violet-500/80 border-violet-700/50 text-violet-50",
+  cobro: "bg-emerald-600/85 border-emerald-800/50 text-emerald-50",
 };
 
 export function TimelineCalendar({
