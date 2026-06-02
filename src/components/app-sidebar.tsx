@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +47,8 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const otherItems: NavItem[] = [
     { title: "Equipo IC", to: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
     { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
+    { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
+    { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
     { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
     { title: "Directorio completo", to: "/people", search: { role: "all" }, icon: Users, active: peopleRole === "all" },
   ];
