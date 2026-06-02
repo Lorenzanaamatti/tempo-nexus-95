@@ -276,6 +276,9 @@ function Inner({
           <Link to="/composers" className="hover:text-foreground">Roster</Link> · Ficha
         </p>
         <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/finance" search={{ composerId: c.id }}>Dashboard económico</Link>
+          </Button>
           <Button size="sm" variant="ghost" onClick={deleteComposer}>
             <Trash2 className="mr-1 h-3 w-3" /> Eliminar
           </Button>

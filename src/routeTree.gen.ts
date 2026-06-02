@@ -26,8 +26,10 @@ import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_auth
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
+import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenticated/_admin/budget'
+import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
 import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_authenticated/_admin/platforms.index'
@@ -147,6 +149,12 @@ const AuthenticatedAdminRosterRoute =
     path: '/roster',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFinanceRoute =
+  AuthenticatedAdminFinanceRouteImport.update({
+    id: '/finance',
+    path: '/finance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCalendarRoute =
   AuthenticatedAdminCalendarRouteImport.update({
     id: '/calendar',
@@ -157,6 +165,12 @@ const AuthenticatedAdminBudgetRoute =
   AuthenticatedAdminBudgetRouteImport.update({
     id: '/budget',
     path: '/budget',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBillingRoute =
+  AuthenticatedAdminBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminProductionsIndexRoute =
@@ -322,8 +336,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/finance': typeof AuthenticatedAdminFinanceRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -366,8 +382,10 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/finance': typeof AuthenticatedAdminFinanceRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -414,8 +432,10 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/_admin/budget': typeof AuthenticatedAdminBudgetRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -461,8 +481,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/portal'
+    | '/billing'
     | '/budget'
     | '/calendar'
+    | '/finance'
     | '/roster'
     | '/portal/agenda'
     | '/portal/carrera'
@@ -505,8 +527,10 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
+    | '/billing'
     | '/budget'
     | '/calendar'
+    | '/finance'
     | '/roster'
     | '/portal/agenda'
     | '/portal/carrera'
@@ -552,8 +576,10 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/portal'
     | '/_authenticated/'
+    | '/_authenticated/_admin/billing'
     | '/_authenticated/_admin/budget'
     | '/_authenticated/_admin/calendar'
+    | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/roster'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
@@ -718,6 +744,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRosterRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/finance': {
+      id: '/_authenticated/_admin/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/calendar': {
       id: '/_authenticated/_admin/calendar'
       path: '/calendar'
@@ -730,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/budget'
       fullPath: '/budget'
       preLoaderRoute: typeof AuthenticatedAdminBudgetRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/billing': {
+      id: '/_authenticated/_admin/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/productions/': {
@@ -918,8 +958,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBudgetRoute: typeof AuthenticatedAdminBudgetRoute
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
+  AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
@@ -950,8 +992,10 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBudgetRoute: AuthenticatedAdminBudgetRoute,
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
+  AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,

@@ -1698,6 +1698,8 @@ export type Database = {
           amount: number | null
           created_at: string
           due_date: string | null
+          holded_invoice_ref: string | null
+          holded_url: string | null
           id: string
           invoiced_date: string | null
           kind: Database["public"]["Enums"]["billing_sprint_kind"]
@@ -1713,6 +1715,8 @@ export type Database = {
           amount?: number | null
           created_at?: string
           due_date?: string | null
+          holded_invoice_ref?: string | null
+          holded_url?: string | null
           id?: string
           invoiced_date?: string | null
           kind: Database["public"]["Enums"]["billing_sprint_kind"]
@@ -1728,6 +1732,8 @@ export type Database = {
           amount?: number | null
           created_at?: string
           due_date?: string | null
+          holded_invoice_ref?: string | null
+          holded_url?: string | null
           id?: string
           invoiced_date?: string | null
           kind?: Database["public"]["Enums"]["billing_sprint_kind"]
