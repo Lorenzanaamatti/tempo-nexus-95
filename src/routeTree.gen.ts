@@ -45,6 +45,8 @@ import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './rou
 import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
 import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './routes/_authenticated/_admin/marketing.decks.index'
 import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
+import { Route as AuthenticatedAdminMarketingCaseStudiesIndexRouteImport } from './routes/_authenticated/_admin/marketing.case-studies.index'
+import { Route as AuthenticatedAdminMarketingBrandIndexRouteImport } from './routes/_authenticated/_admin/marketing.brand.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -254,6 +256,18 @@ const AuthenticatedAdminMarketingClippingsIndexRoute =
     path: '/marketing/clippings/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingCaseStudiesIndexRoute =
+  AuthenticatedAdminMarketingCaseStudiesIndexRouteImport.update({
+    id: '/marketing/case-studies/',
+    path: '/marketing/case-studies/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminMarketingBrandIndexRoute =
+  AuthenticatedAdminMarketingBrandIndexRouteImport.update({
+    id: '/marketing/brand/',
+    path: '/marketing/brand/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingTargetAccountsAccountIdRoute =
   AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport.update({
     id: '/marketing/target-accounts/$accountId',
@@ -294,6 +308,8 @@ export interface FileRoutesByFullPath {
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
+  '/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
@@ -330,6 +346,8 @@ export interface FileRoutesByTo {
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/brand': typeof AuthenticatedAdminMarketingBrandIndexRoute
+  '/marketing/case-studies': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
@@ -370,6 +388,8 @@ export interface FileRoutesById {
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/_authenticated/_admin/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
+  '/_authenticated/_admin/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/_authenticated/_admin/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
@@ -409,6 +429,8 @@ export interface FileRouteTypes {
     | '/production-companies/'
     | '/productions/'
     | '/marketing/target-accounts/$accountId'
+    | '/marketing/brand/'
+    | '/marketing/case-studies/'
     | '/marketing/clippings/'
     | '/marketing/decks/'
     | '/marketing/target-accounts/'
@@ -445,6 +467,8 @@ export interface FileRouteTypes {
     | '/production-companies'
     | '/productions'
     | '/marketing/target-accounts/$accountId'
+    | '/marketing/brand'
+    | '/marketing/case-studies'
     | '/marketing/clippings'
     | '/marketing/decks'
     | '/marketing/target-accounts'
@@ -484,6 +508,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
+    | '/_authenticated/_admin/marketing/brand/'
+    | '/_authenticated/_admin/marketing/case-studies/'
     | '/_authenticated/_admin/marketing/clippings/'
     | '/_authenticated/_admin/marketing/decks/'
     | '/_authenticated/_admin/marketing/target-accounts/'
@@ -748,6 +774,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingClippingsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/case-studies/': {
+      id: '/_authenticated/_admin/marketing/case-studies/'
+      path: '/marketing/case-studies'
+      fullPath: '/marketing/case-studies/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingCaseStudiesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/marketing/brand/': {
+      id: '/_authenticated/_admin/marketing/brand/'
+      path: '/marketing/brand'
+      fullPath: '/marketing/brand/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingBrandIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/target-accounts/$accountId': {
       id: '/_authenticated/_admin/marketing/target-accounts/$accountId'
       path: '/marketing/target-accounts/$accountId'
@@ -779,6 +819,8 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  AuthenticatedAdminMarketingBrandIndexRoute: typeof AuthenticatedAdminMarketingBrandIndexRoute
+  AuthenticatedAdminMarketingCaseStudiesIndexRoute: typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   AuthenticatedAdminMarketingClippingsIndexRoute: typeof AuthenticatedAdminMarketingClippingsIndexRoute
   AuthenticatedAdminMarketingDecksIndexRoute: typeof AuthenticatedAdminMarketingDecksIndexRoute
   AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
@@ -815,6 +857,10 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute:
     AuthenticatedAdminMarketingTargetAccountsAccountIdRoute,
+  AuthenticatedAdminMarketingBrandIndexRoute:
+    AuthenticatedAdminMarketingBrandIndexRoute,
+  AuthenticatedAdminMarketingCaseStudiesIndexRoute:
+    AuthenticatedAdminMarketingCaseStudiesIndexRoute,
   AuthenticatedAdminMarketingClippingsIndexRoute:
     AuthenticatedAdminMarketingClippingsIndexRoute,
   AuthenticatedAdminMarketingDecksIndexRoute:
@@ -876,3 +922,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
