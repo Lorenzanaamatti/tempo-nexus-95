@@ -46,8 +46,8 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <p className="smallcaps text-muted-foreground">Interesante Compañía</p>
-          <h1 className="mt-2 font-display text-4xl italic">Roster &amp; oportunidades</h1>
+          <h1 className="font-display text-4xl">INTERESANTE COMPAÑIA</h1>
+          <p className="mt-2 smallcaps text-muted-foreground">Herramienta de gestión integral</p>
           <p className="mt-3 text-sm text-muted-foreground">Acceso restringido al equipo y a los compositores representados.</p>
         </div>
         <div className="glass-panel rounded-sm p-6">
