@@ -65,7 +65,7 @@ function ComposerEditPage() {
           .order("created_at", { ascending: false }),
         supabase
           .from("productions")
-          .select("id, title, year, status, platform, director, premiere_date, delivery_date")
+          .select("id, title, year, status, platform, director, premiere_date, delivery_date, fee_amount, ic_commission, ic_commission_pct, billing_sprints:production_billing_sprints(id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url)")
           .eq("composer_id", composerId)
           .order("year", { ascending: false }),
         supabase
@@ -457,6 +457,11 @@ function Inner({
         )}
       </Section>
 
+      <Section title="Facturación">
+        <ComposerBilling productions={productionsRel} composerId={c.id} />
+      </Section>
+
+
       <Section title="Contratos">
         {contractsRel.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin contratos.</p>
@@ -821,6 +826,111 @@ function KPI({ label, value }: { label: string; value: string }) {
       <div className="smallcaps text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 font-display text-2xl">{value}</div>
     </div>
+  );
+}
+
+function ComposerBilling({ productions, composerId }: { productions: any[]; composerId: string }) {
+  const sprints = productions.flatMap((p) =>
+    (p.billing_sprints ?? []).map((s: any) => ({ ...s, production_title: p.title, production_id: p.id })),
+  );
+  if (productions.length === 0) {
+    return <p className="text-sm text-muted-foreground">Asigna al compositor a una producción para ver su facturación.</p>;
+  }
+  if (sprints.length === 0) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Ninguna producción tiene sprints de facturación todavía. Crea sprints desde la ficha de cada producción.
+        </p>
+        <ProductionFeeSummary productions={productions} />
+        <Link to="/finance" search={{ composerId }} className="inline-block text-xs underline text-muted-foreground hover:text-foreground">
+          Abrir dashboard económico completo →
+        </Link>
+      </div>
+    );
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const totals = sprints.reduce(
+    (acc: any, s: any) => {
+      const a = Number(s.amount) || 0;
+      acc.previsto += a;
+      if (s.invoiced_date) acc.fact += a;
+      if (s.paid_date) acc.cob += a;
+      if (s.due_date && !s.invoiced_date && s.due_date < today) acc.venc += a;
+      return acc;
+    },
+    { previsto: 0, fact: 0, cob: 0, venc: 0 },
+  );
+  sprints.sort((a: any, b: any) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KPI label="Previsto" value={`${totals.previsto.toLocaleString("es-ES")} €`} />
+        <KPI label="Facturado" value={`${totals.fact.toLocaleString("es-ES")} €`} />
+        <KPI label="Cobrado" value={`${totals.cob.toLocaleString("es-ES")} €`} />
+        <KPI label="Vencido sin facturar" value={`${totals.venc.toLocaleString("es-ES")} €`} />
+      </div>
+      <div className="overflow-x-auto rounded-sm border border-border">
+        <table className="min-w-full text-sm">
+          <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2">Producción</th>
+              <th className="px-3 py-2">Sprint</th>
+              <th className="px-3 py-2">Tipo</th>
+              <th className="px-3 py-2 text-right">Importe</th>
+              <th className="px-3 py-2">Vencimiento</th>
+              <th className="px-3 py-2">Estado</th>
+              <th className="px-3 py-2">Ref. Holded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sprints.map((s: any) => {
+              const vencido = s.due_date && !s.invoiced_date && s.due_date < today;
+              return (
+                <tr key={s.id} className={`border-t border-border ${vencido ? "bg-amber-500/5" : ""}`}>
+                  <td className="px-3 py-2">
+                    <Link to="/productions/$productionId" params={{ productionId: s.production_id }} className="hover:underline">
+                      {s.production_title}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">#{s.sprint_number}{s.label ? ` · ${s.label}` : ""}</td>
+                  <td className="px-3 py-2 text-xs">{s.kind === "comision" ? "Comisión IC" : s.kind === "trabajo" ? "Trabajo" : s.kind}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{Number(s.amount ?? 0).toLocaleString("es-ES")} €</td>
+                  <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{s.due_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs">{s.status}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {s.holded_url ? (
+                      <a href={s.holded_url} target="_blank" rel="noreferrer" className="underline">
+                        {s.holded_invoice_ref || "ver"}
+                      </a>
+                    ) : (
+                      s.holded_invoice_ref || "—"
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <Link to="/finance" search={{ composerId }} className="inline-block text-xs underline text-muted-foreground hover:text-foreground">
+        Abrir dashboard económico completo →
+      </Link>
+    </div>
+  );
+}
+
+function ProductionFeeSummary({ productions }: { productions: any[] }) {
+  const withFee = productions.filter((p) => p.fee_amount != null || p.ic_commission != null);
+  if (withFee.length === 0) return null;
+  return (
+    <ul className="space-y-1 text-xs text-muted-foreground">
+      {withFee.map((p) => (
+        <li key={p.id}>
+          <span className="text-foreground">{p.title}</span> · Fee {Number(p.fee_amount ?? 0).toLocaleString("es-ES")} € · Comisión IC {Number(p.ic_commission ?? 0).toLocaleString("es-ES")} €
+        </li>
+      ))}
+    </ul>
   );
 }
 
