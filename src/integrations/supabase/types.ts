@@ -195,6 +195,50 @@ export type Database = {
           },
         ]
       }
+      composer_documents: {
+        Row: {
+          composer_id: string
+          created_at: string
+          id: string
+          kind: string | null
+          notes: string | null
+          position: number
+          storage_path: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_documents_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_filmography: {
         Row: {
           composer_id: string
@@ -439,10 +483,13 @@ export type Database = {
       composers: {
         Row: {
           address: string | null
+          agent_person_id: string | null
+          artistic_name: string | null
           availability: Database["public"]["Enums"]["availability_status"]
           bio_long: string | null
           bio_short: string | null
           birth_year: number | null
+          career_notes: string | null
           city: string | null
           country: string | null
           created_at: string
@@ -452,29 +499,38 @@ export type Database = {
           full_name: string
           id: string
           internal_notes: string | null
+          legal_name: string | null
           next_available_on: string | null
           nif: string | null
           owner_email: string | null
           owner_user_id: string | null
           phone: string | null
           photo_path: string | null
+          portal_url: string | null
           postal_code: string | null
           province: string | null
           reel_url: string | null
+          renewal_date: string | null
+          representation_start_date: string | null
+          representation_status: Database["public"]["Enums"]["representation_status"]
           roster_role: Database["public"]["Enums"]["roster_role"]
           search_tsv: unknown
           slug: string
           tags: string[]
           team_email: string | null
           team_name: string | null
+          tier: Database["public"]["Enums"]["representation_tier"] | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          agent_person_id?: string | null
+          artistic_name?: string | null
           availability?: Database["public"]["Enums"]["availability_status"]
           bio_long?: string | null
           bio_short?: string | null
           birth_year?: number | null
+          career_notes?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -484,29 +540,38 @@ export type Database = {
           full_name: string
           id?: string
           internal_notes?: string | null
+          legal_name?: string | null
           next_available_on?: string | null
           nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
           phone?: string | null
           photo_path?: string | null
+          portal_url?: string | null
           postal_code?: string | null
           province?: string | null
           reel_url?: string | null
+          renewal_date?: string | null
+          representation_start_date?: string | null
+          representation_status?: Database["public"]["Enums"]["representation_status"]
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug: string
           tags?: string[]
           team_email?: string | null
           team_name?: string | null
+          tier?: Database["public"]["Enums"]["representation_tier"] | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          agent_person_id?: string | null
+          artistic_name?: string | null
           availability?: Database["public"]["Enums"]["availability_status"]
           bio_long?: string | null
           bio_short?: string | null
           birth_year?: number | null
+          career_notes?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -516,24 +581,37 @@ export type Database = {
           full_name?: string
           id?: string
           internal_notes?: string | null
+          legal_name?: string | null
           next_available_on?: string | null
           nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
           phone?: string | null
           photo_path?: string | null
+          portal_url?: string | null
           postal_code?: string | null
           province?: string | null
           reel_url?: string | null
+          renewal_date?: string | null
+          representation_start_date?: string | null
+          representation_status?: Database["public"]["Enums"]["representation_status"]
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug?: string
           tags?: string[]
           team_email?: string | null
           team_name?: string | null
+          tier?: Database["public"]["Enums"]["representation_tier"] | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "composers_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "composers_fee_range_id_fkey"
             columns: ["fee_range_id"]
@@ -835,6 +913,12 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      representation_status:
+        | "activo"
+        | "pausa"
+        | "en_negociacion"
+        | "finalizado"
+      representation_tier: "A" | "B" | "C" | "desarrollo"
       roster_role:
         | "composer"
         | "artist"
@@ -997,6 +1081,13 @@ export const Constants = {
         "curator",
         "other",
       ],
+      representation_status: [
+        "activo",
+        "pausa",
+        "en_negociacion",
+        "finalizado",
+      ],
+      representation_tier: ["A", "B", "C", "desarrollo"],
       roster_role: [
         "composer",
         "artist",

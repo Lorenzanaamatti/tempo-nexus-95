@@ -16,7 +16,7 @@ import { RelationListEditor } from "@/components/relation-list-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
   component: ComposerEditPage,
@@ -44,13 +44,16 @@ function ComposerEditPage() {
   const relationsQ = useQuery({
     queryKey: ["composer-relations", composerId],
     queryFn: async () => {
-      const [demos, films, awards, styles, genres, langs] = await Promise.all([
+      const [demos, films, awards, styles, genres, langs, docs, projects, agents] = await Promise.all([
         supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_styles").select("style_id").eq("composer_id", composerId),
         supabase.from("composer_genres").select("genre_id").eq("composer_id", composerId),
         supabase.from("composer_languages").select("language_code").eq("composer_id", composerId),
+        supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
+        supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
+        supabase.from("people").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
       ]);
       return {
         demos: demos.data ?? [],
@@ -59,6 +62,9 @@ function ComposerEditPage() {
         styleIds: new Set((styles.data ?? []).map((r: any) => r.style_id)),
         genreIds: new Set((genres.data ?? []).map((r: any) => r.genre_id)),
         langCodes: new Set((langs.data ?? []).map((r: any) => r.language_code)),
+        docs: docs.data ?? [],
+        projects: projects.data ?? [],
+        agents: agents.data ?? [],
       };
     },
   });
@@ -102,6 +108,9 @@ function Inner({
   const [demos, setDemos] = useState<any[]>(initialRelations.demos);
   const [films, setFilms] = useState<any[]>(initialRelations.films);
   const [awards, setAwards] = useState<any[]>(initialRelations.awards);
+  const [docs, setDocs] = useState<any[]>(initialRelations.docs);
+  const projects: any[] = initialRelations.projects ?? [];
+  const agents: { id: string; full_name: string; email: string | null }[] = initialRelations.agents ?? [];
   const [tagInput, setTagInput] = useState("");
 
   function field<K extends string>(k: K, v: any) {
@@ -133,12 +142,34 @@ function Inner({
         email_secondary: c.email_secondary,
         team_name: c.team_name,
         team_email: c.team_email,
+        artistic_name: c.artistic_name,
+        legal_name: c.legal_name,
+        tier: c.tier,
+        representation_status: c.representation_status ?? "activo",
+        agent_person_id: c.agent_person_id,
+        representation_start_date: c.representation_start_date,
+        renewal_date: c.renewal_date,
+        career_notes: c.career_notes,
+        portal_url: c.portal_url,
       })
       .eq("id", c.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Ficha guardada");
     setDirty(false);
+  }
+
+  const activeYear = new Date().getFullYear();
+  const activeProjects = projects.filter((p) => (p.year ?? activeYear) >= activeYear);
+  const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
+  const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
+  const portalLink = c.portal_url || `${typeof window !== "undefined" ? window.location.origin : ""}/me`;
+
+  function copyPortal() {
+    navigator.clipboard.writeText(portalLink).then(
+      () => toast.success("Enlace del portal copiado"),
+      () => toast.error("No se pudo copiar"),
+    );
   }
 
   async function toggleStyle(id: string) {
@@ -230,11 +261,161 @@ function Inner({
       </div>
 
       <header className="mb-10 border-b border-border pb-6">
-        <h1 className="font-display text-5xl">{c.full_name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-5xl">{c.artistic_name || c.full_name}</h1>
+            {(c.legal_name || c.full_name) && (c.artistic_name && (c.legal_name || c.full_name) !== c.artistic_name) && (
+              <p className="mt-1 text-sm text-muted-foreground">Nombre legal: {c.legal_name || c.full_name}</p>
+            )}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {c.tier && <Badge variant="outline" className="rounded-sm">Tier {c.tier}</Badge>}
+            <Badge variant="secondary" className="rounded-sm">
+              {({ activo: "Activo", pausa: "En pausa", en_negociacion: "En negociación", finalizado: "Finalizado" } as Record<string, string>)[c.representation_status ?? "activo"]}
+            </Badge>
+          </div>
+        </div>
       </header>
+
+      {/* KPIs */}
+      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KPI label="Proyectos activos" value={String(activeProjects.length)} />
+        <KPI label="Proyectos totales" value={String(projects.length)} />
+        <KPI label="Facturación histórica" value={`${totalRevenue.toLocaleString("es-ES")} €`} />
+        <KPI label="Margen neto" value={`${totalMargin.toLocaleString("es-ES")} €`} />
+      </section>
+
+      {/* Representación */}
+      <Section title="Representación">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Nombre artístico">
+            <Input value={c.artistic_name ?? ""} onChange={(e) => field("artistic_name", e.target.value || null)} />
+          </Field>
+          <Field label="Nombre legal">
+            <Input value={c.legal_name ?? ""} onChange={(e) => field("legal_name", e.target.value || null)} />
+          </Field>
+          <Field label="Tier">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.tier ?? ""}
+              onChange={(e) => field("tier", e.target.value || null)}
+            >
+              <option value="">—</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="desarrollo">Desarrollo</option>
+            </select>
+          </Field>
+          <Field label="Estado">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.representation_status ?? "activo"}
+              onChange={(e) => field("representation_status", e.target.value)}
+            >
+              <option value="activo">Activo</option>
+              <option value="pausa">En pausa</option>
+              <option value="en_negociacion">En negociación</option>
+              <option value="finalizado">Finalizado</option>
+            </select>
+          </Field>
+          <Field label="Agente responsable">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.agent_person_id ?? ""}
+              onChange={(e) => field("agent_person_id", e.target.value || null)}
+            >
+              <option value="">— Sin asignar —</option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>{a.full_name}{a.email ? ` · ${a.email}` : ""}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Fecha de inicio de representación">
+            <Input
+              type="date"
+              value={c.representation_start_date ?? ""}
+              onChange={(e) => field("representation_start_date", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Fecha de renovación">
+            <Input
+              type="date"
+              value={c.renewal_date ?? ""}
+              onChange={(e) => field("renewal_date", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Notas de carrera" className="sm:col-span-2">
+            <Textarea
+              rows={4}
+              value={c.career_notes ?? ""}
+              onChange={(e) => field("career_notes", e.target.value || null)}
+              placeholder="Trayectoria, objetivos, hitos próximos, conversaciones abiertas…"
+            />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Proyectos activos */}
+      <Section title="Proyectos activos">
+        {activeProjects.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin proyectos activos este año.</p>
+        ) : (
+          <ul className="space-y-2">
+            {activeProjects.map((p) => (
+              <li key={p.id} className="flex items-baseline justify-between rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div>
+                  <div className="text-sm">{p.production}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {[p.production_type, p.director, p.platform, p.year].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                {p.price_charged != null && (
+                  <div className="text-sm text-muted-foreground">{Number(p.price_charged).toLocaleString("es-ES")} €</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* Portal del representado */}
+      <Section title="Portal del representado">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="URL personalizada del portal (opcional)" className="sm:col-span-2">
+            <Input
+              type="url"
+              value={c.portal_url ?? ""}
+              onChange={(e) => field("portal_url", e.target.value || null)}
+              placeholder="https://… (si se deja vacío, se usa el portal interno /me)"
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 rounded-sm border border-border bg-muted/40 px-4 py-3">
+          <span className="smallcaps text-xs text-muted-foreground">Acceso</span>
+          <code className="flex-1 truncate text-xs">{portalLink}</code>
+          <Button type="button" size="sm" variant="outline" onClick={copyPortal}>
+            <Copy className="mr-1 h-3 w-3" /> Copiar enlace
+          </Button>
+          <Button type="button" size="sm" variant="outline" asChild>
+            <a href={portalLink} target="_blank" rel="noreferrer">
+              <ExternalLink className="mr-1 h-3 w-3" /> Abrir
+            </a>
+          </Button>
+        </div>
+        {c.owner_email ? (
+          <p className="text-xs text-muted-foreground">
+            Cuenta del representado: <strong>{c.owner_email}</strong>
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Aún no hay cuenta vinculada. El representado podrá entrar al portal cuando se registre con un email asociado a esta ficha.
+          </p>
+        )}
+      </Section>
 
       {/* Identidad */}
       <Section title="Identidad">
@@ -486,6 +667,25 @@ function Inner({
         />
       </Section>
 
+      {/* Documentos y materiales */}
+      <Section>
+        <RelationListEditor
+          title="Documentos y materiales"
+          table="composer_documents"
+          composerId={c.id}
+          rows={docs}
+          onChange={setDocs}
+          newDefaults={{ title: "Nuevo documento" }}
+          fields={[
+            { key: "title", label: "Título" },
+            { key: "kind", label: "Tipo", placeholder: "p.ej. Contrato, Press kit, Rider, EPK" },
+            { key: "url", label: "Enlace (Drive, Dropbox, web…)", type: "url", className: "sm:col-span-2" },
+            { key: "storage_path", label: "Ruta de archivo interno", placeholder: "composer-assets/…", className: "sm:col-span-2" },
+            { key: "notes", label: "Notas", type: "textarea", className: "sm:col-span-2" },
+          ]}
+        />
+      </Section>
+
       <div className="sticky bottom-4 mt-12 flex justify-end">
         <Button onClick={saveCore} disabled={!dirty || saving} size="lg">
           {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Todo guardado"}
@@ -506,6 +706,15 @@ function Section({ title, children }: { title?: string; children: React.ReactNod
       )}
       <div className="space-y-4">{children}</div>
     </section>
+  );
+}
+
+function KPI({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-sm border border-border bg-card/50 px-4 py-3">
+      <div className="smallcaps text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 font-display text-2xl">{value}</div>
+    </div>
   );
 }
 
