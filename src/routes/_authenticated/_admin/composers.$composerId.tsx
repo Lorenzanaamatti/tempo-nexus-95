@@ -457,6 +457,11 @@ function Inner({
         )}
       </Section>
 
+      <Section title="Facturación">
+        <ComposerBilling productions={productionsRel} composerId={c.id} />
+      </Section>
+
+
       <Section title="Contratos">
         {contractsRel.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin contratos.</p>
