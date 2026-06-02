@@ -129,10 +129,6 @@ function PersonEdit() {
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end">
-        <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
-      </div>
-
       <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <PersonEventsEditor personId={personId} />

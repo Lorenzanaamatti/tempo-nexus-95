@@ -418,10 +418,6 @@ function ProductionEdit() {
         <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} /></div>
       </div>
 
-      <div className="mt-4 flex justify-end">
-        <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
-      </div>
-
       <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Documentos asociados</h2>
         <ProductionDocumentsEditor productionId={productionId} />
