@@ -266,7 +266,40 @@ function ProductionEdit() {
           </Select>
         </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
-        <div><Label>Productora</Label><Input value={form.production_company} onChange={(e) => setForm({ ...form, production_company: e.target.value })} /></div>
+        <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
+        <div>
+          <Label>Director de Producción</Label>
+          <Select value={form.production_director_person_id || undefined} onValueChange={(v) => setForm({ ...form, production_director_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Responsable de Postproducción</Label>
+          <Select value={form.postproduction_supervisor_person_id || undefined} onValueChange={(v) => setForm({ ...form, postproduction_supervisor_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Supervisor Musical</Label>
+          <Select value={form.music_supervisor_person_id || undefined} onValueChange={(v) => setForm({ ...form, music_supervisor_person_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+            <SelectContent>
+              {(peopleAllQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label>Director</Label>
           <div className="flex gap-2">
@@ -289,11 +322,33 @@ function ProductionEdit() {
           </div>
           <Link to="/directors" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar directores →</Link>
         </div>
-        <div><Label>Plataforma</Label><Input value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })} /></div>
+        <div>
+          <Label>Plataforma</Label>
+          <div className="flex gap-2">
+            <Select value={form.platform_id || undefined} onValueChange={(v) => setForm({ ...form, platform_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona plataforma…" /></SelectTrigger>
+              <SelectContent>
+                {(platformsQ.data ?? []).map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" size="sm" onClick={async () => {
+              const name = window.prompt("Nombre de la plataforma");
+              if (!name?.trim()) return;
+              const { data, error } = await supabase.from("platforms").insert({ name: name.trim() }).select("id").single();
+              if (error) return toast.error(error.message);
+              setForm((f) => ({ ...f, platform_id: data.id }));
+              qc.invalidateQueries({ queryKey: ["platforms-mini"] });
+            }}><Plus className="h-3 w-3" /></Button>
+          </div>
+          <Link to="/platforms" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar plataformas →</Link>
+        </div>
         <div>
           <Label>Color en calendario</Label>
           <Input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className="h-10 w-20 p-1" />
         </div>
+        <div className="sm:col-span-2"><Label>Otros responsables</Label><Textarea value={form.other_responsibles} onChange={(e) => setForm({ ...form, other_responsibles: e.target.value })} rows={2} placeholder="Cualquier otro responsable o contacto relevante" /></div>
         <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} /></div>
       </div>
 
