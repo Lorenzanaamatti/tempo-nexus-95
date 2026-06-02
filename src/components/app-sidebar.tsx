@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -48,6 +48,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Equipo IC", to: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
     { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
+    { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
     { title: "Presupuesto", to: "/budget", icon: Wallet, active: pathname.startsWith("/budget") },
     { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
