@@ -716,6 +716,56 @@ export type Database = {
           },
         ]
       }
+      composer_videos: {
+        Row: {
+          composer_id: string
+          copyright: string | null
+          created_at: string
+          duration_seconds: number | null
+          external_url: string | null
+          id: string
+          position: number
+          poster_path: string | null
+          storage_path: string | null
+          title: string | null
+          year: number | null
+        }
+        Insert: {
+          composer_id: string
+          copyright?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          external_url?: string | null
+          id?: string
+          position?: number
+          poster_path?: string | null
+          storage_path?: string | null
+          title?: string | null
+          year?: number | null
+        }
+        Update: {
+          composer_id?: string
+          copyright?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          external_url?: string | null
+          id?: string
+          position?: number
+          poster_path?: string | null
+          storage_path?: string | null
+          title?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_videos_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composers: {
         Row: {
           address: string | null
@@ -1959,6 +2009,360 @@ export type Database = {
         }
         Relationships: []
       }
+      social_campaigns: {
+        Row: {
+          composer_id: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          objective: string | null
+          production_id: string | null
+          start_date: string | null
+          target_engagement: number | null
+          target_leads: number | null
+          target_reach: number | null
+          updated_at: string
+        }
+        Insert: {
+          composer_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          objective?: string | null
+          production_id?: string | null
+          start_date?: string | null
+          target_engagement?: number | null
+          target_leads?: number | null
+          target_reach?: number | null
+          updated_at?: string
+        }
+        Update: {
+          composer_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          objective?: string | null
+          production_id?: string | null
+          start_date?: string | null
+          target_engagement?: number | null
+          target_leads?: number | null
+          target_reach?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_campaigns_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaigns_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_copy_templates: {
+        Row: {
+          body_md: string | null
+          channel: Database["public"]["Enums"]["social_channel"] | null
+          created_at: string
+          id: string
+          language: string
+          notes: string | null
+          occasion: string | null
+          title: string
+          updated_at: string
+          variables: string[]
+        }
+        Insert: {
+          body_md?: string | null
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          id?: string
+          language?: string
+          notes?: string | null
+          occasion?: string | null
+          title: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Update: {
+          body_md?: string | null
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          id?: string
+          language?: string
+          notes?: string | null
+          occasion?: string | null
+          title?: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Relationships: []
+      }
+      social_hashtag_sets: {
+        Row: {
+          channel: Database["public"]["Enums"]["social_channel"] | null
+          created_at: string
+          genre_id: string | null
+          hashtags: string[]
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          genre_id?: string | null
+          hashtags?: string[]
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["social_channel"] | null
+          created_at?: string
+          genre_id?: string | null
+          hashtags?: string[]
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_hashtag_sets_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "av_genres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_post_assets: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          kind: Database["public"]["Enums"]["social_asset_kind"]
+          position: number
+          post_id: string
+          storage_path: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["social_asset_kind"]
+          position?: number
+          post_id: string
+          storage_path?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["social_asset_kind"]
+          position?: number
+          post_id?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_assets_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_post_metrics: {
+        Row: {
+          clicks: number | null
+          comments: number | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          measured_at: string
+          notes: string | null
+          post_id: string
+          reach: number | null
+          saves: number | null
+          shares: number | null
+          video_views: number | null
+        }
+        Insert: {
+          clicks?: number | null
+          comments?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          measured_at?: string
+          notes?: string | null
+          post_id: string
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          video_views?: number | null
+        }
+        Update: {
+          clicks?: number | null
+          comments?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          measured_at?: string
+          notes?: string | null
+          post_id?: string
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          video_views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_posts: {
+        Row: {
+          brief: string | null
+          campaign_id: string | null
+          channel: Database["public"]["Enums"]["social_channel"]
+          composer_id: string | null
+          copy_ca: string | null
+          copy_en: string | null
+          copy_es: string | null
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          format: Database["public"]["Enums"]["social_format"]
+          hashtags: string[]
+          id: string
+          notes: string | null
+          owner_person_id: string | null
+          parent_post_id: string | null
+          production_id: string | null
+          published_at: string | null
+          published_url: string | null
+          scheduled_for: string | null
+          status: Database["public"]["Enums"]["social_post_status"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          brief?: string | null
+          campaign_id?: string | null
+          channel: Database["public"]["Enums"]["social_channel"]
+          composer_id?: string | null
+          copy_ca?: string | null
+          copy_en?: string | null
+          copy_es?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          format?: Database["public"]["Enums"]["social_format"]
+          hashtags?: string[]
+          id?: string
+          notes?: string | null
+          owner_person_id?: string | null
+          parent_post_id?: string | null
+          production_id?: string | null
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_for?: string | null
+          status?: Database["public"]["Enums"]["social_post_status"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brief?: string | null
+          campaign_id?: string | null
+          channel?: Database["public"]["Enums"]["social_channel"]
+          composer_id?: string | null
+          copy_ca?: string | null
+          copy_en?: string | null
+          copy_es?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          format?: Database["public"]["Enums"]["social_format"]
+          hashtags?: string[]
+          id?: string
+          notes?: string | null
+          owner_person_id?: string | null
+          parent_post_id?: string | null
+          production_id?: string | null
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_for?: string | null
+          status?: Database["public"]["Enums"]["social_post_status"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_posts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       target_accounts: {
         Row: {
           created_at: string
@@ -2172,6 +2576,29 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      social_asset_kind: "image" | "video" | "audio" | "gif" | "documento"
+      social_channel:
+        | "instagram"
+        | "facebook"
+        | "linkedin"
+        | "youtube"
+        | "tiktok"
+        | "otra"
+      social_format:
+        | "feed"
+        | "reel"
+        | "story"
+        | "carousel"
+        | "video"
+        | "live"
+        | "articulo"
+      social_post_status:
+        | "borrador"
+        | "en_revision"
+        | "aprobado"
+        | "programado"
+        | "publicado"
+        | "archivado"
       target_account_priority: "alta" | "media" | "baja"
       target_account_status:
         | "sin_contacto"
@@ -2437,6 +2864,32 @@ export const Constants = {
         "specialist",
         "curator",
         "other",
+      ],
+      social_asset_kind: ["image", "video", "audio", "gif", "documento"],
+      social_channel: [
+        "instagram",
+        "facebook",
+        "linkedin",
+        "youtube",
+        "tiktok",
+        "otra",
+      ],
+      social_format: [
+        "feed",
+        "reel",
+        "story",
+        "carousel",
+        "video",
+        "live",
+        "articulo",
+      ],
+      social_post_status: [
+        "borrador",
+        "en_revision",
+        "aprobado",
+        "programado",
+        "publicado",
+        "archivado",
       ],
       target_account_priority: ["alta", "media", "baja"],
       target_account_status: [
