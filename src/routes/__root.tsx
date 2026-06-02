@@ -80,13 +80,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Interesante Compañía — Roster de compositores" },
-      { name: "description", content: "Herramienta interna de Interesante Compañía para gestionar el roster de compositores audiovisuales." },
+      { title: "IC Cotarro" },
+      { name: "description", content: "eina interna" },
       { name: "author", content: "Interesante Compañía" },
-      { property: "og:title", content: "Interesante Compañía" },
-      { property: "og:description", content: "Gestión interna de compositores audiovisuales." },
+      { property: "og:title", content: "IC Cotarro" },
+      { property: "og:description", content: "eina interna" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "IC Cotarro" },
+      { name: "twitter:description", content: "eina interna" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/09e2b020-cc81-4504-9eb9-ff3e4550be55/id-preview-dab182fe--38d750cd-b153-4aae-aef4-892cbc9810b1.lovable.app-1780420636510.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/09e2b020-cc81-4504-9eb9-ff3e4550be55/id-preview-dab182fe--38d750cd-b153-4aae-aef4-892cbc9810b1.lovable.app-1780420636510.png" },
     ],
     links: [
       {
