@@ -842,42 +842,102 @@ export type Database = {
           },
         ]
       }
-      productions: {
+      production_documents: {
         Row: {
-          color: string | null
           created_at: string
-          director: string | null
           id: string
           kind: string | null
           notes: string | null
+          position: number
+          production_id: string
+          storage_path: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          production_id: string
+          storage_path?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          production_id?: string
+          storage_path?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      productions: {
+        Row: {
+          color: string | null
+          composer_id: string | null
+          created_at: string
+          delivery_date: string | null
+          director: string | null
+          fee_amount: number | null
+          ic_commission: number | null
+          id: string
+          kind: string | null
+          negotiator_person_id: string | null
+          notes: string | null
+          partner: string | null
           platform: string | null
           production_company: string | null
+          project_type: Database["public"]["Enums"]["production_kind"] | null
+          status: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at: string
           year: number | null
         }
         Insert: {
           color?: string | null
+          composer_id?: string | null
           created_at?: string
+          delivery_date?: string | null
           director?: string | null
+          fee_amount?: number | null
+          ic_commission?: number | null
           id?: string
           kind?: string | null
+          negotiator_person_id?: string | null
           notes?: string | null
+          partner?: string | null
           platform?: string | null
           production_company?: string | null
+          project_type?: Database["public"]["Enums"]["production_kind"] | null
+          status?: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at?: string
           year?: number | null
         }
         Update: {
           color?: string | null
+          composer_id?: string | null
           created_at?: string
+          delivery_date?: string | null
           director?: string | null
+          fee_amount?: number | null
+          ic_commission?: number | null
           id?: string
           kind?: string | null
+          negotiator_person_id?: string | null
           notes?: string | null
+          partner?: string | null
           platform?: string | null
           production_company?: string | null
+          project_type?: Database["public"]["Enums"]["production_kind"] | null
+          status?: Database["public"]["Enums"]["production_status"] | null
           title?: string
           updated_at?: string
           year?: number | null
@@ -981,6 +1041,33 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      production_kind:
+        | "cine"
+        | "serie"
+        | "plataforma"
+        | "publicidad"
+        | "videojuego"
+        | "documental"
+      production_status:
+        | "pitch_enviado"
+        | "negociacion"
+        | "contrato_firmado"
+        | "fechas_rodaje"
+        | "fechas_montaje"
+        | "entrega_visuales"
+        | "corte_intermedio_1"
+        | "corte_intermedio_2"
+        | "corte_intermedio_3"
+        | "entrega_musica"
+        | "mezclas"
+        | "sprint_1"
+        | "sprint_2"
+        | "sprint_3"
+        | "sprint_4"
+        | "sprint_5"
+        | "sprint_6"
+        | "facturado"
+        | "cobrado"
       representation_status:
         | "activo"
         | "pausa"
@@ -1157,6 +1244,35 @@ export const Constants = {
         "specialist",
         "curator",
         "other",
+      ],
+      production_kind: [
+        "cine",
+        "serie",
+        "plataforma",
+        "publicidad",
+        "videojuego",
+        "documental",
+      ],
+      production_status: [
+        "pitch_enviado",
+        "negociacion",
+        "contrato_firmado",
+        "fechas_rodaje",
+        "fechas_montaje",
+        "entrega_visuales",
+        "corte_intermedio_1",
+        "corte_intermedio_2",
+        "corte_intermedio_3",
+        "entrega_musica",
+        "mezclas",
+        "sprint_1",
+        "sprint_2",
+        "sprint_3",
+        "sprint_4",
+        "sprint_5",
+        "sprint_6",
+        "facturado",
+        "cobrado",
       ],
       representation_status: [
         "activo",
