@@ -35,7 +35,7 @@ function ProductionEdit() {
   });
 
   const [form, setForm] = useState({
-    title: "", kind: "", year: "" as string | number, production_company: "", director: "", platform: "", notes: "", color: "#6366f1",
+    title: "", kind: "", year: "" as string | number, production_company: "", director: "", platform: "", notes: "",
     project_type: "" as ProductionKind | "",
     status: "" as ProductionStatus | "",
     partner: "",
@@ -130,7 +130,6 @@ function ProductionEdit() {
         director: d.director ?? "",
         platform: d.platform ?? "",
         notes: d.notes ?? "",
-        color: d.color ?? "#6366f1",
         project_type: d.project_type ?? "",
         status: d.status ?? "",
         partner: d.partner ?? "",
@@ -167,7 +166,6 @@ function ProductionEdit() {
       director: form.director || null,
       platform: form.platform || null,
       notes: form.notes || null,
-      color: form.color || null,
       project_type: (form.project_type || null) as any,
       status: (form.status || null) as any,
       partner: form.partner || null,
