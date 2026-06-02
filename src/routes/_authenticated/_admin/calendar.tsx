@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/_admin/calendar")({
   component: GlobalCalendar,
 });
 
-type Category = "operativo" | "marketing" | "facturacion" | "personal";
+export type Category = "operativo" | "marketing" | "facturacion" | "personal";
 const CATEGORY_LABEL: Record<Category, string> = {
   operativo: "Operativo",
   marketing: "Marketing",
@@ -58,13 +58,29 @@ const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
 };
 
 function GlobalCalendar() {
+  return <CalendarBoard />;
+}
+
+export function CalendarBoard({
+  lockedCategory,
+  title = "Calendario general",
+  eyebrow = "Interesante Compañía",
+  description,
+}: {
+  lockedCategory?: Category;
+  title?: string;
+  eyebrow?: string;
+  description?: React.ReactNode;
+}) {
   const { user } = useAuth();
   const [view, setView] = useState<CalendarView>("month");
   const [anchor, setAnchor] = useState<Date>(new Date());
   const [onlyMine, setOnlyMine] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>({
-    operativo: true, marketing: true, facturacion: true, personal: true,
-  });
+  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(
+    lockedCategory
+      ? { operativo: false, marketing: false, facturacion: false, personal: false, [lockedCategory]: true }
+      : { operativo: true, marketing: true, facturacion: true, personal: true },
+  );
   const [activeSources, setActiveSources] = useState<Record<CalendarSource, boolean>>({
     people: true, productions: true, billing: true, opportunities: true, contracts: true, tasks: true,
   });
@@ -271,11 +287,15 @@ function GlobalCalendar() {
     <div className="mx-auto max-w-[1400px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
-          <p className="smallcaps text-muted-foreground">Interesante Compañía</p>
-          <h1 className="mt-1 font-display text-5xl">Calendario general</h1>
+          <p className="smallcaps text-muted-foreground">{eyebrow}</p>
+          <h1 className="mt-1 font-display text-5xl">{title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Una sola fuente: <span className="font-mono">calendar_events</span>. Tareas, contratos,
-            entregas, estrenos, check-ins y publicaciones aparecen automáticamente.
+            {description ?? (
+              <>
+                Una sola fuente: <span className="font-mono">calendar_events</span>. Tareas, contratos,
+                entregas, estrenos, check-ins y publicaciones aparecen automáticamente.
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -309,7 +329,7 @@ function GlobalCalendar() {
 
       {/* Category chips + Mis tareas */}
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
+        {!lockedCategory && (Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
           <FamilyChip
             key={c}
             active={activeCategories[c]}

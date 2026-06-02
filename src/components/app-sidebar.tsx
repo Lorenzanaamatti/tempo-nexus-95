@@ -56,6 +56,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
   ];
   const marketingItems: NavItem[] = [
+    { title: "Calendario MKTG", to: "/marketing/calendar", icon: CalendarDays, active: pathname.startsWith("/marketing/calendar") },
     { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
     { title: "Decks de venta", to: "/marketing/decks", icon: Presentation, active: pathname.startsWith("/marketing/decks") },
     { title: "Clipping", to: "/marketing/clippings", icon: Newspaper, active: pathname.startsWith("/marketing/clippings") },
