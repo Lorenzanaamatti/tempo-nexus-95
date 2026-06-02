@@ -73,12 +73,24 @@ function PeopleIndex() {
   async function create() {
     if (!newName.trim()) return;
     setCreating(true);
-    const { error } = await supabase.from("people").insert({ full_name: newName.trim(), role: newRole });
+    let error: { message: string } | null = null;
+    if (newRole === "ic_team") {
+      const res = await supabase.from("people").insert({ full_name: newName.trim(), role: newRole });
+      error = res.error;
+    } else {
+      // Roster roles live in composers (sync trigger mirrors them into people).
+      const base = newName.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "persona";
+      const slug = `${base}-${crypto.randomUUID().slice(0, 6)}`;
+      const res = await supabase.from("composers").insert({ full_name: newName.trim(), slug, roster_role: newRole });
+      error = res.error;
+    }
     setCreating(false);
     if (error) return toast.error(error.message);
     setNewName("");
     toast.success("Persona añadida");
     qc.invalidateQueries({ queryKey: ["people"] });
+    qc.invalidateQueries({ queryKey: ["roster-all"] });
+    qc.invalidateQueries({ queryKey: ["composers"] });
   }
 
   return (
