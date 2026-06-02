@@ -689,7 +689,7 @@ function Inner({
         />
       </Section>
 
-      <SaveButton floating onClick={saveCore} saving={saving} disabled={!dirty} title={dirty ? "Guardar cambios" : "Todo guardado"} />
+      <SaveButton floating onClick={saveCore} saving={saving} title={dirty ? "Guardar cambios" : "Guardar ficha"} />
     </div>
   );
 }
