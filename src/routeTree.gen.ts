@@ -42,6 +42,7 @@ import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './rou
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
+import { Route as AuthenticatedAdminMarketingTemplatesIndexRouteImport } from './routes/_authenticated/_admin/marketing.templates.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
 import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './routes/_authenticated/_admin/marketing.decks.index'
 import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
@@ -238,6 +239,12 @@ const AuthenticatedAdminComposersComposerIdRoute =
     path: '/composers/$composerId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingTemplatesIndexRoute =
+  AuthenticatedAdminMarketingTemplatesIndexRouteImport.update({
+    id: '/marketing/templates/',
+    path: '/marketing/templates/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingTargetAccountsIndexRoute =
   AuthenticatedAdminMarketingTargetAccountsIndexRouteImport.update({
     id: '/marketing/target-accounts/',
@@ -313,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
+  '/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -351,6 +359,7 @@ export interface FileRoutesByTo {
   '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
+  '/marketing/templates': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -393,6 +402,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/_authenticated/_admin/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
+  '/_authenticated/_admin/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/marketing/clippings/'
     | '/marketing/decks/'
     | '/marketing/target-accounts/'
+    | '/marketing/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/marketing/clippings'
     | '/marketing/decks'
     | '/marketing/target-accounts'
+    | '/marketing/templates'
   id:
     | '__root__'
     | '/_authenticated'
@@ -513,6 +525,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/clippings/'
     | '/_authenticated/_admin/marketing/decks/'
     | '/_authenticated/_admin/marketing/target-accounts/'
+    | '/_authenticated/_admin/marketing/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -753,6 +766,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersComposerIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/templates/': {
+      id: '/_authenticated/_admin/marketing/templates/'
+      path: '/marketing/templates'
+      fullPath: '/marketing/templates/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingTemplatesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/target-accounts/': {
       id: '/_authenticated/_admin/marketing/target-accounts/'
       path: '/marketing/target-accounts'
@@ -824,6 +844,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMarketingClippingsIndexRoute: typeof AuthenticatedAdminMarketingClippingsIndexRoute
   AuthenticatedAdminMarketingDecksIndexRoute: typeof AuthenticatedAdminMarketingDecksIndexRoute
   AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
+  AuthenticatedAdminMarketingTemplatesIndexRoute: typeof AuthenticatedAdminMarketingTemplatesIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -867,6 +888,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketingDecksIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsIndexRoute:
     AuthenticatedAdminMarketingTargetAccountsIndexRoute,
+  AuthenticatedAdminMarketingTemplatesIndexRoute:
+    AuthenticatedAdminMarketingTemplatesIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
