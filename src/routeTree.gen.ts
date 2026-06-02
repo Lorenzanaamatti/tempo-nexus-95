@@ -32,12 +32,14 @@ import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminOpportunitiesIndexRouteImport } from './routes/_authenticated/_admin/opportunities.index'
 import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
+import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
 import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from './routes/_authenticated/_admin/opportunities.$opportunityId'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
+import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 
@@ -170,6 +172,12 @@ const AuthenticatedAdminDirectorsIndexRoute =
     path: '/directors/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminContractsIndexRoute =
+  AuthenticatedAdminContractsIndexRouteImport.update({
+    id: '/contracts/',
+    path: '/contracts/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminComposersIndexRoute =
   AuthenticatedAdminComposersIndexRouteImport.update({
     id: '/composers/',
@@ -206,6 +214,12 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
     path: '/directors/$directorId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminContractsContractIdRoute =
+  AuthenticatedAdminContractsContractIdRouteImport.update({
+    id: '/contracts/$contractId',
+    path: '/contracts/$contractId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminComposersNewRoute =
   AuthenticatedAdminComposersNewRouteImport.update({
     id: '/composers/new',
@@ -237,12 +251,14 @@ export interface FileRoutesByFullPath {
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -267,12 +283,14 @@ export interface FileRoutesByTo {
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
+  '/contracts': typeof AuthenticatedAdminContractsIndexRoute
   '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
@@ -301,12 +319,14 @@ export interface FileRoutesById {
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/_authenticated/_admin/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -334,12 +354,14 @@ export interface FileRouteTypes {
     | '/portal/'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/contracts/$contractId'
     | '/directors/$directorId'
     | '/opportunities/$opportunityId'
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/composers/'
+    | '/contracts/'
     | '/directors/'
     | '/opportunities/'
     | '/people/'
@@ -364,12 +386,14 @@ export interface FileRouteTypes {
     | '/portal'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/contracts/$contractId'
     | '/directors/$directorId'
     | '/opportunities/$opportunityId'
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/composers'
+    | '/contracts'
     | '/directors'
     | '/opportunities'
     | '/people'
@@ -397,12 +421,14 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
+    | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/opportunities/$opportunityId'
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
+    | '/_authenticated/_admin/contracts/'
     | '/_authenticated/_admin/directors/'
     | '/_authenticated/_admin/opportunities/'
     | '/_authenticated/_admin/people/'
@@ -579,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/contracts/': {
+      id: '/_authenticated/_admin/contracts/'
+      path: '/contracts'
+      fullPath: '/contracts/'
+      preLoaderRoute: typeof AuthenticatedAdminContractsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/composers/': {
       id: '/_authenticated/_admin/composers/'
       path: '/composers'
@@ -621,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/contracts/$contractId': {
+      id: '/_authenticated/_admin/contracts/$contractId'
+      path: '/contracts/$contractId'
+      fullPath: '/contracts/$contractId'
+      preLoaderRoute: typeof AuthenticatedAdminContractsContractIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/composers/new': {
       id: '/_authenticated/_admin/composers/new'
       path: '/composers/new'
@@ -644,12 +684,14 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
+  AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
+  AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
@@ -665,6 +707,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
+  AuthenticatedAdminContractsContractIdRoute:
+    AuthenticatedAdminContractsContractIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminOpportunitiesOpportunityIdRoute:
@@ -675,6 +719,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProductionsProductionIdRoute:
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
+  AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
@@ -739,3 +784,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
