@@ -1595,7 +1595,21 @@ export type Database = {
       availability_status: "available" | "partial" | "unavailable"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
-      calendar_subject_type: "person" | "production"
+      calendar_subject_type:
+        | "person"
+        | "production"
+        | "opportunity"
+        | "composer"
+        | "contract"
+        | "production_company"
+        | "platform"
+        | "festival"
+        | "award"
+        | "grant"
+        | "campaign"
+        | "media_outlet"
+        | "media_coverage"
+        | "public_appearance"
       composer_team_role:
         | "agente"
         | "manager"
@@ -1816,7 +1830,22 @@ export const Constants = {
       availability_status: ["available", "partial", "unavailable"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
-      calendar_subject_type: ["person", "production"],
+      calendar_subject_type: [
+        "person",
+        "production",
+        "opportunity",
+        "composer",
+        "contract",
+        "production_company",
+        "platform",
+        "festival",
+        "award",
+        "grant",
+        "campaign",
+        "media_outlet",
+        "media_coverage",
+        "public_appearance",
+      ],
       composer_team_role: [
         "agente",
         "manager",
