@@ -12,7 +12,15 @@ import {
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export type AvailabilityKind = "libre" | "ocupado" | "vacaciones" | "personal" | "produccion";
+export type AvailabilityKind =
+  | "libre"
+  | "ocupado"
+  | "vacaciones"
+  | "personal"
+  | "produccion"
+  | "facturacion"
+  | "pago"
+  | "cobro";
 
 export const AVAILABILITY_LABELS: Record<AvailabilityKind, string> = {
   libre: "Libre",
@@ -20,6 +28,9 @@ export const AVAILABILITY_LABELS: Record<AvailabilityKind, string> = {
   vacaciones: "Vacaciones",
   personal: "Personal",
   produccion: "Producción",
+  facturacion: "Vencimiento factura",
+  pago: "Facturado",
+  cobro: "Cobrado",
 };
 
 export const AVAILABILITY_COLORS: Record<AvailabilityKind, string> = {
@@ -28,6 +39,9 @@ export const AVAILABILITY_COLORS: Record<AvailabilityKind, string> = {
   vacaciones: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40",
   personal: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/40",
   produccion: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/40",
+  facturacion: "bg-amber-600/15 text-amber-800 dark:text-amber-200 border-amber-600/40",
+  pago: "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/40",
+  cobro: "bg-emerald-600/20 text-emerald-800 dark:text-emerald-200 border-emerald-600/50",
 };
 
 type Period = {
