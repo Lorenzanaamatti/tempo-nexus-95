@@ -154,12 +154,23 @@ export type Database = {
       }
       calendar_events: {
         Row: {
+          assignee_person_id: string | null
+          calendar_category: Database["public"]["Enums"]["calendar_category"]
           created_at: string
           end_date: string
           id: string
-          kind: Database["public"]["Enums"]["availability_kind"]
+          kind: string
           note: string | null
+          source_action_id: string | null
+          source_composer_id: string | null
+          source_contract_id: string | null
+          source_kind: string | null
+          source_opp_action_id: string | null
+          source_opportunity_id: string | null
+          source_production_id: string | null
+          source_social_post_id: string | null
           source_sprint_id: string | null
+          source_target_account_id: string | null
           start_date: string
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
@@ -167,12 +178,23 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assignee_person_id?: string | null
+          calendar_category?: Database["public"]["Enums"]["calendar_category"]
           created_at?: string
           end_date: string
           id?: string
-          kind?: Database["public"]["Enums"]["availability_kind"]
+          kind?: string
           note?: string | null
+          source_action_id?: string | null
+          source_composer_id?: string | null
+          source_contract_id?: string | null
+          source_kind?: string | null
+          source_opp_action_id?: string | null
+          source_opportunity_id?: string | null
+          source_production_id?: string | null
+          source_social_post_id?: string | null
           source_sprint_id?: string | null
+          source_target_account_id?: string | null
           start_date: string
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
@@ -180,12 +202,23 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assignee_person_id?: string | null
+          calendar_category?: Database["public"]["Enums"]["calendar_category"]
           created_at?: string
           end_date?: string
           id?: string
-          kind?: Database["public"]["Enums"]["availability_kind"]
+          kind?: string
           note?: string | null
+          source_action_id?: string | null
+          source_composer_id?: string | null
+          source_contract_id?: string | null
+          source_kind?: string | null
+          source_opp_action_id?: string | null
+          source_opportunity_id?: string | null
+          source_production_id?: string | null
+          source_social_post_id?: string | null
           source_sprint_id?: string | null
+          source_target_account_id?: string | null
           start_date?: string
           subject_id?: string
           subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
@@ -2471,6 +2504,7 @@ export type Database = {
       availability_status: "available" | "partial" | "unavailable"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
+      calendar_category: "operativo" | "marketing" | "facturacion" | "personal"
       calendar_subject_type:
         | "person"
         | "production"
@@ -2749,6 +2783,7 @@ export const Constants = {
       availability_status: ["available", "partial", "unavailable"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
+      calendar_category: ["operativo", "marketing", "facturacion", "personal"],
       calendar_subject_type: [
         "person",
         "production",
