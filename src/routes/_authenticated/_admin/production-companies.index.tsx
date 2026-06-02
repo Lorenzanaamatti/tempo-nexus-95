@@ -33,8 +33,8 @@ function ProductionCompaniesIndex() {
     qc.invalidateQueries({ queryKey: ["production-companies"] });
   }
 
-  async function update(id: string, patch: Record<string, unknown>) {
-    const { error } = await supabase.from("production_companies").update(patch).eq("id", id);
+  async function update(id: string, patch: Record<string, string | null>) {
+    const { error } = await supabase.from("production_companies").update(patch as any).eq("id", id);
     if (error) toast.error(error.message);
     else qc.invalidateQueries({ queryKey: ["production-companies"] });
   }

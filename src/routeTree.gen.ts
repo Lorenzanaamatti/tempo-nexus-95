@@ -26,6 +26,7 @@ import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
+import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
@@ -126,6 +127,12 @@ const AuthenticatedAdminProductionsIndexRoute =
     path: '/productions/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminProductionCompaniesIndexRoute =
+  AuthenticatedAdminProductionCompaniesIndexRouteImport.update({
+    id: '/production-companies/',
+    path: '/production-companies/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPeopleIndexRoute =
   AuthenticatedAdminPeopleIndexRouteImport.update({
     id: '/people/',
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
+  '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
+  '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRoutesById {
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
+  '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers/'
     | '/people/'
+    | '/production-companies/'
     | '/productions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers'
     | '/people'
+    | '/production-companies'
     | '/productions'
   id:
     | '__root__'
@@ -304,6 +316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/people/'
+    | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
   fileRoutesById: FileRoutesById
 }
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductionsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/production-companies/': {
+      id: '/_authenticated/_admin/production-companies/'
+      path: '/production-companies'
+      fullPath: '/production-companies/'
+      preLoaderRoute: typeof AuthenticatedAdminProductionCompaniesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/people/': {
       id: '/_authenticated/_admin/people/'
       path: '/people'
@@ -487,6 +507,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
+  AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
 }
 
@@ -501,6 +522,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminPeopleIndexRoute: AuthenticatedAdminPeopleIndexRoute,
+  AuthenticatedAdminProductionCompaniesIndexRoute:
+    AuthenticatedAdminProductionCompaniesIndexRoute,
   AuthenticatedAdminProductionsIndexRoute:
     AuthenticatedAdminProductionsIndexRoute,
 }
