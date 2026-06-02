@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
+import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
@@ -139,6 +140,12 @@ const AuthenticatedAdminPeopleIndexRoute =
     path: '/people/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDirectorsIndexRoute =
+  AuthenticatedAdminDirectorsIndexRouteImport.update({
+    id: '/directors/',
+    path: '/directors/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminComposersIndexRoute =
   AuthenticatedAdminComposersIndexRouteImport.update({
     id: '/composers/',
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
@@ -213,6 +221,7 @@ export interface FileRoutesByTo {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
+  '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
+  '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/productions/$productionId'
     | '/composers/'
+    | '/directors/'
     | '/people/'
     | '/production-companies/'
     | '/productions/'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/productions/$productionId'
     | '/composers'
+    | '/directors'
     | '/people'
     | '/production-companies'
     | '/productions'
@@ -315,6 +327,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
+    | '/_authenticated/_admin/directors/'
     | '/_authenticated/_admin/people/'
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
@@ -460,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeopleIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/directors/': {
+      id: '/_authenticated/_admin/directors/'
+      path: '/directors'
+      fullPath: '/directors/'
+      preLoaderRoute: typeof AuthenticatedAdminDirectorsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/composers/': {
       id: '/_authenticated/_admin/composers/'
       path: '/composers'
@@ -506,6 +526,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
+  AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
@@ -521,6 +542,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProductionsProductionIdRoute:
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
+  AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminPeopleIndexRoute: AuthenticatedAdminPeopleIndexRoute,
   AuthenticatedAdminProductionCompaniesIndexRoute:
     AuthenticatedAdminProductionCompaniesIndexRoute,
@@ -581,3 +603,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
