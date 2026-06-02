@@ -1,3 +1,4 @@
+import { SaveButton } from "@/components/save-button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { photoUrl, uploadComposerPhoto } from "@/lib/composers-api";
@@ -195,7 +196,7 @@ function PhotoCard({
             <Loader2 className="h-3 w-3 animate-spin" /> Guardando
           </span>
         ) : dirty ? (
-          <Button size="sm" onClick={save}>Guardar</Button>
+          <SaveButton size="sm" onClick={save} />
         ) : justSaved ? (
           <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <Check className="h-3 w-3" /> Guardado

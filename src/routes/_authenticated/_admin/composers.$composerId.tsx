@@ -18,6 +18,7 @@ import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
+import { SaveButton } from "@/components/save-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
   component: ComposerEditPage,
@@ -254,9 +255,6 @@ function Inner({
         <div className="flex gap-2">
           <Button size="sm" variant="ghost" onClick={deleteComposer}>
             <Trash2 className="mr-1 h-3 w-3" /> Eliminar
-          </Button>
-          <Button size="sm" onClick={saveCore} disabled={!dirty || saving}>
-            {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Guardado"}
           </Button>
         </div>
       </div>
@@ -691,11 +689,7 @@ function Inner({
         />
       </Section>
 
-      <div className="sticky bottom-4 mt-12 flex justify-end">
-        <Button onClick={saveCore} disabled={!dirty || saving} size="lg">
-          {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Todo guardado"}
-        </Button>
-      </div>
+      <SaveButton floating onClick={saveCore} saving={saving} disabled={!dirty} title={dirty ? "Guardar cambios" : "Todo guardado"} />
     </div>
   );
 }

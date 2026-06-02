@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Trash2, Plus, Check } from "lucide-react";
+import { SaveButton } from "@/components/save-button";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
 
@@ -299,9 +300,6 @@ function OpportunityDetail() {
           <Label>Notas</Label>
           <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
-        <div className="sm:col-span-2 flex justify-end">
-          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
-        </div>
       </section>
 
       <section className="mt-10">
@@ -365,6 +363,7 @@ function OpportunityDetail() {
           </ul>
         )}
       </section>
+      <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
 }

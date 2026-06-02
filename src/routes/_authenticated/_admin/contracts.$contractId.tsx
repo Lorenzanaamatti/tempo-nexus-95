@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { SaveButton } from "@/components/save-button";
 import {
   CONTRACT_STATUS_LABEL,
   CONTRACT_LANG_LABEL,
@@ -232,10 +233,8 @@ function ContractDetail() {
           <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
 
-        <div className="sm:col-span-2 flex justify-end">
-          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
-        </div>
       </section>
+      <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
 }

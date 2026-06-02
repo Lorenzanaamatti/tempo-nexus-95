@@ -1,3 +1,4 @@
+import { SaveButton } from "@/components/save-button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -185,11 +186,7 @@ function PeriodRow({ period, onRemove }: { period: Period; onRemove: () => void 
         <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Opcional" className="bg-background" />
       </div>
       <div className="flex items-center gap-1">
-        {dirty && (
-          <Button size="sm" onClick={save} disabled={saving}>
-            {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Guardar"}
-          </Button>
-        )}
+        {dirty && <SaveButton size="sm" onClick={save} saving={saving} />}
         <Button size="sm" variant="ghost" onClick={onRemove} aria-label="Eliminar">
           <Trash2 className="h-3 w-3" />
         </Button>
