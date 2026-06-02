@@ -16,6 +16,13 @@ import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
+import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
+import { Route as AuthenticatedPortalProyectosRouteImport } from './routes/_authenticated/portal/proyectos'
+import { Route as AuthenticatedPortalPropuestasRouteImport } from './routes/_authenticated/portal/propuestas'
+import { Route as AuthenticatedPortalMensajesRouteImport } from './routes/_authenticated/portal/mensajes'
+import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_authenticated/portal/contratos'
+import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
+import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
@@ -59,6 +66,48 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPortalIndexRoute =
+  AuthenticatedPortalIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalProyectosRoute =
+  AuthenticatedPortalProyectosRouteImport.update({
+    id: '/proyectos',
+    path: '/proyectos',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalPropuestasRoute =
+  AuthenticatedPortalPropuestasRouteImport.update({
+    id: '/propuestas',
+    path: '/propuestas',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalMensajesRoute =
+  AuthenticatedPortalMensajesRouteImport.update({
+    id: '/mensajes',
+    path: '/mensajes',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalContratosRoute =
+  AuthenticatedPortalContratosRouteImport.update({
+    id: '/contratos',
+    path: '/contratos',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalCarreraRoute =
+  AuthenticatedPortalCarreraRouteImport.update({
+    id: '/carrera',
+    path: '/carrera',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalAgendaRoute =
+  AuthenticatedPortalAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedAdminRosterRoute =
   AuthenticatedAdminRosterRouteImport.update({
     id: '/roster',
@@ -119,9 +168,16 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
-  '/portal': typeof AuthenticatedPortalRoute
+  '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/calendar': typeof AuthenticatedAdminCalendarRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
+  '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
+  '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
+  '/portal/': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -135,9 +191,15 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
-  '/portal': typeof AuthenticatedPortalRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
+  '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
+  '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
+  '/portal': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -153,10 +215,17 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
-  '/_authenticated/portal': typeof AuthenticatedPortalRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
+  '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
+  '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/_authenticated/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/_authenticated/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/_authenticated/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
+  '/_authenticated/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
+  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
@@ -175,6 +244,13 @@ export interface FileRouteTypes {
     | '/portal'
     | '/calendar'
     | '/roster'
+    | '/portal/agenda'
+    | '/portal/carrera'
+    | '/portal/contratos'
+    | '/portal/mensajes'
+    | '/portal/propuestas'
+    | '/portal/proyectos'
+    | '/portal/'
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
@@ -188,9 +264,15 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
-    | '/portal'
     | '/calendar'
     | '/roster'
+    | '/portal/agenda'
+    | '/portal/carrera'
+    | '/portal/contratos'
+    | '/portal/mensajes'
+    | '/portal/propuestas'
+    | '/portal/proyectos'
+    | '/portal'
     | '/composers/$composerId'
     | '/composers/new'
     | '/people/$personId'
@@ -209,6 +291,13 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/_admin/calendar'
     | '/_authenticated/_admin/roster'
+    | '/_authenticated/portal/agenda'
+    | '/_authenticated/portal/carrera'
+    | '/_authenticated/portal/contratos'
+    | '/_authenticated/portal/mensajes'
+    | '/_authenticated/portal/propuestas'
+    | '/_authenticated/portal/proyectos'
+    | '/_authenticated/portal/'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/people/$personId'
@@ -273,6 +362,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/portal/': {
+      id: '/_authenticated/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/proyectos': {
+      id: '/_authenticated/portal/proyectos'
+      path: '/proyectos'
+      fullPath: '/portal/proyectos'
+      preLoaderRoute: typeof AuthenticatedPortalProyectosRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/propuestas': {
+      id: '/_authenticated/portal/propuestas'
+      path: '/propuestas'
+      fullPath: '/portal/propuestas'
+      preLoaderRoute: typeof AuthenticatedPortalPropuestasRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/mensajes': {
+      id: '/_authenticated/portal/mensajes'
+      path: '/mensajes'
+      fullPath: '/portal/mensajes'
+      preLoaderRoute: typeof AuthenticatedPortalMensajesRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/contratos': {
+      id: '/_authenticated/portal/contratos'
+      path: '/contratos'
+      fullPath: '/portal/contratos'
+      preLoaderRoute: typeof AuthenticatedPortalContratosRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/carrera': {
+      id: '/_authenticated/portal/carrera'
+      path: '/carrera'
+      fullPath: '/portal/carrera'
+      preLoaderRoute: typeof AuthenticatedPortalCarreraRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/agenda': {
+      id: '/_authenticated/portal/agenda'
+      path: '/agenda'
+      fullPath: '/portal/agenda'
+      preLoaderRoute: typeof AuthenticatedPortalAgendaRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/_admin/roster': {
       id: '/_authenticated/_admin/roster'
@@ -370,11 +508,34 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedPortalRouteChildren {
+  AuthenticatedPortalAgendaRoute: typeof AuthenticatedPortalAgendaRoute
+  AuthenticatedPortalCarreraRoute: typeof AuthenticatedPortalCarreraRoute
+  AuthenticatedPortalContratosRoute: typeof AuthenticatedPortalContratosRoute
+  AuthenticatedPortalMensajesRoute: typeof AuthenticatedPortalMensajesRoute
+  AuthenticatedPortalPropuestasRoute: typeof AuthenticatedPortalPropuestasRoute
+  AuthenticatedPortalProyectosRoute: typeof AuthenticatedPortalProyectosRoute
+  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
+}
+
+const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
+  AuthenticatedPortalAgendaRoute: AuthenticatedPortalAgendaRoute,
+  AuthenticatedPortalCarreraRoute: AuthenticatedPortalCarreraRoute,
+  AuthenticatedPortalContratosRoute: AuthenticatedPortalContratosRoute,
+  AuthenticatedPortalMensajesRoute: AuthenticatedPortalMensajesRoute,
+  AuthenticatedPortalPropuestasRoute: AuthenticatedPortalPropuestasRoute,
+  AuthenticatedPortalProyectosRoute: AuthenticatedPortalProyectosRoute,
+  AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
+}
+
+const AuthenticatedPortalRouteWithChildren =
+  AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
-  AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -382,7 +543,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
-  AuthenticatedPortalRoute: AuthenticatedPortalRoute,
+  AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

@@ -14,11 +14,17 @@ function Agenda() {
     enabled: !!composerId,
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
+      const { data: person } = await supabase
+        .from("people")
+        .select("id")
+        .eq("composer_id", composerId!)
+        .maybeSingle();
+      if (!person) return [];
       const { data } = await supabase
         .from("calendar_events")
         .select("id, title, note, kind, start_date, end_date")
-        .eq("subject_type", "composer")
-        .eq("subject_id", composerId!)
+        .eq("subject_type", "person")
+        .eq("subject_id", person.id)
         .gte("end_date", today)
         .order("start_date");
       return data ?? [];
