@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Home, User, FolderKanban, Inbox, FileSignature, CalendarDays, MessagesSquare } from "lucide-react";
+import { Home, User, FolderKanban, Inbox, FileSignature, CalendarDays, MessagesSquare, LineChart, Receipt } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalLayout,
@@ -9,8 +9,10 @@ type NavItem = { to: string; label: string; icon: typeof Home; exact?: boolean }
 const NAV: NavItem[] = [
   { to: "/portal", label: "Inicio", icon: Home, exact: true },
   { to: "/portal/carrera", label: "Mi carrera", icon: User },
+  { to: "/portal/kpis", label: "KPIs", icon: LineChart },
   { to: "/portal/proyectos", label: "Proyectos activos", icon: FolderKanban },
   { to: "/portal/propuestas", label: "Propuestas en curso", icon: Inbox },
+  { to: "/portal/facturacion", label: "Facturación", icon: Receipt },
   { to: "/portal/contratos", label: "Contratos y derechos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda y reuniones", icon: CalendarDays },
   { to: "/portal/mensajes", label: "Mensajes y actualizaciones", icon: MessagesSquare },
