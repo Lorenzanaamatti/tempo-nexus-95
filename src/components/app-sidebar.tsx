@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText } from "lucide-react";
+import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -54,7 +54,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
     { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
-    { title: "Directorio completo", to: "/people", search: { role: "all" }, icon: Users, active: peopleRole === "all" },
   ];
 
   return (
