@@ -90,10 +90,10 @@ function ComposersIndex() {
                 key={c.id}
                 to="/composers/$composerId"
                 params={{ composerId: c.id }}
-                className="group block"
+                className="group block h-full"
               >
-                <article className="glass-panel overflow-hidden rounded-sm transition group-hover:border-primary/60">
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+                <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition group-hover:border-primary/60">
+                  <div className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
                     {url ? (
                       <img
                         src={url}
@@ -106,15 +106,15 @@ function ComposersIndex() {
                       </div>
                     )}
                   </div>
-                  <div className="p-5">
+                  <div className="flex flex-1 flex-col p-5">
                     <h2 className="font-display text-2xl">{c.full_name}</h2>
-                    <p className="text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ")}</p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+                    <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
                       {(c.tags ?? []).slice(0, 4).map((t: string) => (
                         <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
                       ))}
                     </div>
-                    <p className="mt-4 smallcaps text-muted-foreground">
+                    <p className="mt-auto pt-4 smallcaps text-muted-foreground">
                       {c.availability === "available" ? "Disponible" : c.availability === "partial" ? "Parcial" : "No disponible"}
                     </p>
                   </div>
