@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,22 +66,16 @@ function ProductionCompaniesIndex() {
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin productoras.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-border rounded-sm border border-border">
           {data.map((c: any) => (
-            <div key={c.id} className="rounded-sm border border-border p-4">
-              <div className="flex items-start justify-between gap-3">
-                <Input defaultValue={c.name} onBlur={(e) => e.target.value !== c.name && update(c.id, { name: e.target.value })} className="font-display text-lg" />
-                <Button variant="ghost" size="sm" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <Input defaultValue={c.contact_name ?? ""} placeholder="Contacto" onBlur={(e) => update(c.id, { contact_name: e.target.value || null })} />
-                <Input defaultValue={c.email ?? ""} placeholder="Email" onBlur={(e) => update(c.id, { email: e.target.value || null })} />
-                <Input defaultValue={c.phone ?? ""} placeholder="Teléfono" onBlur={(e) => update(c.id, { phone: e.target.value || null })} />
-                <Input defaultValue={c.website ?? ""} placeholder="Web" onBlur={(e) => update(c.id, { website: e.target.value || null })} />
-                <Input defaultValue={c.city ?? ""} placeholder="Ciudad" onBlur={(e) => update(c.id, { city: e.target.value || null })} />
-                <Input defaultValue={c.country ?? ""} placeholder="País" onBlur={(e) => update(c.id, { country: e.target.value || null })} />
-              </div>
-              <Textarea defaultValue={c.notes ?? ""} placeholder="Notas" rows={2} className="mt-2" onBlur={(e) => update(c.id, { notes: e.target.value || null })} />
+            <div key={c.id} className="flex items-center gap-3 px-4 py-3">
+              <Link to="/production-companies/$companyId" params={{ companyId: c.id }} className="flex-1">
+                <div className="font-display text-lg hover:underline">{c.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {[c.cif, c.city, c.country, c.email].filter(Boolean).join(" · ") || "Sin datos · abre para completar"}
+                </div>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
         </div>
