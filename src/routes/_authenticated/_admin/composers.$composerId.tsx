@@ -667,6 +667,25 @@ function Inner({
         />
       </Section>
 
+      {/* Documentos y materiales */}
+      <Section>
+        <RelationListEditor
+          title="Documentos y materiales"
+          table="composer_documents"
+          composerId={c.id}
+          rows={docs}
+          onChange={setDocs}
+          newDefaults={{ title: "Nuevo documento" }}
+          fields={[
+            { key: "title", label: "Título" },
+            { key: "kind", label: "Tipo", placeholder: "p.ej. Contrato, Press kit, Rider, EPK" },
+            { key: "url", label: "Enlace (Drive, Dropbox, web…)", type: "url", className: "sm:col-span-2" },
+            { key: "storage_path", label: "Ruta de archivo interno", placeholder: "composer-assets/…", className: "sm:col-span-2" },
+            { key: "notes", label: "Notas", type: "textarea", className: "sm:col-span-2" },
+          ]}
+        />
+      </Section>
+
       <div className="sticky bottom-4 mt-12 flex justify-end">
         <Button onClick={saveCore} disabled={!dirty || saving} size="lg">
           {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Todo guardado"}
@@ -687,6 +706,15 @@ function Section({ title, children }: { title?: string; children: React.ReactNod
       )}
       <div className="space-y-4">{children}</div>
     </section>
+  );
+}
+
+function KPI({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-sm border border-border bg-card/50 px-4 py-3">
+      <div className="smallcaps text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 font-display text-2xl">{value}</div>
+    </div>
   );
 }
 
