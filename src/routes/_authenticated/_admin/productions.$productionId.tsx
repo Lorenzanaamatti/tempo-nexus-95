@@ -40,6 +40,8 @@ function ProductionEdit() {
     fee_amount: "" as string | number,
     ic_commission: "" as string | number,
     delivery_date: "",
+    partner_company_id: "" as string,
+    director_id: "" as string,
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,9 +55,31 @@ function ProductionEdit() {
   });
 
   const peopleQ = useQuery({
-    queryKey: ["people-mini"],
+    queryKey: ["people-ic"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      const { data, error } = await supabase
+        .from("people")
+        .select("id, full_name, role")
+        .eq("role", "ic_team")
+        .order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const companiesQ = useQuery({
+    queryKey: ["production-companies-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const directorsQ = useQuery({
+    queryKey: ["directors-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
       if (error) throw error;
       return data ?? [];
     },
@@ -81,6 +105,8 @@ function ProductionEdit() {
         fee_amount: d.fee_amount ?? "",
         ic_commission: d.ic_commission ?? "",
         delivery_date: d.delivery_date ?? "",
+        partner_company_id: d.partner_company_id ?? "",
+        director_id: d.director_id ?? "",
       });
     }
   }, [data]);
@@ -104,6 +130,8 @@ function ProductionEdit() {
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
       delivery_date: form.delivery_date || null,
+      partner_company_id: form.partner_company_id || null,
+      director_id: form.director_id || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
