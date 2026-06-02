@@ -1,6 +1,9 @@
 import { addDays, addMonths, addQuarters, addYears, differenceInDays, eachDayOfInterval, eachMonthOfInterval, eachWeekOfInterval, format, startOfDay, startOfMonth, startOfQuarter, startOfWeek, startOfYear } from "date-fns";
 import { es } from "date-fns/locale";
 import type { AvailabilityKind } from "@/components/availability-editor";
+import type { ExtraKind } from "@/lib/calendar-sources";
+
+export type AnyKind = AvailabilityKind | ExtraKind;
 
 export type CalendarView =
   | "day"
@@ -130,7 +133,7 @@ export type TimelineEvent = {
   id: string;
   start: Date;
   end: Date;
-  kind: AvailabilityKind;
+  kind: AnyKind;
   title?: string;
   note?: string | null;
 };
