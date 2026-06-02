@@ -139,11 +139,11 @@ function GlobalCalendar() {
   });
 
   const opportunityActionsQ = useQuery({
-    queryKey: ["calendar-opp-actions"],
+    queryKey: ["calendar-actions"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("opportunity_actions")
-        .select("id, title, due_date, done, opportunity_id");
+      const { data, error } = await (supabase as any)
+        .from("actions")
+        .select("id, title, due_date, done, subject_type, subject_id, kind");
       if (error) throw error;
       return data ?? [];
     },
@@ -276,7 +276,7 @@ function GlobalCalendar() {
         // tareas asociadas
         if (activeSources.tasks && activeExtras.tarea) {
           for (const a of oppActions) {
-            if (a.opportunity_id !== o.id || !a.due_date) continue;
+            if (a.subject_type !== "opportunity" || a.subject_id !== o.id || !a.due_date) continue;
             const d = new Date(a.due_date + "T00:00:00");
             evs.push({ id: `act-${a.id}`, start: d, end: d, kind: "tarea", title: `${a.done ? "✓ " : ""}${a.title}`, note: o.title });
           }
