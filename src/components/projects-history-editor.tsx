@@ -258,10 +258,7 @@ function ProjectRow({ project, onRemove }: { project: Project; onRemove: () => v
           </Field>
 
           <div className="flex justify-end">
-            <Button size="sm" onClick={save} disabled={!dirty || saving}>
-              {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-              {saving ? "Guardando…" : dirty ? "Guardar proyecto" : "Guardado"}
-            </Button>
+            <SaveButton size="sm" onClick={save} saving={saving} disabled={!dirty} title={dirty ? "Guardar proyecto" : "Guardado"} />
           </div>
         </div>
       )}
