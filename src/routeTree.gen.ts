@@ -20,6 +20,8 @@ import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPortalProyectosRouteImport } from './routes/_authenticated/portal/proyectos'
 import { Route as AuthenticatedPortalPropuestasRouteImport } from './routes/_authenticated/portal/propuestas'
 import { Route as AuthenticatedPortalMensajesRouteImport } from './routes/_authenticated/portal/mensajes'
+import { Route as AuthenticatedPortalKpisRouteImport } from './routes/_authenticated/portal/kpis'
+import { Route as AuthenticatedPortalFacturacionRouteImport } from './routes/_authenticated/portal/facturacion'
 import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_authenticated/portal/contratos'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
@@ -106,6 +108,17 @@ const AuthenticatedPortalMensajesRoute =
   AuthenticatedPortalMensajesRouteImport.update({
     id: '/mensajes',
     path: '/mensajes',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalKpisRoute = AuthenticatedPortalKpisRouteImport.update({
+  id: '/kpis',
+  path: '/kpis',
+  getParentRoute: () => AuthenticatedPortalRoute,
+} as any)
+const AuthenticatedPortalFacturacionRoute =
+  AuthenticatedPortalFacturacionRouteImport.update({
+    id: '/facturacion',
+    path: '/facturacion',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
 const AuthenticatedPortalContratosRoute =
@@ -301,6 +314,8 @@ export interface FileRoutesByFullPath {
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
+  '/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
@@ -341,6 +356,8 @@ export interface FileRoutesByTo {
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
+  '/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
@@ -385,6 +402,8 @@ export interface FileRoutesById {
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/_authenticated/portal/contratos': typeof AuthenticatedPortalContratosRoute
+  '/_authenticated/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
+  '/_authenticated/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/_authenticated/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/_authenticated/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/_authenticated/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
@@ -428,6 +447,8 @@ export interface FileRouteTypes {
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/contratos'
+    | '/portal/facturacion'
+    | '/portal/kpis'
     | '/portal/mensajes'
     | '/portal/propuestas'
     | '/portal/proyectos'
@@ -468,6 +489,8 @@ export interface FileRouteTypes {
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/contratos'
+    | '/portal/facturacion'
+    | '/portal/kpis'
     | '/portal/mensajes'
     | '/portal/propuestas'
     | '/portal/proyectos'
@@ -511,6 +534,8 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
     | '/_authenticated/portal/contratos'
+    | '/_authenticated/portal/facturacion'
+    | '/_authenticated/portal/kpis'
     | '/_authenticated/portal/mensajes'
     | '/_authenticated/portal/propuestas'
     | '/_authenticated/portal/proyectos'
@@ -623,6 +648,20 @@ declare module '@tanstack/react-router' {
       path: '/mensajes'
       fullPath: '/portal/mensajes'
       preLoaderRoute: typeof AuthenticatedPortalMensajesRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/kpis': {
+      id: '/_authenticated/portal/kpis'
+      path: '/kpis'
+      fullPath: '/portal/kpis'
+      preLoaderRoute: typeof AuthenticatedPortalKpisRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/facturacion': {
+      id: '/_authenticated/portal/facturacion'
+      path: '/facturacion'
+      fullPath: '/portal/facturacion'
+      preLoaderRoute: typeof AuthenticatedPortalFacturacionRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/portal/contratos': {
@@ -922,6 +961,8 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalAgendaRoute: typeof AuthenticatedPortalAgendaRoute
   AuthenticatedPortalCarreraRoute: typeof AuthenticatedPortalCarreraRoute
   AuthenticatedPortalContratosRoute: typeof AuthenticatedPortalContratosRoute
+  AuthenticatedPortalFacturacionRoute: typeof AuthenticatedPortalFacturacionRoute
+  AuthenticatedPortalKpisRoute: typeof AuthenticatedPortalKpisRoute
   AuthenticatedPortalMensajesRoute: typeof AuthenticatedPortalMensajesRoute
   AuthenticatedPortalPropuestasRoute: typeof AuthenticatedPortalPropuestasRoute
   AuthenticatedPortalProyectosRoute: typeof AuthenticatedPortalProyectosRoute
@@ -932,6 +973,8 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalAgendaRoute: AuthenticatedPortalAgendaRoute,
   AuthenticatedPortalCarreraRoute: AuthenticatedPortalCarreraRoute,
   AuthenticatedPortalContratosRoute: AuthenticatedPortalContratosRoute,
+  AuthenticatedPortalFacturacionRoute: AuthenticatedPortalFacturacionRoute,
+  AuthenticatedPortalKpisRoute: AuthenticatedPortalKpisRoute,
   AuthenticatedPortalMensajesRoute: AuthenticatedPortalMensajesRoute,
   AuthenticatedPortalPropuestasRoute: AuthenticatedPortalPropuestasRoute,
   AuthenticatedPortalProyectosRoute: AuthenticatedPortalProyectosRoute,

@@ -30,8 +30,11 @@ function Mensajes() {
           Comunicación con el equipo IC y novedades sobre tu representación.
         </p>
       </header>
-      <div className="rounded-sm border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-        El canal de mensajes se activará próximamente. Mientras tanto, contacta a tu agente por los canales habituales.
+      <div className="rounded-sm border border-dashed border-border p-6 text-sm text-muted-foreground">
+        <p className="font-display text-base text-foreground">Integración con Mattermost · próximamente</p>
+        <p className="mt-2">
+          Los mensajes con el equipo IC se vincularán a la plataforma <strong>Mattermost</strong> en una próxima actualización. Mientras tanto, contacta con tu agente por los canales habituales.
+        </p>
       </div>
 
       <section className="space-y-3">

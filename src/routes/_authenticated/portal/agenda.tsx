@@ -42,6 +42,12 @@ function Agenda() {
         <h2 className="font-display text-3xl">Agenda y reuniones</h2>
         <p className="mt-2 text-sm text-muted-foreground">Tus próximos compromisos y citas.</p>
       </header>
+      <div className="rounded-sm border border-dashed border-border p-4 text-sm text-muted-foreground">
+        <p className="font-display text-base text-foreground">Solicitud de reuniones vía Calendly · próximamente</p>
+        <p className="mt-1">
+          La reserva de reuniones con tu agente se vinculará a <strong>Calendly</strong> en una próxima actualización.
+        </p>
+      </div>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : (
