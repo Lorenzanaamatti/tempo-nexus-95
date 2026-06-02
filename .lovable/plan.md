@@ -1,127 +1,74 @@
-# Plan: Transversal → Personas → Marketing
+## Módulo Marketing y Ventas — plan de construcción
 
-Tres fases secuenciales. Cada fase deja la app funcionando y abre la siguiente.
+Ya tenemos: **Cuentas objetivo** (con creación de oportunidad). Faltan **14 módulos**. Para no entregar 14 páginas a medias, los agrupo en 3 fases por afinidad funcional. Cada fase es independiente, así que podemos pausar/iterar entre fase y fase.
 
----
+### Estructura común
 
-## FASE C — Unificar tablas transversales
-
-Objetivo: que cualquier entidad (productora, compositor, festival, premio, plataforma, campaña…) pueda tener acciones y documentos sin duplicar tablas.
-
-### C1. Tabla `actions` (polimórfica)
-Sustituye / unifica `opportunity_actions` y futuras tareas dispersas.
-
-Campos clave:
-- `subject_type` (enum compartido con `calendar_events`: `production | composer | opportunity | contract | production_company | platform | festival | award | grant | campaign | person`)
-- `subject_id`
-- `title`, `notes`
-- `due_date`, `done`, `done_at`
-- `assignee_person_id` (miembro de IC responsable)
-- `kind` (`tarea | seguimiento | llamada | email | reunión | marketing`)
-
-Migración de datos: copiar `opportunity_actions` → `actions` con `subject_type='opportunity'`. Mantener la tabla vieja como `view` o eliminarla tras adaptar la UI.
-
-### C2. Tabla `documents` (polimórfica)
-Unifica `composer_documents` y `production_documents`.
-
-Campos clave: `subject_type`, `subject_id`, `title`, `kind`, `url`, `storage_path`, `position`, `notes`.
-
-Migración: copiar ambas tablas con su `subject_type` correspondiente. Adaptar `photo-gallery` y editores existentes a la tabla nueva.
-
-### C3. Componentes reutilizables
-- `<EntityActionsEditor subjectType subjectId />`
-- `<EntityDocumentsEditor subjectType subjectId />`
-- `<EntityCalendarPanel subjectType subjectId />` (envoltorio del `TimelineCalendar` ya existente)
-- `<EntityContractsPanel subjectType subjectId />` (filtra `contracts` + `contract_counterparties`)
-
-### C4. Calendario general
-Añadir las acciones (`actions`) como nueva fuente en `src/lib/calendar-sources.ts`, con toggle.
+- Nuevo grupo en sidebar **Marketing y Ventas** (ya creado) con todos los enlaces.
+- Las rutas viven en `src/routes/_authenticated/_admin/marketing.*.tsx`.
+- Cada módulo: pantalla listado + ficha de detalle.
+- Para repositorios documentales reutilizamos el bucket privado existente `composer-assets` con un prefijo `marketing/` (o creamos `marketing-assets` si prefieres separación dura — recomiendo separado).
+- Toda la escritura: admin; lectura: cualquier usuario autenticado.
 
 ---
 
-## FASE A — Reorganizar PERSONAS Y EQUIPOS
+### FASE 1 — Repositorios documentales y de contenido (la "base" del módulo)
 
-Objetivo: tres entradas claras en el sidebar, mismo modelo `people`/`composers` por debajo.
+Son los que más usaréis a diario y comparten el mismo patrón (CRUD + adjunto + tags).
 
-### A1. Sidebar
-Reemplazar la entrada actual por un grupo:
+1. **Decks de venta** — tabla `marketing_decks` (titulo, propósito[corto/largo/genérico/por cliente], idioma, versión, audiencia, fecha, archivo, enlace público opcional, notas). Vista lista filtrable por propósito/idioma.
+2. **Clipping** — tabla `press_clippings` (medio, titular, autor, fecha, idioma, url, screenshot, compositor relacionado opcional, etiquetas, destacado sí/no). Vista lista con filtros + grid de portadas.
+3. **Libro de estilo / Brand** — tabla `brand_guidelines` (sección, contenido richtext, orden, versión) + área de descarga de logos/tipografías. Vista tipo página única con secciones.
+4. **Casos de éxito** — tabla `case_studies` (cliente, compositor, problema, propuesta, resultado, métricas, año, assets, visibilidad interna/externa). Vista lista + ficha.
+5. **Plantillas de propuesta y email** — tabla `outreach_templates` (tipo[cold/follow-up/propuesta económica/NDA], idioma, asunto, cuerpo markdown, variables disponibles). Vista lista + editor.
+6. **Press kits / EPK** — tabla `press_kits` (alcance[compositor/IC global], compositor_id opcional, idioma, versión, archivo, enlace público). Reutiliza compositores existentes.
 
-```text
-PERSONAS Y EQUIPOS
-  ├─ Roster          → /roster
-  ├─ Equipo IC       → /team
-  └─ Contactos CRM   → /people
-```
-
-### A2. Rutas
-
-- `/roster` — listado segmentado de `composers` con filtros por: `roster_role` (compositor/artista/…), `tier`, `representation_status`, disponibilidad, estilos musicales, idiomas, rango de fees. Reutiliza la ficha existente `/composers/$id`.
-- `/team` — listado de `people` con `role = 'ic_team'`. Doble vista:
-  - "A quién represento" (agrupa por miembro IC → `composer_team_assignments`).
-  - "Quién me lleva" (vista cruzada por representado).
-  - Ficha de miembro IC en `/team/$personId` con pestañas Resumen, Asignaciones, Calendario, Acciones, Documentos (usando los componentes de C3).
-- `/people` — listado actual, filtrado para excluir `ic_team` y `composer` por defecto (CRM externo: supervisores, productores, contactos).
-
-### A3. Filtros del Roster
-Añadir barra de filtros con chips persistidos en URL (`validateSearch`). Reutilizar catálogos existentes (`music_styles`, `fee_ranges`, `languages`).
+**Storage:** un único bucket privado `marketing-assets` con subcarpetas por tipo.
 
 ---
 
-## FASE B — Módulo MARKETING
+### FASE 2 — Planificación y eventos
 
-Objetivo: capa transversal nueva, mismo patrón que Producciones/Contratos, integrada con calendario y finanzas.
+Todo lo que es temporal/calendario.
 
-### B1. Tablas
-
-- `campaigns` — entidad de primer nivel: `name`, `objective`, `status` (`borrador|activa|pausada|cerrada`), `start_date`, `end_date`, `budget_amount`, `responsible_person_id`, `notes`.
-- `campaign_targets` — N:N polimórfica (`campaign_id`, `subject_type`, `subject_id`) para apuntar a producciones, compositores, festivales, premios…
-- `marketing_assets` — `campaign_id?`, `subject_type?`, `subject_id?`, `title`, `kind` (`reel|foto|nota_prensa|epk|social_post|otro`), `url`, `storage_path`, `published_at`.
-- `media_outlets` — fichas de medios (nombre, tipo: prensa/radio/podcast/online, web, contactos).
-- `media_coverage` — clipping: `media_outlet_id`, `subject_type`, `subject_id`, `title`, `url`, `published_at`, `notes`.
-- `public_appearances` — entrevistas/charlas: `composer_id?`, `production_id?`, `media_outlet_id?`, `festival_id?`, `date`, `title`, `notes`.
-
-Todas con RLS estándar: lectura por autenticados, escritura sólo admin (`current_user_is_admin()`).
-
-### B2. Rutas
-
-```text
-MARKETING
-  ├─ Campañas         → /marketing/campaigns
-  ├─ Assets           → /marketing/assets
-  ├─ Cobertura        → /marketing/coverage
-  ├─ Apariciones      → /marketing/appearances
-  └─ Medios           → /marketing/outlets
-```
-
-Ficha de campaña `/marketing/campaigns/$id` con pestañas Resumen, Targets (qué/quién promociona), Assets, Calendario, Acciones, Cobertura asociada, Finanzas (sprints de presupuesto).
-
-### B3. Integración transversal
-
-- `calendar-sources.ts`: añadir fuentes `campaign` (inicio/fin), `marketing_asset` (publicación), `media_coverage` (publicación), `public_appearance`.
-- `billing_sprints` ya soporta cualquier subject vía `production_id`; ampliar a `subject_type` para vincular sprints a campañas.
-- En la ficha de cualquier entidad (productora, compositor, festival, premio) aparece una pestaña **Marketing** que pregunta "campañas y coberturas donde aparezco" usando `campaign_targets` y `media_coverage`.
+7. **Calendario de marketing** — tabla `marketing_events` (tipo[publicación/newsletter/evento/campaña], fecha, canal, estado[idea/programado/publicado], responsable, asset_id opcional, notas) + integración con `calendar_events` (subject_type='marketing') para verse en el calendario global existente.
+8. **Calendario editorial** — usamos la misma tabla `marketing_events` con tipo `contenido` (tema, formato[blog/entrevista/post], borrador, fecha publicación). Vista separada centrada en pipeline editorial (idea → borrador → revisión → publicado).
+9. **Eventos y ferias** — tabla `industry_events` (nombre, ciudad, país, fechas, web, tipo[festival/mercado/congreso], coste estimado, asistentes IC, objetivo, próximas acciones, notas). Vista anual + ficha.
 
 ---
 
-## Detalles técnicos
+### FASE 3 — Distribución, métricas y ecosistema
 
-- Enum `subject_type` ampliado: añadir `opportunity, contract, production_company, platform, festival, award, grant, campaign, media_outlet, person` al enum existente usado por `calendar_events`.
-- `contracts` recibe también `subject_type`/`subject_id` opcional para poder vincularse a entidades distintas de productora/compositor (festival, campaña…).
-- Botón de guardado en todas las nuevas fichas: `<SaveButton floating />` (regla ya en memoria del proyecto).
-- Migraciones siempre con `GRANT` a `authenticated` y `service_role`, RLS activa, políticas `current_user_is_admin()` para escritura.
-- No tocar `src/integrations/supabase/client.ts` ni `types.ts` (auto-generados). Las queries usan `(supabase as any)` cuando golpean tablas recién creadas hasta que se regeneran los tipos.
+10. **Newsletter** — tablas `newsletter_issues` (número, fecha, asunto, contenido, segmento, métricas[enviados/abiertos/clics]) + `newsletter_subscribers` (email, nombre, segmentos, alta, baja, fuente). Vista archivo + suscriptores + composición.
+11. **KPIs de marketing con analytics** — tabla `marketing_kpi_snapshots` (fecha, canal[IG/LinkedIn/YouTube/web/newsletter], métrica[seguidores/engagement/leads/decks_abiertos/NPS], valor, nota). Vista dashboard con gráficos (Recharts) + carga manual mensual + comparativas.
+12. **Activos visuales** — tabla `marketing_visual_assets` (tipo[reel/showreel/foto/vídeo/gif], compositor opcional, archivo o url, miniatura, derechos, etiquetas, fecha). Vista grid con previews.
+13. **Colaboraciones / Partners** — tabla `partnerships` (nombre socio, tipo[medio/marca/festival/cross-promo], estado, contacto, contraprestación, fecha inicio/fin, notas, documentos). Vista lista + ficha.
+14. **SEO / Web backlog** — tabla `seo_backlog` (tipo[keyword/página/backlink/contenido], título, url destino, prioridad, estado[idea/en progreso/publicado], métrica objetivo, responsable, notas). Vista kanban por estado.
 
 ---
 
-## Orden de entrega
+### Detalles técnicos (sección para no técnicos puedes saltar)
 
-Cada fase = una entrega cerrada y revisable.
+- Cada tabla: PK uuid, timestamps, `GRANT SELECT ... TO authenticated`, RLS lectura abierta a autenticado + escritura solo admin (mismo patrón que `target_accounts`).
+- Constantes y enums en `src/lib/marketing-constants.ts`.
+- Sidebar: añadir todos los enlaces dentro del grupo "Marketing y Ventas" creando submenu por fase para no saturar.
+- Calendarios reutilizan `calendar_events` cuando aplican, vía triggers que sincronizan desde `marketing_events`.
+- KPIs usan `recharts` (ya presente) para los gráficos.
 
-1. **C1+C2** migraciones + componentes reutilizables + adaptar lo que ya usa `opportunity_actions`/`composer_documents`/`production_documents`.
-2. **C3+C4** integración en fichas existentes + calendario.
-3. **A1+A2+A3** sidebar, tres rutas, filtros del Roster, ficha de miembro IC.
-4. **B1** migraciones de Marketing.
-5. **B2** rutas e índices.
-6. **B3** integración con calendario, finanzas y pestañas cruzadas.
+---
 
-Después de la fase C confirmamos antes de seguir, por si quieres ajustar nomenclatura o campos.
+### Estimación de migraciones
+
+Fase 1: 1 migración (6 tablas + bucket). Fase 2: 1 migración (2 tablas + sincronización con calendar_events). Fase 3: 1 migración (6 tablas).
+
+---
+
+### ¿Cómo procedemos?
+
+**Opción A (recomendada):** Construyo **Fase 1 ahora** (6 módulos documentales, los más usables y la base del módulo). Cuando confirmes que funciona, sigo con Fase 2 y luego Fase 3. Reduce riesgo y permite ajustar el patrón antes de replicarlo.
+
+**Opción B:** Construyo las 3 fases seguidas en un solo paso. Más rápido pero menos margen para ajustes.
+
+**Opción C:** Reordenamos prioridades — dime qué módulos quieres primero y construyo esos.
+
+¿Vamos con A, B o C?
