@@ -58,7 +58,11 @@ function ComposersIndex() {
         .eq("roster_role", role)
         .order("full_name", { ascending: true });
       if (q.trim()) {
-        query = query.textSearch("search_tsv", q.trim(), { type: "plain", config: "spanish" });
+        const term = q.trim().replace(/[%,]/g, " ");
+        const like = `%${term}%`;
+        query = query.or(
+          `full_name.ilike.${like},artistic_name.ilike.${like},legal_name.ilike.${like},city.ilike.${like},country.ilike.${like},email.ilike.${like}`,
+        );
       }
       const { data, error } = await query;
       if (error) throw error;
