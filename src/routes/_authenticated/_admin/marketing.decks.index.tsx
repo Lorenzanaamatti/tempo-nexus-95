@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -174,14 +174,15 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Sync when prop changes
-  useMemo(() => {
-    setForm(deck);
-  }, [deck?.id]);
+  useEffect(() => { setForm(deck); }, [deck]);
 
-  if (!deck || !form) return (
-    <Sheet open={false} onOpenChange={(o) => { if (!o) onClose(); }}><SheetContent /></Sheet>
-  );
+  if (!deck || !form) {
+    return (
+      <Sheet open={false} onOpenChange={(o) => { if (!o) onClose(); }}>
+        <SheetContent />
+      </Sheet>
+    );
+  }
 
   function update<K extends keyof Deck>(k: K, v: Deck[K]) {
     setForm((prev) => (prev ? { ...prev, [k]: v } : prev));
