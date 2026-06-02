@@ -64,7 +64,7 @@ function ComposerEditPage() {
   });
 
   if (composerQ.isLoading || catalogsQ.isLoading || relationsQ.isLoading) {
-    return <div className="p-10 font-display italic text-muted-foreground">Cargando ficha…</div>;
+    return <div className="p-10 font-display text-muted-foreground">Cargando ficha…</div>;
   }
   if (composerQ.error || !composerQ.data) {
     return <div className="p-10 text-destructive">No se encontró el compositor.</div>;
@@ -230,7 +230,7 @@ function Inner({
       </div>
 
       <header className="mb-10 border-b border-border pb-6">
-        <h1 className="font-display text-5xl italic">{c.full_name}</h1>
+        <h1 className="font-display text-5xl">{c.full_name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
         </p>
@@ -500,7 +500,7 @@ function Section({ title, children }: { title?: string; children: React.ReactNod
     <section className="space-y-4 py-8">
       {title && (
         <>
-          <h2 className="font-display text-2xl italic">{title}</h2>
+          <h2 className="font-display text-2xl">{title}</h2>
           <Separator />
         </>
       )}

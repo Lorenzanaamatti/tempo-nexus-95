@@ -67,7 +67,7 @@ function NewComposerPage() {
       <p className="smallcaps text-muted-foreground">
         <Link to="/composers" search={{ role: initialRole }} className="hover:text-foreground">Roster</Link> · Nueva ficha
       </p>
-      <h1 className="mt-2 font-display text-4xl italic">Añadir {ROLE_LABEL[role].toLowerCase()}</h1>
+      <h1 className="mt-2 font-display text-4xl">Añadir {ROLE_LABEL[role].toLowerCase()}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Empieza con lo mínimo. Podrás completar bio, demos, filmografía y premios después.
       </p>

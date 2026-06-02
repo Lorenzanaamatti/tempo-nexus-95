@@ -75,14 +75,14 @@ function PersonEdit() {
     navigate({ to: "/people" });
   }
 
-  if (isLoading || !data) return <div className="p-10 font-display italic text-muted-foreground">Cargando…</div>;
+  if (isLoading || !data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
           <Link to="/people" className="smallcaps text-xs text-muted-foreground hover:underline">← Personas</Link>
-          <h1 className="mt-1 font-display text-4xl italic">{form.full_name || "—"}</h1>
+          <h1 className="mt-1 font-display text-4xl">{form.full_name || "—"}</h1>
         </div>
         <div className="flex gap-2">
           {data.composer_id && (
@@ -133,7 +133,7 @@ function PersonEdit() {
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 font-display text-2xl italic">Eventos en el calendario</h2>
+        <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <PersonEventsEditor personId={personId} />
       </div>
     </div>

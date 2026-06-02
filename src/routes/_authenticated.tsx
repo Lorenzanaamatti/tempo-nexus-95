@@ -25,7 +25,7 @@ function Shell() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center font-display italic text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center font-display text-muted-foreground">
         Abriendo el archivo…
       </div>
     );

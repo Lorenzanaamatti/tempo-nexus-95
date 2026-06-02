@@ -50,7 +50,7 @@ function RosterAll() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl italic">Directorio completo</h1>
+          <h1 className="mt-1 font-display text-5xl">Directorio completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Todas las personas representadas, agrupadas por categoría. {total} ficha{total === 1 ? "" : "s"} en total.
           </p>
@@ -64,7 +64,7 @@ function RosterAll() {
       </div>
 
       {isLoading ? (
-        <p className="font-display italic text-muted-foreground">Cargando archivo…</p>
+        <p className="font-display text-muted-foreground">Cargando archivo…</p>
       ) : !total ? (
         <p className="text-sm text-muted-foreground">Sin fichas en el roster.</p>
       ) : (
@@ -75,7 +75,7 @@ function RosterAll() {
             return (
               <section key={r}>
                 <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-                  <h2 className="font-display text-3xl italic">{ROLE_LABEL[r]}</h2>
+                  <h2 className="font-display text-3xl">{ROLE_LABEL[r]}</h2>
                   <Link to="/composers" search={{ role: r }} className="smallcaps text-xs text-muted-foreground hover:text-foreground">
                     Ver categoría →
                   </Link>
@@ -94,13 +94,13 @@ function RosterAll() {
                           {url ? (
                             <img src={url} alt={c.full_name} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="flex h-full items-center justify-center font-display text-xl italic text-muted-foreground">
+                            <div className="flex h-full items-center justify-center font-display text-xl text-muted-foreground">
                               {c.full_name?.[0] ?? "·"}
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-display text-lg italic">{c.full_name}</p>
+                          <p className="truncate font-display text-lg">{c.full_name}</p>
                           <p className="truncate text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "—"}</p>
                         </div>
                         <Badge variant="outline" className="rounded-sm text-[10px]">

@@ -82,7 +82,7 @@ export function ProjectsHistoryEditor({ composerId }: { composerId: string }) {
   return (
     <div className="space-y-4">
       {loading ? (
-        <p className="text-sm italic text-muted-foreground">Cargando histórico…</p>
+        <p className="text-sm text-muted-foreground">Cargando histórico…</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Sin proyectos registrados. Añade el primero para empezar el histórico económico.
@@ -119,7 +119,7 @@ function Total({ label, value, accent }: { label: string; value: number; accent?
   return (
     <div>
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`font-display text-lg ${accent ? "italic text-primary" : ""}`}>{EUR.format(value)}</p>
+      <p className={`font-display text-lg ${accent ? "text-primary" : ""}`}>{EUR.format(value)}</p>
     </div>
   );
 }
@@ -177,7 +177,7 @@ function ProjectRow({ project, onRemove }: { project: Project; onRemove: () => v
           {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
         <div className="flex-1 min-w-0">
-          <p className="truncate font-display text-base italic">{p.production || "—"}</p>
+          <p className="truncate font-display text-base">{p.production || "—"}</p>
           <p className="truncate text-[11px] text-muted-foreground">
             {[p.year, p.production_type, p.production_company, p.platform].filter(Boolean).join(" · ")}
           </p>

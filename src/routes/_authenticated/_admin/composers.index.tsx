@@ -53,7 +53,7 @@ function ComposersIndex() {
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl italic">{meta.title}</h1>
+          <h1 className="mt-1 font-display text-5xl">{meta.title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -70,10 +70,10 @@ function ComposersIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display italic text-muted-foreground">Cargando archivo…</p>
+        <p className="font-display text-muted-foreground">Cargando archivo…</p>
       ) : !data?.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
-          <p className="font-display text-2xl italic">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>
+          <p className="font-display text-2xl">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>
           <p className="mt-2 text-sm text-muted-foreground">
             Empieza añadiendo el primer {meta.singular} a la cartera.
           </p>
@@ -101,7 +101,7 @@ function ComposersIndex() {
                         className="h-full w-full object-cover transition group-hover:scale-[1.02]"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center font-display text-4xl italic text-muted-foreground">
+                      <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
                         {c.full_name?.[0] ?? "·"}
                       </div>
                     )}
