@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import {
-  AVAILABILITY_COLORS,
   AVAILABILITY_LABELS,
   type AvailabilityKind,
 } from "@/components/availability-editor";
@@ -20,8 +20,9 @@ import {
 } from "@/lib/calendar-api";
 import {
   CALENDAR_SOURCE_LABELS,
-  EXTRA_KIND_CHIP,
   EXTRA_KIND_LABELS,
+  FAMILY_DOT,
+  KIND_FAMILY,
   type CalendarSource,
   type ExtraKind,
 } from "@/lib/calendar-sources";
@@ -366,63 +367,94 @@ function GlobalCalendar() {
         ))}
       </div>
 
-      {/* Source filters (qué módulos aparecen en el calendario) */}
-      <div className="mb-3">
-        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Fuentes</p>
-        <div className="flex flex-wrap gap-1.5">
-          {(Object.keys(CALENDAR_SOURCE_LABELS) as CalendarSource[]).map((s) => (
-            <FilterChip
-              key={s}
-              active={activeSources[s]}
-              onClick={() => setActiveSources((p) => ({ ...p, [s]: !p[s] }))}
+      {/* Source family filters — one row, color-coded by family */}
+      <div className="mb-4 flex flex-wrap items-center gap-1.5">
+        {(Object.keys(CALENDAR_SOURCE_LABELS) as CalendarSource[]).map((s) => (
+          <FamilyChip
+            key={s}
+            active={activeSources[s]}
+            dotClass={FAMILY_DOT[s]}
+            onClick={() => setActiveSources((p) => ({ ...p, [s]: !p[s] }))}
+          >
+            {CALENDAR_SOURCE_LABELS[s]}
+          </FamilyChip>
+        ))}
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="ml-1 inline-flex items-center gap-1.5 rounded-sm border border-border px-3 py-1 text-xs opacity-70 hover:opacity-100 transition"
             >
-              {CALENDAR_SOURCE_LABELS[s]}
-            </FilterChip>
-          ))}
-        </div>
-      </div>
+              <SlidersHorizontal className="h-3 w-3" />
+              Más filtros
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 max-h-[70vh] overflow-y-auto p-4 space-y-4">
+            <div>
+              <p className="smallcaps mb-2 text-[10px] text-muted-foreground">Roles del equipo</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(ROLE_GROUP) as PersonRole[]).map((r) => (
+                  <SubChip
+                    key={r}
+                    active={activeRoles[r]}
+                    onClick={() => setActiveRoles((s) => ({ ...s, [r]: !s[r] }))}
+                  >
+                    {ROLE_GROUP[r]}
+                  </SubChip>
+                ))}
+              </div>
+            </div>
 
-      {/* Category filters */}
-      <div className="mb-3">
-        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Roles del equipo</p>
-        <div className="flex flex-wrap gap-1.5">
-        {(Object.keys(ROLE_GROUP) as PersonRole[]).map((r) => (
-          <FilterChip
-            key={r}
-            active={activeRoles[r]}
-            onClick={() => setActiveRoles((s) => ({ ...s, [r]: !s[r] }))}
-          >
-            {ROLE_GROUP[r]}
-          </FilterChip>
-        ))}
-        </div>
-      </div>
-
-      {/* Kind filters */}
-      <div className="mb-3">
-        <p className="smallcaps mb-1.5 text-[10px] text-muted-foreground">Tipos de evento</p>
-        <div className="flex flex-wrap gap-1.5">
-        {(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[]).map((k) => (
-          <FilterChip
-            key={k}
-            active={activeKinds[k]}
-            onClick={() => setActiveKinds((s) => ({ ...s, [k]: !s[k] }))}
-            className={activeKinds[k] ? AVAILABILITY_COLORS[k] : ""}
-          >
-            {AVAILABILITY_LABELS[k]}
-          </FilterChip>
-        ))}
-        {(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[]).map((k) => (
-          <FilterChip
-            key={k}
-            active={activeExtras[k]}
-            onClick={() => setActiveExtras((s) => ({ ...s, [k]: !s[k] }))}
-            className={activeExtras[k] ? EXTRA_KIND_CHIP[k] : ""}
-          >
-            {EXTRA_KIND_LABELS[k]}
-          </FilterChip>
-        ))}
-        </div>
+            <SubtypeGroup
+              title="Personas — disponibilidad"
+              family="people"
+              items={(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
+                .filter((k) => KIND_FAMILY[k] === "people")
+                .map((k) => ({ k, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) }))}
+            />
+            <SubtypeGroup
+              title="Producciones"
+              family="productions"
+              items={[
+                ...(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
+                  .filter((k) => KIND_FAMILY[k] === "productions")
+                  .map((k) => ({ k: k as string, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) })),
+                ...(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
+                  .filter((k) => KIND_FAMILY[k] === "productions")
+                  .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) })),
+              ]}
+            />
+            <SubtypeGroup
+              title="Facturación"
+              family="billing"
+              items={(Object.keys(AVAILABILITY_LABELS) as AvailabilityKind[])
+                .filter((k) => KIND_FAMILY[k] === "billing")
+                .map((k) => ({ k, label: AVAILABILITY_LABELS[k], active: activeKinds[k], toggle: () => setActiveKinds((s) => ({ ...s, [k]: !s[k] })) }))}
+            />
+            <SubtypeGroup
+              title="Oportunidades"
+              family="opportunities"
+              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
+                .filter((k) => KIND_FAMILY[k] === "opportunities")
+                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
+            />
+            <SubtypeGroup
+              title="Contratos"
+              family="contracts"
+              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
+                .filter((k) => KIND_FAMILY[k] === "contracts")
+                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
+            />
+            <SubtypeGroup
+              title="Tareas"
+              family="tasks"
+              items={(Object.keys(EXTRA_KIND_LABELS) as ExtraKind[])
+                .filter((k) => KIND_FAMILY[k] === "tasks")
+                .map((k) => ({ k: k as string, label: EXTRA_KIND_LABELS[k], active: activeExtras[k], toggle: () => setActiveExtras((s) => ({ ...s, [k]: !s[k] })) }))}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       {loading ? (
@@ -434,26 +466,78 @@ function GlobalCalendar() {
   );
 }
 
-function FilterChip({
+function FamilyChip({
   active,
   onClick,
   children,
-  className = "",
+  dotClass,
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
-  className?: string;
+  dotClass: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-sm border px-3 py-1 text-xs transition ${
-        active ? "border-foreground" : "border-border opacity-60 hover:opacity-100"
-      } ${className}`}
+      className={`inline-flex items-center gap-2 rounded-sm border px-3 py-1 text-xs transition ${
+        active
+          ? "border-foreground bg-foreground/[0.04]"
+          : "border-border opacity-50 hover:opacity-90"
+      }`}
+    >
+      <span className={`h-2 w-2 rounded-full ${dotClass} ${active ? "" : "opacity-40"}`} />
+      {children}
+    </button>
+  );
+}
+
+function SubChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-sm border px-2.5 py-0.5 text-[11px] transition ${
+        active ? "border-foreground" : "border-border opacity-50 hover:opacity-90"
+      }`}
     >
       {children}
     </button>
+  );
+}
+
+function SubtypeGroup({
+  title,
+  family,
+  items,
+}: {
+  title: string;
+  family: CalendarSource;
+  items: { k: string; label: string; active: boolean; toggle: () => void }[];
+}) {
+  if (!items.length) return null;
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${FAMILY_DOT[family]}`} />
+        <p className="smallcaps text-[10px] text-muted-foreground">{title}</p>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((it) => (
+          <SubChip key={it.k} active={it.active} onClick={it.toggle}>
+            {it.label}
+          </SubChip>
+        ))}
+      </div>
+    </div>
   );
 }

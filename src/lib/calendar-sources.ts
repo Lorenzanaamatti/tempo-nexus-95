@@ -15,30 +15,6 @@ export const EXTRA_KIND_LABELS = {
 
 export type ExtraKind = keyof typeof EXTRA_KIND_LABELS;
 
-export const EXTRA_KIND_BAR: Record<ExtraKind, string> = {
-  oportunidad_detectada: "bg-cyan-500/70 border-cyan-700/40 text-cyan-50",
-  oportunidad_contacto: "bg-blue-500/70 border-blue-700/40 text-blue-50",
-  oportunidad_cierre: "bg-fuchsia-500/75 border-fuchsia-700/40 text-fuchsia-50",
-  contrato_firma: "bg-teal-600/80 border-teal-800/50 text-teal-50",
-  contrato_fin: "bg-zinc-500/75 border-zinc-700/40 text-zinc-50",
-  contrato_preaviso: "bg-orange-500/80 border-orange-700/40 text-orange-50",
-  tarea: "bg-yellow-500/80 border-yellow-700/40 text-yellow-900",
-  estreno: "bg-pink-500/80 border-pink-700/40 text-pink-50",
-  entrega: "bg-lime-500/80 border-lime-700/40 text-lime-900",
-};
-
-export const EXTRA_KIND_CHIP: Record<ExtraKind, string> = {
-  oportunidad_detectada: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/40",
-  oportunidad_contacto: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40",
-  oportunidad_cierre: "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-500/40",
-  contrato_firma: "bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/40",
-  contrato_fin: "bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border-zinc-500/40",
-  contrato_preaviso: "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/40",
-  tarea: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-300 border-yellow-500/40",
-  estreno: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/40",
-  entrega: "bg-lime-500/15 text-lime-800 dark:text-lime-300 border-lime-500/40",
-};
-
 export type CalendarSource =
   | "people"
   | "productions"
@@ -48,10 +24,70 @@ export type CalendarSource =
   | "tasks";
 
 export const CALENDAR_SOURCE_LABELS: Record<CalendarSource, string> = {
-  people: "Equipo y roster",
+  people: "Equipo & Roster",
   productions: "Producciones",
-  billing: "Facturación / pagos / cobros",
-  opportunities: "Oportunidades (CRM)",
+  billing: "Facturación",
+  opportunities: "Oportunidades",
   contracts: "Contratos",
-  tasks: "Tareas y acciones",
+  tasks: "Tareas",
+};
+
+// One signature color per source family. Used for the chip dot and for all
+// timeline bars of events that belong to that family. Subtypes inside a
+// family only vary in intensity, never in hue.
+export const FAMILY_DOT: Record<CalendarSource, string> = {
+  people: "bg-emerald-500",
+  productions: "bg-violet-500",
+  billing: "bg-amber-500",
+  opportunities: "bg-sky-500",
+  contracts: "bg-orange-500",
+  tasks: "bg-zinc-500",
+};
+
+// Maps every kind (availability + extra) to its source family.
+export const KIND_FAMILY: Record<string, CalendarSource> = {
+  libre: "people",
+  ocupado: "people",
+  vacaciones: "people",
+  personal: "people",
+  produccion: "productions",
+  estreno: "productions",
+  entrega: "productions",
+  facturacion: "billing",
+  pago: "billing",
+  cobro: "billing",
+  oportunidad_detectada: "opportunities",
+  oportunidad_contacto: "opportunities",
+  oportunidad_cierre: "opportunities",
+  contrato_firma: "contracts",
+  contrato_preaviso: "contracts",
+  contrato_fin: "contracts",
+  tarea: "tasks",
+};
+
+// Bar styles per kind. Same hue inside a family, intensity varies per subtype.
+export const KIND_BAR_ALL: Record<string, string> = {
+  // people — emerald
+  libre: "bg-emerald-400/70 border-emerald-600/40 text-emerald-950",
+  ocupado: "bg-emerald-700/85 border-emerald-900/50 text-emerald-50",
+  vacaciones: "bg-emerald-500/75 border-emerald-700/40 text-emerald-50",
+  personal: "bg-emerald-300/70 border-emerald-500/40 text-emerald-950",
+  // productions — violet
+  produccion: "bg-violet-500/75 border-violet-700/50 text-violet-50",
+  estreno: "bg-violet-700/90 border-violet-900/50 text-violet-50",
+  entrega: "bg-violet-300/80 border-violet-500/40 text-violet-950",
+  // billing — amber
+  facturacion: "bg-amber-400/80 border-amber-600/50 text-amber-950",
+  pago: "bg-amber-600/85 border-amber-800/50 text-amber-50",
+  cobro: "bg-amber-800/90 border-amber-950/50 text-amber-50",
+  // opportunities — sky
+  oportunidad_detectada: "bg-sky-300/75 border-sky-500/40 text-sky-950",
+  oportunidad_contacto: "bg-sky-500/80 border-sky-700/50 text-sky-50",
+  oportunidad_cierre: "bg-sky-700/90 border-sky-900/50 text-sky-50",
+  // contracts — orange
+  contrato_preaviso: "bg-orange-300/80 border-orange-500/40 text-orange-950",
+  contrato_firma: "bg-orange-600/90 border-orange-800/50 text-orange-50",
+  contrato_fin: "bg-orange-400/80 border-orange-600/50 text-orange-950",
+  // tasks — zinc
+  tarea: "bg-zinc-600/85 border-zinc-800/50 text-zinc-50",
 };

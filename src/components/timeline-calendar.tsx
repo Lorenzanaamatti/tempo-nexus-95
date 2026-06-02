@@ -1,26 +1,10 @@
 import { Fragment, useMemo } from "react";
 import { differenceInDays, isWithinInterval } from "date-fns";
 import { Link } from "@tanstack/react-router";
-import {
-  AVAILABILITY_COLORS,
-  AVAILABILITY_LABELS,
-  type AvailabilityKind,
-} from "@/components/availability-editor";
+import { AVAILABILITY_LABELS } from "@/components/availability-editor";
 import type { TimelineRow } from "@/lib/calendar-api";
-import { EXTRA_KIND_BAR, EXTRA_KIND_LABELS, type ExtraKind } from "@/lib/calendar-sources";
+import { EXTRA_KIND_LABELS, KIND_BAR_ALL } from "@/lib/calendar-sources";
 
-const KIND_BAR: Record<AvailabilityKind, string> = {
-  libre: "bg-emerald-500/70 border-emerald-700/40 text-emerald-50",
-  ocupado: "bg-rose-500/70 border-rose-700/40 text-rose-50",
-  vacaciones: "bg-amber-500/70 border-amber-700/40 text-amber-50",
-  personal: "bg-sky-500/70 border-sky-700/40 text-sky-50",
-  produccion: "bg-indigo-500/70 border-indigo-700/40 text-indigo-50",
-  facturacion: "bg-amber-600/80 border-amber-800/50 text-amber-50",
-  pago: "bg-violet-500/80 border-violet-700/50 text-violet-50",
-  cobro: "bg-emerald-600/85 border-emerald-800/50 text-emerald-50",
-};
-
-const ALL_BAR: Record<string, string> = { ...KIND_BAR, ...EXTRA_KIND_BAR };
 const ALL_LABELS: Record<string, string> = { ...AVAILABILITY_LABELS, ...EXTRA_KIND_LABELS };
 
 export function TimelineCalendar({
@@ -131,7 +115,7 @@ export function TimelineCalendar({
                         <div
                           key={e.id}
                           title={`${e.title ?? ALL_LABELS[e.kind] ?? e.kind} · ${e.start.toLocaleDateString("es-ES")} → ${e.end.toLocaleDateString("es-ES")}${e.note ? "\n" + e.note : ""}`}
-                          className={`absolute top-1.5 bottom-1.5 overflow-hidden rounded-sm border px-1.5 text-[10px] leading-[9px] flex items-center ${ALL_BAR[e.kind] ?? "bg-muted border-border text-foreground"}`}
+                          className={`absolute top-1.5 bottom-1.5 overflow-hidden rounded-sm border px-1.5 text-[10px] leading-[9px] flex items-center ${KIND_BAR_ALL[e.kind] ?? "bg-muted border-border text-foreground"}`}
                           style={{ left: `${left}%`, width: `${width}%` }}
                         >
                           <span className="truncate">
