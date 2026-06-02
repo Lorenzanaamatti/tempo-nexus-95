@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   TARGET_ACCOUNT_STATUSES,
@@ -92,6 +92,7 @@ function TargetAccountDetail() {
   const [form, setForm] = useState<Account | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [creatingOpp, setCreatingOpp] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -148,6 +149,35 @@ function TargetAccountDetail() {
     navigate({ to: "/marketing/target-accounts" });
   }
 
+  async function createOpportunity() {
+    if (!form) return;
+    setCreatingOpp(true);
+    const notesParts: string[] = [];
+    if (form.sector) notesParts.push(`Sector: ${form.sector}`);
+    notesParts.push(`Origen: cuenta objetivo "${form.name}"`);
+    if (form.notes) notesParts.push("", form.notes);
+    const { data: created, error } = await (supabase as any)
+      .from("opportunities")
+      .insert({
+        title: form.name,
+        partner_name: form.name,
+        partner_company_id: form.production_company_id,
+        responsible_person_id: form.responsible_person_id,
+        notes: notesParts.join("\n"),
+        detected_date: new Date().toISOString().slice(0, 10),
+      })
+      .select("id")
+      .single();
+    setCreatingOpp(false);
+    if (error || !created) {
+      toast.error(error?.message ?? "No se pudo crear la oportunidad");
+      return;
+    }
+    toast.success("Oportunidad creada desde esta cuenta");
+    qc.invalidateQueries({ queryKey: ["opportunities"] });
+    navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: created.id } });
+  }
+
   if (isLoading || !form) {
     return <div className="mx-auto max-w-4xl px-6 py-10 font-display text-muted-foreground">Cargando…</div>;
   }
@@ -158,9 +188,15 @@ function TargetAccountDetail() {
         <Button asChild variant="ghost" size="sm">
           <Link to="/marketing/target-accounts"><ArrowLeft className="mr-1 h-4 w-4" /> Cuentas objetivo</Link>
         </Button>
-        <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive">
-          <Trash2 className="mr-1 h-4 w-4" /> Eliminar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={createOpportunity} disabled={creatingOpp}>
+            <Sparkles className="mr-1 h-4 w-4" />
+            {creatingOpp ? "Creando…" : "Crear oportunidad desde esta cuenta"}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive">
+            <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 border-b border-border pb-6">
