@@ -1095,6 +1095,7 @@ export type Database = {
           id: string
           imdb_url: string | null
           kind: string | null
+          music_supervisor_name: string | null
           music_supervisor_person_id: string | null
           negotiator_person_id: string | null
           notes: string | null
@@ -1103,9 +1104,11 @@ export type Database = {
           partner_company_id: string | null
           platform: string | null
           platform_id: string | null
+          postproduction_supervisor_name: string | null
           postproduction_supervisor_person_id: string | null
           premiere_date: string | null
           production_company: string | null
+          production_director_name: string | null
           production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
           status: Database["public"]["Enums"]["production_status"] | null
@@ -1127,6 +1130,7 @@ export type Database = {
           id?: string
           imdb_url?: string | null
           kind?: string | null
+          music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           notes?: string | null
@@ -1135,9 +1139,11 @@ export type Database = {
           partner_company_id?: string | null
           platform?: string | null
           platform_id?: string | null
+          postproduction_supervisor_name?: string | null
           postproduction_supervisor_person_id?: string | null
           premiere_date?: string | null
           production_company?: string | null
+          production_director_name?: string | null
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           status?: Database["public"]["Enums"]["production_status"] | null
@@ -1159,6 +1165,7 @@ export type Database = {
           id?: string
           imdb_url?: string | null
           kind?: string | null
+          music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           notes?: string | null
@@ -1167,9 +1174,11 @@ export type Database = {
           partner_company_id?: string | null
           platform?: string | null
           platform_id?: string | null
+          postproduction_supervisor_name?: string | null
           postproduction_supervisor_person_id?: string | null
           premiere_date?: string | null
           production_company?: string | null
+          production_director_name?: string | null
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           status?: Database["public"]["Enums"]["production_status"] | null
