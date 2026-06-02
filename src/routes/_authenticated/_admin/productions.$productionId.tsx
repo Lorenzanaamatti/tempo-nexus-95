@@ -42,6 +42,12 @@ function ProductionEdit() {
     delivery_date: "",
     partner_company_id: "" as string,
     director_id: "" as string,
+    platform_id: "" as string,
+    production_director_person_id: "" as string,
+    postproduction_supervisor_person_id: "" as string,
+    music_supervisor_person_id: "" as string,
+    other_responsibles: "",
+    premiere_date: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -85,6 +91,24 @@ function ProductionEdit() {
     },
   });
 
+  const platformsQ = useQuery({
+    queryKey: ["platforms-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("platforms").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const peopleAllQ = useQuery({
+    queryKey: ["people-all-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   useEffect(() => {
     if (data) {
       const d = data as any;
@@ -107,6 +131,12 @@ function ProductionEdit() {
         delivery_date: d.delivery_date ?? "",
         partner_company_id: d.partner_company_id ?? "",
         director_id: d.director_id ?? "",
+        platform_id: d.platform_id ?? "",
+        production_director_person_id: d.production_director_person_id ?? "",
+        postproduction_supervisor_person_id: d.postproduction_supervisor_person_id ?? "",
+        music_supervisor_person_id: d.music_supervisor_person_id ?? "",
+        other_responsibles: d.other_responsibles ?? "",
+        premiere_date: d.premiere_date ?? "",
       });
     }
   }, [data]);
@@ -132,6 +162,12 @@ function ProductionEdit() {
       delivery_date: form.delivery_date || null,
       partner_company_id: form.partner_company_id || null,
       director_id: form.director_id || null,
+      platform_id: form.platform_id || null,
+      production_director_person_id: form.production_director_person_id || null,
+      postproduction_supervisor_person_id: form.postproduction_supervisor_person_id || null,
+      music_supervisor_person_id: form.music_supervisor_person_id || null,
+      other_responsibles: form.other_responsibles || null,
+      premiere_date: form.premiere_date || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
