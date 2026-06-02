@@ -44,6 +44,7 @@ import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
 import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './routes/_authenticated/_admin/marketing.decks.index'
+import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -247,6 +248,12 @@ const AuthenticatedAdminMarketingDecksIndexRoute =
     path: '/marketing/decks/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingClippingsIndexRoute =
+  AuthenticatedAdminMarketingClippingsIndexRouteImport.update({
+    id: '/marketing/clippings/',
+    path: '/marketing/clippings/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingTargetAccountsAccountIdRoute =
   AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport.update({
     id: '/marketing/target-accounts/$accountId',
@@ -287,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/marketing/decks': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
@@ -361,6 +370,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
   '/_authenticated/_admin/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/production-companies/'
     | '/productions/'
     | '/marketing/target-accounts/$accountId'
+    | '/marketing/clippings/'
     | '/marketing/decks/'
     | '/marketing/target-accounts/'
   fileRoutesByTo: FileRoutesByTo
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/production-companies'
     | '/productions'
     | '/marketing/target-accounts/$accountId'
+    | '/marketing/clippings'
     | '/marketing/decks'
     | '/marketing/target-accounts'
   id:
@@ -472,6 +484,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
+    | '/_authenticated/_admin/marketing/clippings/'
     | '/_authenticated/_admin/marketing/decks/'
     | '/_authenticated/_admin/marketing/target-accounts/'
   fileRoutesById: FileRoutesById
@@ -728,6 +741,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingDecksIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/clippings/': {
+      id: '/_authenticated/_admin/marketing/clippings/'
+      path: '/marketing/clippings'
+      fullPath: '/marketing/clippings/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingClippingsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/target-accounts/$accountId': {
       id: '/_authenticated/_admin/marketing/target-accounts/$accountId'
       path: '/marketing/target-accounts/$accountId'
@@ -759,6 +779,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  AuthenticatedAdminMarketingClippingsIndexRoute: typeof AuthenticatedAdminMarketingClippingsIndexRoute
   AuthenticatedAdminMarketingDecksIndexRoute: typeof AuthenticatedAdminMarketingDecksIndexRoute
   AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
 }
@@ -794,6 +815,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute:
     AuthenticatedAdminMarketingTargetAccountsAccountIdRoute,
+  AuthenticatedAdminMarketingClippingsIndexRoute:
+    AuthenticatedAdminMarketingClippingsIndexRoute,
   AuthenticatedAdminMarketingDecksIndexRoute:
     AuthenticatedAdminMarketingDecksIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsIndexRoute:
@@ -853,3 +876,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
