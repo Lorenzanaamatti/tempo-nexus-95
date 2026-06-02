@@ -406,6 +406,77 @@ function Inner({
         )}
       </Section>
 
+      {/* Oportunidades y relaciones */}
+      <Section title="Oportunidades">
+        {candidacies.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aún no figura como candidato en ninguna oportunidad.</p>
+        ) : (
+          <ul className="space-y-2">
+            {candidacies.map((c: any) => (
+              <li key={c.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <Link to="/opportunities/$opportunityId" params={{ opportunityId: c.opportunity?.id }} className="text-sm hover:underline">
+                    {c.opportunity?.title ?? "—"}
+                  </Link>
+                  <div className="text-xs text-muted-foreground">
+                    {[c.opportunity?.partner_name, (c.opportunity?.statuses ?? []).join(" · "), c.opportunity?.expected_close_date].filter(Boolean).join(" · ")}
+                  </div>
+                  {c.note && <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>}
+                </div>
+                {c.opportunity?.estimated_value != null && (
+                  <div className="text-sm text-muted-foreground whitespace-nowrap">{Number(c.opportunity.estimated_value).toLocaleString("es-ES")} €</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Producciones">
+        {productionsRel.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin producciones asociadas.</p>
+        ) : (
+          <ul className="space-y-2">
+            {productionsRel.map((p: any) => (
+              <li key={p.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <Link to="/productions/$productionId" params={{ productionId: p.id }} className="text-sm hover:underline">{p.title}</Link>
+                  <div className="text-xs text-muted-foreground">
+                    {[p.status, p.platform, p.director, p.year].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {p.premiere_date ? `Estreno ${p.premiere_date}` : p.delivery_date ? `Entrega ${p.delivery_date}` : ""}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Contratos">
+        {contractsRel.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin contratos.</p>
+        ) : (
+          <ul className="space-y-2">
+            {contractsRel.map((k: any) => (
+              <li key={k.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="text-sm">{k.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {[k.contract_type, k.sign_status].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {k.signed_date ? `Firmado ${k.signed_date}` : ""}
+                  {k.end_date ? ` · Fin ${k.end_date}` : ""}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
       {/* Portal del representado */}
       <Section title="Portal del representado">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
