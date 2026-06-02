@@ -48,7 +48,7 @@ function ComposerEditPage() {
   const relationsQ = useQuery({
     queryKey: ["composer-relations", composerId],
     queryFn: async () => {
-      const [demos, films, awards, styles, genres, langs, docs, projects, agents] = await Promise.all([
+      const [demos, films, awards, styles, genres, langs, docs, projects, agents, candidacies, productions, contracts] = await Promise.all([
         supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
@@ -58,6 +58,21 @@ function ComposerEditPage() {
         supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
         supabase.from("people").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
+        (supabase as any)
+          .from("opportunity_candidates")
+          .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
+          .eq("composer_id", composerId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("productions")
+          .select("id, title, year, status, platform, director, premiere_date, delivery_date")
+          .eq("composer_id", composerId)
+          .order("year", { ascending: false }),
+        supabase
+          .from("contracts")
+          .select("id, title, contract_type, sign_status, signed_date, end_date, notice_date")
+          .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
+          .order("signed_date", { ascending: false, nullsFirst: false }),
       ]);
       return {
         demos: demos.data ?? [],
@@ -69,6 +84,9 @@ function ComposerEditPage() {
         docs: docs.data ?? [],
         projects: projects.data ?? [],
         agents: agents.data ?? [],
+        candidacies: (candidacies as any).data ?? [],
+        productions: productions.data ?? [],
+        contracts: contracts.data ?? [],
       };
     },
   });
