@@ -89,6 +89,69 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_assets: {
+        Row: {
+          created_at: string
+          external_url: string | null
+          id: string
+          kind: string | null
+          notes: string | null
+          position: number
+          storage_path: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      brand_guidelines: {
+        Row: {
+          body_md: string | null
+          created_at: string
+          id: string
+          position: number
+          section: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          body_md?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          section: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          body_md?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          section?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
@@ -130,6 +193,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      case_studies: {
+        Row: {
+          client: string | null
+          composer_id: string | null
+          cover_path: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          metrics: string | null
+          outcome: string | null
+          problem: string | null
+          proposal: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          visibility: Database["public"]["Enums"]["case_study_visibility"]
+          year: number | null
+        }
+        Insert: {
+          client?: string | null
+          composer_id?: string | null
+          cover_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          metrics?: string | null
+          outcome?: string | null
+          problem?: string | null
+          proposal?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["case_study_visibility"]
+          year?: number | null
+        }
+        Update: {
+          client?: string | null
+          composer_id?: string | null
+          cover_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          metrics?: string | null
+          outcome?: string | null
+          problem?: string | null
+          proposal?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["case_study_visibility"]
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_studies_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       composer_availability: {
         Row: {
@@ -979,6 +1104,54 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_decks: {
+        Row: {
+          audience: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          language: Database["public"]["Enums"]["marketing_language"]
+          notes: string | null
+          public_link: string | null
+          purpose: Database["public"]["Enums"]["deck_purpose"]
+          storage_path: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          audience?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          public_link?: string | null
+          purpose?: Database["public"]["Enums"]["deck_purpose"]
+          storage_path?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          audience?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          public_link?: string | null
+          purpose?: Database["public"]["Enums"]["deck_purpose"]
+          storage_path?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       music_styles: {
         Row: {
           id: string
@@ -1155,6 +1328,45 @@ export type Database = {
           },
         ]
       }
+      outreach_templates: {
+        Row: {
+          body_md: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["outreach_template_kind"]
+          language: Database["public"]["Enums"]["marketing_language"]
+          notes: string | null
+          subject: string | null
+          title: string
+          updated_at: string
+          variables: string[]
+        }
+        Insert: {
+          body_md?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["outreach_template_kind"]
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          subject?: string | null
+          title: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Update: {
+          body_md?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["outreach_template_kind"]
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          subject?: string | null
+          title?: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Relationships: []
+      }
       people: {
         Row: {
           composer_id: string | null
@@ -1237,6 +1449,118 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      press_clippings: {
+        Row: {
+          author: string | null
+          composer_id: string | null
+          created_at: string
+          featured: boolean
+          headline: string
+          id: string
+          language: Database["public"]["Enums"]["marketing_language"]
+          notes: string | null
+          outlet: string
+          published_date: string | null
+          screenshot_path: string | null
+          tags: string[]
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          author?: string | null
+          composer_id?: string | null
+          created_at?: string
+          featured?: boolean
+          headline: string
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          outlet: string
+          published_date?: string | null
+          screenshot_path?: string | null
+          tags?: string[]
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          author?: string | null
+          composer_id?: string | null
+          created_at?: string
+          featured?: boolean
+          headline?: string
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          outlet?: string
+          published_date?: string | null
+          screenshot_path?: string | null
+          tags?: string[]
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_clippings_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      press_kits: {
+        Row: {
+          composer_id: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          language: Database["public"]["Enums"]["marketing_language"]
+          notes: string | null
+          public_link: string | null
+          scope: Database["public"]["Enums"]["press_kit_scope"]
+          storage_path: string | null
+          title: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          composer_id?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          public_link?: string | null
+          scope?: Database["public"]["Enums"]["press_kit_scope"]
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          composer_id?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          public_link?: string | null
+          scope?: Database["public"]["Enums"]["press_kit_scope"]
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_kits_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       production_assignments: {
         Row: {
@@ -1754,6 +2078,7 @@ export type Database = {
         | "media_outlet"
         | "media_coverage"
         | "public_appearance"
+      case_study_visibility: "interna" | "externa"
       composer_team_role:
         | "agente"
         | "manager"
@@ -1770,6 +2095,7 @@ export type Database = {
         | "firmado"
         | "vencido"
         | "cancelado"
+      deck_purpose: "corto" | "largo" | "generico" | "por_cliente" | "sector"
       film_format:
         | "feature"
         | "series"
@@ -1778,6 +2104,7 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       opportunity_status:
         | "identificado"
         | "primer_contacto"
@@ -1785,6 +2112,13 @@ export type Database = {
         | "negociacion"
         | "cerrado"
         | "descartado"
+      outreach_template_kind:
+        | "cold"
+        | "follow_up"
+        | "propuesta_economica"
+        | "nda"
+        | "agradecimiento"
+        | "otro"
       person_role:
         | "ic_team"
         | "composer"
@@ -1793,6 +2127,7 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      press_kit_scope: "ic_global" | "compositor"
       production_kind:
         | "cine"
         | "serie"
@@ -1999,6 +2334,7 @@ export const Constants = {
         "media_coverage",
         "public_appearance",
       ],
+      case_study_visibility: ["interna", "externa"],
       composer_team_role: [
         "agente",
         "manager",
@@ -2017,6 +2353,7 @@ export const Constants = {
         "vencido",
         "cancelado",
       ],
+      deck_purpose: ["corto", "largo", "generico", "por_cliente", "sector"],
       film_format: [
         "feature",
         "series",
@@ -2026,6 +2363,7 @@ export const Constants = {
         "game",
         "other",
       ],
+      marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       opportunity_status: [
         "identificado",
         "primer_contacto",
@@ -2033,6 +2371,14 @@ export const Constants = {
         "negociacion",
         "cerrado",
         "descartado",
+      ],
+      outreach_template_kind: [
+        "cold",
+        "follow_up",
+        "propuesta_economica",
+        "nda",
+        "agradecimiento",
+        "otro",
       ],
       person_role: [
         "ic_team",
@@ -2043,6 +2389,7 @@ export const Constants = {
         "curator",
         "other",
       ],
+      press_kit_scope: ["ic_global", "compositor"],
       production_kind: [
         "cine",
         "serie",
