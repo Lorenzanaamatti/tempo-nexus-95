@@ -94,6 +94,9 @@ function OpportunityDetail() {
     estimated_value: "" as string | number,
     responsible_person_id: "" as string,
     notes: "",
+    detected_date: "" as string,
+    expected_close_date: "" as string,
+    last_contact_date: "" as string,
   });
   const [saving, setSaving] = useState(false);
 
@@ -109,6 +112,9 @@ function OpportunityDetail() {
         estimated_value: d.estimated_value ?? "",
         responsible_person_id: d.responsible_person_id ?? "",
         notes: d.notes ?? "",
+        detected_date: d.detected_date ?? "",
+        expected_close_date: d.expected_close_date ?? "",
+        last_contact_date: d.last_contact_date ?? "",
       });
     }
   }, [oppQ.data]);
@@ -124,6 +130,9 @@ function OpportunityDetail() {
       estimated_value: form.estimated_value === "" ? null : Number(form.estimated_value),
       responsible_person_id: form.responsible_person_id || null,
       notes: form.notes || null,
+      detected_date: form.detected_date || null,
+      expected_close_date: form.expected_close_date || null,
+      last_contact_date: form.last_contact_date || null,
     }).eq("id", opportunityId);
     setSaving(false);
     if (error) return toast.error(error.message);
