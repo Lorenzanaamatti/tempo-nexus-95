@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from '.
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
 import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from './routes/_authenticated/_admin/opportunities.$opportunityId'
+import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
@@ -230,6 +231,12 @@ const AuthenticatedAdminOpportunitiesOpportunityIdRoute =
     path: '/opportunities/$opportunityId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingCalendarRoute =
+  AuthenticatedAdminMarketingCalendarRouteImport.update({
+    id: '/marketing/calendar',
+    path: '/marketing/calendar',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDirectorsDirectorIdRoute =
   AuthenticatedAdminDirectorsDirectorIdRouteImport.update({
     id: '/directors/$directorId',
@@ -331,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
@@ -374,6 +382,7 @@ export interface FileRoutesByTo {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
@@ -421,6 +430,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/directors/$directorId'
+    | '/marketing/calendar'
     | '/opportunities/$opportunityId'
     | '/people/$personId'
     | '/production-companies/$companyId'
@@ -510,6 +521,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/directors/$directorId'
+    | '/marketing/calendar'
     | '/opportunities/$opportunityId'
     | '/people/$personId'
     | '/production-companies/$companyId'
@@ -556,6 +568,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/directors/$directorId'
+    | '/_authenticated/_admin/marketing/calendar'
     | '/_authenticated/_admin/opportunities/$opportunityId'
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/production-companies/$companyId'
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/calendar': {
+      id: '/_authenticated/_admin/marketing/calendar'
+      path: '/marketing/calendar'
+      fullPath: '/marketing/calendar'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingCalendarRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/directors/$directorId': {
       id: '/_authenticated/_admin/directors/$directorId'
       path: '/directors/$directorId'
@@ -905,6 +925,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  AuthenticatedAdminMarketingCalendarRoute: typeof AuthenticatedAdminMarketingCalendarRoute
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
@@ -939,6 +960,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminContractsContractIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
+  AuthenticatedAdminMarketingCalendarRoute:
+    AuthenticatedAdminMarketingCalendarRoute,
   AuthenticatedAdminOpportunitiesOpportunityIdRoute:
     AuthenticatedAdminOpportunitiesOpportunityIdRoute,
   AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,
