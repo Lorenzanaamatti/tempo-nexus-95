@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions: {
+        Row: {
+          assignee_person_id: string | null
+          created_at: string
+          done: boolean
+          done_at: string | null
+          due_date: string | null
+          id: string
+          kind: string
+          notes: string | null
+          position: number
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_person_id?: string | null
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          position?: number
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_person_id?: string | null
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          position?: number
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       av_genres: {
         Row: {
           id: string
@@ -844,6 +892,48 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string | null
+          notes: string | null
+          position: number
+          storage_path: string | null
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string | null
+          notes?: string | null
+          position?: number
+          storage_path?: string | null
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          title?: string
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
