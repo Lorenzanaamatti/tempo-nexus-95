@@ -798,8 +798,11 @@ export type Database = {
       opportunities: {
         Row: {
           created_at: string
+          detected_date: string | null
           estimated_value: number | null
+          expected_close_date: string | null
           id: string
+          last_contact_date: string | null
           notes: string | null
           partner_company_id: string | null
           partner_name: string | null
@@ -811,8 +814,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          detected_date?: string | null
           estimated_value?: number | null
+          expected_close_date?: string | null
           id?: string
+          last_contact_date?: string | null
           notes?: string | null
           partner_company_id?: string | null
           partner_name?: string | null
@@ -824,8 +830,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          detected_date?: string | null
           estimated_value?: number | null
+          expected_close_date?: string | null
           id?: string
+          last_contact_date?: string | null
           notes?: string | null
           partner_company_id?: string | null
           partner_name?: string | null
