@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
+import { ContractSignerInput } from "@/components/contract-signer-input";
+import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
 import {
   CONTRACT_STATUS_LABEL,
   CONTRACT_LANG_LABEL,
@@ -59,7 +61,8 @@ function ContractDetail() {
     contract_type: "" as string,
     contract_type_custom: "" as string,
     signer_name: "",
-    counterparty: "",
+    signer_composer_id: "" as string,
+    signer_person_id: "" as string,
     partner_company_id: "",
     composer_id: "",
     signed_date: "",
@@ -81,7 +84,8 @@ function ContractDetail() {
       contract_type: d.contract_type ? (known ? d.contract_type : "__custom__") : "",
       contract_type_custom: d.contract_type && !known ? d.contract_type : "",
       signer_name: d.signer_name ?? "",
-      counterparty: d.counterparty ?? "",
+      signer_composer_id: d.signer_composer_id ?? "",
+      signer_person_id: d.signer_person_id ?? "",
       partner_company_id: d.partner_company_id ?? "",
       composer_id: d.composer_id ?? "",
       signed_date: d.signed_date ?? "",
@@ -101,7 +105,8 @@ function ContractDetail() {
       title: form.title,
       contract_type: type,
       signer_name: form.signer_name || null,
-      counterparty: form.counterparty || null,
+      signer_composer_id: form.signer_composer_id || null,
+      signer_person_id: form.signer_person_id || null,
       partner_company_id: form.partner_company_id || null,
       composer_id: form.composer_id || null,
       signed_date: form.signed_date || null,
@@ -170,17 +175,31 @@ function ContractDetail() {
           </Select>
         </div>
 
-        <div>
+        <div className="sm:col-span-2">
           <Label>Firmante</Label>
-          <Input value={form.signer_name} onChange={(e) => setForm({ ...form, signer_name: e.target.value })} placeholder="Nombre del firmante" />
+          <ContractSignerInput
+            value={{
+              signer_composer_id: form.signer_composer_id || null,
+              signer_person_id: form.signer_person_id || null,
+              signer_name: form.signer_name,
+            }}
+            onChange={(v) =>
+              setForm({
+                ...form,
+                signer_name: v.signer_name,
+                signer_composer_id: v.signer_composer_id ?? "",
+                signer_person_id: v.signer_person_id ?? "",
+              })
+            }
+          />
         </div>
-        <div>
-          <Label>Contraparte (texto libre)</Label>
-          <Input value={form.counterparty} onChange={(e) => setForm({ ...form, counterparty: e.target.value })} placeholder="Empresa o persona" />
+
+        <div className="sm:col-span-2">
+          <ContractCounterpartiesEditor contractId={contractId} />
         </div>
 
         <div>
-          <Label>Productora vinculada</Label>
+          <Label>Productora principal (opcional)</Label>
           <Select value={form.partner_company_id || undefined} onValueChange={(v) => setForm({ ...form, partner_company_id: v })}>
             <SelectTrigger><SelectValue placeholder="Selecciona productora…" /></SelectTrigger>
             <SelectContent>
