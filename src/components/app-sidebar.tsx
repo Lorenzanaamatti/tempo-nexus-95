@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig } from "lucide-react";
+import { Users, User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -106,17 +106,30 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
           </>
         ) : (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="smallcaps">Catálogo</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="smallcaps">Mi portal</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith("/me")}>
-                    <Link to="/me" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {!collapsed && <span>Mi ficha</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {[
+                  { to: "/portal", label: "Inicio", icon: Home, exact: true },
+                  { to: "/portal/carrera", label: "Mi carrera", icon: User },
+                  { to: "/portal/proyectos", label: "Proyectos activos", icon: FolderKanban },
+                  { to: "/portal/propuestas", label: "Propuestas en curso", icon: Inbox },
+                  { to: "/portal/contratos", label: "Contratos y derechos", icon: FileSignature },
+                  { to: "/portal/agenda", label: "Agenda y reuniones", icon: CalendarDays },
+                  { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
+                ].map((item) => {
+                  const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+                  return (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton asChild isActive={active}>
+                        <Link to={item.to as never} className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.label}</span>}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
