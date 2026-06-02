@@ -363,6 +363,7 @@ function OpportunityDetail() {
           </ul>
         )}
       </section>
+      <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
 }
