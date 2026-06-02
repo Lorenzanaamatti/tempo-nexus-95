@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
+import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
 
@@ -185,6 +186,12 @@ const AuthenticatedAdminPeoplePersonIdRoute =
     path: '/people/$personId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDirectorsDirectorIdRoute =
+  AuthenticatedAdminDirectorsDirectorIdRouteImport.update({
+    id: '/directors/$directorId',
+    path: '/directors/$directorId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminComposersNewRoute =
   AuthenticatedAdminComposersNewRouteImport.update({
     id: '/composers/new',
@@ -216,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -243,6 +251,7 @@ export interface FileRoutesByTo {
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -274,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
+  '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/portal/'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/directors/$directorId'
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/composers/$composerId'
     | '/composers/new'
+    | '/directors/$directorId'
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
@@ -361,6 +373,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/'
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
+    | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
@@ -561,6 +574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeoplePersonIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/directors/$directorId': {
+      id: '/_authenticated/_admin/directors/$directorId'
+      path: '/directors/$directorId'
+      fullPath: '/directors/$directorId'
+      preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/composers/new': {
       id: '/_authenticated/_admin/composers/new'
       path: '/composers/new'
@@ -584,6 +604,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
+  AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -602,6 +623,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
+  AuthenticatedAdminDirectorsDirectorIdRoute:
+    AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,
   AuthenticatedAdminProductionCompaniesCompanyIdRoute:
     AuthenticatedAdminProductionCompaniesCompanyIdRoute,
@@ -670,3 +693,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
