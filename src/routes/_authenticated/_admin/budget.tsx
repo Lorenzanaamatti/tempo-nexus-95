@@ -23,7 +23,7 @@ function Budget() {
   const sprintsQ = useQuery({
     queryKey: ["budget-sprints"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("production_billing_sprints")
         .select("production_id, kind, amount, status");
       if (error) throw error;

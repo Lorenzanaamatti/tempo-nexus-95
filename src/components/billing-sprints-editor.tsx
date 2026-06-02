@@ -31,7 +31,7 @@ export function BillingSprintsEditor({
   const { data, isLoading } = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("production_billing_sprints")
         .select("*")
         .eq("production_id", productionId)
@@ -54,7 +54,7 @@ export function BillingSprintsEditor({
   async function add() {
     if (rows.length >= 6) return toast.error("Máximo 6 sprints");
     const next = (rows.at(-1) as any)?.sprint_number ?? 0;
-    const { error } = await supabase.from("production_billing_sprints").insert({
+    const { error } = await (supabase as any).from("production_billing_sprints").insert({
       production_id: productionId,
       kind,
       sprint_number: Math.min(next + 1, 6),
@@ -64,14 +64,14 @@ export function BillingSprintsEditor({
   }
 
   async function update(id: string, patch: Record<string, unknown>) {
-    const { error } = await supabase.from("production_billing_sprints").update(patch as any).eq("id", id);
+    const { error } = await (supabase as any).from("production_billing_sprints").update(patch).eq("id", id);
     if (error) toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
   }
 
   async function remove(id: string) {
     if (!confirm("¿Eliminar sprint?")) return;
-    const { error } = await supabase.from("production_billing_sprints").delete().eq("id", id);
+    const { error } = await (supabase as any).from("production_billing_sprints").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
   }
