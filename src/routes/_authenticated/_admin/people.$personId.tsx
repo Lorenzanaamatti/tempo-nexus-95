@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { PersonEventsEditor } from "@/components/person-events-editor";
+import { TEAM_ROLE_LABEL, type TeamRole } from "@/components/composer-team-editor";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -32,6 +33,18 @@ function PersonEdit() {
       const { data, error } = await supabase.from("people").select("*").eq("id", personId).single();
       if (error) throw error;
       return data;
+    },
+  });
+
+  const assignmentsQ = useQuery({
+    queryKey: ["person-assignments", personId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("composer_team_assignments")
+        .select("id, composer_id, team_role, role_other, start_date, objectives, kpi_review, kpi_review_date, composers(full_name, artistic_name)")
+        .eq("person_id", personId)
+        .order("start_date", { ascending: false });
+      return data ?? [];
     },
   });
 
@@ -135,6 +148,56 @@ function PersonEdit() {
       <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <PersonEventsEditor personId={personId} />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="mb-3 font-display text-2xl">Representados asignados</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Plan de personal por representado: rol, fecha de inicio, objetivos y revisión KPI. Para editar, abre la ficha del representado.
+        </p>
+        {assignmentsQ.isLoading ? (
+          <p className="text-sm text-muted-foreground">Cargando…</p>
+        ) : !assignmentsQ.data?.length ? (
+          <p className="text-sm text-muted-foreground">Sin asignaciones.</p>
+        ) : (
+          <ul className="space-y-3">
+            {assignmentsQ.data.map((a: any) => {
+              const name = a.composers?.artistic_name || a.composers?.full_name || "—";
+              const roleLabel =
+                a.team_role === "otro" && a.role_other
+                  ? `Otro · ${a.role_other}`
+                  : TEAM_ROLE_LABEL[a.team_role as TeamRole];
+              return (
+                <li key={a.id} className="rounded-sm border border-border p-4">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <Link
+                      to="/composers/$composerId"
+                      params={{ composerId: a.composer_id }}
+                      className="font-display text-lg hover:underline"
+                    >
+                      {name}
+                    </Link>
+                    <span className="smallcaps text-xs text-muted-foreground">{roleLabel}</span>
+                  </div>
+                  <div className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                    <p><span className="text-muted-foreground">Inicio:</span> {a.start_date ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Próxima revisión KPI:</span> {a.kpi_review_date ?? "—"}</p>
+                  </div>
+                  {a.objectives && (
+                    <p className="mt-2 whitespace-pre-wrap text-sm">
+                      <span className="text-muted-foreground">Objetivos: </span>{a.objectives}
+                    </p>
+                  )}
+                  {a.kpi_review && (
+                    <p className="mt-1 whitespace-pre-wrap text-sm">
+                      <span className="text-muted-foreground">Revisión KPI: </span>{a.kpi_review}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );
