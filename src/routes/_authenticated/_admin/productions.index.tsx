@@ -49,7 +49,7 @@ function ProductionsIndex() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Producciones</p>
-          <h1 className="mt-1 font-display text-5xl">Películas y series</h1>
+          <h1 className="mt-1 font-display text-5xl">PRODUCCIONES EN CURSO</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Cada producción puede tener compositores, artistas y supervisores asignados.
           </p>
