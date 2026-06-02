@@ -173,7 +173,7 @@ function ProductionEdit() {
       music_supervisor_person_id: form.music_supervisor_person_id || null,
       other_responsibles: form.other_responsibles || null,
       premiere_date: form.premiere_date || null,
-    }).eq("id", productionId);
+    } as any).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
