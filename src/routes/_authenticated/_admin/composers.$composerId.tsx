@@ -261,11 +261,161 @@ function Inner({
       </div>
 
       <header className="mb-10 border-b border-border pb-6">
-        <h1 className="font-display text-5xl">{c.full_name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-5xl">{c.artistic_name || c.full_name}</h1>
+            {(c.legal_name || c.full_name) && (c.artistic_name && (c.legal_name || c.full_name) !== c.artistic_name) && (
+              <p className="mt-1 text-sm text-muted-foreground">Nombre legal: {c.legal_name || c.full_name}</p>
+            )}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {c.tier && <Badge variant="outline" className="rounded-sm">Tier {c.tier}</Badge>}
+            <Badge variant="secondary" className="rounded-sm">
+              {({ activo: "Activo", pausa: "En pausa", en_negociacion: "En negociación", finalizado: "Finalizado" } as Record<string, string>)[c.representation_status ?? "activo"]}
+            </Badge>
+          </div>
+        </div>
       </header>
+
+      {/* KPIs */}
+      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KPI label="Proyectos activos" value={String(activeProjects.length)} />
+        <KPI label="Proyectos totales" value={String(projects.length)} />
+        <KPI label="Facturación histórica" value={`${totalRevenue.toLocaleString("es-ES")} €`} />
+        <KPI label="Margen neto" value={`${totalMargin.toLocaleString("es-ES")} €`} />
+      </section>
+
+      {/* Representación */}
+      <Section title="Representación">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Nombre artístico">
+            <Input value={c.artistic_name ?? ""} onChange={(e) => field("artistic_name", e.target.value || null)} />
+          </Field>
+          <Field label="Nombre legal">
+            <Input value={c.legal_name ?? ""} onChange={(e) => field("legal_name", e.target.value || null)} />
+          </Field>
+          <Field label="Tier">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.tier ?? ""}
+              onChange={(e) => field("tier", e.target.value || null)}
+            >
+              <option value="">—</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="desarrollo">Desarrollo</option>
+            </select>
+          </Field>
+          <Field label="Estado">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.representation_status ?? "activo"}
+              onChange={(e) => field("representation_status", e.target.value)}
+            >
+              <option value="activo">Activo</option>
+              <option value="pausa">En pausa</option>
+              <option value="en_negociacion">En negociación</option>
+              <option value="finalizado">Finalizado</option>
+            </select>
+          </Field>
+          <Field label="Agente responsable">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={c.agent_person_id ?? ""}
+              onChange={(e) => field("agent_person_id", e.target.value || null)}
+            >
+              <option value="">— Sin asignar —</option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>{a.full_name}{a.email ? ` · ${a.email}` : ""}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Fecha de inicio de representación">
+            <Input
+              type="date"
+              value={c.representation_start_date ?? ""}
+              onChange={(e) => field("representation_start_date", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Fecha de renovación">
+            <Input
+              type="date"
+              value={c.renewal_date ?? ""}
+              onChange={(e) => field("renewal_date", e.target.value || null)}
+            />
+          </Field>
+          <Field label="Notas de carrera" className="sm:col-span-2">
+            <Textarea
+              rows={4}
+              value={c.career_notes ?? ""}
+              onChange={(e) => field("career_notes", e.target.value || null)}
+              placeholder="Trayectoria, objetivos, hitos próximos, conversaciones abiertas…"
+            />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Proyectos activos */}
+      <Section title="Proyectos activos">
+        {activeProjects.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin proyectos activos este año.</p>
+        ) : (
+          <ul className="space-y-2">
+            {activeProjects.map((p) => (
+              <li key={p.id} className="flex items-baseline justify-between rounded-sm border border-border bg-card/50 px-4 py-3">
+                <div>
+                  <div className="text-sm">{p.production}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {[p.production_type, p.director, p.platform, p.year].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                {p.price_charged != null && (
+                  <div className="text-sm text-muted-foreground">{Number(p.price_charged).toLocaleString("es-ES")} €</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* Portal del representado */}
+      <Section title="Portal del representado">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="URL personalizada del portal (opcional)" className="sm:col-span-2">
+            <Input
+              type="url"
+              value={c.portal_url ?? ""}
+              onChange={(e) => field("portal_url", e.target.value || null)}
+              placeholder="https://… (si se deja vacío, se usa el portal interno /me)"
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 rounded-sm border border-border bg-muted/40 px-4 py-3">
+          <span className="smallcaps text-xs text-muted-foreground">Acceso</span>
+          <code className="flex-1 truncate text-xs">{portalLink}</code>
+          <Button type="button" size="sm" variant="outline" onClick={copyPortal}>
+            <Copy className="mr-1 h-3 w-3" /> Copiar enlace
+          </Button>
+          <Button type="button" size="sm" variant="outline" asChild>
+            <a href={portalLink} target="_blank" rel="noreferrer">
+              <ExternalLink className="mr-1 h-3 w-3" /> Abrir
+            </a>
+          </Button>
+        </div>
+        {c.owner_email ? (
+          <p className="text-xs text-muted-foreground">
+            Cuenta del representado: <strong>{c.owner_email}</strong>
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Aún no hay cuenta vinculada. El representado podrá entrar al portal cuando se registre con un email asociado a esta ficha.
+          </p>
+        )}
+      </Section>
 
       {/* Identidad */}
       <Section title="Identidad">
