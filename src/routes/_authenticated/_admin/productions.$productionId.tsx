@@ -12,7 +12,7 @@ import { Trash2, Plus } from "lucide-react";
 import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
-import { formatEUR, parseAmount } from "@/lib/money";
+import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { SuggestInput } from "@/components/suggest-input";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
@@ -279,7 +279,8 @@ function ProductionEdit() {
         <div>
           <Label>Fee acordado (€)</Label>
           <Input
-            defaultValue={form.fee_amount !== "" ? String(form.fee_amount).replace(".", ",") : ""}
+            key={`fee-${form.fee_amount}`}
+            defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
             placeholder="0,00"
             onBlur={(e) => {
               const v = parseAmount(e.target.value);
@@ -308,7 +309,8 @@ function ProductionEdit() {
         <div>
           <Label>Comisión IC (€)</Label>
           <Input
-            defaultValue={form.ic_commission !== "" ? String(form.ic_commission).replace(".", ",") : ""}
+            key={`com-${form.ic_commission}`}
+            defaultValue={form.ic_commission !== "" ? formatNumberEs(Number(form.ic_commission)) : ""}
             placeholder="0,00"
             onBlur={(e) => {
               const v = parseAmount(e.target.value);
