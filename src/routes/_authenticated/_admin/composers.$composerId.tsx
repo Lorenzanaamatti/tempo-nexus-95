@@ -16,7 +16,7 @@ import { RelationListEditor } from "@/components/relation-list-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
   component: ComposerEditPage,
@@ -44,13 +44,16 @@ function ComposerEditPage() {
   const relationsQ = useQuery({
     queryKey: ["composer-relations", composerId],
     queryFn: async () => {
-      const [demos, films, awards, styles, genres, langs] = await Promise.all([
+      const [demos, films, awards, styles, genres, langs, docs, projects, agents] = await Promise.all([
         supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_styles").select("style_id").eq("composer_id", composerId),
         supabase.from("composer_genres").select("genre_id").eq("composer_id", composerId),
         supabase.from("composer_languages").select("language_code").eq("composer_id", composerId),
+        supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
+        supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
+        supabase.from("people").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
       ]);
       return {
         demos: demos.data ?? [],
@@ -59,6 +62,9 @@ function ComposerEditPage() {
         styleIds: new Set((styles.data ?? []).map((r: any) => r.style_id)),
         genreIds: new Set((genres.data ?? []).map((r: any) => r.genre_id)),
         langCodes: new Set((langs.data ?? []).map((r: any) => r.language_code)),
+        docs: docs.data ?? [],
+        projects: projects.data ?? [],
+        agents: agents.data ?? [],
       };
     },
   });
@@ -102,6 +108,9 @@ function Inner({
   const [demos, setDemos] = useState<any[]>(initialRelations.demos);
   const [films, setFilms] = useState<any[]>(initialRelations.films);
   const [awards, setAwards] = useState<any[]>(initialRelations.awards);
+  const [docs, setDocs] = useState<any[]>(initialRelations.docs);
+  const projects: any[] = initialRelations.projects ?? [];
+  const agents: { id: string; full_name: string; email: string | null }[] = initialRelations.agents ?? [];
   const [tagInput, setTagInput] = useState("");
 
   function field<K extends string>(k: K, v: any) {
@@ -133,12 +142,34 @@ function Inner({
         email_secondary: c.email_secondary,
         team_name: c.team_name,
         team_email: c.team_email,
+        artistic_name: c.artistic_name,
+        legal_name: c.legal_name,
+        tier: c.tier,
+        representation_status: c.representation_status ?? "activo",
+        agent_person_id: c.agent_person_id,
+        representation_start_date: c.representation_start_date,
+        renewal_date: c.renewal_date,
+        career_notes: c.career_notes,
+        portal_url: c.portal_url,
       })
       .eq("id", c.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Ficha guardada");
     setDirty(false);
+  }
+
+  const activeYear = new Date().getFullYear();
+  const activeProjects = projects.filter((p) => (p.year ?? activeYear) >= activeYear);
+  const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
+  const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
+  const portalLink = c.portal_url || `${typeof window !== "undefined" ? window.location.origin : ""}/me`;
+
+  function copyPortal() {
+    navigator.clipboard.writeText(portalLink).then(
+      () => toast.success("Enlace del portal copiado"),
+      () => toast.error("No se pudo copiar"),
+    );
   }
 
   async function toggleStyle(id: string) {
