@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Receipt, Share2 } from "lucide-react";
+import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Receipt, Share2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
