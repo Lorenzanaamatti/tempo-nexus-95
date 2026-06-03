@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Wallet, Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Receipt, Share2 } from "lucide-react";
+import { User, LogOut, CalendarDays, UserCircle2, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Receipt, Share2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -49,9 +49,8 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
     { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
-    { title: "Presupuesto", to: "/budget", icon: Wallet, active: pathname.startsWith("/budget") },
     { title: "Plan facturación IC", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
-    { title: "Dashboard económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") },
+    { title: "Económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
     { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
