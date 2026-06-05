@@ -13,6 +13,7 @@ import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
 import { SuggestInput } from "@/components/suggest-input";
 import { SaveButton } from "@/components/save-button";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
@@ -602,7 +603,7 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
               <span className="font-display">{a.people?.full_name}</span>
               {a.role_in_project && <span className="text-xs text-muted-foreground">{a.role_in_project}</span>}
               {(a.start_date || a.end_date) && (
-                <span className="text-xs text-muted-foreground">{a.start_date ?? "?"} → {a.end_date ?? "?"}</span>
+                <span className="text-xs text-muted-foreground">{a.start_date ? formatDateEs(a.start_date) : "?"} → {a.end_date ? formatDateEs(a.end_date) : "?"}</span>
               )}
               <Button variant="ghost" size="sm" className="ml-auto" onClick={() => remove(a.id)}><Trash2 className="h-3 w-3" /></Button>
             </div>
