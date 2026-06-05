@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
 import { Button } from "@/components/ui/button";
 
 type Granularity = "month" | "quarter" | "year";
@@ -145,6 +146,13 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
   const overdue = sprints.filter((s) => s.due_date && !s.invoiced_date && s.due_date < today);
   const overdueTotal = overdue.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
 
+  const upcoming = useMemo(() => {
+    const list = (sprintsQ.data ?? []) as Sprint[];
+    return list
+      .filter((s) => s.due_date && !s.invoiced_date && s.due_date >= today)
+      .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1));
+  }, [sprintsQ.data, today]);
+
   const max = Math.max(1, ...buckets.map((b) => Math.max(b.previsto, b.facturado, b.cobrado)));
 
   if (sprintsQ.isLoading) {
@@ -248,6 +256,40 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
           </tbody>
         </table>
       </div>
+
+      {composerId && (
+        <section className="space-y-2">
+          <h3 className="font-display text-xl">Próximas facturas</h3>
+          {upcoming.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sin facturas previstas.</p>
+          ) : (
+            <div className="overflow-x-auto rounded-sm border border-border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2">Fecha</th>
+                    <th className="px-3 py-2">Producción</th>
+                    <th className="px-3 py-2">Tipo</th>
+                    <th className="px-3 py-2 text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcoming.map((s) => (
+                    <tr key={s.id} className="border-t border-border">
+                      <td className="px-3 py-2 tabular-nums">{formatDateEs(s.due_date)}</td>
+                      <td className="px-3 py-2">{s.productions?.title ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                        {s.kind === "comision" ? "Comisión IC" : "Trabajo"}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums">{formatEUR(s.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
