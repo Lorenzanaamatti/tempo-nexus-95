@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { fetchCatalogs } from "@/lib/composers-api";
+import { formatDateEs } from "@/lib/dates";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { VideoGallery } from "@/components/video-gallery";
@@ -896,7 +897,7 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
                   <td className="px-3 py-2 text-muted-foreground">#{s.sprint_number}{s.label ? ` · ${s.label}` : ""}</td>
                   <td className="px-3 py-2 text-xs">{s.kind === "comision" ? "Comisión IC" : s.kind === "trabajo" ? "Trabajo" : s.kind}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{Number(s.amount ?? 0).toLocaleString("es-ES")} €</td>
-                  <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{s.due_date ?? "—"}</td>
+                  <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(s.due_date)}</td>
                   <td className="px-3 py-2 text-xs">{s.status}</td>
                   <td className="px-3 py-2 text-xs">
                     {s.holded_url ? (

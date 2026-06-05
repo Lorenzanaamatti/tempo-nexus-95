@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, Plus, ExternalLink } from "lucide-react";
+import { formatDateEs } from "@/lib/dates";
 import {
   CONTRACT_STATUS_LABEL,
   CONTRACT_STATUS_TONE,
@@ -204,9 +205,9 @@ function ContractsIndex() {
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{c.contract_type || "—"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{c.signer_name || c.counterparty || "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{c.signed_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{c.end_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{c.notice_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(c.signed_date)}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(c.end_date)}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(c.notice_date)}</td>
                   <td className="px-3 py-2">
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${CONTRACT_STATUS_TONE[c.sign_status as ContractStatus]}`}>
                       {CONTRACT_STATUS_LABEL[c.sign_status as ContractStatus]}

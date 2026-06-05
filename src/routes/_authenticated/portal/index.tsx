@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
+import { formatDateEs } from "@/lib/dates";
 
 export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
@@ -74,7 +75,7 @@ function PortalHome() {
       <section className="grid gap-4 sm:grid-cols-3">
         <Card label="Estado" value={composer?.representation_status ?? "—"} />
         <Card label="Tier" value={composer?.tier ?? "—"} />
-        <Card label="Renovación" value={composer?.renewal_date ?? "—"} />
+        <Card label="Renovación" value={formatDateEs(composer?.renewal_date)} />
       </section>
 
       <section>

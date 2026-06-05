@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { formatEUR } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
@@ -169,8 +170,8 @@ function OpportunitiesIndex() {
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatEUR(o.estimated_value)}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{o.detected_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{o.expected_close_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                 </tr>
               ))}

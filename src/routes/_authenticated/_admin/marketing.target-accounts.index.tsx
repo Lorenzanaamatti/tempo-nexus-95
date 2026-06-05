@@ -28,10 +28,7 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/target-ac
   component: TargetAccountsIndex,
 });
 
-function fmtDate(d: string | null | undefined) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("es", { day: "2-digit", month: "short", year: "numeric" });
-}
+import { formatDateEs as fmtDate } from "@/lib/dates";
 
 function TargetAccountsIndex() {
   const qc = useQueryClient();

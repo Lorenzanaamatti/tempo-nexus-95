@@ -59,6 +59,12 @@ export const CASE_STUDY_VISIBILITY_LABEL: Record<CaseStudyVisibility, string> = 
 };
 
 export function fmtDate(d: string | null | undefined) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("es", { day: "2-digit", month: "short", year: "numeric" });
+  if (d === null || d === undefined || d === "") return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "—";
+  const dd = String(dt.getDate()).padStart(2, "0");
+  const mm = String(dt.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${dt.getFullYear()}`;
 }
