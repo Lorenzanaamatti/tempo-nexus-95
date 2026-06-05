@@ -153,6 +153,8 @@ function ProductionEdit() {
         music_supervisor_name: d.music_supervisor_name ?? "",
         other_responsibles: d.other_responsibles ?? "",
         premiere_date: d.premiere_date ?? "",
+        nomination_date: (d as any).nomination_date ?? "",
+        award_date: (d as any).award_date ?? "",
         imdb_url: d.imdb_url ?? "",
         external_composer: d.external_composer ?? "",
       });
@@ -189,6 +191,8 @@ function ProductionEdit() {
       music_supervisor_name: form.music_supervisor_name || null,
       other_responsibles: form.other_responsibles || null,
       premiere_date: form.premiere_date || null,
+      nomination_date: form.nomination_date || null,
+      award_date: form.award_date || null,
       imdb_url: form.imdb_url || null,
       external_composer: form.external_composer || null,
     } as any).eq("id", productionId);
@@ -337,6 +341,8 @@ function ProductionEdit() {
         </div>
         <div><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
         <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
+        <div><Label>Fecha de nominación</Label><Input type="date" value={form.nomination_date} onChange={(e) => setForm({ ...form, nomination_date: e.target.value })} /></div>
+        <div><Label>Fecha de premio</Label><Input type="date" value={form.award_date} onChange={(e) => setForm({ ...form, award_date: e.target.value })} /></div>
         <div className="sm:col-span-2"><Label>Enlace IMDb</Label><Input value={form.imdb_url} onChange={(e) => setForm({ ...form, imdb_url: e.target.value })} placeholder="https://www.imdb.com/title/…" /></div>
         <div className="sm:col-span-2"><Label>Compositor externo (si no es del roster IC)</Label><Input value={form.external_composer} onChange={(e) => setForm({ ...form, external_composer: e.target.value })} placeholder="Nombre del compositor externo" /></div>
         <div>
