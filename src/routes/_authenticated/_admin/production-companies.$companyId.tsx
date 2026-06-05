@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { formatDateEs } from "@/lib/dates";
 
 export const Route = createFileRoute("/_authenticated/_admin/production-companies/$companyId")({
   component: CompanyDetail,
@@ -112,7 +113,7 @@ function CompanyDetail() {
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">{p.composer?.artistic_name || p.composer?.full_name || "—"}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.negotiator?.full_name || "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{p.premiere_date ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{formatDateEs(p.premiere_date)}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.status ?? "—"}</td>
                   </tr>
                 ))}
