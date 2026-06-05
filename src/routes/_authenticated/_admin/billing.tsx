@@ -38,7 +38,6 @@ const STATUS_LABEL: Record<string, string> = {
 function BillingPlan() {
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<"all" | "pendiente" | "facturado" | "cobrado" | "vencido">("all");
-  const [kindFilter, setKindFilter] = useState<"all" | "comision" | "trabajo">("all");
   const [search, setSearch] = useState("");
 
   const sprintsQ = useQuery({
@@ -47,6 +46,7 @@ function BillingPlan() {
       const { data, error } = await (supabase as any)
         .from("production_billing_sprints")
         .select("id, production_id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url, productions(id, title, composer_id, composers(full_name, artistic_name))")
+        .eq("kind", "comision")
         .order("due_date", { ascending: true, nullsFirst: false });
       if (error) throw error;
       return (data ?? []) as Row[];
@@ -69,7 +69,6 @@ function BillingPlan() {
   const rows = useMemo(() => {
     const list = sprintsQ.data ?? [];
     return list.filter((r) => {
-      if (kindFilter !== "all" && r.kind !== kindFilter) return false;
       if (statusFilter === "vencido") {
         if (!(r.due_date && !r.invoiced_date && r.due_date < today)) return false;
       } else if (statusFilter !== "all" && r.status !== statusFilter) return false;
@@ -89,7 +88,7 @@ function BillingPlan() {
       }
       return true;
     });
-  }, [sprintsQ.data, statusFilter, kindFilter, search, today]);
+  }, [sprintsQ.data, statusFilter, search, today]);
 
   const totals = rows.reduce(
     (acc, r) => {
@@ -109,7 +108,7 @@ function BillingPlan() {
         <p className="smallcaps text-muted-foreground">Operativo</p>
         <h1 className="font-display text-4xl">Plan de facturación IC</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sprints de comisión y trabajo de todas las producciones. Anota la referencia de la factura en Holded y un enlace directo.
+          Facturas de comisión IC pendientes de emitir, emitidas y cobradas. Anota la referencia de la factura en Holded y un enlace directo.
         </p>
       </header>
 
@@ -139,16 +138,6 @@ function BillingPlan() {
           ]}
           onChange={(v) => setStatusFilter(v as typeof statusFilter)}
         />
-        <FilterChips
-          label="Tipo"
-          value={kindFilter}
-          options={[
-            ["all", "Todo"],
-            ["comision", "Comisión IC"],
-            ["trabajo", "Trabajo"],
-          ]}
-          onChange={(v) => setKindFilter(v as typeof kindFilter)}
-        />
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -157,7 +146,6 @@ function BillingPlan() {
             <tr>
               <th className="px-3 py-2">Producción</th>
               <th className="px-3 py-2">Sprint</th>
-              <th className="px-3 py-2">Tipo</th>
               <th className="px-3 py-2 text-right">Importe</th>
               <th className="px-3 py-2">Vencimiento</th>
               <th className="px-3 py-2">Facturado</th>
@@ -169,9 +157,9 @@ function BillingPlan() {
           </thead>
           <tbody>
             {sprintsQ.isLoading ? (
-              <tr><td colSpan={10} className="px-3 py-6 text-center text-muted-foreground">Cargando…</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Cargando…</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={10} className="px-3 py-6 text-center text-muted-foreground">Sin sprints con esos filtros.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Sin facturas de comisión con esos filtros.</td></tr>
             ) : (
               rows.map((r) => {
                 const vencido = r.due_date && !r.invoiced_date && r.due_date < today;
@@ -188,11 +176,6 @@ function BillingPlan() {
                       )}
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">#{r.sprint_number}{r.label ? ` · ${r.label}` : ""}</td>
-                    <td className="px-3 py-2">
-                      <span className="rounded-sm border border-border px-2 py-0.5 text-xs">
-                        {r.kind === "comision" ? "Comisión IC" : r.kind === "trabajo" ? "Trabajo" : r.kind}
-                      </span>
-                    </td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatEUR(r.amount)}</td>
                     <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{r.due_date ?? "—"}</td>
                     <td className="px-3 py-2">{r.invoiced_date ?? "—"}</td>
