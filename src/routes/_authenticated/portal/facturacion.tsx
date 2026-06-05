@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
 import { useMemo, useState } from "react";
+import { formatDateEs } from "@/lib/dates";
 
 export const Route = createFileRoute("/_authenticated/portal/facturacion")({
   component: Facturacion,
@@ -146,8 +147,8 @@ function Facturacion() {
             s.production?.title ?? "—",
             `${s.sprint_number}${s.label ? " · " + s.label : ""}`,
             fmt(Number(s.amount ?? 0)),
-            s.due_date ?? "—",
-            s.invoiced_date ?? <Pending key="p">Pendiente</Pending>,
+            formatDateEs(s.due_date),
+            s.invoiced_date ? formatDateEs(s.invoiced_date) : <Pending key="p">Pendiente</Pending>,
             <Status key="s" value={s.invoiced_date ? "Emitida" : "Pendiente"} ok={!!s.invoiced_date} />,
           ]}
         />
@@ -161,8 +162,8 @@ function Facturacion() {
             s.production?.title ?? "—",
             `${s.sprint_number}${s.label ? " · " + s.label : ""}`,
             fmt(Number(s.amount ?? 0)),
-            s.invoiced_date ?? "—",
-            s.paid_date ?? <Pending key="p">Pendiente</Pending>,
+            formatDateEs(s.invoiced_date),
+            s.paid_date ? formatDateEs(s.paid_date) : <Pending key="p">Pendiente</Pending>,
             <Status key="s" value={s.paid_date ? "Cobrada" : "Pendiente cobro"} ok={!!s.paid_date} />,
           ]}
         />
@@ -176,9 +177,9 @@ function Facturacion() {
             s.production?.title ?? "—",
             `${s.sprint_number}${s.label ? " · " + s.label : ""}`,
             fmt(Number(s.amount ?? 0)),
-            s.due_date ?? "—",
-            s.invoiced_date ?? <Pending key="p">Pendiente</Pending>,
-            s.paid_date ?? <Pending key="c">Pendiente</Pending>,
+            formatDateEs(s.due_date),
+            s.invoiced_date ? formatDateEs(s.invoiced_date) : <Pending key="p">Pendiente</Pending>,
+            s.paid_date ? formatDateEs(s.paid_date) : <Pending key="c">Pendiente</Pending>,
           ]}
         />
       )}
@@ -303,7 +304,7 @@ function CalendarView({ sprints }: { sprints: Sprint[] }) {
             <li key={idx} className="flex items-baseline justify-between gap-4 rounded-sm border border-border p-3">
               <div>
                 <p className="font-display">{i.production}</p>
-                <p className="text-xs text-muted-foreground">{i.label} · {i.date}</p>
+                <p className="text-xs text-muted-foreground">{i.label} · {formatDateEs(i.date)}</p>
               </div>
               <span className="font-display">{fmt(i.amount)}</span>
             </li>
