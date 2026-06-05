@@ -2603,6 +2603,26 @@ export type Database = {
         | "sprint_6"
         | "facturado"
         | "cobrado"
+        | "compositor_confirmado"
+        | "compositor_descartado"
+        | "presupuesto_enviado"
+        | "presupuesto_confirmado"
+        | "contrato_enviado"
+        | "contrato_negociacion"
+        | "visuales_entregados"
+        | "en_composicion"
+        | "en_produccion"
+        | "en_mezclas"
+        | "entrega_parcial"
+        | "entrega_total"
+        | "entregables_completados"
+        | "finalizada"
+        | "estrenada"
+        | "comunicado_estreno"
+        | "nominada"
+        | "premiada"
+        | "comunicada_nominacion"
+        | "comunicado_premio"
       representation_status:
         | "activo"
         | "pausa"
@@ -2890,6 +2910,26 @@ export const Constants = {
         "sprint_6",
         "facturado",
         "cobrado",
+        "compositor_confirmado",
+        "compositor_descartado",
+        "presupuesto_enviado",
+        "presupuesto_confirmado",
+        "contrato_enviado",
+        "contrato_negociacion",
+        "visuales_entregados",
+        "en_composicion",
+        "en_produccion",
+        "en_mezclas",
+        "entrega_parcial",
+        "entrega_total",
+        "entregables_completados",
+        "finalizada",
+        "estrenada",
+        "comunicado_estreno",
+        "nominada",
+        "premiada",
+        "comunicada_nominacion",
+        "comunicado_premio",
       ],
       representation_status: [
         "activo",
