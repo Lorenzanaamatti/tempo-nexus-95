@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -177,9 +178,9 @@ function BillingPlan() {
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">#{r.sprint_number}{r.label ? ` · ${r.label}` : ""}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatEUR(r.amount)}</td>
-                    <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{r.due_date ?? "—"}</td>
-                    <td className="px-3 py-2">{r.invoiced_date ?? "—"}</td>
-                    <td className="px-3 py-2">{r.paid_date ?? "—"}</td>
+                    <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(r.due_date)}</td>
+                    <td className="px-3 py-2">{formatDateEs(r.invoiced_date)}</td>
+                    <td className="px-3 py-2">{formatDateEs(r.paid_date)}</td>
                     <td className="px-3 py-2">{STATUS_LABEL[r.status] ?? r.status}</td>
                     <td className="px-3 py-2">
                       <Input
