@@ -57,6 +57,8 @@ function ProductionEdit() {
     music_supervisor_name: "",
     other_responsibles: "",
     premiere_date: "",
+    nomination_date: "",
+    award_date: "",
     imdb_url: "",
     external_composer: "",
   });
