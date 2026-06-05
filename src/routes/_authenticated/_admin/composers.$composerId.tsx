@@ -185,8 +185,28 @@ function Inner({
     setDirty(false);
   }
 
-  const activeYear = new Date().getFullYear();
-  const activeProjects = projects.filter((p) => (p.year ?? activeYear) >= activeYear);
+  // "Proyectos activos" = producciones con estado >= contrato_firmado,
+  // hasta 10 días naturales después del comunicado de estreno (premiere_date).
+  const ACTIVE_PRODUCTION_STATUSES = new Set([
+    "contrato_firmado",
+    "visuales_entregados",
+    "en_composicion",
+    "en_produccion",
+    "en_mezclas",
+    "entrega_parcial",
+    "entrega_total",
+    "entregables_completados",
+    "finalizada",
+    "estrenada",
+    "comunicado_estreno",
+  ]);
+  const todayMs = Date.now();
+  const activeProductions = productionsRel.filter((p: any) => {
+    if (!ACTIVE_PRODUCTION_STATUSES.has(p.status)) return false;
+    if (!p.premiere_date) return true;
+    const cutoff = new Date(p.premiere_date).getTime() + 10 * 24 * 60 * 60 * 1000;
+    return todayMs <= cutoff;
+  });
   const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
   const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
   const portalLink = c.portal_url || `${typeof window !== "undefined" ? window.location.origin : ""}/me`;
@@ -308,7 +328,7 @@ function Inner({
 
       {/* KPIs */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Proyectos activos" value={String(activeProjects.length)} />
+        <KPI label="Proyectos activos" value={String(activeProductions.length)} />
         <KPI label="Proyectos totales" value={String(projects.length)} />
         <KPI label="Facturación histórica" value={`${totalRevenue.toLocaleString("es-ES")} €`} />
         <KPI label="Margen neto" value={`${totalMargin.toLocaleString("es-ES")} €`} />
@@ -389,20 +409,24 @@ function Inner({
 
       {/* Proyectos activos */}
       <Section title="Proyectos activos">
-        {activeProjects.length === 0 ? (
+        {activeProductions.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin proyectos activos este año.</p>
         ) : (
           <ul className="space-y-2">
-            {activeProjects.map((p) => (
+            {activeProductions.map((p: any) => (
               <li key={p.id} className="flex items-baseline justify-between rounded-sm border border-border bg-card/50 px-4 py-3">
                 <div>
-                  <div className="text-sm">{p.production}</div>
+                  <div className="text-sm">
+                    <Link to="/productions/$productionId" params={{ productionId: p.id }} className="hover:underline">
+                      {p.title}
+                    </Link>
+                  </div>
                   <div className="text-xs text-muted-foreground">
-                    {[p.production_type, p.director, p.platform, p.year].filter(Boolean).join(" · ")}
+                    {[p.director, p.platform, p.year, p.status].filter(Boolean).join(" · ")}
                   </div>
                 </div>
-                {p.price_charged != null && (
-                  <div className="text-sm text-muted-foreground">{Number(p.price_charged).toLocaleString("es-ES")} €</div>
+                {p.fee_amount != null && (
+                  <div className="text-sm text-muted-foreground">{Number(p.fee_amount).toLocaleString("es-ES")} €</div>
                 )}
               </li>
             ))}
