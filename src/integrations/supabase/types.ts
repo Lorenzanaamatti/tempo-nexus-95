@@ -1858,6 +1858,7 @@ export type Database = {
       }
       productions: {
         Row: {
+          award_date: string | null
           color: string | null
           composer_id: string | null
           created_at: string
@@ -1874,6 +1875,7 @@ export type Database = {
           music_supervisor_name: string | null
           music_supervisor_person_id: string | null
           negotiator_person_id: string | null
+          nomination_date: string | null
           notes: string | null
           other_responsibles: string | null
           partner: string | null
@@ -1893,6 +1895,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          award_date?: string | null
           color?: string | null
           composer_id?: string | null
           created_at?: string
@@ -1909,6 +1912,7 @@ export type Database = {
           music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
+          nomination_date?: string | null
           notes?: string | null
           other_responsibles?: string | null
           partner?: string | null
@@ -1928,6 +1932,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          award_date?: string | null
           color?: string | null
           composer_id?: string | null
           created_at?: string
@@ -1944,6 +1949,7 @@ export type Database = {
           music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
+          nomination_date?: string | null
           notes?: string | null
           other_responsibles?: string | null
           partner?: string | null
