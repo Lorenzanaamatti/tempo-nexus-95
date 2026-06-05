@@ -2488,6 +2488,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_business_days: { Args: { _d: string; _n: number }; Returns: string }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
       current_user_is_admin: { Args: never; Returns: boolean }
       has_role: {
