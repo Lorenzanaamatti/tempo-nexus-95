@@ -51,6 +51,51 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
     },
   });
 
+  const productionsQ = useQuery({
+    queryKey: ["finance-prod-budgets", composerId ?? null],
+    queryFn: async () => {
+      let q = supabase
+        .from("productions")
+        .select("id, fee_amount, ic_commission, ic_commission_pct");
+      if (composerId) q = q.eq("composer_id", composerId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const budgets = useMemo(() => {
+    const list = (productionsQ.data ?? []) as any[];
+    return list.reduce(
+      (acc, p) => {
+        acc.fee += Number(p.fee_amount) || 0;
+        const comm = p.ic_commission != null
+          ? Number(p.ic_commission)
+          : (p.fee_amount != null && p.ic_commission_pct != null
+              ? (Number(p.fee_amount) * Number(p.ic_commission_pct)) / 100
+              : 0);
+        acc.comm += comm || 0;
+        return acc;
+      },
+      { fee: 0, comm: 0 },
+    );
+  }, [productionsQ.data]);
+
+  const splitTotals = useMemo(() => {
+    const list = (sprintsQ.data ?? []) as Sprint[];
+    const acc = {
+      trabajo: { facturado: 0, cobrado: 0 },
+      comision: { facturado: 0, cobrado: 0 },
+    };
+    for (const s of list) {
+      const a = Number(s.amount) || 0;
+      const k = s.kind === "comision" ? "comision" : "trabajo";
+      if (s.invoiced_date) acc[k].facturado += a;
+      if (s.paid_date) acc[k].cobrado += a;
+    }
+    return acc;
+  }, [sprintsQ.data]);
+
   const sprints = useMemo(() => {
     const list = sprintsQ.data ?? [];
     if (kindFilter === "all") return list;
@@ -141,8 +186,29 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
         </div>
       </div>
 
+      {composerId && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-sm border border-primary/30 bg-card p-4">
+            <div className="smallcaps text-xs text-muted-foreground">Facturación compositor (lo que él factura)</div>
+            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.fee)}</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.facturado)}</span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.cobrado)}</span></div>
+            </div>
+          </div>
+          <div className="rounded-sm border border-amber-500/40 bg-card p-4">
+            <div className="smallcaps text-xs text-muted-foreground">Comisión IC (que paga a IC)</div>
+            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.comm)}</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.facturado)}</span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.cobrado)}</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Previsto" value={formatEUR(totals.previsto)} accent="muted" />
+        <KPI label="Previsto (sprints)" value={formatEUR(totals.previsto)} accent="muted" />
         <KPI label="Facturado" value={formatEUR(totals.facturado)} accent="primary" />
         <KPI label="Cobrado" value={formatEUR(totals.cobrado)} accent="success" />
         <KPI label="Vencido sin facturar" value={formatEUR(overdueTotal)} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
