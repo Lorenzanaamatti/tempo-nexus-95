@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/portal/facturacion")({
 });
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
+  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
 
 type Sprint = {
   id: string;
@@ -27,6 +27,14 @@ type Sprint = {
   production?: { title: string | null } | null;
 };
 
+type Production = {
+  id: string;
+  title: string | null;
+  year: number | null;
+  fee_amount: number | null;
+  ic_commission_pct: number | null;
+};
+
 function Facturacion() {
   const { composerId } = useCurrentRole();
   const [tab, setTab] = useState<"resumen" | "emitidas" | "cobros" | "ic" | "costes" | "calendario">("resumen");
@@ -37,10 +45,11 @@ function Facturacion() {
     queryFn: async () => {
       const { data: prods } = await supabase
         .from("productions")
-        .select("id, title, year")
+        .select("id, title, year, fee_amount, ic_commission_pct")
         .eq("composer_id", composerId!);
-      const productionIds = (prods ?? []).map((p) => p.id);
-      const prodMap = new Map((prods ?? []).map((p) => [p.id, p]));
+      const productions: Production[] = (prods ?? []) as Production[];
+      const productionIds = productions.map((p) => p.id);
+      const prodMap = new Map(productions.map((p) => [p.id, p]));
       let sprints: Sprint[] = [];
       if (productionIds.length) {
         const { data: s } = await supabase
@@ -54,17 +63,25 @@ function Facturacion() {
         .from("composer_projects")
         .select("id, production, year, price_charged, production_cost, agency_commission, composer_profit, net_margin")
         .eq("composer_id", composerId!);
-      return { sprints, projects: projects ?? [] };
+      return { sprints, projects: projects ?? [], productions };
     },
   });
 
   const totals = useMemo(() => {
     const s = data?.sprints ?? [];
+    const prods = data?.productions ?? [];
     const work = s.filter((x) => x.kind === "trabajo");
     const ic = s.filter((x) => x.kind === "comision");
     const sum = (arr: Sprint[]) => arr.reduce((acc, x) => acc + Number(x.amount ?? 0), 0);
     const sumWhere = (arr: Sprint[], f: (x: Sprint) => boolean) => sum(arr.filter(f));
+    const feeTotal = prods.reduce((a, p) => a + Number(p.fee_amount ?? 0), 0);
+    const icTotal = prods.reduce(
+      (a, p) => a + Number(p.fee_amount ?? 0) * Number(p.ic_commission_pct ?? 0) / 100,
+      0,
+    );
     return {
+      feeTotal,
+      icTotal,
       issued: sumWhere(work, (x) => !!x.invoiced_date),
       pendingIssue: sumWhere(work, (x) => !x.invoiced_date),
       paid: sumWhere(work, (x) => !!x.paid_date),
@@ -83,6 +100,21 @@ function Facturacion() {
   const sprints = data?.sprints ?? [];
   const work = sprints.filter((x) => x.kind === "trabajo");
   const ic = sprints.filter((x) => x.kind === "comision");
+  const productions = data?.productions ?? [];
+
+  const perProduction = productions.map((p) => {
+    const ps = sprints.filter((s) => s.production_id === p.id);
+    const workS = ps.filter((s) => s.kind === "trabajo");
+    const icS = ps.filter((s) => s.kind === "comision");
+    const fee = Number(p.fee_amount ?? 0);
+    const pct = Number(p.ic_commission_pct ?? 0);
+    const icExpected = fee * pct / 100;
+    const workIssued = workS.filter((s) => s.invoiced_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
+    const workPaid = workS.filter((s) => s.paid_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
+    const icIssued = icS.filter((s) => s.invoiced_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
+    const icPaid = icS.filter((s) => s.paid_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
+    return { p, fee, pct, icExpected, workIssued, workPaid, icIssued, icPaid };
+  });
 
   return (
     <div className="space-y-6">
@@ -117,7 +149,51 @@ function Facturacion() {
       {tab === "resumen" && (
         <div className="space-y-6">
           <section>
-            <h3 className="mb-3 font-display text-xl">Facturación desde el inicio</h3>
+            <h3 className="mb-3 font-display text-xl">Facturación asignada a producciones actuales</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Card label="Facturación total (compositor)" value={fmt(totals.feeTotal)} />
+              <Card label="Comisión IC total" value={fmt(totals.icTotal)} />
+              <Card label="Emitido (trabajo)" value={fmt(totals.issued)} />
+              <Card label="Cobrado (trabajo)" value={fmt(totals.paid)} />
+            </div>
+          </section>
+          <section>
+            <h3 className="mb-3 font-display text-xl">Detalle por producción</h3>
+            <div className="overflow-x-auto rounded-sm border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/30 text-left">
+                  <tr>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Producción</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Año</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Facturación</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">% IC</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Comisión IC</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Emitido</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Cobrado</th>
+                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">IC emit./cobr.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!perProduction.length ? (
+                    <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">Sin producciones.</td></tr>
+                  ) : perProduction.map(({ p, fee, pct, icExpected, workIssued, workPaid, icIssued, icPaid }) => (
+                    <tr key={p.id} className="border-t border-border">
+                      <td className="px-3 py-2 font-display">{p.title ?? "—"}</td>
+                      <td className="px-3 py-2">{p.year ?? "—"}</td>
+                      <td className="px-3 py-2">{fmt(fee)}</td>
+                      <td className="px-3 py-2">{pct ? `${pct}%` : "—"}</td>
+                      <td className="px-3 py-2">{fmt(icExpected)}</td>
+                      <td className="px-3 py-2">{fmt(workIssued)}</td>
+                      <td className="px-3 py-2">{fmt(workPaid)}</td>
+                      <td className="px-3 py-2">{fmt(icIssued)} / {fmt(icPaid)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section>
+            <h3 className="mb-3 font-display text-xl">Histórico (proyectos anteriores)</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card label="Facturación histórica" value={fmt(totals.historicRevenue)} />
               <Card label="Coste producción" value={fmt(totals.historicCost)} />
