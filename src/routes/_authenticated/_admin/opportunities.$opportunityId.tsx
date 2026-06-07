@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, Check } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
-import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
+import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
 
@@ -63,6 +63,15 @@ function OpportunityDetail() {
     },
   });
 
+  const productionsQ = useQuery({
+    queryKey: ["productions-mini"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("productions").select("id, title, year").order("title");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const peopleICQ = useQuery({
     queryKey: ["people-ic"],
     queryFn: async () => {
@@ -74,6 +83,9 @@ function OpportunityDetail() {
 
   const [form, setForm] = useState({
     title: "",
+    kind: "pitch" as OpportunityKind,
+    target_production_id: "" as string,
+    target_production_text: "",
     partner_company_id: "" as string,
     partner_name: "",
     statuses: [] as OpportunityStatus[],
@@ -92,6 +104,9 @@ function OpportunityDetail() {
       const d: any = oppQ.data;
       setForm({
         title: d.title ?? "",
+        kind: (d.kind ?? "pitch") as OpportunityKind,
+        target_production_id: d.target_production_id ?? "",
+        target_production_text: d.target_production_text ?? "",
         partner_company_id: d.partner_company_id ?? "",
         partner_name: d.partner_name ?? "",
         statuses: (d.statuses ?? []) as OpportunityStatus[],
@@ -110,6 +125,9 @@ function OpportunityDetail() {
     setSaving(true);
     const { error } = await (supabase as any).from("opportunities").update({
       title: form.title,
+      kind: form.kind,
+      target_production_id: form.kind === "pitch" ? (form.target_production_id || null) : null,
+      target_production_text: form.kind === "pitch" ? (form.target_production_text || null) : null,
       partner_company_id: form.partner_company_id || null,
       partner_name: form.partner_name || null,
       statuses: form.statuses.length ? form.statuses : ["identificado"],
@@ -176,6 +194,41 @@ function OpportunityDetail() {
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Label>Tipo de oportunidad</Label>
+          <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v as OpportunityKind })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]).map((k) => (
+                <SelectItem key={k} value={k}>{OPPORTUNITY_KIND_LABEL[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {form.kind === "fichaje"
+              ? "Captación de un nuevo compositor para el roster IC."
+              : "Presentar a uno o varios representados para una producción concreta."}
+          </p>
+        </div>
+        {form.kind === "pitch" && (
+          <>
+            <div>
+              <Label>Producción objetivo (del CRM)</Label>
+              <Select value={form.target_production_id || undefined} onValueChange={(v) => setForm({ ...form, target_production_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecciona producción…" /></SelectTrigger>
+                <SelectContent>
+                  {(productionsQ.data ?? []).map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.title}{p.year ? ` (${p.year})` : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Producción (texto libre si no está en el CRM)</Label>
+              <Input value={form.target_production_text} onChange={(e) => setForm({ ...form, target_production_text: e.target.value })} placeholder="Título de la producción" />
+            </div>
+          </>
+        )}
         <div className="sm:col-span-2">
           <Label>Oportunidad detectada</Label>
           <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
