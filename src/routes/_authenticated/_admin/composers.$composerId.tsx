@@ -19,6 +19,7 @@ import { RelationListEditor } from "@/components/relation-list-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
+import { ComposerChat } from "@/components/composer-chat";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
