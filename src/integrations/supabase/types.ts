@@ -289,6 +289,83 @@ export type Database = {
           },
         ]
       }
+      chat_channels: {
+        Row: {
+          composer_id: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["chat_channel_kind"]
+          label: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["chat_channel_kind"]
+          label: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["chat_channel_kind"]
+          label?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          attachments: Json
+          author_name: string | null
+          author_role: string | null
+          author_user_id: string
+          body: string | null
+          channel_id: string
+          composer_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          author_name?: string | null
+          author_role?: string | null
+          author_user_id: string
+          body?: string | null
+          channel_id: string
+          composer_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          author_name?: string | null
+          author_role?: string | null
+          author_user_id?: string
+          body?: string | null
+          channel_id?: string
+          composer_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "chat_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_availability: {
         Row: {
           composer_id: string
@@ -2491,6 +2568,10 @@ export type Database = {
       add_business_days: { Args: { _d: string; _n: number }; Returns: string }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
       current_user_is_admin: { Args: never; Returns: boolean }
+      ensure_composer_chat_channels: {
+        Args: { _composer_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2534,6 +2615,14 @@ export type Database = {
         | "media_coverage"
         | "public_appearance"
       case_study_visibility: "interna" | "externa"
+      chat_channel_kind:
+        | "general"
+        | "producciones"
+        | "oportunidades"
+        | "facturacion"
+        | "actas"
+        | "calendario"
+        | "contratos"
       composer_team_role:
         | "agente"
         | "manager"
@@ -2834,6 +2923,15 @@ export const Constants = {
         "public_appearance",
       ],
       case_study_visibility: ["interna", "externa"],
+      chat_channel_kind: [
+        "general",
+        "producciones",
+        "oportunidades",
+        "facturacion",
+        "actas",
+        "calendario",
+        "contratos",
+      ],
       composer_team_role: [
         "agente",
         "manager",
