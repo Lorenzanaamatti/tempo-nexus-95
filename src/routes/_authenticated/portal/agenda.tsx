@@ -13,20 +13,37 @@ function Agenda() {
     queryKey: ["portal-agenda", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data: person } = await supabase
-        .from("people")
-        .select("id")
-        .eq("composer_id", composerId!)
-        .maybeSingle();
-      if (!person) return { upcoming: [], past: [] };
-      const { data } = await supabase
-        .from("calendar_events")
-        .select("id, title, note, kind, start_date, end_date")
-        .eq("subject_type", "person")
-        .eq("subject_id", person.id)
-        .order("start_date");
+      const [{ data: person }, { data: prods }] = await Promise.all([
+        supabase.from("people").select("id").eq("composer_id", composerId!).maybeSingle(),
+        (supabase as any).from("productions").select("id").eq("composer_id", composerId!),
+      ]);
+      const subjects: { type: string; id: string }[] = [
+        { type: "composer", id: composerId! },
+      ];
+      if (person?.id) subjects.push({ type: "person", id: person.id });
+      for (const p of (prods ?? []) as { id: string }[]) subjects.push({ type: "production", id: p.id });
+
+      const results = await Promise.all(
+        subjects.map((s) =>
+          supabase
+            .from("calendar_events")
+            .select("id, title, note, kind, start_date, end_date, subject_type")
+            .eq("subject_type", s.type as any)
+            .eq("subject_id", s.id),
+        ),
+      );
+      const seen = new Set<string>();
+      const data: any[] = [];
+      for (const r of results) {
+        for (const ev of r.data ?? []) {
+          if (seen.has(ev.id)) continue;
+          seen.add(ev.id);
+          data.push(ev);
+        }
+      }
+      data.sort((a, b) => String(a.start_date).localeCompare(String(b.start_date)));
       const today = new Date().toISOString().slice(0, 10);
-      const all = data ?? [];
+      const all = data;
       return {
         upcoming: all.filter((e) => (e.end_date ?? e.start_date) >= today),
         past: all
