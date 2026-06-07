@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
-import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
+import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
   component: OpportunitiesIndex,
@@ -19,10 +19,12 @@ function OpportunitiesIndex() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const [newKind, setNewKind] = useState<OpportunityKind>("pitch");
   const [newCompany, setNewCompany] = useState<string>("");
   const [newResponsible, setNewResponsible] = useState<string>("");
   const [newDetectedDate, setNewDetectedDate] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [kindFilter, setKindFilter] = useState<string>("all");
   const [creating, setCreating] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -30,7 +32,7 @@ function OpportunitiesIndex() {
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
-        .select("id, title, statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
+        .select("id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
         .order("created_at", { ascending: false });
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
       const { data, error } = await query;
@@ -62,6 +64,7 @@ function OpportunitiesIndex() {
     setCreating(true);
     const { error } = await (supabase as any).from("opportunities").insert({
       title: newTitle.trim(),
+      kind: newKind,
       partner_company_id: newCompany || null,
       responsible_person_id: newResponsible || null,
       detected_date: newDetectedDate || null,
@@ -69,6 +72,7 @@ function OpportunitiesIndex() {
     setCreating(false);
     if (error) return toast.error(error.message);
     setNewTitle("");
+    setNewKind("pitch");
     setNewCompany("");
     setNewResponsible("");
     setNewDetectedDate("");
@@ -76,9 +80,11 @@ function OpportunitiesIndex() {
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
 
-  const filtered = (data ?? []).filter((o: any) =>
-    statusFilter === "all" ? true : (o.statuses ?? []).includes(statusFilter),
-  );
+  const filtered = (data ?? []).filter((o: any) => {
+    if (statusFilter !== "all" && !(o.statuses ?? []).includes(statusFilter)) return false;
+    if (kindFilter !== "all" && (o.kind ?? "pitch") !== kindFilter) return false;
+    return true;
+  });
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -91,6 +97,15 @@ function OpportunitiesIndex() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Select value={kindFilter} onValueChange={setKindFilter}>
+            <SelectTrigger className="w-56 rounded-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              {(Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]).map((k) => (
+                <SelectItem key={k} value={k}>{OPPORTUNITY_KIND_LABEL[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48 rounded-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -105,7 +120,17 @@ function OpportunitiesIndex() {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-4 sm:grid-cols-12">
-        <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Oportunidad detectada…" className="sm:col-span-4" />
+        <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Oportunidad detectada…" className="sm:col-span-3" />
+        <div className="sm:col-span-3">
+          <Select value={newKind} onValueChange={(v) => setNewKind(v as OpportunityKind)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]).map((k) => (
+                <SelectItem key={k} value={k}>{OPPORTUNITY_KIND_LABEL[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="sm:col-span-3">
           <Select value={newCompany || undefined} onValueChange={setNewCompany}>
             <SelectTrigger><SelectValue placeholder="Productora…" /></SelectTrigger>
@@ -116,7 +141,7 @@ function OpportunitiesIndex() {
             </SelectContent>
           </Select>
         </div>
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-1">
           <Select value={newResponsible || undefined} onValueChange={setNewResponsible}>
             <SelectTrigger><SelectValue placeholder="Responsable…" /></SelectTrigger>
             <SelectContent>
@@ -126,7 +151,7 @@ function OpportunitiesIndex() {
             </SelectContent>
           </Select>
         </div>
-        <Input type="date" value={newDetectedDate} onChange={(e) => setNewDetectedDate(e.target.value)} className="sm:col-span-2" />
+        <Input type="date" value={newDetectedDate} onChange={(e) => setNewDetectedDate(e.target.value)} className="sm:col-span-1" />
         <Button onClick={create} disabled={creating} className="sm:col-span-1"><Plus className="h-4 w-4" /></Button>
       </div>
 
@@ -139,8 +164,10 @@ function OpportunitiesIndex() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left">
               <tr>
+                <th className="px-3 py-2 smallcaps text-xs">Tipo</th>
                 <th className="px-3 py-2 smallcaps text-xs">Oportunidad</th>
                 <th className="px-3 py-2 smallcaps text-xs">Partner</th>
+                <th className="px-3 py-2 smallcaps text-xs">Producción</th>
                 <th className="px-3 py-2 smallcaps text-xs">Candidatos</th>
                 <th className="px-3 py-2 smallcaps text-xs">Estado</th>
                 <th className="px-3 py-2 smallcaps text-xs text-right">Prob.</th>
@@ -154,9 +181,19 @@ function OpportunitiesIndex() {
               {filtered.map((o: any) => (
                 <tr key={o.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
+                    <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
+                      {OPPORTUNITY_KIND_LABEL[(o.kind ?? "pitch") as OpportunityKind]}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">
+                    {(o.kind ?? "pitch") === "pitch"
+                      ? (o.target_production?.title || o.target_production_text || "—")
+                      : "—"}
+                  </td>
                   <td className="px-3 py-2 text-muted-foreground">
                     {(o.candidates ?? []).slice(0, 3).map((c: any) => c.composer?.artistic_name || c.composer?.full_name).filter(Boolean).join(", ") || "—"}
                     {(o.candidates?.length ?? 0) > 3 && <span className="text-xs"> +{o.candidates.length - 3}</span>}

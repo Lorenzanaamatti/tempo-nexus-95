@@ -17,3 +17,15 @@ export const OPPORTUNITY_STATUS_TONE: Record<OpportunityStatus, string> = {
   cerrado: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
   descartado: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
 };
+
+export const OPPORTUNITY_KIND_LABEL = {
+  fichaje: "Fichaje de representado",
+  pitch: "Presentar representado a producción",
+} as const;
+
+export type OpportunityKind = keyof typeof OPPORTUNITY_KIND_LABEL;
+
+export const OPPORTUNITY_KIND_TONE: Record<OpportunityKind, string> = {
+  fichaje: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
+  pitch: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+};
