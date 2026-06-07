@@ -546,6 +546,10 @@ function Inner({
         )}
       </Section>
 
+      <Section title="Chat con el compositor">
+        <ComposerChat composerId={c.id} />
+      </Section>
+
       {/* Identidad */}
       <Section title="Identidad">
         <PhotoUploader
