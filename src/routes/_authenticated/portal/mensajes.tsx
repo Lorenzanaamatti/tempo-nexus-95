@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
@@ -25,20 +25,12 @@ function Mensajes() {
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="font-display text-3xl">Mensajes y actualizaciones</h2>
+        <h2 className="font-display text-3xl">Materiales compartidos</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Comunicación con el equipo IC y novedades sobre tu representación.
+          Documentos y materiales que IC ha vinculado a tu ficha. Para hablar con el equipo, usa el <Link to="/portal/chat" className="underline">Chat con IC</Link>.
         </p>
       </header>
-      <div className="rounded-sm border border-dashed border-border p-6 text-sm text-muted-foreground">
-        <p className="font-display text-base text-foreground">Integración con Mattermost · próximamente</p>
-        <p className="mt-2">
-          Los mensajes con el equipo IC se vincularán a la plataforma <strong>Mattermost</strong> en una próxima actualización. Mientras tanto, contacta con tu agente por los canales habituales.
-        </p>
-      </div>
-
       <section className="space-y-3">
-        <h3 className="font-display text-xl">Materiales y documentos compartidos</h3>
         {!data?.length ? (
           <p className="text-sm text-muted-foreground">Aún no hay materiales compartidos.</p>
         ) : (
