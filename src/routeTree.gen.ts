@@ -23,6 +23,7 @@ import { Route as AuthenticatedPortalMensajesRouteImport } from './routes/_authe
 import { Route as AuthenticatedPortalKpisRouteImport } from './routes/_authenticated/portal/kpis'
 import { Route as AuthenticatedPortalFacturacionRouteImport } from './routes/_authenticated/portal/facturacion'
 import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_authenticated/portal/contratos'
+import { Route as AuthenticatedPortalChatRouteImport } from './routes/_authenticated/portal/chat'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
@@ -131,6 +132,11 @@ const AuthenticatedPortalContratosRoute =
     path: '/contratos',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedPortalChatRoute = AuthenticatedPortalChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AuthenticatedPortalRoute,
+} as any)
 const AuthenticatedPortalCarreraRoute =
   AuthenticatedPortalCarreraRouteImport.update({
     id: '/carrera',
@@ -343,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/portal/chat': typeof AuthenticatedPortalChatRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/portal/chat': typeof AuthenticatedPortalChatRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
+  '/_authenticated/portal/chat': typeof AuthenticatedPortalChatRoute
   '/_authenticated/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/_authenticated/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/_authenticated/portal/kpis': typeof AuthenticatedPortalKpisRoute
@@ -488,6 +497,7 @@ export interface FileRouteTypes {
     | '/roster'
     | '/portal/agenda'
     | '/portal/carrera'
+    | '/portal/chat'
     | '/portal/contratos'
     | '/portal/facturacion'
     | '/portal/kpis'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/roster'
     | '/portal/agenda'
     | '/portal/carrera'
+    | '/portal/chat'
     | '/portal/contratos'
     | '/portal/facturacion'
     | '/portal/kpis'
@@ -583,6 +594,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/roster'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
+    | '/_authenticated/portal/chat'
     | '/_authenticated/portal/contratos'
     | '/_authenticated/portal/facturacion'
     | '/_authenticated/portal/kpis'
@@ -721,6 +733,13 @@ declare module '@tanstack/react-router' {
       path: '/contratos'
       fullPath: '/portal/contratos'
       preLoaderRoute: typeof AuthenticatedPortalContratosRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/chat': {
+      id: '/_authenticated/portal/chat'
+      path: '/chat'
+      fullPath: '/portal/chat'
+      preLoaderRoute: typeof AuthenticatedPortalChatRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/portal/carrera': {
@@ -1050,6 +1069,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalAgendaRoute: typeof AuthenticatedPortalAgendaRoute
   AuthenticatedPortalCarreraRoute: typeof AuthenticatedPortalCarreraRoute
+  AuthenticatedPortalChatRoute: typeof AuthenticatedPortalChatRoute
   AuthenticatedPortalContratosRoute: typeof AuthenticatedPortalContratosRoute
   AuthenticatedPortalFacturacionRoute: typeof AuthenticatedPortalFacturacionRoute
   AuthenticatedPortalKpisRoute: typeof AuthenticatedPortalKpisRoute
@@ -1062,6 +1082,7 @@ interface AuthenticatedPortalRouteChildren {
 const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalAgendaRoute: AuthenticatedPortalAgendaRoute,
   AuthenticatedPortalCarreraRoute: AuthenticatedPortalCarreraRoute,
+  AuthenticatedPortalChatRoute: AuthenticatedPortalChatRoute,
   AuthenticatedPortalContratosRoute: AuthenticatedPortalContratosRoute,
   AuthenticatedPortalFacturacionRoute: AuthenticatedPortalFacturacionRoute,
   AuthenticatedPortalKpisRoute: AuthenticatedPortalKpisRoute,
