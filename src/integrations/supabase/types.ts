@@ -1412,6 +1412,13 @@ export type Database = {
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "opportunities_target_production_id_fkey"
+            columns: ["target_production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       opportunity_actions: {
