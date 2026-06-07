@@ -16,7 +16,7 @@ function PortalHome() {
     queryFn: async () => {
       const year = new Date().getFullYear();
       const today = new Date().toISOString().slice(0, 10);
-      const [composer, projects, nextEvent] = await Promise.all([
+      const [composer, projects, productions, candidates, contracts, nextEvent] = await Promise.all([
         supabase
           .from("composers")
           .select("full_name, artistic_name, tier, representation_status, renewal_date")
@@ -26,6 +26,18 @@ function PortalHome() {
           .from("composer_projects")
           .select("id, production, year, price_charged, net_margin")
           .eq("composer_id", composerId!),
+        (supabase as any)
+          .from("productions")
+          .select("id, status, year, fee_amount, ic_commission_pct")
+          .eq("composer_id", composerId!),
+        (supabase as any)
+          .from("opportunity_candidates")
+          .select("id, opportunity:opportunities(statuses)")
+          .eq("composer_id", composerId!),
+        (supabase as any)
+          .from("contracts")
+          .select("id, sign_status")
+          .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`),
         (async () => {
           const { data: person } = await supabase
             .from("people")
@@ -49,9 +61,29 @@ function PortalHome() {
       const yearProjects = all.filter((p) => p.year === year);
       const revenue = yearProjects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
       const margin = yearProjects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
+      const prods = (productions.data ?? []) as any[];
+      const yearProds = prods.filter((p) => p.year === year);
+      const facturacionYearProds = yearProds.reduce((s, p) => s + Number(p.fee_amount ?? 0), 0);
+      const ACTIVE = new Set(["compositor_confirmado","presupuesto_enviado","presupuesto_confirmado","contrato_enviado","contrato_negociacion","contrato_firmado","visuales_entregados","en_composicion","en_produccion","en_mezclas","entrega_parcial","entrega_total","entregables_completados"]);
+      const activeProds = prods.filter((p) => ACTIVE.has(p.status)).length;
+      const openCands = ((candidates.data ?? []) as any[]).filter((c) => {
+        const s = (c.opportunity?.statuses ?? []) as string[];
+        return !s.includes("cerrado") && !s.includes("descartado");
+      }).length;
+      const signedContracts = ((contracts.data ?? []) as any[]).filter((c) => c.sign_status === "firmado").length;
       return {
         composer: composer.data,
-        kpis: { year, count: yearProjects.length, revenue, margin, total: all.length },
+        kpis: {
+          year,
+          revenueHist: revenue,
+          marginHist: margin,
+          totalHist: all.length,
+          facturacionYearProds,
+          activeProds,
+          totalProds: prods.length,
+          openCands,
+          signedContracts,
+        },
         nextEvent,
       };
     },
@@ -79,13 +111,16 @@ function PortalHome() {
       </section>
 
       <section>
-        <h3 className="mb-3 font-display text-xl">KPIs del año {data?.kpis.year}</h3>
-        <div className="grid gap-4 sm:grid-cols-4">
-          <Card label="Proyectos del año" value={String(data?.kpis.count ?? 0)} />
-          <Card label="Total histórico" value={String(data?.kpis.total ?? 0)} />
-          <Card label="Facturación año" value={data ? fmt(data.kpis.revenue) : "—"} />
-          <Card label="Margen neto año" value={data ? fmt(data.kpis.margin) : "—"} />
+        <h3 className="mb-3 font-display text-xl">Resumen IC · {data?.kpis.year}</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card label="Producciones activas" value={String(data?.kpis.activeProds ?? 0)} />
+          <Card label="Facturación asignada año" value={data ? fmt(data.kpis.facturacionYearProds) : "—"} />
+          <Card label="Propuestas abiertas" value={String(data?.kpis.openCands ?? 0)} />
+          <Card label="Contratos firmados" value={String(data?.kpis.signedContracts ?? 0)} />
         </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Producciones gestionadas por IC en su CRM. Total histórico financiero: {data?.kpis.totalHist ?? 0} proyectos · facturación histórica {data ? fmt(data.kpis.revenueHist) : "—"}.
+        </p>
       </section>
 
       <section className="rounded-sm border border-border bg-card/40 p-5">
