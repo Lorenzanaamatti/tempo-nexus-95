@@ -152,6 +152,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
                   { to: "/portal/facturacion", label: "Facturación", icon: Receipt },
                   { to: "/portal/contratos", label: "Contratos y derechos", icon: FileSignature },
                   { to: "/portal/agenda", label: "Agenda y reuniones", icon: CalendarDays },
+                  { to: "/portal/chat", label: "Chat con IC", icon: MessagesSquare },
                   { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
                 ].map((item) => {
                   const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
