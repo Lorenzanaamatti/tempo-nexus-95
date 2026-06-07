@@ -1346,6 +1346,7 @@ export type Database = {
           estimated_value: number | null
           expected_close_date: string | null
           id: string
+          kind: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date: string | null
           notes: string | null
           partner_company_id: string | null
@@ -1353,6 +1354,8 @@ export type Database = {
           probability_pct: number | null
           responsible_person_id: string | null
           statuses: Database["public"]["Enums"]["opportunity_status"][]
+          target_production_id: string | null
+          target_production_text: string | null
           title: string
           updated_at: string
         }
@@ -1362,6 +1365,7 @@ export type Database = {
           estimated_value?: number | null
           expected_close_date?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
           partner_company_id?: string | null
@@ -1369,6 +1373,8 @@ export type Database = {
           probability_pct?: number | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
+          target_production_id?: string | null
+          target_production_text?: string | null
           title: string
           updated_at?: string
         }
@@ -1378,6 +1384,7 @@ export type Database = {
           estimated_value?: number | null
           expected_close_date?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
           partner_company_id?: string | null
@@ -1385,6 +1392,8 @@ export type Database = {
           probability_pct?: number | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
+          target_production_id?: string | null
+          target_production_text?: string | null
           title?: string
           updated_at?: string
         }
@@ -2649,6 +2658,7 @@ export type Database = {
         | "game"
         | "other"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
+      opportunity_kind: "fichaje" | "pitch"
       opportunity_status:
         | "identificado"
         | "primer_contacto"
@@ -2961,6 +2971,7 @@ export const Constants = {
         "other",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
+      opportunity_kind: ["fichaje", "pitch"],
       opportunity_status: [
         "identificado",
         "primer_contacto",
