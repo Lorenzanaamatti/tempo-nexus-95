@@ -1,0 +1,1 @@
+ALTER TYPE public.ic_team_function ADD VALUE IF NOT EXISTS 'ai_envia_presus_productoras';

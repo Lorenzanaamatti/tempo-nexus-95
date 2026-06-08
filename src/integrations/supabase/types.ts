@@ -3138,6 +3138,7 @@ export type Database = {
         | "reels_background_av"
         | "fotos_videos_clientes"
         | "seguimiento_producciones"
+        | "ai_envia_presus_productoras"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       opportunity_kind: "fichaje" | "pitch"
       opportunity_status:
@@ -3518,6 +3519,7 @@ export const Constants = {
         "reels_background_av",
         "fotos_videos_clientes",
         "seguimiento_producciones",
+        "ai_envia_presus_productoras",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       opportunity_kind: ["fichaje", "pitch"],
