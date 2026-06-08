@@ -62,7 +62,7 @@ function PeopleIndex() {
   const [newRole, setNewRole] = useState<PersonRole>(
     roleFilter !== "all" && roleFilter !== "composer" ? roleFilter : "ic_team",
   );
-  const [newFns, setNewFns] = useState<Set<IcTeamFunction>>(new Set());
+  const [newFn, setNewFn] = useState<IcTeamFunction | "none">("none");
 
   const { data, isLoading } = useQuery({
     queryKey: ["people", q, roleFilter, fnFilter],
@@ -98,10 +98,11 @@ function PeopleIndex() {
         .select("id")
         .single();
       error = res.error;
-      if (!res.error && res.data && newFns.size > 0) {
-        await (supabase as any).from("person_ic_functions").insert(
-          Array.from(newFns).map((fn) => ({ person_id: res.data!.id, function: fn })),
-        );
+      if (!res.error && res.data && newFn !== "none") {
+        await (supabase as any).from("person_ic_functions").insert({
+          person_id: res.data.id,
+          function: newFn,
+        });
       }
     } else {
       // Roster roles live in composers (sync trigger mirrors them into people).
@@ -113,7 +114,7 @@ function PeopleIndex() {
     setCreating(false);
     if (error) return toast.error(error.message);
     setNewName("");
-    setNewFns(new Set());
+    setNewFn("none");
     toast.success("Persona añadida");
     qc.invalidateQueries({ queryKey: ["people"] });
     qc.invalidateQueries({ queryKey: ["roster-all"] });
@@ -132,81 +133,50 @@ function PeopleIndex() {
         </div>
         <div className="flex items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar nombre…" className="w-56 rounded-sm" />
-          <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as PersonRole | "all")}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los roles</SelectItem>
-              {(Object.keys(ROLE_LABEL) as PersonRole[]).map((r) => (
-                <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
+          <Select value={fnFilter} onValueChange={(v) => setFnFilter(v as IcTeamFunction | "all")}>
+            <SelectTrigger className="w-72"><SelectValue placeholder="Equipo IC · función…" /></SelectTrigger>
+            <SelectContent className="max-h-96">
+              <SelectItem value="all">Equipo IC · todas las funciones</SelectItem>
+              {IC_FUNCTION_GROUPS.map((g) => (
+                <div key={g.label}>
+                  <div className="smallcaps px-2 py-1 text-[10px] text-muted-foreground">{g.label}</div>
+                  {g.items.map((it) => (
+                    <SelectItem key={it.value} value={it.value}>{it.label}</SelectItem>
+                  ))}
+                </div>
               ))}
             </SelectContent>
           </Select>
-          {roleFilter === "ic_team" && (
-            <Select value={fnFilter} onValueChange={(v) => setFnFilter(v as IcTeamFunction | "all")}>
-              <SelectTrigger className="w-64"><SelectValue placeholder="Filtrar por función…" /></SelectTrigger>
-              <SelectContent className="max-h-96">
-                <SelectItem value="all">Todas las funciones</SelectItem>
-                {IC_FUNCTION_GROUPS.map((g) => (
-                  <div key={g.label}>
-                    <div className="smallcaps px-2 py-1 text-[10px] text-muted-foreground">{g.label}</div>
-                    {g.items.map((it) => (
-                      <SelectItem key={it.value} value={it.value}>{it.label}</SelectItem>
-                    ))}
-                  </div>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
         </div>
       </div>
 
-      <div className="mb-6 space-y-3 rounded-sm border border-dashed border-border p-4">
-        <div className="flex flex-wrap items-end gap-2">
-          <Input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nombre completo"
-            className="w-64"
-          />
-          <Select value={newRole} onValueChange={(v) => setNewRole(v as PersonRole)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(Object.keys(ROLE_LABEL) as PersonRole[]).map((r) => (
-                <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={create} disabled={creating || !newName.trim()}>
-            <Plus className="mr-1 h-4 w-4" /> Añadir persona
-          </Button>
-          <p className="ml-auto text-xs text-muted-foreground">
-            Para crear un compositor usa el módulo Roster.
-          </p>
-        </div>
-        {newRole === "ic_team" && (
-          <div className="space-y-2 border-t border-dashed border-border pt-3">
-            <p className="smallcaps text-[10px] text-muted-foreground">Funciones iniciales (opcional, multi-selección)</p>
-            <div className="flex flex-wrap gap-1.5">
-              {IC_FUNCTION_GROUPS.flatMap((g) => g.items).map((it) => {
-                const active = newFns.has(it.value);
-                return (
-                  <button
-                    type="button"
-                    key={it.value}
-                    onClick={() => {
-                      const next = new Set(newFns);
-                      if (active) next.delete(it.value); else next.add(it.value);
-                      setNewFns(next);
-                    }}
-                    className={`rounded-sm border px-2 py-0.5 text-[11px] transition ${active ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-foreground"}`}
-                  >
-                    {it.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+      <div className="mb-6 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
+        <Input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Nombre completo"
+          className="w-64"
+        />
+        <Select value={newFn} onValueChange={(v) => { setNewRole("ic_team"); setNewFn(v as IcTeamFunction | "none"); }}>
+          <SelectTrigger className="w-72"><SelectValue placeholder="Equipo IC · función inicial…" /></SelectTrigger>
+          <SelectContent className="max-h-96">
+            <SelectItem value="none">Equipo IC · sin función inicial</SelectItem>
+            {IC_FUNCTION_GROUPS.map((g) => (
+              <div key={g.label}>
+                <div className="smallcaps px-2 py-1 text-[10px] text-muted-foreground">{g.label}</div>
+                {g.items.map((it) => (
+                  <SelectItem key={it.value} value={it.value}>{it.label}</SelectItem>
+                ))}
+              </div>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button onClick={create} disabled={creating || !newName.trim()}>
+          <Plus className="mr-1 h-4 w-4" /> Añadir persona
+        </Button>
+        <p className="ml-auto text-xs text-muted-foreground">
+          Puedes asignar varias funciones desde la ficha de la persona.
+        </p>
       </div>
 
       {isLoading ? (
