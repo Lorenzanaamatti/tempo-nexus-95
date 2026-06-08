@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalLayout,
 });
 
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] = [
   { to: "/portal", label: "Inicio", icon: Home, exact: true },
   { to: "/portal/carrera", label: "Mi carrera", icon: User },
   { to: "/portal/kpis", label: "KPIs", icon: LineChart },
