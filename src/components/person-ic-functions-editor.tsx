@@ -25,6 +25,7 @@ export type IcTeamFunction =
   | "ai_cobros"
   | "ai_calendarios_preavisos"
   | "ai_control_agentes_ai"
+  | "ai_envia_presus_productoras"
   | "administracion"
   | "contabilidad"
   | "fiscal"
