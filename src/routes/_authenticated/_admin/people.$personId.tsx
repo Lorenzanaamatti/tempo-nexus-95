@@ -18,6 +18,7 @@ import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/co
 import { PersonVerifiersEditor } from "@/components/person-verifiers-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -46,6 +47,7 @@ function PersonEdit() {
   const [form, setForm] = useState({ full_name: "", role: "ic_team" as PersonRole, email: "", phone: "", notes: "" });
   const [saving, setSaving] = useState(false);
   const [fnPicker, setFnPicker] = useState<string>("");
+  const [isVirtual, setIsVirtual] = useState(false);
 
   async function addIcFunction(fn: IcTeamFunction) {
     const { error } = await (supabase as any)
@@ -68,6 +70,7 @@ function PersonEdit() {
         phone: data.phone ?? "",
         notes: data.notes ?? "",
       });
+      setIsVirtual(!!data.is_virtual_assistant);
     }
   }, [data]);
 
@@ -81,6 +84,7 @@ function PersonEdit() {
         email: form.email || null,
         phone: form.phone || null,
         notes: form.notes || null,
+        is_virtual_assistant: isVirtual,
       })
       .eq("id", personId);
     setSaving(false);
@@ -107,7 +111,7 @@ function PersonEdit() {
             {form.full_name || "—"}
             {data.is_virtual_assistant && (
               <Badge variant="outline" className="rounded-sm smallcaps text-[10px]">
-                <Sparkles className="mr-1 h-3 w-3" /> Asistente Claude
+                <Sparkles className="mr-1 h-3 w-3" /> Agente virtual
               </Badge>
             )}
           </h1>
@@ -186,6 +190,17 @@ function PersonEdit() {
           <Label>Notas</Label>
           <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
         </div>
+        {form.role === "ic_team" && (
+          <div className="sm:col-span-2 flex items-center justify-between rounded-sm border border-dashed border-border p-3">
+            <div>
+              <Label className="text-sm">Agente virtual (IA)</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Las personas reales no llevan verificador. Los agentes virtuales sí.
+              </p>
+            </div>
+            <Switch checked={isVirtual} onCheckedChange={setIsVirtual} />
+          </div>
+        )}
       </div>
 
       <div className="mt-10">
@@ -211,11 +226,11 @@ function PersonEdit() {
         <PersonAssignmentsEditor personId={personId} />
       </div>
 
-      {form.role === "ic_team" && (
+      {form.role === "ic_team" && isVirtual && (
         <div className="mt-10">
           <h2 className="mb-3 font-display text-2xl">Verificadores asignados</h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Asigna una o varias personas del equipo IC como verificadores de esta persona.
+            Asigna una o varias personas reales del equipo IC como verificadoras de este agente virtual.
           </p>
           <PersonVerifiersEditor personId={personId} />
         </div>
