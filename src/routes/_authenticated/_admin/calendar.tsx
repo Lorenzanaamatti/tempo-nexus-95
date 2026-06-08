@@ -199,7 +199,14 @@ export function CalendarBoard({
     for (const e of events) {
       const fam0 = KIND_FAMILY[e.kind] as string | undefined;
       const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
-      const cat = (isOpp ? "oportunidades" : (e.calendar_category ?? "operativo")) as Category;
+      // Person availability kinds (vacaciones, ausencias, etc.) always belong to "Personal"
+      // regardless of how the row was stored.
+      const personalKind = e.kind === "vacaciones" || e.kind === "personal" || e.kind === "libre" || e.kind === "ocupado";
+      const cat = (
+        isOpp ? "oportunidades"
+        : (e.subject_type === "person" && personalKind) ? "personal"
+        : (e.calendar_category ?? "operativo")
+      ) as Category;
       if (!activeCategories[cat]) continue;
       // Hide events for explicitly-hidden person/composer subjects.
       if ((e.subject_type === "person" || e.subject_type === "composer") &&
