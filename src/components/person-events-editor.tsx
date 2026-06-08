@@ -26,6 +26,14 @@ type Ev = {
 
 function today() { return new Date().toISOString().slice(0, 10); }
 
+// Map availability kinds to the right calendar category so events
+// surface under "Personal" in the general calendar instead of "Operativo".
+function categoryForKind(kind: AvailabilityKind): "personal" | "operativo" | "facturacion" {
+  if (kind === "vacaciones" || kind === "personal" || kind === "libre" || kind === "ocupado") return "personal";
+  if (kind === "facturacion" || kind === "pago" || kind === "cobro") return "facturacion";
+  return "operativo";
+}
+
 export function PersonEventsEditor({ personId }: { personId: string }) {
   return <EventsEditor subjectType="person" subjectId={personId} />;
 }
@@ -138,10 +146,12 @@ function EventsEditor({ subjectType, subjectId }: { subjectType: "person" | "pro
   async function add() {
     setCreating(true);
     const t = today();
+    const kind: AvailabilityKind = subjectType === "production" ? "produccion" : "ocupado";
     const { error } = await supabase.from("calendar_events").insert({
       subject_type: subjectType,
       subject_id: subjectId,
-      kind: subjectType === "production" ? "produccion" : "ocupado",
+      kind,
+      calendar_category: categoryForKind(kind),
       start_date: t,
       end_date: t,
     });
@@ -190,7 +200,8 @@ function Row({ ev, onRemove }: { ev: Ev; onRemove: () => void }) {
     if (end < start) return toast.error("Fin no puede ser anterior al inicio");
     setSaving(true);
     const { error } = await supabase.from("calendar_events").update({
-      kind, start_date: start, end_date: end,
+      kind, calendar_category: categoryForKind(kind),
+      start_date: start, end_date: end,
       title: title.trim() || null, note: note.trim() || null,
     }).eq("id", ev.id);
     setSaving(false);
