@@ -49,6 +49,7 @@ import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './route
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
 import { Route as AuthenticatedAdminDealMemosContactosRouteImport } from './routes/_authenticated/_admin/deal-memos.contactos'
+import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
@@ -294,6 +295,12 @@ const AuthenticatedAdminDealMemosContactosRoute =
     path: '/contactos',
     getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
+const AuthenticatedAdminDealMemosConfiguracionRoute =
+  AuthenticatedAdminDealMemosConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
 const AuthenticatedAdminDealMemosDealMemoIdRoute =
   AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
     id: '/$dealMemoId',
@@ -411,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
@@ -464,6 +472,7 @@ export interface FileRoutesByTo {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
@@ -522,6 +531,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/_authenticated/_admin/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
@@ -579,6 +589,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/configuracion'
     | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
@@ -632,6 +643,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/configuracion'
     | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
@@ -689,6 +701,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
+    | '/_authenticated/_admin/deal-memos/configuracion'
     | '/_authenticated/_admin/deal-memos/contactos'
     | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
@@ -1006,6 +1019,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealMemosContactosRouteImport
       parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
+    '/_authenticated/_admin/deal-memos/configuracion': {
+      id: '/_authenticated/_admin/deal-memos/configuracion'
+      path: '/configuracion'
+      fullPath: '/deal-memos/configuracion'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
     '/_authenticated/_admin/deal-memos/$dealMemoId': {
       id: '/_authenticated/_admin/deal-memos/$dealMemoId'
       path: '/$dealMemoId'
@@ -1116,6 +1136,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminDealMemosRouteChildren {
   AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  AuthenticatedAdminDealMemosConfiguracionRoute: typeof AuthenticatedAdminDealMemosConfiguracionRoute
   AuthenticatedAdminDealMemosContactosRoute: typeof AuthenticatedAdminDealMemosContactosRoute
   AuthenticatedAdminDealMemosListaRoute: typeof AuthenticatedAdminDealMemosListaRoute
   AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
@@ -1127,6 +1148,8 @@ const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRoute
   {
     AuthenticatedAdminDealMemosDealMemoIdRoute:
       AuthenticatedAdminDealMemosDealMemoIdRoute,
+    AuthenticatedAdminDealMemosConfiguracionRoute:
+      AuthenticatedAdminDealMemosConfiguracionRoute,
     AuthenticatedAdminDealMemosContactosRoute:
       AuthenticatedAdminDealMemosContactosRoute,
     AuthenticatedAdminDealMemosListaRoute:
