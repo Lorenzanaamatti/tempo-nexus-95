@@ -588,6 +588,15 @@ function Inner({
               <option value="other">Otros</option>
             </select>
           </Field>
+          {(c as { roster_role?: string }).roster_role === "specialist" && (
+            <Field label="Tipo de especialista">
+              <Input
+                value={(c as { specialist_subtype?: string | null }).specialist_subtype ?? ""}
+                onChange={(e) => field("specialist_subtype" as never, (e.target.value || null) as never)}
+                placeholder="Ej. sound designer, foley artist, ingeniero de mezcla…"
+              />
+            </Field>
+          )}
           <Field label="Año de nacimiento">
             <Input
               type="number"
