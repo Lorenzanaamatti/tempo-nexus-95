@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles, User } from "lucide-react";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -23,26 +25,30 @@ function PeopleIndex() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [q, setQ] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "real" | "virtual">("all");
   const fnFilter = (search.fn ?? "all") as IcTeamFunction | "all";
   const setFnFilter = (v: IcTeamFunction | "all") =>
     navigate({ search: { fn: v }, replace: true });
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newFn, setNewFn] = useState<IcTeamFunction | "none">("none");
+  const [newVirtual, setNewVirtual] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["people-ic", q, fnFilter],
+    queryKey: ["people-ic", q, fnFilter, typeFilter],
     queryFn: async () => {
       let query = supabase
         .from("people")
-        .select("id, full_name, role, email, phone, person_ic_functions(function)")
+        .select("id, full_name, role, email, phone, is_virtual_assistant, person_ic_functions(function)")
         .eq("role", "ic_team")
         .order("full_name");
+      if (typeFilter === "real") query = query.eq("is_virtual_assistant", false);
+      if (typeFilter === "virtual") query = query.eq("is_virtual_assistant", true);
       if (q.trim()) query = query.ilike("full_name", `%${q.trim()}%`);
       const { data, error } = await query;
       if (error) throw error;
       const rows = (data ?? []) as Array<{
-        id: string; full_name: string; role: string; email: string | null; phone: string | null;
+        id: string; full_name: string; role: string; email: string | null; phone: string | null; is_virtual_assistant: boolean;
         person_ic_functions: { function: IcTeamFunction }[] | null;
       }>;
       const mapped = rows.map((r) => ({ ...r, fns: (r.person_ic_functions ?? []).map((f) => f.function) }));
@@ -58,7 +64,7 @@ function PeopleIndex() {
     setCreating(true);
     const res = await supabase
       .from("people")
-      .insert({ full_name: newName.trim(), role: "ic_team" })
+      .insert({ full_name: newName.trim(), role: "ic_team", is_virtual_assistant: newVirtual })
       .select("id")
       .single();
     const error = res.error;
@@ -72,6 +78,7 @@ function PeopleIndex() {
     if (error) return toast.error(error.message);
     setNewName("");
     setNewFn("none");
+    setNewVirtual(false);
     toast.success("Persona añadida al Equipo IC");
     qc.invalidateQueries({ queryKey: ["people-ic"] });
   }
@@ -88,6 +95,14 @@ function PeopleIndex() {
         </div>
         <div className="flex items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar nombre…" className="w-56 rounded-sm" />
+          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="real">Personas reales</SelectItem>
+              <SelectItem value="virtual">Agentes virtuales</SelectItem>
+            </SelectContent>
+          </Select>
           <Select value={fnFilter} onValueChange={(v) => setFnFilter(v as IcTeamFunction | "all")}>
             <SelectTrigger className="w-72"><SelectValue placeholder="Filtrar por función…" /></SelectTrigger>
             <SelectContent className="max-h-96">
@@ -126,11 +141,15 @@ function PeopleIndex() {
             ))}
           </SelectContent>
         </Select>
+        <div className="flex items-center gap-2 rounded-sm border border-border px-3 py-2">
+          <Switch id="new-virtual" checked={newVirtual} onCheckedChange={setNewVirtual} />
+          <Label htmlFor="new-virtual" className="text-xs">Agente virtual (IA)</Label>
+        </div>
         <Button onClick={create} disabled={creating || !newName.trim()}>
           <Plus className="mr-1 h-4 w-4" /> Añadir persona
         </Button>
         <p className="ml-auto text-xs text-muted-foreground">
-          Puedes asignar varias funciones desde la ficha de la persona.
+          Las personas reales no llevan verificador. Los agentes virtuales sí.
         </p>
       </div>
 
@@ -148,6 +167,13 @@ function PeopleIndex() {
               className="flex flex-wrap items-center gap-2 px-4 py-3 transition hover:bg-muted/40"
             >
               <span className="font-display text-lg">{p.full_name}</span>
+              <Badge variant="outline" className="rounded-sm text-[10px]">
+                {p.is_virtual_assistant ? (
+                  <><Sparkles className="mr-1 h-3 w-3" /> Agente virtual</>
+                ) : (
+                  <><User className="mr-1 h-3 w-3" /> Persona real</>
+                )}
+              </Badge>
               {p.fns?.map((fn) => (
                 <Badge key={fn} variant="secondary" className="rounded-sm text-[10px]">
                   {IC_FUNCTION_LABEL[fn]}
