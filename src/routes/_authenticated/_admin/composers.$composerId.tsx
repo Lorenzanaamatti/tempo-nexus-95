@@ -589,14 +589,29 @@ function Inner({
             </select>
           </Field>
           {(c as { roster_role?: string }).roster_role === "specialist" && (
-            <Field label="Tipo de especialista">
-              <Input
-                value={(c as { specialist_subtype?: string | null }).specialist_subtype ?? ""}
-                onChange={(e) => field("specialist_subtype" as never, (e.target.value || null) as never)}
-                placeholder="Ej. sound designer, foley artist, ingeniero de mezcla…"
-              />
-            </Field>
+            <>
+              <Field label="Especialidad (etiquetas)" className="sm:col-span-2">
+                <SpecialistTagsEditor
+                  value={((c as { specialist_tags?: string[] }).specialist_tags ?? []) as string[]}
+                  onChange={(tags) => field("specialist_tags" as never, tags as never)}
+                />
+              </Field>
+              <Field label="Detalle de la especialidad" className="sm:col-span-2">
+                <Input
+                  value={(c as { specialist_detail?: string | null }).specialist_detail ?? ""}
+                  onChange={(e) => field("specialist_detail" as never, (e.target.value || null) as never)}
+                  placeholder="Ej. soprano, violín barroco, Pro Tools, copia para orquesta sinfónica…"
+                />
+              </Field>
+            </>
           )}
+          <Field label="Ubicación actual" className="sm:col-span-2">
+            <Input
+              value={(c as { current_location?: string | null }).current_location ?? ""}
+              onChange={(e) => field("current_location" as never, (e.target.value || null) as never)}
+              placeholder="Ej. Madrid (hasta 12/jun), Los Ángeles a partir del 15/jun"
+            />
+          </Field>
           <Field label="Año de nacimiento">
             <Input
               type="number"
