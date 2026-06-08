@@ -8,12 +8,16 @@ import { ComposerChat } from "@/components/composer-chat";
 
 export const Route = createFileRoute("/_authenticated/portal/chat")({
   component: PortalChat,
+  validateSearch: (s: Record<string, unknown>): { ch?: string } => ({
+    ch: typeof s.ch === "string" ? s.ch : undefined,
+  }),
 });
 
 function PortalChat() {
   const { composerId, loading } = useCurrentRole();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { ch } = Route.useSearch();
 
   useEffect(() => {
     if (!composerId || !user) return;
@@ -39,7 +43,7 @@ function PortalChat() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : composerId ? (
-        <ComposerChat composerId={composerId} />
+        <ComposerChat composerId={composerId} initialChannelId={ch ?? null} />
       ) : (
         <p className="text-sm text-muted-foreground">Tu cuenta aún no está vinculada a una ficha de compositor.</p>
       )}
