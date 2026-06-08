@@ -75,7 +75,7 @@ function OpportunityDetail() {
   const peopleICQ = useQuery({
     queryKey: ["people-ic"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("people").select("id, full_name").eq("role", "ic_team").order("full_name");
+      const { data, error } = await supabase.from("ic_team").select("id, full_name").eq("role", "ic_team").order("full_name");
       if (error) throw error;
       return data ?? [];
     },

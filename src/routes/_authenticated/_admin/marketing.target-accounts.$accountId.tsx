@@ -80,7 +80,7 @@ function TargetAccountDetail() {
     queryKey: ["people-ic"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("people")
+        .from("ic_team")
         .select("id, full_name")
         .eq("role", "ic_team")
         .order("full_name");

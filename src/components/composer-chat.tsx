@@ -44,7 +44,7 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     enabled: !!user?.email && role === "admin",
     queryFn: async () => {
       const { data } = await supabase
-        .from("people")
+        .from("ic_team")
         .select("id, full_name")
         .eq("role", "ic_team")
         .ilike("email", user!.email!)

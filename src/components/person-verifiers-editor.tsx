@@ -35,7 +35,7 @@ export function PersonVerifiersEditor({ personId }: { personId: string }) {
           .eq("person_id", personId)
           .order("position"),
         supabase
-          .from("people")
+          .from("ic_team")
           .select("id, full_name")
           .eq("role", "ic_team")
           .neq("id", personId)
