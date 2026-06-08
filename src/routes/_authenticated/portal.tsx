@@ -31,8 +31,8 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
   { to: "/portal/facturacion", label: "Facturación", icon: Receipt },
   { to: "/portal/contratos", label: "Contratos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda", icon: CalendarDays },
-  { to: "/portal/chat", label: "Chat IC", icon: MessagesSquare },
-  { to: "/portal/mensajes", label: "Materiales", icon: FolderOpen },
+  { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
+  { to: "/portal/chat", label: "Chat IC", icon: FolderOpen },
 ] as const;
 
 function PortalLayout() {
