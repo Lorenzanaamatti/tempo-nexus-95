@@ -105,7 +105,7 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
     <div className="space-y-4">
       <div className="flex items-baseline justify-between">
         <p className="text-sm text-muted-foreground">
-          Cada asignación cruza una persona del Equipo IC con su función (37 funciones disponibles).
+          Cada asignación cruza una persona del Equipo IC con su función (38 funciones disponibles).
         </p>
         <Button type="button" size="sm" variant="outline" onClick={add}>
           + Añadir asignación
