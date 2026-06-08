@@ -28,6 +28,7 @@ import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authen
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
+import { Route as AuthenticatedAdminDealMemosRouteImport } from './routes/_authenticated/_admin/deal-memos'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenticated/_admin/budget'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
@@ -163,6 +164,12 @@ const AuthenticatedAdminFinanceRoute =
     path: '/finance',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosRoute =
+  AuthenticatedAdminDealMemosRouteImport.update({
+    id: '/deal-memos',
+    path: '/deal-memos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCalendarRoute =
   AuthenticatedAdminCalendarRouteImport.update({
     id: '/calendar',
@@ -219,9 +226,9 @@ const AuthenticatedAdminDirectorsIndexRoute =
   } as any)
 const AuthenticatedAdminDealMemosIndexRoute =
   AuthenticatedAdminDealMemosIndexRouteImport.update({
-    id: '/deal-memos/',
-    path: '/deal-memos/',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
 const AuthenticatedAdminContractsIndexRoute =
   AuthenticatedAdminContractsIndexRouteImport.update({
@@ -273,9 +280,9 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
   } as any)
 const AuthenticatedAdminDealMemosDealMemoIdRoute =
   AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
-    id: '/deal-memos/$dealMemoId',
-    path: '/deal-memos/$dealMemoId',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/$dealMemoId',
+    path: '/$dealMemoId',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
 const AuthenticatedAdminContractsContractIdRoute =
   AuthenticatedAdminContractsContractIdRouteImport.update({
@@ -359,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
@@ -461,6 +469,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/_admin/budget': typeof AuthenticatedAdminBudgetRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/_authenticated/_admin/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
@@ -513,6 +522,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/budget'
     | '/calendar'
+    | '/deal-memos'
     | '/finance'
     | '/roster'
     | '/portal/agenda'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/billing'
     | '/_authenticated/_admin/budget'
     | '/_authenticated/_admin/calendar'
+    | '/_authenticated/_admin/deal-memos'
     | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/roster'
     | '/_authenticated/portal/agenda'
@@ -796,6 +807,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos': {
+      id: '/_authenticated/_admin/deal-memos'
+      path: '/deal-memos'
+      fullPath: '/deal-memos'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/calendar': {
       id: '/_authenticated/_admin/calendar'
       path: '/calendar'
@@ -861,10 +879,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/_admin/deal-memos/': {
       id: '/_authenticated/_admin/deal-memos/'
-      path: '/deal-memos'
+      path: '/'
       fullPath: '/deal-memos/'
       preLoaderRoute: typeof AuthenticatedAdminDealMemosIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
     '/_authenticated/_admin/contracts/': {
       id: '/_authenticated/_admin/contracts/'
@@ -924,10 +942,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/_admin/deal-memos/$dealMemoId': {
       id: '/_authenticated/_admin/deal-memos/$dealMemoId'
-      path: '/deal-memos/$dealMemoId'
+      path: '/$dealMemoId'
       fullPath: '/deal-memos/$dealMemoId'
       preLoaderRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
     '/_authenticated/_admin/contracts/$contractId': {
       id: '/_authenticated/_admin/contracts/$contractId'
@@ -1016,16 +1034,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminDealMemosRouteChildren {
+  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
+}
+
+const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRouteChildren =
+  {
+    AuthenticatedAdminDealMemosDealMemoIdRoute:
+      AuthenticatedAdminDealMemosDealMemoIdRoute,
+    AuthenticatedAdminDealMemosIndexRoute:
+      AuthenticatedAdminDealMemosIndexRoute,
+  }
+
+const AuthenticatedAdminDealMemosRouteWithChildren =
+  AuthenticatedAdminDealMemosRoute._addFileChildren(
+    AuthenticatedAdminDealMemosRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBudgetRoute: typeof AuthenticatedAdminBudgetRoute
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
+  AuthenticatedAdminDealMemosRoute: typeof AuthenticatedAdminDealMemosRouteWithChildren
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
-  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminMarketingCalendarRoute: typeof AuthenticatedAdminMarketingCalendarRoute
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -1034,7 +1070,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
-  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
@@ -1056,6 +1091,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBudgetRoute: AuthenticatedAdminBudgetRoute,
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
+  AuthenticatedAdminDealMemosRoute:
+    AuthenticatedAdminDealMemosRouteWithChildren,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
   AuthenticatedAdminComposersComposerIdRoute:
@@ -1063,8 +1100,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
   AuthenticatedAdminContractsContractIdRoute:
     AuthenticatedAdminContractsContractIdRoute,
-  AuthenticatedAdminDealMemosDealMemoIdRoute:
-    AuthenticatedAdminDealMemosDealMemoIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminMarketingCalendarRoute:
@@ -1078,7 +1113,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
-  AuthenticatedAdminDealMemosIndexRoute: AuthenticatedAdminDealMemosIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
