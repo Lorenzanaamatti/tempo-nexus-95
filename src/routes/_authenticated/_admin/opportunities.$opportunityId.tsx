@@ -199,7 +199,7 @@ function OpportunityDetail() {
           <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v as OpportunityKind })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {(Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]).map((k) => (
+              {(Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]).filter((k) => k !== "fichaje_productora").map((k) => (
                 <SelectItem key={k} value={k}>{OPPORTUNITY_KIND_LABEL[k]}</SelectItem>
               ))}
             </SelectContent>
