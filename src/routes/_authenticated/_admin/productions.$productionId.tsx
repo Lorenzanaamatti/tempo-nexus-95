@@ -159,6 +159,7 @@ function ProductionEdit() {
         award_date: (d as any).award_date ?? "",
         imdb_url: d.imdb_url ?? "",
         external_composer: d.external_composer ?? "",
+        project_type_note: (d as any).project_type_note ?? "",
       });
     }
   }, [data]);
@@ -197,6 +198,7 @@ function ProductionEdit() {
       award_date: form.award_date || null,
       imdb_url: form.imdb_url || null,
       external_composer: form.external_composer || null,
+      project_type_note: form.project_type === "produccion_especial" ? (form.project_type_note || null) : null,
     } as any).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
