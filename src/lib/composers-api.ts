@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export type Availability = "available" | "partial" | "unavailable";
 export type FilmFormat = "feature" | "series" | "doc" | "short" | "spot" | "game" | "other";
@@ -13,9 +14,24 @@ export function slugify(s: string) {
     .slice(0, 80);
 }
 
-export function photoUrl(path?: string | null) {
-  if (!path) return null;
-  return supabase.storage.from("composer-photos").getPublicUrl(path).data.publicUrl;
+/**
+ * Hook that returns a short-lived signed URL for a composer photo.
+ * The `composer-photos` bucket is private; reads must go through signed URLs.
+ */
+export function useComposerPhotoUrl(path?: string | null) {
+  return useQuery({
+    queryKey: ["composer-photo-signed", path],
+    enabled: !!path,
+    staleTime: 1000 * 60 * 50, // refresh before 1h expiry
+    queryFn: async () => {
+      if (!path) return null;
+      const { data, error } = await supabase.storage
+        .from("composer-photos")
+        .createSignedUrl(path, 60 * 60);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
 }
 
 export async function uploadComposerPhoto(composerId: string, file: File) {
