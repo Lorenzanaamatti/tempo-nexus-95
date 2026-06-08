@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Paperclip, Send, Trash2, FileText, Download, Hash } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
+import { Link } from "@tanstack/react-router";
 
 type Channel = { id: string; kind: string; label: string; position: number };
 type Attachment = { name: string; path?: string; url?: string; mime?: string; size?: number; kind: "file" | "link" };
@@ -19,6 +20,7 @@ type Message = {
   author_user_id: string;
   author_name: string | null;
   author_role: string | null;
+  author_person_id: string | null;
   created_at: string;
 };
 
@@ -35,6 +37,21 @@ export function ComposerChat({ composerId }: { composerId: string }) {
   const { user } = useAuth();
   const { role } = useCurrentRole();
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Resolve the IC team person record for the current admin user (signature).
+  const icPersonQ = useQuery({
+    queryKey: ["ic-person", user?.email, role],
+    enabled: !!user?.email && role === "admin",
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("people")
+        .select("id, full_name")
+        .eq("role", "ic_team")
+        .ilike("email", user!.email!)
+        .maybeSingle();
+      return data ?? null;
+    },
+  });
 
   const channelsQ = useQuery({
     queryKey: ["chat-channels", composerId],
@@ -61,7 +78,7 @@ export function ComposerChat({ composerId }: { composerId: string }) {
     queryFn: async (): Promise<Message[]> => {
       const { data, error } = await supabase
         .from("chat_messages")
-        .select("id, channel_id, body, attachments, author_user_id, author_name, author_role, created_at")
+        .select("id, channel_id, body, attachments, author_user_id, author_name, author_role, author_person_id, created_at")
         .eq("channel_id", activeId!)
         .order("created_at");
       if (error) throw error;
@@ -118,8 +135,9 @@ export function ComposerChat({ composerId }: { composerId: string }) {
             channelId={active.id}
             composerId={composerId}
             authorUserId={user.id}
-            authorName={user.user_metadata?.full_name || user.email || "Usuario"}
+            authorName={icPersonQ.data?.full_name || user.user_metadata?.full_name || user.email || "Usuario"}
             authorRole={role ?? "user"}
+            authorPersonId={icPersonQ.data?.id ?? null}
             onSent={() => qc.invalidateQueries({ queryKey: ["chat-messages", active.id] })}
           />
         )}
@@ -169,7 +187,18 @@ function MessageList({
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="smallcaps text-[10px] text-muted-foreground">
-                    {m.author_name ?? "—"} {m.author_role === "admin" ? "· IC" : ""}
+                    {m.author_person_id ? (
+                      <Link
+                        to="/people/$personId"
+                        params={{ personId: m.author_person_id }}
+                        className="underline-offset-2 hover:underline"
+                      >
+                        {m.author_name ?? "—"}
+                      </Link>
+                    ) : (
+                      <>{m.author_name ?? "—"}</>
+                    )}
+                    {m.author_role === "admin" ? " · Equipo IC" : ""}
                   </p>
                   <span className="text-[10px] text-muted-foreground">{fmtTime(m.created_at)}</span>
                 </div>
@@ -241,6 +270,7 @@ function Composer({
   authorUserId,
   authorName,
   authorRole,
+  authorPersonId,
   onSent,
 }: {
   channelId: string;
@@ -248,6 +278,7 @@ function Composer({
   authorUserId: string;
   authorName: string;
   authorRole: string;
+  authorPersonId: string | null;
   onSent: () => void;
 }) {
   const [body, setBody] = useState("");
@@ -279,6 +310,7 @@ function Composer({
         author_user_id: authorUserId,
         author_name: authorName,
         author_role: authorRole,
+        author_person_id: authorPersonId,
         body: trimmed || null,
         attachments: attachments as unknown as never,
       });
