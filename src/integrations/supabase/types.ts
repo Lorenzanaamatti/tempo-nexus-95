@@ -1138,6 +1138,193 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_memo_eventos: {
+        Row: {
+          actor_email: string | null
+          created_at: string
+          deal_memo_id: string
+          id: string
+          payload: Json | null
+          tipo_evento: Database["public"]["Enums"]["dm_evento_tipo"]
+        }
+        Insert: {
+          actor_email?: string | null
+          created_at?: string
+          deal_memo_id: string
+          id?: string
+          payload?: Json | null
+          tipo_evento: Database["public"]["Enums"]["dm_evento_tipo"]
+        }
+        Update: {
+          actor_email?: string | null
+          created_at?: string
+          deal_memo_id?: string
+          id?: string
+          payload?: Json | null
+          tipo_evento?: Database["public"]["Enums"]["dm_evento_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memo_eventos_deal_memo_id_fkey"
+            columns: ["deal_memo_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_memo_versiones: {
+        Row: {
+          comentarios_revision: string | null
+          created_at: string
+          deal_memo_id: string
+          email_asunto: string
+          email_cuerpo: string
+          generada_por: Database["public"]["Enums"]["dm_version_origen"]
+          id: string
+          numero_version: number
+          word_file_url: string | null
+        }
+        Insert: {
+          comentarios_revision?: string | null
+          created_at?: string
+          deal_memo_id: string
+          email_asunto: string
+          email_cuerpo: string
+          generada_por: Database["public"]["Enums"]["dm_version_origen"]
+          id?: string
+          numero_version: number
+          word_file_url?: string | null
+        }
+        Update: {
+          comentarios_revision?: string | null
+          created_at?: string
+          deal_memo_id?: string
+          email_asunto?: string
+          email_cuerpo?: string
+          generada_por?: Database["public"]["Enums"]["dm_version_origen"]
+          id?: string
+          numero_version?: number
+          word_file_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memo_versiones_deal_memo_id_fkey"
+            columns: ["deal_memo_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_memos: {
+        Row: {
+          cliente_id: string | null
+          contraparte_id: string | null
+          created_at: string
+          descripcion_uso: string | null
+          destinatario_final_email: string
+          estado: Database["public"]["Enums"]["deal_memo_estado"]
+          fecha_envio: string | null
+          fecha_limite_respuesta: string | null
+          google_calendar_event_id: string | null
+          google_calendar_reminder_event_id: string | null
+          id: string
+          importe_propuesto: number | null
+          moneda: string
+          notas_internas: string | null
+          obra: string
+          plantilla_id: string | null
+          plazo_respuesta_dias: number
+          referencia: string
+          updated_at: string
+          validador_final_id: string | null
+          validador_interno_id: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          contraparte_id?: string | null
+          created_at?: string
+          descripcion_uso?: string | null
+          destinatario_final_email: string
+          estado?: Database["public"]["Enums"]["deal_memo_estado"]
+          fecha_envio?: string | null
+          fecha_limite_respuesta?: string | null
+          google_calendar_event_id?: string | null
+          google_calendar_reminder_event_id?: string | null
+          id?: string
+          importe_propuesto?: number | null
+          moneda?: string
+          notas_internas?: string | null
+          obra: string
+          plantilla_id?: string | null
+          plazo_respuesta_dias?: number
+          referencia: string
+          updated_at?: string
+          validador_final_id?: string | null
+          validador_interno_id?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          contraparte_id?: string | null
+          created_at?: string
+          descripcion_uso?: string | null
+          destinatario_final_email?: string
+          estado?: Database["public"]["Enums"]["deal_memo_estado"]
+          fecha_envio?: string | null
+          fecha_limite_respuesta?: string | null
+          google_calendar_event_id?: string | null
+          google_calendar_reminder_event_id?: string | null
+          id?: string
+          importe_propuesto?: number | null
+          moneda?: string
+          notas_internas?: string | null
+          obra?: string
+          plantilla_id?: string | null
+          plazo_respuesta_dias?: number
+          referencia?: string
+          updated_at?: string
+          validador_final_id?: string | null
+          validador_interno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "dm_contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_contraparte_id_fkey"
+            columns: ["contraparte_id"]
+            isOneToOne: false
+            referencedRelation: "dm_contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_plantilla_id_fkey"
+            columns: ["plantilla_id"]
+            isOneToOne: false
+            referencedRelation: "dm_plantillas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_validador_final_id_fkey"
+            columns: ["validador_final_id"]
+            isOneToOne: false
+            referencedRelation: "dm_contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_validador_interno_id_fkey"
+            columns: ["validador_interno_id"]
+            isOneToOne: false
+            referencedRelation: "dm_contactos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       directors: {
         Row: {
           agent: string | null
@@ -1177,6 +1364,84 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      dm_contactos: {
+        Row: {
+          created_at: string
+          email: string
+          empresa: string | null
+          id: string
+          nombre: string
+          notas: string | null
+          rol: string | null
+          tipo: Database["public"]["Enums"]["dm_contacto_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          empresa?: string | null
+          id?: string
+          nombre: string
+          notas?: string | null
+          rol?: string | null
+          tipo: Database["public"]["Enums"]["dm_contacto_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          empresa?: string | null
+          id?: string
+          nombre?: string
+          notas?: string | null
+          rol?: string | null
+          tipo?: Database["public"]["Enums"]["dm_contacto_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dm_plantillas: {
+        Row: {
+          activa: boolean
+          created_at: string
+          descripcion: string | null
+          email_asunto_template: string
+          email_cuerpo_template: string
+          email_firma: string
+          id: string
+          instrucciones_para_agente: string
+          nombre: string
+          updated_at: string
+          word_template_url: string | null
+        }
+        Insert: {
+          activa?: boolean
+          created_at?: string
+          descripcion?: string | null
+          email_asunto_template: string
+          email_cuerpo_template: string
+          email_firma: string
+          id?: string
+          instrucciones_para_agente: string
+          nombre: string
+          updated_at?: string
+          word_template_url?: string | null
+        }
+        Update: {
+          activa?: boolean
+          created_at?: string
+          descripcion?: string | null
+          email_asunto_template?: string
+          email_cuerpo_template?: string
+          email_firma?: string
+          id?: string
+          instrucciones_para_agente?: string
+          nombre?: string
+          updated_at?: string
+          word_template_url?: string | null
         }
         Relationships: []
       }
@@ -2664,7 +2929,31 @@ export type Database = {
         | "firmado"
         | "vencido"
         | "cancelado"
+      deal_memo_estado:
+        | "borrador"
+        | "generando"
+        | "revision_interna"
+        | "corrigiendo"
+        | "revision_final"
+        | "enviado"
+        | "respondido"
+        | "cerrado"
+        | "cancelado"
       deck_purpose: "corto" | "largo" | "generico" | "por_cliente" | "sector"
+      dm_contacto_tipo: "interno" | "cliente" | "contraparte" | "validador"
+      dm_evento_tipo:
+        | "creado"
+        | "version_generada"
+        | "enviado_a_revisor_interno"
+        | "aprobado_revisor_interno"
+        | "correcciones_solicitadas"
+        | "enviado_a_validador_final"
+        | "aprobado_final"
+        | "enviado_a_destinatario"
+        | "respuesta_recibida"
+        | "reminder_enviado"
+        | "cerrado"
+      dm_version_origen: "agente_ia" | "correccion_humana"
       film_format:
         | "feature"
         | "series"
@@ -2976,7 +3265,33 @@ export const Constants = {
         "vencido",
         "cancelado",
       ],
+      deal_memo_estado: [
+        "borrador",
+        "generando",
+        "revision_interna",
+        "corrigiendo",
+        "revision_final",
+        "enviado",
+        "respondido",
+        "cerrado",
+        "cancelado",
+      ],
       deck_purpose: ["corto", "largo", "generico", "por_cliente", "sector"],
+      dm_contacto_tipo: ["interno", "cliente", "contraparte", "validador"],
+      dm_evento_tipo: [
+        "creado",
+        "version_generada",
+        "enviado_a_revisor_interno",
+        "aprobado_revisor_interno",
+        "correcciones_solicitadas",
+        "enviado_a_validador_final",
+        "aprobado_final",
+        "enviado_a_destinatario",
+        "respuesta_recibida",
+        "reminder_enviado",
+        "cerrado",
+      ],
+      dm_version_origen: ["agente_ia", "correccion_humana"],
       film_format: [
         "feature",
         "series",
