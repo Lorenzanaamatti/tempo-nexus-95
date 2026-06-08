@@ -1545,33 +1545,42 @@ export type Database = {
       }
       people: {
         Row: {
+          assistant_model: string
+          assistant_persona: string | null
           composer_id: string | null
           created_at: string
           email: string | null
           full_name: string
           id: string
+          is_virtual_assistant: boolean
           notes: string | null
           phone: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at: string
         }
         Insert: {
+          assistant_model?: string
+          assistant_persona?: string | null
           composer_id?: string | null
           created_at?: string
           email?: string | null
           full_name: string
           id?: string
+          is_virtual_assistant?: boolean
           notes?: string | null
           phone?: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at?: string
         }
         Update: {
+          assistant_model?: string
+          assistant_persona?: string | null
           composer_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
           id?: string
+          is_virtual_assistant?: boolean
           notes?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["person_role"]
