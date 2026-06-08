@@ -63,6 +63,7 @@ function ProductionEdit() {
     award_date: "",
     imdb_url: "",
     external_composer: "",
+    project_type_note: "",
   });
   const [saving, setSaving] = useState(false);
 
