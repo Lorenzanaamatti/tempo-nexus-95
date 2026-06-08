@@ -255,8 +255,8 @@ function TargetAccountDetail() {
             <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— Sin asignar —</SelectItem>
-              {(peopleICQ.data ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+              {(peopleICQ.data ?? []).filter((p) => p.id).map((p) => (
+                <SelectItem key={p.id!} value={p.id!}>{p.full_name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
