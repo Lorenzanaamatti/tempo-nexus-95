@@ -100,7 +100,8 @@ export function CalendarBoard({
     people: true, productions: true, billing: true, opportunities: true, contracts: true, tasks: true,
   });
 
-  const range = useMemo(() => computeRange(view, anchor), [view, anchor]);
+  const effectiveView: CalendarView = layout === "gantt" ? view : "month";
+  const range = useMemo(() => computeRange(effectiveView, anchor), [effectiveView, anchor]);
   const startIso = range.start.toISOString().slice(0, 10);
   const endIso = range.end.toISOString().slice(0, 10);
 
@@ -354,15 +355,15 @@ export function CalendarBoard({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(view, anchor, -1))}>
+          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, -1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>Hoy</Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(view, anchor, 1))}>
+          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, 1))}>
             <ChevronRight className="h-4 w-4" />
           </Button>
           <span className="ml-3 font-display text-xl capitalize min-w-[14ch]">
-            {rangeLabel(view, range.start, range.end)}
+            {rangeLabel(effectiveView, range.start, range.end)}
           </span>
         </div>
       </div>
