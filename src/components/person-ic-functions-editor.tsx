@@ -25,6 +25,7 @@ export type IcTeamFunction =
   | "ai_cobros"
   | "ai_calendarios_preavisos"
   | "ai_control_agentes_ai"
+  | "ai_envia_presus_productoras"
   | "administracion"
   | "contabilidad"
   | "fiscal"
@@ -85,6 +86,7 @@ export const IC_FUNCTION_GROUPS: { label: string; items: { value: IcTeamFunction
       { value: "ai_cobros", label: "AI Cobros" },
       { value: "ai_calendarios_preavisos", label: "AI Calendarios y preavisos" },
       { value: "ai_control_agentes_ai", label: "AI Control de agentes AI" },
+      { value: "ai_envia_presus_productoras", label: "AI envía presus a productoras" },
     ],
   },
   {
