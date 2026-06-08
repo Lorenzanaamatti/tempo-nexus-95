@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminOpportunitiesIndexRouteImport } from './routes/_authenticated/_admin/opportunities.index'
 import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
+import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.index'
 import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
@@ -215,6 +216,12 @@ const AuthenticatedAdminDirectorsIndexRoute =
     path: '/directors/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosIndexRoute =
+  AuthenticatedAdminDealMemosIndexRouteImport.update({
+    id: '/deal-memos/',
+    path: '/deal-memos/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminContractsIndexRoute =
   AuthenticatedAdminContractsIndexRouteImport.update({
     id: '/contracts/',
@@ -368,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
+  '/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -415,6 +423,7 @@ export interface FileRoutesByTo {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts': typeof AuthenticatedAdminContractsIndexRoute
+  '/deal-memos': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
@@ -466,6 +475,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
+  '/_authenticated/_admin/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/_authenticated/_admin/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers/'
     | '/contracts/'
+    | '/deal-memos/'
     | '/directors/'
     | '/opportunities/'
     | '/people/'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers'
     | '/contracts'
+    | '/deal-memos'
     | '/directors'
     | '/opportunities'
     | '/people'
@@ -613,6 +625,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/contracts/'
+    | '/_authenticated/_admin/deal-memos/'
     | '/_authenticated/_admin/directors/'
     | '/_authenticated/_admin/opportunities/'
     | '/_authenticated/_admin/people/'
@@ -833,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/': {
+      id: '/_authenticated/_admin/deal-memos/'
+      path: '/deal-memos'
+      fullPath: '/deal-memos/'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/contracts/': {
       id: '/_authenticated/_admin/contracts/'
       path: '/contracts'
@@ -993,6 +1013,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
+  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
@@ -1034,6 +1055,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
+  AuthenticatedAdminDealMemosIndexRoute: AuthenticatedAdminDealMemosIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
