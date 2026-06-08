@@ -444,7 +444,7 @@ function ProductionEdit() {
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 font-display text-2xl">Personal asignado</h2>
+        <h2 className="mb-3 font-display text-2xl">Cliente asignado</h2>
         <AssignmentsEditor productionId={productionId} />
       </div>
 
