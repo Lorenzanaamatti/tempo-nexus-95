@@ -157,7 +157,7 @@ function PersonEdit() {
                 </SelectContent>
               </Select>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                37 funciones disponibles. Cada selección añade la función a esta persona.
+                38 funciones disponibles. Cada selección añade la función a esta persona.
               </p>
             </>
           ) : (
