@@ -65,11 +65,23 @@ function ComposerEditPage() {
           .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
           .eq("composer_id", composerId)
           .order("created_at", { ascending: false }),
-        supabase
-          .from("productions")
-          .select("id, title, year, status, platform, director, premiere_date, delivery_date, fee_amount, ic_commission, ic_commission_pct, billing_sprints:production_billing_sprints!production_billing_sprints_production_id_fkey(id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url)")
-          .eq("composer_id", composerId)
-          .order("year", { ascending: false }),
+        (async () => {
+          const PROD_SELECT = "id, title, year, status, platform, director, premiere_date, delivery_date, fee_amount, ic_commission, ic_commission_pct, composer_id, billing_sprints:production_billing_sprints!production_billing_sprints_production_id_fkey(id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url)";
+          const [direct, viaAssign] = await Promise.all([
+            supabase.from("productions").select(PROD_SELECT).eq("composer_id", composerId),
+            (supabase as any)
+              .from("production_assignments")
+              .select(`production:productions(${PROD_SELECT})`)
+              .eq("composer_id", composerId),
+          ]);
+          const map = new Map<string, any>();
+          (direct.data ?? []).forEach((p: any) => map.set(p.id, p));
+          ((viaAssign.data ?? []) as any[]).forEach((row: any) => {
+            if (row.production) map.set(row.production.id, row.production);
+          });
+          const arr = Array.from(map.values()).sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+          return { data: arr, error: direct.error ?? viaAssign.error };
+        })(),
         supabase
           .from("contracts")
           .select("id, title, contract_type, sign_status, signed_date, end_date, notice_date")

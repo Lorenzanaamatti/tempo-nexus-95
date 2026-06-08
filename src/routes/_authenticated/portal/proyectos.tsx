@@ -16,19 +16,28 @@ function Proyectos() {
     queryKey: ["portal-proyectos", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const [{ data: prods }, { data: history }] = await Promise.all([
+      const PROD_SELECT = "id, title, kind, status, year, director, production_company, platform, partner, notes, fee_amount, ic_commission_pct, delivery_date, premiere_date, nomination_date, award_date, updated_at";
+      const [direct, viaAssign, { data: history }] = await Promise.all([
+        (supabase as any).from("productions").select(PROD_SELECT).eq("composer_id", composerId!),
         (supabase as any)
-          .from("productions")
-          .select("id, title, kind, status, year, director, production_company, platform, partner, notes, fee_amount, ic_commission_pct, delivery_date, premiere_date, nomination_date, award_date")
-          .eq("composer_id", composerId!)
-          .order("updated_at", { ascending: false }),
+          .from("production_assignments")
+          .select(`production:productions(${PROD_SELECT})`)
+          .eq("composer_id", composerId!),
         supabase
           .from("composer_projects")
           .select("id, production, year, director, production_company, platform, music_type, notes, production_type")
           .eq("composer_id", composerId!)
           .order("position"),
       ]);
-      return { productions: prods ?? [], history: history ?? [] };
+      const map = new Map<string, any>();
+      ((direct.data ?? []) as any[]).forEach((p) => map.set(p.id, p));
+      ((viaAssign.data ?? []) as any[]).forEach((row: any) => {
+        if (row.production) map.set(row.production.id, row.production);
+      });
+      const prods = Array.from(map.values()).sort(
+        (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
+      );
+      return { productions: prods, history: history ?? [] };
     },
   });
 
