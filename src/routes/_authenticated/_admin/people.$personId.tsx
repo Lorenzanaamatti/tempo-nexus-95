@@ -14,6 +14,7 @@ import { PersonAssignmentsEditor } from "@/components/person-assignments-editor"
 import { SaveButton } from "@/components/save-button";
 import { AssistantChat } from "@/components/assistant-chat";
 import { PersonIcFunctionsEditor } from "@/components/person-ic-functions-editor";
+import { PersonVerifiersEditor } from "@/components/person-verifiers-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 
@@ -163,6 +164,16 @@ function PersonEdit() {
         </p>
         <PersonAssignmentsEditor personId={personId} />
       </div>
+
+      {form.role === "ic_team" && (
+        <div className="mt-10">
+          <h2 className="mb-3 font-display text-2xl">Verificadores asignados</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Asigna una o varias personas del equipo IC como verificadores de esta persona.
+          </p>
+          <PersonVerifiersEditor personId={personId} />
+        </div>
+      )}
 
       {data.is_virtual_assistant && (
         <div className="mt-10">
