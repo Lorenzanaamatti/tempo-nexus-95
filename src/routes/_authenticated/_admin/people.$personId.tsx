@@ -13,6 +13,7 @@ import { PersonEventsEditor } from "@/components/person-events-editor";
 import { PersonAssignmentsEditor } from "@/components/person-assignments-editor";
 import { SaveButton } from "@/components/save-button";
 import { AssistantChat } from "@/components/assistant-chat";
+import { PersonIcFunctionsEditor } from "@/components/person-ic-functions-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 
@@ -144,6 +145,16 @@ function PersonEdit() {
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <PersonEventsEditor personId={personId} />
       </div>
+
+      {form.role === "ic_team" && (
+        <div className="mt-10">
+          <h2 className="mb-1 font-display text-2xl">Funciones en el equipo IC</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Marca todas las funciones que asume esta persona. Cada persona puede tener varias funciones simultáneas.
+          </p>
+          <PersonIcFunctionsEditor personId={personId} />
+        </div>
+      )}
 
       <div className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Representados asignados</h2>

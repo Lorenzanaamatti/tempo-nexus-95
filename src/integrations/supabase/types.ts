@@ -1861,6 +1861,35 @@ export type Database = {
           },
         ]
       }
+      person_ic_functions: {
+        Row: {
+          created_at: string
+          function: Database["public"]["Enums"]["ic_team_function"]
+          id: string
+          person_id: string
+        }
+        Insert: {
+          created_at?: string
+          function: Database["public"]["Enums"]["ic_team_function"]
+          id?: string
+          person_id: string
+        }
+        Update: {
+          created_at?: string
+          function?: Database["public"]["Enums"]["ic_team_function"]
+          id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_ic_functions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platforms: {
         Row: {
           contact_name: string | null
@@ -2962,6 +2991,44 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      ic_team_function:
+        | "equipo_virtual"
+        | "direccion_general"
+        | "agente"
+        | "produccion"
+        | "post_produccion"
+        | "legal"
+        | "legal_externo"
+        | "validacion_contratos_deal_memos"
+        | "onboarding_clientes"
+        | "discografica"
+        | "editorial"
+        | "ai_reminder"
+        | "ai_deal_memos"
+        | "ai_contratos"
+        | "ai_facturacion"
+        | "ai_cobros"
+        | "ai_calendarios_preavisos"
+        | "ai_control_agentes_ai"
+        | "administracion"
+        | "contabilidad"
+        | "fiscal"
+        | "pagos_y_cobros"
+        | "bancos_y_tesoreria"
+        | "facturacion"
+        | "diseno"
+        | "marketing"
+        | "comunicacion"
+        | "paid_media"
+        | "analytics"
+        | "prensa"
+        | "pr"
+        | "institucional"
+        | "editores"
+        | "sellos"
+        | "reels_background_av"
+        | "fotos_videos_clientes"
+        | "seguimiento_producciones"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       opportunity_kind: "fichaje" | "pitch"
       opportunity_status:
@@ -3300,6 +3367,45 @@ export const Constants = {
         "spot",
         "game",
         "other",
+      ],
+      ic_team_function: [
+        "equipo_virtual",
+        "direccion_general",
+        "agente",
+        "produccion",
+        "post_produccion",
+        "legal",
+        "legal_externo",
+        "validacion_contratos_deal_memos",
+        "onboarding_clientes",
+        "discografica",
+        "editorial",
+        "ai_reminder",
+        "ai_deal_memos",
+        "ai_contratos",
+        "ai_facturacion",
+        "ai_cobros",
+        "ai_calendarios_preavisos",
+        "ai_control_agentes_ai",
+        "administracion",
+        "contabilidad",
+        "fiscal",
+        "pagos_y_cobros",
+        "bancos_y_tesoreria",
+        "facturacion",
+        "diseno",
+        "marketing",
+        "comunicacion",
+        "paid_media",
+        "analytics",
+        "prensa",
+        "pr",
+        "institucional",
+        "editores",
+        "sellos",
+        "reels_background_av",
+        "fotos_videos_clientes",
+        "seguimiento_producciones",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       opportunity_kind: ["fichaje", "pitch"],
