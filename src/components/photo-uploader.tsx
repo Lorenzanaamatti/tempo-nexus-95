@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { uploadComposerPhoto, photoUrl } from "@/lib/composers-api";
+import { uploadComposerPhoto, useComposerPhotoUrl } from "@/lib/composers-api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,7 +15,7 @@ export function PhotoUploader({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const url = photoUrl(photoPath);
+  const url = useComposerPhotoUrl(photoPath).data ?? null;
 
   async function handleFile(file: File) {
     setBusy(true);
