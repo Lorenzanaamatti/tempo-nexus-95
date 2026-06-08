@@ -242,6 +242,16 @@ function ProductionEdit() {
               ))}
             </SelectContent>
           </Select>
+          {form.project_type === "produccion_especial" && (
+            <div className="mt-2">
+              <Label className="text-xs text-muted-foreground">Aclaración (producción especial)</Label>
+              <Input
+                value={form.project_type_note}
+                onChange={(e) => setForm({ ...form, project_type_note: e.target.value })}
+                placeholder="Ej. instalación, espectáculo en directo, contenido inmersivo…"
+              />
+            </div>
+          )}
         </div>
         <div>
           <Label>Representado asignado</Label>
