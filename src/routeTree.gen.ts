@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AprobarTokenRouteImport } from './routes/aprobar.$token'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -79,6 +80,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AprobarTokenRoute = AprobarTokenRouteImport.update({
+  id: '/aprobar/$token',
+  path: '/aprobar/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   id: '/portal',
@@ -398,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
@@ -453,6 +460,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
@@ -510,6 +518,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/_admin/budget': typeof AuthenticatedAdminBudgetRoute
@@ -569,6 +578,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/portal'
+    | '/aprobar/$token'
     | '/billing'
     | '/budget'
     | '/calendar'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
+    | '/aprobar/$token'
     | '/billing'
     | '/budget'
     | '/calendar'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/me'
     | '/_authenticated/portal'
+    | '/aprobar/$token'
     | '/_authenticated/'
     | '/_authenticated/_admin/billing'
     | '/_authenticated/_admin/budget'
@@ -735,6 +747,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  AprobarTokenRoute: typeof AprobarTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -759,6 +772,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/aprobar/$token': {
+      id: '/aprobar/$token'
+      path: '/aprobar/$token'
+      fullPath: '/aprobar/$token'
+      preLoaderRoute: typeof AprobarTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/portal': {
       id: '/_authenticated/portal'
@@ -1312,6 +1332,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  AprobarTokenRoute: AprobarTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
