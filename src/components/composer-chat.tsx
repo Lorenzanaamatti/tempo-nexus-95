@@ -32,11 +32,11 @@ function fmtTime(iso: string) {
   return sameDay ? t : `${formatDateEs(d.toISOString().slice(0, 10))} · ${t}`;
 }
 
-export function ComposerChat({ composerId }: { composerId: string }) {
+export function ComposerChat({ composerId, initialChannelId }: { composerId: string; initialChannelId?: string | null }) {
   const qc = useQueryClient();
   const { user } = useAuth();
   const { role } = useCurrentRole();
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(initialChannelId ?? null);
 
   // Resolve the IC team person record for the current admin user (signature).
   const icPersonQ = useQuery({
@@ -71,6 +71,11 @@ export function ComposerChat({ composerId }: { composerId: string }) {
   useEffect(() => {
     if (!activeId && channelsQ.data?.length) setActiveId(channelsQ.data[0].id);
   }, [channelsQ.data, activeId]);
+
+  // Switch when parent provides a new initial channel.
+  useEffect(() => {
+    if (initialChannelId) setActiveId(initialChannelId);
+  }, [initialChannelId]);
 
   const messagesQ = useQuery({
     queryKey: ["chat-messages", activeId],
