@@ -656,18 +656,6 @@ function Inner({
         </div>
       </Section>
 
-      {/* Equipo */}
-      <Section title="Equipo / Representación">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Nombre del equipo">
-            <Input value={c.team_name ?? ""} onChange={(e) => field("team_name", e.target.value || null)} />
-          </Field>
-          <Field label="Email del equipo">
-            <Input type="email" value={c.team_email ?? ""} onChange={(e) => field("team_email", e.target.value || null)} />
-          </Field>
-        </div>
-      </Section>
-
       {/* Disponibilidad por periodos */}
       <Section title="Disponibilidad">
         <p className="text-xs text-muted-foreground">
@@ -808,7 +796,7 @@ function Inner({
         />
       </Section>
 
-      <Section title="Equipo asignado a este representado">
+      <Section title="Equipo / Representación">
         <ComposerTeamEditor composerId={c.id} />
       </Section>
 

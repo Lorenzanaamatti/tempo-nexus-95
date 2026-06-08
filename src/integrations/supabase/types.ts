@@ -780,6 +780,7 @@ export type Database = {
         Row: {
           composer_id: string
           created_at: string
+          ic_function: Database["public"]["Enums"]["ic_team_function"] | null
           id: string
           kpi_review: string | null
           kpi_review_date: string | null
@@ -788,12 +789,13 @@ export type Database = {
           position: number
           role_other: string | null
           start_date: string | null
-          team_role: Database["public"]["Enums"]["composer_team_role"]
+          team_role: Database["public"]["Enums"]["composer_team_role"] | null
           updated_at: string
         }
         Insert: {
           composer_id: string
           created_at?: string
+          ic_function?: Database["public"]["Enums"]["ic_team_function"] | null
           id?: string
           kpi_review?: string | null
           kpi_review_date?: string | null
@@ -802,12 +804,13 @@ export type Database = {
           position?: number
           role_other?: string | null
           start_date?: string | null
-          team_role: Database["public"]["Enums"]["composer_team_role"]
+          team_role?: Database["public"]["Enums"]["composer_team_role"] | null
           updated_at?: string
         }
         Update: {
           composer_id?: string
           created_at?: string
+          ic_function?: Database["public"]["Enums"]["ic_team_function"] | null
           id?: string
           kpi_review?: string | null
           kpi_review_date?: string | null
@@ -816,7 +819,7 @@ export type Database = {
           position?: number
           role_other?: string | null
           start_date?: string | null
-          team_role?: Database["public"]["Enums"]["composer_team_role"]
+          team_role?: Database["public"]["Enums"]["composer_team_role"] | null
           updated_at?: string
         }
         Relationships: [

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 
 export type TeamRole =
   | "agente" | "manager" | "producer" | "comunicacion" | "facturacion" | "pagos" | "otro";
@@ -25,7 +26,8 @@ type Assignment = {
   id: string;
   composer_id: string;
   person_id: string;
-  team_role: TeamRole;
+  team_role: TeamRole | null;
+  ic_function: IcTeamFunction | null;
   role_other: string | null;
   start_date: string | null;
   objectives: string | null;
@@ -103,7 +105,7 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
     <div className="space-y-4">
       <div className="flex items-baseline justify-between">
         <p className="text-sm text-muted-foreground">
-          Roles: agente, manager, producer, comunicación, facturación, pagos u otro.
+          Cada asignación cruza una persona del Equipo IC con su función (37 funciones disponibles).
         </p>
         <Button type="button" size="sm" variant="outline" onClick={add}>
           + Añadir asignación
@@ -131,31 +133,24 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Rol</Label>
+                  <Label className="text-xs text-muted-foreground">Función IC</Label>
                   <Select
-                    value={r.team_role}
-                    onValueChange={(v) => update(r.id, { team_role: v as TeamRole })}
+                    value={r.ic_function ?? ""}
+                    onValueChange={(v) => update(r.id, { ic_function: v as IcTeamFunction })}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Selecciona función…" /></SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(TEAM_ROLE_LABEL) as TeamRole[]).map((k) => (
-                        <SelectItem key={k} value={k}>{TEAM_ROLE_LABEL[k]}</SelectItem>
+                      {IC_FUNCTION_GROUPS.map((g) => (
+                        <div key={g.label}>
+                          <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{g.label}</div>
+                          {g.items.map((it) => (
+                            <SelectItem key={it.value} value={it.value}>{IC_FUNCTION_LABEL[it.value]}</SelectItem>
+                          ))}
+                        </div>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                {r.team_role === "otro" && (
-                  <div className="sm:col-span-2">
-                    <Label className="text-xs text-muted-foreground">Describir rol</Label>
-                    <Input
-                      defaultValue={r.role_other ?? ""}
-                      onBlur={(e) =>
-                        e.target.value !== (r.role_other ?? "") &&
-                        update(r.id, { role_other: e.target.value || null })
-                      }
-                    />
-                  </div>
-                )}
                 <div>
                   <Label className="text-xs text-muted-foreground">Fecha de inicio</Label>
                   <Input
