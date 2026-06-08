@@ -62,7 +62,7 @@ function PeopleIndex() {
   const [newRole, setNewRole] = useState<PersonRole>(
     roleFilter !== "all" && roleFilter !== "composer" ? roleFilter : "ic_team",
   );
-  const [newFns, setNewFns] = useState<Set<IcTeamFunction>>(new Set());
+  const [newFn, setNewFn] = useState<IcTeamFunction | "none">("none");
 
   const { data, isLoading } = useQuery({
     queryKey: ["people", q, roleFilter, fnFilter],
@@ -113,7 +113,7 @@ function PeopleIndex() {
     setCreating(false);
     if (error) return toast.error(error.message);
     setNewName("");
-    setNewFns(new Set());
+    setNewFn("none");
     toast.success("Persona añadida");
     qc.invalidateQueries({ queryKey: ["people"] });
     qc.invalidateQueries({ queryKey: ["roster-all"] });
