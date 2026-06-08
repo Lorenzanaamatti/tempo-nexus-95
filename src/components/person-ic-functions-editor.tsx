@@ -124,15 +124,27 @@ export function PersonIcFunctionsEditor({ personId }: { personId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
+    let cancelled = false;
+    async function load() {
       const { data, error } = await (supabase as any)
         .from("person_ic_functions")
         .select("function")
         .eq("person_id", personId);
+      if (cancelled) return;
       if (!error && data) setSelected(new Set(data.map((d: { function: IcTeamFunction }) => d.function)));
       setLoading(false);
-    })();
+    }
+    setLoading(true);
+    load();
+    const onRefresh = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { personId?: string } | undefined;
+      if (!detail || detail.personId === personId) load();
+    };
+    window.addEventListener("person-ic-functions:refresh", onRefresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("person-ic-functions:refresh", onRefresh);
+    };
   }, [personId]);
 
   async function toggle(fn: IcTeamFunction) {
