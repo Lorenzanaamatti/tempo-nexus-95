@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { X } from "lucide-react";
+import { CurrentLocationEditor } from "@/components/current-location-editor";
 
 const SPECIALIST_TAG_OPTIONS = [
   "Instrumentista",
@@ -402,8 +403,15 @@ function Inner({
               <p className="mt-1 text-sm text-muted-foreground">Nombre legal: {c.legal_name || c.full_name}</p>
             )}
             <p className="mt-1 text-sm text-muted-foreground">
-              {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización"}
+              {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización base"}
             </p>
+            <div className="mt-3">
+              <div className="smallcaps mb-1 text-[10px] text-muted-foreground">Ubicación actual</div>
+              <CurrentLocationEditor
+                value={(c as { current_location?: string | null }).current_location ?? null}
+                onChange={(next) => field("current_location" as never, next as never)}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {c.tier && <Badge variant="outline" className="rounded-sm">Tier {c.tier}</Badge>}
@@ -679,13 +687,6 @@ function Inner({
               </Field>
             </>
           )}
-          <Field label="Ubicación actual" className="sm:col-span-2">
-            <Input
-              value={(c as { current_location?: string | null }).current_location ?? ""}
-              onChange={(e) => field("current_location" as never, (e.target.value || null) as never)}
-              placeholder="Ej. Madrid (hasta 12/jun), Los Ángeles a partir del 15/jun"
-            />
-          </Field>
           <Field label="Año de nacimiento">
             <Input
               type="number"
