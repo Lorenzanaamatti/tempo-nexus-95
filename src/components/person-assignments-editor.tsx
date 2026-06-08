@@ -7,14 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { TEAM_ROLE_LABEL, type TeamRole } from "@/components/composer-team-editor";
+import {
+  IC_FUNCTION_GROUPS,
+  IC_FUNCTION_LABEL,
+  type IcTeamFunction,
+} from "@/components/person-ic-functions-editor";
 
 type Assignment = {
   id: string;
   composer_id: string;
   person_id: string;
-  team_role: TeamRole;
-  role_other: string | null;
+  ic_function: IcTeamFunction | null;
   start_date: string | null;
   objectives: string | null;
   kpi_review: string | null;
@@ -55,7 +58,6 @@ export function PersonAssignmentsEditor({ personId }: { personId: string }) {
       .insert({
         person_id: personId,
         composer_id: composers[0].id,
-        team_role: "agente",
         position: (rows.at(-1)?.position ?? -1) + 1,
       })
       .select("*")
@@ -122,29 +124,22 @@ export function PersonAssignmentsEditor({ personId }: { personId: string }) {
                 <div>
                   <Label className="text-xs text-muted-foreground">Rol</Label>
                   <Select
-                    value={r.team_role}
-                    onValueChange={(v) => update(r.id, { team_role: v as TeamRole })}
+                    value={r.ic_function ?? ""}
+                    onValueChange={(v) => update(r.id, { ic_function: v as IcTeamFunction })}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Selecciona función…" /></SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(TEAM_ROLE_LABEL) as TeamRole[]).map((k) => (
-                        <SelectItem key={k} value={k}>{TEAM_ROLE_LABEL[k]}</SelectItem>
+                      {IC_FUNCTION_GROUPS.map((g) => (
+                        <div key={g.label}>
+                          <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{g.label}</div>
+                          {g.items.map((it) => (
+                            <SelectItem key={it.value} value={it.value}>{IC_FUNCTION_LABEL[it.value]}</SelectItem>
+                          ))}
+                        </div>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                {r.team_role === "otro" && (
-                  <div className="sm:col-span-2">
-                    <Label className="text-xs text-muted-foreground">Describir rol</Label>
-                    <Input
-                      defaultValue={r.role_other ?? ""}
-                      onBlur={(e) =>
-                        e.target.value !== (r.role_other ?? "") &&
-                        update(r.id, { role_other: e.target.value || null })
-                      }
-                    />
-                  </div>
-                )}
                 <div>
                   <Label className="text-xs text-muted-foreground">Fecha de inicio</Label>
                   <Input

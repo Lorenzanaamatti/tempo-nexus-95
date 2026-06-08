@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
+import { IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 
 export const Route = createFileRoute("/_authenticated/portal/carrera")({
   component: Carrera,
@@ -22,6 +23,25 @@ function Carrera() {
     },
   });
 
+  const { data: team } = useQuery({
+    queryKey: ["portal-team", composerId],
+    enabled: !!composerId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("composer_team_assignments")
+        .select("id, ic_function, position, person:people(id, full_name, email, phone)")
+        .eq("composer_id", composerId!)
+        .order("position");
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        ic_function: IcTeamFunction | null;
+        position: number;
+        person: { id: string; full_name: string; email: string | null; phone: string | null } | null;
+      }>;
+    },
+  });
+
   return (
     <div className="space-y-6">
       <header>
@@ -36,6 +56,39 @@ function Carrera() {
       <Block title="Biografía breve" value={data?.bio_short} multiline />
       <Block title="Biografía extendida" value={data?.bio_long} multiline />
       <Block title="Plan de carrera vigente" value={data?.career_notes} multiline />
+      <section className="rounded-sm border border-border p-4">
+        <p className="smallcaps text-xs text-muted-foreground">Mi equipo IC</p>
+        {team && team.length > 0 ? (
+          <ul className="mt-3 divide-y divide-border">
+            {team.map((row) => {
+              const fn = row.ic_function ? IC_FUNCTION_LABEL[row.ic_function] : "Función por definir";
+              const email = row.person?.email?.trim() || null;
+              return (
+                <li key={row.id} className="grid gap-1 py-3 sm:grid-cols-[1fr_auto] sm:items-baseline">
+                  <div>
+                    <p className="font-display text-lg">{row.person?.full_name ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground">{fn}</p>
+                  </div>
+                  <div className="text-right text-sm">
+                    {email ? (
+                      <a href={`mailto:${email}`} className="text-primary underline">{email}</a>
+                    ) : (
+                      <span className="text-muted-foreground">Contacto únicamente a través de la App</span>
+                    )}
+                    {row.person?.phone && (
+                      <p className="text-xs text-muted-foreground">{row.person.phone}</p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Aún no hay personas del equipo IC asignadas a tu representación.
+          </p>
+        )}
+      </section>
       <section className="rounded-sm border border-border p-4">
         <p className="smallcaps text-xs text-muted-foreground">Mercados y objetivos</p>
         <p className="mt-2 text-sm text-muted-foreground">
