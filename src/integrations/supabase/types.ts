@@ -2391,6 +2391,7 @@ export type Database = {
           production_director_name: string | null
           production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
+          project_type_note: string | null
           status: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at: string
@@ -2428,6 +2429,7 @@ export type Database = {
           production_director_name?: string | null
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
+          project_type_note?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at?: string
@@ -2465,6 +2467,7 @@ export type Database = {
           production_director_name?: string | null
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
+          project_type_note?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title?: string
           updated_at?: string
@@ -3167,6 +3170,9 @@ export type Database = {
         | "publicidad"
         | "videojuego"
         | "documental"
+        | "programa_tv"
+        | "teatro"
+        | "produccion_especial"
       production_status:
         | "pitch_enviado"
         | "negociacion"
@@ -3548,6 +3554,9 @@ export const Constants = {
         "publicidad",
         "videojuego",
         "documental",
+        "programa_tv",
+        "teatro",
+        "produccion_especial",
       ],
       production_status: [
         "pitch_enviado",

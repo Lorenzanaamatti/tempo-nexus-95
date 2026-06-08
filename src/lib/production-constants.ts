@@ -1,10 +1,12 @@
 export const PRODUCTION_KIND_LABEL = {
   cine: "Cine",
   serie: "Serie",
-  plataforma: "Plataforma",
+  documental: "Documental",
+  programa_tv: "Programa TV",
   publicidad: "Publicidad",
   videojuego: "Videojuego",
-  documental: "Documental",
+  teatro: "Teatro",
+  produccion_especial: "Producción especial",
 } as const;
 
 export type ProductionKind = keyof typeof PRODUCTION_KIND_LABEL;
