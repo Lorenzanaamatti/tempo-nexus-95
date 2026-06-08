@@ -687,13 +687,6 @@ function Inner({
               </Field>
             </>
           )}
-          <Field label="Ubicación actual" className="sm:col-span-2">
-            <Input
-              value={(c as { current_location?: string | null }).current_location ?? ""}
-              onChange={(e) => field("current_location" as never, (e.target.value || null) as never)}
-              placeholder="Ej. Madrid (hasta 12/jun), Los Ángeles a partir del 15/jun"
-            />
-          </Field>
           <Field label="Año de nacimiento">
             <Input
               type="number"
