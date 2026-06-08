@@ -1,5 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal, LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv, Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Receipt, Share2, KanbanSquare } from "lucide-react";
+import {
+  User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal,
+  LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
+  Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
+  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +38,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     icon: typeof Music;
     active: boolean;
   };
+  // 1. ROSTER
   const rosterItems: NavItem[] = [
     { title: "Roster completo", to: "/roster", icon: LibraryBig, active: pathname.startsWith("/roster") },
     { title: "Compositores",        to: "/composers", search: { role: "composer" },   icon: Music,            active: composersRole === "composer" },
@@ -42,21 +48,38 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Curadores musicales", to: "/composers", search: { role: "curator" },    icon: ListMusic,        active: composersRole === "curator" },
     { title: "Otros",               to: "/composers", search: { role: "other" },      icon: MoreHorizontal,   active: composersRole === "other" },
   ];
-  const otherItems: NavItem[] = [
-    { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
-    { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
-    { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
-    { title: "Deal Memos", to: "/deal-memos", icon: KanbanSquare, active: pathname.startsWith("/deal-memos") },
-    { title: "Plan facturación IC", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
-    { title: "Económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
+
+  // 2. PARTNERS (productoras, plataformas, directores, cuentas objetivo)
+  const partnersItems: NavItem[] = [
+    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
     { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
-    { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
-    { title: "Calendario", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
+    { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
   ];
+
+  // 3. OPORTUNIDADES
+  const opportunitiesItems: NavItem[] = [
+    { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
+  ];
+
+  // 4. ECONÓMICO
+  const economicoItems: NavItem[] = [
+    { title: "Dashboard económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
+    { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
+    { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare, active: pathname === "/deal-memos" || pathname.startsWith("/deal-memos/lista") || pathname.startsWith("/deal-memos/configuracion") },
+    { title: "Plan facturación IC", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
+  ];
+
+  // 5. LEGAL
+  const legalItems: NavItem[] = [
+    { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
+    { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature, active: pathname.startsWith("/deal-memos/plantillas") },
+    { title: "Contactos DM", to: "/deal-memos/contactos", icon: User, active: pathname.startsWith("/deal-memos/contactos") },
+  ];
+
+  // 6. MKTG
   const marketingItems: NavItem[] = [
     { title: "Calendario MKTG", to: "/marketing/calendar", icon: CalendarDays, active: pathname.startsWith("/marketing/calendar") },
-    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
     { title: "Decks de venta", to: "/marketing/decks", icon: Presentation, active: pathname.startsWith("/marketing/decks") },
     { title: "Clipping", to: "/marketing/clippings", icon: Newspaper, active: pathname.startsWith("/marketing/clippings") },
     { title: "Libro de estilo", to: "/marketing/brand", icon: Palette, active: pathname.startsWith("/marketing/brand") },
@@ -64,6 +87,15 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Plantillas", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
     { title: "Press kits", to: "/marketing/press-kits", icon: FolderOpen, active: pathname.startsWith("/marketing/press-kits") },
     { title: "Redes sociales", to: "/marketing/social", icon: Share2, active: pathname.startsWith("/marketing/social") },
+  ];
+
+  const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
+    { label: "Roster",        icon: LibraryBig,  items: rosterItems },
+    { label: "Partners",      icon: Handshake,   items: partnersItems },
+    { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
+    { label: "Económico",     icon: Wallet,      items: economicoItems },
+    { label: "Legal",         icon: Scale,       items: legalItems },
+    { label: "Marketing",     icon: Megaphone,   items: marketingItems },
   ];
 
   return (
@@ -84,57 +116,30 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
       <SidebarContent>
         {role === "admin" ? (
           <>
-            <SidebarGroup>
-              {!collapsed && <SidebarGroupLabel className="smallcaps">Roster</SidebarGroupLabel>}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {rosterItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.active}>
-                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
-                          {!collapsed && <span>{item.title}</span>}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarGroup>
-              {!collapsed && <SidebarGroupLabel className="smallcaps">Gestión</SidebarGroupLabel>}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {otherItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.active}>
-                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
-                          {!collapsed && <span>{item.title}</span>}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarGroup>
-              {!collapsed && <SidebarGroupLabel className="smallcaps">Marketing y Ventas</SidebarGroupLabel>}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {marketingItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.active}>
-                        <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
-                          {!collapsed && <span>{item.title}</span>}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            {adminGroups.map((group) => (
+              <SidebarGroup key={group.label}>
+                {!collapsed && (
+                  <SidebarGroupLabel className="smallcaps flex items-center gap-1.5">
+                    <group.icon className="h-3 w-3" />
+                    {group.label}
+                  </SidebarGroupLabel>
+                )}
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={item.active}>
+                          <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            {!collapsed && <span>{item.title}</span>}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
           </>
         ) : (
           <SidebarGroup>
