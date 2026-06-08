@@ -195,9 +195,9 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
       </div>
 
       {composerId && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-sm border border-primary/30 bg-card p-4">
-            <div className="smallcaps text-xs text-muted-foreground">Facturación compositor (lo que él factura)</div>
+            <div className="smallcaps text-xs text-muted-foreground">Facturación bruta (lo que el representado factura a su cliente · incluye comisión IC)</div>
             <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.fee)}</div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
               <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.facturado)}</span></div>
@@ -205,11 +205,19 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
             </div>
           </div>
           <div className="rounded-sm border border-amber-500/40 bg-card p-4">
-            <div className="smallcaps text-xs text-muted-foreground">Comisión IC (que paga a IC)</div>
-            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.comm)}</div>
+            <div className="smallcaps text-xs text-muted-foreground">Comisión IC (IC factura al representado)</div>
+            <div className="mt-1 font-display text-3xl tabular-nums">−{formatEUR(budgets.comm)}</div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
               <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.facturado)}</span></div>
               <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.cobrado)}</span></div>
+            </div>
+          </div>
+          <div className="rounded-sm border border-emerald-500/40 bg-card p-4">
+            <div className="smallcaps text-xs text-muted-foreground">Neto representado (bruto − comisión IC)</div>
+            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.fee - budgets.comm)}</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.facturado - splitTotals.comision.facturado)}</span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.cobrado - splitTotals.comision.cobrado)}</span></div>
             </div>
           </div>
         </div>
