@@ -945,6 +945,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          current_location: string | null
           email: string | null
           email_secondary: string | null
           fee_range_id: string | null
@@ -968,7 +969,9 @@ export type Database = {
           roster_role: Database["public"]["Enums"]["roster_role"]
           search_tsv: unknown
           slug: string
+          specialist_detail: string | null
           specialist_subtype: string | null
+          specialist_tags: string[]
           tags: string[]
           team_email: string | null
           team_name: string | null
@@ -987,6 +990,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_location?: string | null
           email?: string | null
           email_secondary?: string | null
           fee_range_id?: string | null
@@ -1010,7 +1014,9 @@ export type Database = {
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug: string
+          specialist_detail?: string | null
           specialist_subtype?: string | null
+          specialist_tags?: string[]
           tags?: string[]
           team_email?: string | null
           team_name?: string | null
@@ -1029,6 +1035,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_location?: string | null
           email?: string | null
           email_secondary?: string | null
           fee_range_id?: string | null
@@ -1052,7 +1059,9 @@ export type Database = {
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug?: string
+          specialist_detail?: string | null
           specialist_subtype?: string | null
+          specialist_tags?: string[]
           tags?: string[]
           team_email?: string | null
           team_name?: string | null
