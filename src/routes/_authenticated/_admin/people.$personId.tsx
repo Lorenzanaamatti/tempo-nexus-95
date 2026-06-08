@@ -14,6 +14,7 @@ import { PersonAssignmentsEditor } from "@/components/person-assignments-editor"
 import { SaveButton } from "@/components/save-button";
 import { AssistantChat } from "@/components/assistant-chat";
 import { PersonIcFunctionsEditor } from "@/components/person-ic-functions-editor";
+import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { PersonVerifiersEditor } from "@/components/person-verifiers-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
@@ -44,6 +45,19 @@ function PersonEdit() {
 
   const [form, setForm] = useState({ full_name: "", role: "ic_team" as PersonRole, email: "", phone: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [fnPicker, setFnPicker] = useState<string>("");
+
+  async function addIcFunction(fn: IcTeamFunction) {
+    const { error } = await (supabase as any)
+      .from("person_ic_functions")
+      .insert({ person_id: personId, function: fn });
+    if (error && !`${error.message}`.toLowerCase().includes("duplicate")) {
+      return toast.error(error.message);
+    }
+    toast.success(`Función añadida: ${IC_FUNCTION_LABEL[fn]}`);
+    // Trigger refresh of the IC functions editor list.
+    window.dispatchEvent(new CustomEvent("person-ic-functions:refresh", { detail: { personId } }));
+  }
 
   useEffect(() => {
     if (data) {
@@ -118,15 +132,47 @@ function PersonEdit() {
           <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} disabled={!!data.composer_id} />
         </div>
         <div>
-          <Label>Rol</Label>
-          <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as PersonRole })} disabled={!!data.composer_id}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(Object.keys(ROLE_LABEL) as PersonRole[]).map((r) => (
-                <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {form.role === "ic_team" ? (
+            <>
+              <Label>Rol (función IC)</Label>
+              <Select
+                value={fnPicker}
+                onValueChange={(v) => {
+                  setFnPicker("");
+                  addIcFunction(v as IcTeamFunction);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Añadir función IC…" />
+                </SelectTrigger>
+                <SelectContent className="max-h-96">
+                  {IC_FUNCTION_GROUPS.map((g) => (
+                    <div key={g.label}>
+                      <div className="smallcaps px-2 py-1 text-[10px] text-muted-foreground">{g.label}</div>
+                      {g.items.map((it) => (
+                        <SelectItem key={it.value} value={it.value}>{it.label}</SelectItem>
+                      ))}
+                    </div>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                37 funciones disponibles. Cada selección añade la función a esta persona.
+              </p>
+            </>
+          ) : (
+            <>
+              <Label>Rol</Label>
+              <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as PersonRole })} disabled={!!data.composer_id}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(ROLE_LABEL) as PersonRole[]).map((r) => (
+                    <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
         </div>
         <div>
           <Label>Email</Label>
