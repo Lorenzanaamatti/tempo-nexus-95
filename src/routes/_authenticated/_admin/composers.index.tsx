@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { photoUrl } from "@/lib/composers-api";
+import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
@@ -136,7 +136,6 @@ function ComposersIndex() {
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((c: any) => {
-            const url = photoUrl(c.photo_path as string | null);
             return (
               <Link
                 key={c.id}
@@ -145,19 +144,17 @@ function ComposersIndex() {
                 className="group block h-full"
               >
                 <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition group-hover:border-primary/60">
-                  <div className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
-                    {url ? (
-                      <img
-                        src={url}
-                        alt={c.full_name}
-                        className="h-full w-full object-cover transition group-hover:scale-[1.02]"
-                      />
-                    ) : (
+                  <ComposerThumb
+                    path={c.photo_path as string | null}
+                    alt={c.full_name}
+                    className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
+                    imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
+                    fallback={
                       <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
                         {c.full_name?.[0] ?? "·"}
                       </div>
-                    )}
-                  </div>
+                    }
+                  />
                   <div className="flex flex-1 flex-col p-5">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
