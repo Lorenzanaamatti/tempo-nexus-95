@@ -3419,7 +3419,11 @@ export type Database = {
         | "seguimiento_producciones"
         | "ai_envia_presus_productoras"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
-      opportunity_kind: "fichaje" | "pitch" | "fichaje_productora"
+      opportunity_kind:
+        | "fichaje"
+        | "pitch"
+        | "fichaje_productora"
+        | "presentar_ic"
       opportunity_status:
         | "identificado"
         | "primer_contacto"
@@ -3811,7 +3815,12 @@ export const Constants = {
         "ai_envia_presus_productoras",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
-      opportunity_kind: ["fichaje", "pitch", "fichaje_productora"],
+      opportunity_kind: [
+        "fichaje",
+        "pitch",
+        "fichaje_productora",
+        "presentar_ic",
+      ],
       opportunity_status: [
         "identificado",
         "primer_contacto",

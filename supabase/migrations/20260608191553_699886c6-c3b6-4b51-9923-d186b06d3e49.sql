@@ -1,0 +1,1 @@
+ALTER TYPE public.opportunity_kind ADD VALUE IF NOT EXISTS 'presentar_ic';

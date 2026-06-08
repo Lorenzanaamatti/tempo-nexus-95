@@ -207,6 +207,10 @@ function OpportunityDetail() {
           <p className="mt-1 text-xs text-muted-foreground">
             {form.kind === "fichaje"
               ? "Captación de un nuevo compositor para el roster IC."
+              : form.kind === "fichaje_productora"
+              ? "Captación de una productora como nuevo cliente de IC."
+              : form.kind === "presentar_ic"
+              ? "Presentar a IC (agencia y roster) ante una productora."
               : "Presentar a uno o varios representados para una producción concreta."}
           </p>
         </div>

@@ -21,6 +21,8 @@ export const OPPORTUNITY_STATUS_TONE: Record<OpportunityStatus, string> = {
 export const OPPORTUNITY_KIND_LABEL = {
   fichaje: "Fichaje de representado",
   pitch: "Presentar representado a producción",
+  presentar_ic: "Presentar IC a productora",
+  fichaje_productora: "Fichaje de productora",
 } as const;
 
 export type OpportunityKind = keyof typeof OPPORTUNITY_KIND_LABEL;
@@ -28,4 +30,6 @@ export type OpportunityKind = keyof typeof OPPORTUNITY_KIND_LABEL;
 export const OPPORTUNITY_KIND_TONE: Record<OpportunityKind, string> = {
   fichaje: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   pitch: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+  presentar_ic: "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300",
+  fichaje_productora: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
 };
