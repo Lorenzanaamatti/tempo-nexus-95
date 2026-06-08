@@ -393,6 +393,13 @@ export type Database = {
             foreignKeyName: "chat_messages_author_person_id_fkey"
             columns: ["author_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_author_person_id_fkey"
+            columns: ["author_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -863,6 +870,13 @@ export type Database = {
             foreignKeyName: "composer_team_assignments_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_team_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -1047,6 +1061,13 @@ export type Database = {
             foreignKeyName: "composers_agent_person_id_fkey"
             columns: ["agent_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composers_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -1109,6 +1130,13 @@ export type Database = {
             foreignKeyName: "contract_counterparties_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_counterparties_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -1121,6 +1149,7 @@ export type Database = {
           counterparty: string | null
           created_at: string
           deal_memo_id: string | null
+          direction: Database["public"]["Enums"]["contract_direction_v2"] | null
           end_date: string | null
           id: string
           language: Database["public"]["Enums"]["contract_language"]
@@ -1143,6 +1172,9 @@ export type Database = {
           counterparty?: string | null
           created_at?: string
           deal_memo_id?: string | null
+          direction?:
+            | Database["public"]["Enums"]["contract_direction_v2"]
+            | null
           end_date?: string | null
           id?: string
           language?: Database["public"]["Enums"]["contract_language"]
@@ -1165,6 +1197,9 @@ export type Database = {
           counterparty?: string | null
           created_at?: string
           deal_memo_id?: string | null
+          direction?:
+            | Database["public"]["Enums"]["contract_direction_v2"]
+            | null
           end_date?: string | null
           id?: string
           language?: Database["public"]["Enums"]["contract_language"]
@@ -1737,6 +1772,13 @@ export type Database = {
             foreignKeyName: "opportunities_responsible_person_id_fkey"
             columns: ["responsible_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_responsible_person_id_fkey"
+            columns: ["responsible_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -1745,6 +1787,13 @@ export type Database = {
             columns: ["target_production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_target_production_id_fkey"
+            columns: ["target_production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1948,6 +1997,13 @@ export type Database = {
             foreignKeyName: "person_ic_functions_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_ic_functions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -1995,7 +2051,21 @@ export type Database = {
             foreignKeyName: "person_verifier_assignments_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_verifier_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_verifier_assignments_verifier_person_id_fkey"
+            columns: ["verifier_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
             referencedColumns: ["id"]
           },
           {
@@ -2165,6 +2235,7 @@ export type Database = {
           end_date: string | null
           id: string
           note: string | null
+          partner_company_id: string | null
           person_id: string | null
           production_id: string
           role_in_project: string | null
@@ -2176,6 +2247,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           note?: string | null
+          partner_company_id?: string | null
           person_id?: string | null
           production_id: string
           role_in_project?: string | null
@@ -2187,6 +2259,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           note?: string | null
+          partner_company_id?: string | null
           person_id?: string | null
           production_id?: string
           role_in_project?: string | null
@@ -2201,6 +2274,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "production_assignments_partner_company_id_fkey"
+            columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_assignments_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
@@ -2212,6 +2299,13 @@ export type Database = {
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_assignments_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2274,6 +2368,13 @@ export type Database = {
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_billing_sprints_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2375,6 +2476,13 @@ export type Database = {
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_documents_production_fk"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2523,7 +2631,21 @@ export type Database = {
             foreignKeyName: "productions_music_supervisor_person_id_fkey"
             columns: ["music_supervisor_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_negotiator_fk"
+            columns: ["negotiator_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
             referencedColumns: ["id"]
           },
           {
@@ -2551,7 +2673,21 @@ export type Database = {
             foreignKeyName: "productions_postproduction_supervisor_person_id_fkey"
             columns: ["postproduction_supervisor_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_postproduction_supervisor_person_id_fkey"
+            columns: ["postproduction_supervisor_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_production_director_person_id_fkey"
+            columns: ["production_director_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
             referencedColumns: ["id"]
           },
           {
@@ -2649,6 +2785,13 @@ export type Database = {
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaigns_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2925,6 +3068,13 @@ export type Database = {
             foreignKeyName: "social_posts_owner_person_id_fkey"
             columns: ["owner_person_id"]
             isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -2940,6 +3090,13 @@ export type Database = {
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -3021,7 +3178,97 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ic_team: {
+        Row: {
+          composer_id: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          notes: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["person_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          composer_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          notes?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["person_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          composer_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          notes?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["person_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: true
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      productions_roster_view: {
+        Row: {
+          composer_id: string | null
+          created_at: string | null
+          delivery_date: string | null
+          fee_amount: number | null
+          id: string | null
+          kind: string | null
+          premiere_date: string | null
+          status: Database["public"]["Enums"]["production_status"] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          composer_id?: string | null
+          created_at?: string | null
+          delivery_date?: string | null
+          fee_amount?: number | null
+          id?: string | null
+          kind?: string | null
+          premiere_date?: string | null
+          status?: Database["public"]["Enums"]["production_status"] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          composer_id?: string | null
+          created_at?: string | null
+          delivery_date?: string | null
+          fee_amount?: number | null
+          id?: string | null
+          kind?: string | null
+          premiere_date?: string | null
+          status?: Database["public"]["Enums"]["production_status"] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "productions_composer_fk"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_business_days: { Args: { _d: string; _n: number }; Returns: string }
@@ -3090,6 +3337,7 @@ export type Database = {
         | "facturacion"
         | "pagos"
         | "otro"
+      contract_direction_v2: "ic_roster" | "roster_productora" | "ic_productora"
       contract_language: "ca" | "es" | "en"
       contract_sign_status:
         | "borrador"
@@ -3471,6 +3719,11 @@ export const Constants = {
         "facturacion",
         "pagos",
         "otro",
+      ],
+      contract_direction_v2: [
+        "ic_roster",
+        "roster_productora",
+        "ic_productora",
       ],
       contract_language: ["ca", "es", "en"],
       contract_sign_status: [
