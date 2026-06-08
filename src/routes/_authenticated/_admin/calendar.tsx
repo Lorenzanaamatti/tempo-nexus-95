@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, User2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, User2, GanttChartSquare, CalendarDays, KanbanSquare } from "lucide-react";
 import { TimelineCalendar } from "@/components/timeline-calendar";
+import { CalendarMonthGrid, type FlatCalendarEvent } from "@/components/calendar-month-grid";
+import { CalendarKanban } from "@/components/calendar-kanban";
 import {
   computeRange,
   rangeLabel,
@@ -57,6 +59,18 @@ const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
   person: { to: "/people/$personId", param: "personId" },
 };
 
+type Layout = "gantt" | "calendar" | "kanban";
+const LAYOUT_LABELS: Record<Layout, string> = {
+  gantt: "Gantt",
+  calendar: "Calendario",
+  kanban: "Kanban",
+};
+const LAYOUT_ICONS: Record<Layout, typeof GanttChartSquare> = {
+  gantt: GanttChartSquare,
+  calendar: CalendarDays,
+  kanban: KanbanSquare,
+};
+
 function GlobalCalendar() {
   return <CalendarBoard />;
 }
@@ -74,6 +88,7 @@ export function CalendarBoard({
 }) {
   const { user } = useAuth();
   const [view, setView] = useState<CalendarView>("month");
+  const [layout, setLayout] = useState<Layout>("gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
   const [onlyMine, setOnlyMine] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(
@@ -85,7 +100,8 @@ export function CalendarBoard({
     people: true, productions: true, billing: true, opportunities: true, contracts: true, tasks: true,
   });
 
-  const range = useMemo(() => computeRange(view, anchor), [view, anchor]);
+  const effectiveView: CalendarView = layout === "gantt" ? view : "month";
+  const range = useMemo(() => computeRange(effectiveView, anchor), [effectiveView, anchor]);
   const startIso = range.start.toISOString().slice(0, 10);
   const endIso = range.end.toISOString().slice(0, 10);
 
@@ -154,7 +170,7 @@ export function CalendarBoard({
     queryFn: async () => (await supabase.from("contracts").select("id, title, counterparty")).data ?? [],
   });
 
-  const rows: TimelineRow[] = useMemo(() => {
+  const { rows, flatEvents } = useMemo(() => {
     const events = (eventsQ.data ?? []) as any[];
     const avail = (composerAvailQ.data ?? []) as any[];
     const myPersonId = myPersonQ.data?.id ?? null;
@@ -167,6 +183,7 @@ export function CalendarBoard({
 
     type Bag = { subject_type: string; subject_id: string; events: any[] };
     const byKey = new Map<string, Bag>();
+    const flat: Array<{ subject_type: string; subject_id: string; ev: any; category: Category }> = [];
     const push = (subject_type: string, subject_id: string, ev: any) => {
       const key = `${subject_type}::${subject_id}`;
       if (!byKey.has(key)) byKey.set(key, { subject_type, subject_id, events: [] });
@@ -192,6 +209,19 @@ export function CalendarBoard({
         title: e.title ?? undefined,
         note: e.note,
       });
+      flat.push({
+        subject_type: e.subject_type,
+        subject_id: e.subject_id,
+        category: cat,
+        ev: {
+          id: e.id,
+          start: new Date(e.start_date + "T00:00:00"),
+          end: new Date(e.end_date + "T23:59:59"),
+          kind: e.kind,
+          title: e.title ?? undefined,
+          note: e.note,
+        },
+      });
     }
 
     // Merge composer_availability as virtual events on the composer subject.
@@ -199,18 +229,21 @@ export function CalendarBoard({
       for (const a of avail) {
         const fam = KIND_FAMILY[a.kind] as CalendarSource | undefined;
         if (fam && !activeSources[fam]) continue;
-        push("composer", a.composer_id, {
+        const ev = {
           id: "ca-" + a.id,
           start: new Date(a.start_date + "T00:00:00"),
           end: new Date(a.end_date + "T23:59:59"),
           kind: a.kind,
-          title: undefined,
+          title: undefined as string | undefined,
           note: a.note,
-        });
+        };
+        push("composer", a.composer_id, ev);
+        flat.push({ subject_type: "composer", subject_id: a.composer_id, category: "personal", ev });
       }
     }
 
     const out: TimelineRow[] = [];
+    const subjectMeta = new Map<string, { label: string; group: string; to?: string; params?: Record<string, string> }>();
     for (const { subject_type, subject_id, events: evs } of byKey.values()) {
       let label = subject_id.slice(0, 8);
       let sublabel: string | undefined;
@@ -276,9 +309,32 @@ export function CalendarBoard({
         params,
         events: evs,
       });
+      subjectMeta.set(`${subject_type}::${subject_id}`, {
+        label,
+        group: SUBJECT_GROUP_LABEL[subject_type] ?? subject_type,
+        to: toPath,
+        params,
+      });
     }
     out.sort((a, b) => a.group.localeCompare(b.group) || a.label.localeCompare(b.label));
-    return out;
+
+    const flatEvents: FlatCalendarEvent[] = flat.map((f) => {
+      const meta = subjectMeta.get(`${f.subject_type}::${f.subject_id}`);
+      return {
+        id: f.ev.id,
+        start: f.ev.start,
+        end: f.ev.end,
+        kind: f.ev.kind,
+        title: f.ev.title,
+        note: f.ev.note,
+        category: f.category,
+        subjectLabel: meta?.label ?? f.subject_id.slice(0, 8),
+        subjectGroup: meta?.group ?? f.subject_type,
+        to: meta?.to,
+        params: meta?.params,
+      };
+    });
+    return { rows: out, flatEvents };
   }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, activeSources, onlyMine]);
 
   const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
@@ -299,33 +355,53 @@ export function CalendarBoard({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(view, anchor, -1))}>
+          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, -1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>Hoy</Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(view, anchor, 1))}>
+          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, 1))}>
             <ChevronRight className="h-4 w-4" />
           </Button>
           <span className="ml-3 font-display text-xl capitalize min-w-[14ch]">
-            {rangeLabel(view, range.start, range.end)}
+            {rangeLabel(effectiveView, range.start, range.end)}
           </span>
         </div>
       </div>
 
-      {/* View selector */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        {(Object.keys(VIEW_LABELS) as CalendarView[]).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`rounded-sm border px-3 py-1 text-xs transition ${
-              view === v ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
-            }`}
-          >
-            {VIEW_LABELS[v]}
-          </button>
-        ))}
+      {/* Layout selector */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        {(Object.keys(LAYOUT_LABELS) as Layout[]).map((l) => {
+          const Icon = LAYOUT_ICONS[l];
+          return (
+            <button
+              key={l}
+              onClick={() => setLayout(l)}
+              className={`inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs transition ${
+                layout === l ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" /> {LAYOUT_LABELS[l]}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Range selector — only relevant for Gantt */}
+      {layout === "gantt" && (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {(Object.keys(VIEW_LABELS) as CalendarView[]).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`rounded-sm border px-3 py-1 text-xs transition ${
+                view === v ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
+              }`}
+            >
+              {VIEW_LABELS[v]}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Category chips + Mis tareas */}
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
@@ -368,6 +444,10 @@ export function CalendarBoard({
 
       {loading ? (
         <p className="font-display text-muted-foreground">Cargando calendario…</p>
+      ) : layout === "calendar" ? (
+        <CalendarMonthGrid anchor={anchor} events={flatEvents} />
+      ) : layout === "kanban" ? (
+        <CalendarKanban events={flatEvents} />
       ) : (
         <TimelineCalendar rows={rows} start={range.start} end={range.end} ticks={range.ticks} />
       )}
