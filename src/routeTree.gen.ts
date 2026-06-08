@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
 import { Route as AuthenticatedAdminOpportunitiesIndexRouteImport } from './routes/_authenticated/_admin/opportunities.index'
 import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
+import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.index'
 import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
@@ -45,6 +46,7 @@ import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from './routes/_authenticated/_admin/opportunities.$opportunityId'
 import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
+import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
@@ -215,6 +217,12 @@ const AuthenticatedAdminDirectorsIndexRoute =
     path: '/directors/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosIndexRoute =
+  AuthenticatedAdminDealMemosIndexRouteImport.update({
+    id: '/deal-memos/',
+    path: '/deal-memos/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminContractsIndexRoute =
   AuthenticatedAdminContractsIndexRouteImport.update({
     id: '/contracts/',
@@ -261,6 +269,12 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
   AuthenticatedAdminDirectorsDirectorIdRouteImport.update({
     id: '/directors/$directorId',
     path: '/directors/$directorId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDealMemosDealMemoIdRoute =
+  AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
+    id: '/deal-memos/$dealMemoId',
+    path: '/deal-memos/$dealMemoId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminContractsContractIdRoute =
@@ -360,6 +374,7 @@ export interface FileRoutesByFullPath {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
+  '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -368,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
+  '/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -407,6 +423,7 @@ export interface FileRoutesByTo {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
+  '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -415,6 +432,7 @@ export interface FileRoutesByTo {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts': typeof AuthenticatedAdminContractsIndexRoute
+  '/deal-memos': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
@@ -458,6 +476,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
+  '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -466,6 +485,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
+  '/_authenticated/_admin/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/_authenticated/_admin/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
@@ -508,6 +528,7 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/contracts/$contractId'
+    | '/deal-memos/$dealMemoId'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -516,6 +537,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers/'
     | '/contracts/'
+    | '/deal-memos/'
     | '/directors/'
     | '/opportunities/'
     | '/people/'
@@ -555,6 +577,7 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/contracts/$contractId'
+    | '/deal-memos/$dealMemoId'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -563,6 +586,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/composers'
     | '/contracts'
+    | '/deal-memos'
     | '/directors'
     | '/opportunities'
     | '/people'
@@ -605,6 +629,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
+    | '/_authenticated/_admin/deal-memos/$dealMemoId'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/marketing/calendar'
     | '/_authenticated/_admin/opportunities/$opportunityId'
@@ -613,6 +638,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/contracts/'
+    | '/_authenticated/_admin/deal-memos/'
     | '/_authenticated/_admin/directors/'
     | '/_authenticated/_admin/opportunities/'
     | '/_authenticated/_admin/people/'
@@ -833,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/': {
+      id: '/_authenticated/_admin/deal-memos/'
+      path: '/deal-memos'
+      fullPath: '/deal-memos/'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/contracts/': {
       id: '/_authenticated/_admin/contracts/'
       path: '/contracts'
@@ -887,6 +920,13 @@ declare module '@tanstack/react-router' {
       path: '/directors/$directorId'
       fullPath: '/directors/$directorId'
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/deal-memos/$dealMemoId': {
+      id: '/_authenticated/_admin/deal-memos/$dealMemoId'
+      path: '/deal-memos/$dealMemoId'
+      fullPath: '/deal-memos/$dealMemoId'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/contracts/$contractId': {
@@ -985,6 +1025,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
+  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminMarketingCalendarRoute: typeof AuthenticatedAdminMarketingCalendarRoute
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -993,6 +1034,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
+  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
@@ -1021,6 +1063,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
   AuthenticatedAdminContractsContractIdRoute:
     AuthenticatedAdminContractsContractIdRoute,
+  AuthenticatedAdminDealMemosDealMemoIdRoute:
+    AuthenticatedAdminDealMemosDealMemoIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminMarketingCalendarRoute:
@@ -1034,6 +1078,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
+  AuthenticatedAdminDealMemosIndexRoute: AuthenticatedAdminDealMemosIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
