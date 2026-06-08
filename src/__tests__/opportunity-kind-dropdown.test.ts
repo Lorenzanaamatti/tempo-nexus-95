@@ -1,11 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { OPPORTUNITY_KIND_LABEL } from "@/lib/opportunity-constants";
 
+const here = dirname(fileURLToPath(import.meta.url));
 const detailFile = readFileSync(
-  join(import.meta.dir, "../routes/_authenticated/_admin/opportunities.$opportunityId.tsx"),
+  join(here, "../routes/_authenticated/_admin/opportunities.$opportunityId.tsx"),
   "utf8",
 );
 
