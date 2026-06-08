@@ -323,6 +323,7 @@ export type Database = {
         Row: {
           attachments: Json
           author_name: string | null
+          author_person_id: string | null
           author_role: string | null
           author_user_id: string
           body: string | null
@@ -335,6 +336,7 @@ export type Database = {
         Insert: {
           attachments?: Json
           author_name?: string | null
+          author_person_id?: string | null
           author_role?: string | null
           author_user_id: string
           body?: string | null
@@ -347,6 +349,7 @@ export type Database = {
         Update: {
           attachments?: Json
           author_name?: string | null
+          author_person_id?: string | null
           author_role?: string | null
           author_user_id?: string
           body?: string | null
@@ -357,6 +360,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_author_person_id_fkey"
+            columns: ["author_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_channel_id_fkey"
             columns: ["channel_id"]
