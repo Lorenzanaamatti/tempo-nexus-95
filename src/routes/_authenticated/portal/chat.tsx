@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentRole } from "@/lib/use-role";
+import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import { ComposerChat } from "@/components/composer-chat";
 
 export const Route = createFileRoute("/_authenticated/portal/chat")({
@@ -8,6 +12,22 @@ export const Route = createFileRoute("/_authenticated/portal/chat")({
 
 function PortalChat() {
   const { composerId, loading } = useCurrentRole();
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!composerId || !user) return;
+    (async () => {
+      await supabase
+        .from("chat_message_reads")
+        .upsert(
+          { user_id: user.id, composer_id: composerId, last_read_at: new Date().toISOString() },
+          { onConflict: "user_id,composer_id" },
+        );
+      qc.invalidateQueries({ queryKey: ["portal-unread"] });
+    })();
+  }, [composerId, user, qc]);
+
   return (
     <div className="space-y-6">
       <header>
