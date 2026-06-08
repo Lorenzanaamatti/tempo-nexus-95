@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { photoUrl } from "@/lib/composers-api";
+import { ComposerThumb } from "@/components/composer-thumb";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -81,7 +81,6 @@ function RosterAll() {
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {rows.map((c) => {
-                    const url = photoUrl(c.photo_path as string | null);
                     return (
                       <Link
                         key={c.id}
@@ -89,15 +88,17 @@ function RosterAll() {
                         params={{ composerId: c.id }}
                         className="group flex items-center gap-4 rounded-sm border border-border p-3 transition hover:border-primary/60"
                       >
-                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
-                          {url ? (
-                            <img src={url} alt={c.full_name} className="h-full w-full object-cover" />
-                          ) : (
+                        <ComposerThumb
+                          path={c.photo_path as string | null}
+                          alt={c.full_name}
+                          className="h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted"
+                          imgClassName="h-full w-full object-cover"
+                          fallback={
                             <div className="flex h-full items-center justify-center font-display text-xl text-muted-foreground">
                               {c.full_name?.[0] ?? "·"}
                             </div>
-                          )}
-                        </div>
+                          }
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="font-display text-lg leading-tight">{c.full_name}</p>
                           <p className="mt-1 truncate text-xs text-muted-foreground">
