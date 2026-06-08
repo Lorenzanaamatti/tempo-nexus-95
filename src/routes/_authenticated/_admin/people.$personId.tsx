@@ -12,6 +12,9 @@ import { Trash2 } from "lucide-react";
 import { PersonEventsEditor } from "@/components/person-events-editor";
 import { PersonAssignmentsEditor } from "@/components/person-assignments-editor";
 import { SaveButton } from "@/components/save-button";
+import { AssistantChat } from "@/components/assistant-chat";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -84,7 +87,14 @@ function PersonEdit() {
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
           <Link to="/people" className="smallcaps text-xs text-muted-foreground hover:underline">← Personas</Link>
-          <h1 className="mt-1 font-display text-4xl">{form.full_name || "—"}</h1>
+          <h1 className="mt-1 flex items-center gap-3 font-display text-4xl">
+            {form.full_name || "—"}
+            {data.is_virtual_assistant && (
+              <Badge variant="outline" className="rounded-sm smallcaps text-[10px]">
+                <Sparkles className="mr-1 h-3 w-3" /> Asistente Claude
+              </Badge>
+            )}
+          </h1>
         </div>
         <div className="flex gap-2">
           {data.composer_id && (
@@ -142,6 +152,16 @@ function PersonEdit() {
         </p>
         <PersonAssignmentsEditor personId={personId} />
       </div>
+
+      {data.is_virtual_assistant && (
+        <div className="mt-10">
+          <h2 className="mb-3 font-display text-2xl">Chat con {form.full_name}</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Asistente virtual integrado con Anthropic Claude. Las respuestas se generan en tiempo real con el rol asignado a {form.full_name} dentro del equipo IC.
+          </p>
+          <AssistantChat personId={personId} name={form.full_name || "Asistente"} />
+        </div>
+      )}
       <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
