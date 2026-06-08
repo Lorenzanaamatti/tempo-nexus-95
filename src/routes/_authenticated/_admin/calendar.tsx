@@ -17,28 +17,27 @@ import {
   type TimelineRow,
 } from "@/lib/calendar-api";
 import {
-  CALENDAR_SOURCE_LABELS,
-  FAMILY_DOT,
   KIND_FAMILY,
-  type CalendarSource,
 } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/_admin/calendar")({
   component: GlobalCalendar,
 });
 
-export type Category = "operativo" | "marketing" | "facturacion" | "personal";
+export type Category = "operativo" | "marketing" | "facturacion" | "personal" | "oportunidades";
 const CATEGORY_LABEL: Record<Category, string> = {
   operativo: "Operativo",
   marketing: "Marketing",
   facturacion: "Facturación",
   personal: "Personal",
+  oportunidades: "Oportunidades",
 };
 const CATEGORY_DOT: Record<Category, string> = {
   operativo: "bg-violet-500",
   marketing: "bg-sky-500",
   facturacion: "bg-amber-500",
   personal: "bg-emerald-500",
+  oportunidades: "bg-rose-500",
 };
 
 const SUBJECT_GROUP_LABEL: Record<string, string> = {
@@ -93,12 +92,19 @@ export function CalendarBoard({
   const [onlyMine, setOnlyMine] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(
     lockedCategory
-      ? { operativo: false, marketing: false, facturacion: false, personal: false, [lockedCategory]: true }
-      : { operativo: true, marketing: true, facturacion: true, personal: true },
+      ? { operativo: false, marketing: false, facturacion: false, personal: false, oportunidades: false, [lockedCategory]: true }
+      : { operativo: true, marketing: true, facturacion: true, personal: true, oportunidades: true },
   );
-  const [activeSources, setActiveSources] = useState<Record<CalendarSource, boolean>>({
-    people: true, productions: true, billing: true, opportunities: true, contracts: true, tasks: true,
-  });
+  // Per-subject filters: when a subject id maps to `false`, hide all its events.
+  // Subjects not present in the map are considered visible (default-on).
+  const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());
+  const toggleSubject = (key: string) =>
+    setHiddenSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const effectiveView: CalendarView = layout === "gantt" ? view : "month";
   const range = useMemo(() => computeRange(effectiveView, anchor), [effectiveView, anchor]);
@@ -191,10 +197,13 @@ export function CalendarBoard({
     };
 
     for (const e of events) {
-      const cat = (e.calendar_category ?? "operativo") as Category;
+      const fam0 = KIND_FAMILY[e.kind] as string | undefined;
+      const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
+      const cat = (isOpp ? "oportunidades" : (e.calendar_category ?? "operativo")) as Category;
       if (!activeCategories[cat]) continue;
-      const fam = KIND_FAMILY[e.kind] as CalendarSource | undefined;
-      if (fam && !activeSources[fam]) continue;
+      // Hide events for explicitly-hidden person/composer subjects.
+      if ((e.subject_type === "person" || e.subject_type === "composer") &&
+          hiddenSubjects.has(`${e.subject_type}::${e.subject_id}`)) continue;
       if (onlyMine) {
         if (!myPersonId) continue;
         const assignedToMe = e.assignee_person_id === myPersonId;
@@ -225,10 +234,9 @@ export function CalendarBoard({
     }
 
     // Merge composer_availability as virtual events on the composer subject.
-    if (!onlyMine && activeSources.people) {
+    if (!onlyMine && activeCategories.personal) {
       for (const a of avail) {
-        const fam = KIND_FAMILY[a.kind] as CalendarSource | undefined;
-        if (fam && !activeSources[fam]) continue;
+        if (hiddenSubjects.has(`composer::${a.composer_id}`)) continue;
         const ev = {
           id: "ca-" + a.id,
           start: new Date(a.start_date + "T00:00:00"),
@@ -335,7 +343,7 @@ export function CalendarBoard({
       };
     });
     return { rows: out, flatEvents };
-  }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, activeSources, onlyMine]);
+  }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine]);
 
   const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
 
@@ -429,18 +437,20 @@ export function CalendarBoard({
       </div>
 
       {/* Source family filters — secondary axis */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        {(Object.keys(CALENDAR_SOURCE_LABELS) as CalendarSource[]).map((s) => (
-          <FamilyChip
-            key={s}
-            active={activeSources[s]}
-            dotClass={FAMILY_DOT[s]}
-            onClick={() => setActiveSources((p) => ({ ...p, [s]: !p[s] }))}
-          >
-            {CALENDAR_SOURCE_LABELS[s]}
-          </FamilyChip>
-        ))}
-      </div>
+      <SubjectFilters
+        people={(peopleQ.data ?? []) as any[]}
+        composers={(composersQ.data ?? []) as any[]}
+        hidden={hiddenSubjects}
+        onToggle={toggleSubject}
+        onSetAll={(keys, visible) =>
+          setHiddenSubjects((prev) => {
+            const next = new Set(prev);
+            if (visible) for (const k of keys) next.delete(k);
+            else for (const k of keys) next.add(k);
+            return next;
+          })
+        }
+      />
 
       {loading ? (
         <p className="font-display text-muted-foreground">Cargando calendario…</p>
