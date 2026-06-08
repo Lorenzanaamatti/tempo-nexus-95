@@ -17,6 +17,7 @@ import { formatDateEs } from "@/lib/dates";
 import { SuggestInput } from "@/components/suggest-input";
 import { SaveButton } from "@/components/save-button";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
+import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -444,7 +445,7 @@ function ProductionEdit() {
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 font-display text-2xl">Cliente asignado</h2>
+        <h2 className="mb-3 font-display text-2xl">Personal asignado</h2>
         <AssignmentsEditor productionId={productionId} />
       </div>
 
@@ -532,38 +533,23 @@ function ProductionDocumentsEditor({ productionId }: { productionId: string }) {
 
 function AssignmentsEditor({ productionId }: { productionId: string }) {
   const qc = useQueryClient();
-  const [composerId, setComposerId] = useState<string>("");
-  const [role, setRole] = useState("");
+  const [personId, setPersonId] = useState<string>("");
+  const [role, setRole] = useState<IcTeamFunction | "">("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
-  const ROSTER_ROLE_LABEL: Record<string, string> = {
-    composer: "Compositor",
-    artist: "Artista",
-    supervisor: "Supervisor musical",
-    specialist: "Especialista",
-    curator: "Curador musical",
-    other: "Otro",
-  };
-  const ROSTER_ROLES = Object.keys(ROSTER_ROLE_LABEL);
-
-  const composersQ = useQuery({
-    queryKey: ["composers-all-mini"],
+  const peopleIcQ = useQuery({
+    queryKey: ["people-ic"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("composers")
-        .select("id, full_name, artistic_name, roster_role")
+        .from("people")
+        .select("id, full_name, role")
+        .eq("role", "ic_team")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
     },
   });
-
-  const selectedComposer = (composersQ.data ?? []).find((c: any) => c.id === composerId);
-  // Si el cliente tiene roster_role, lo proponemos por defecto.
-  const defaultRole = selectedComposer?.roster_role
-    ? ROSTER_ROLE_LABEL[selectedComposer.roster_role] ?? ""
-    : "";
 
   const assignsQ = useQuery({
     queryKey: ["prod-assigns", productionId],
@@ -578,16 +564,17 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
   });
 
   async function add() {
-    if (!composerId) return;
+    if (!personId) return toast.error("Selecciona una persona del equipo IC.");
+    if (!role) return toast.error("Selecciona una categoría del equipo IC.");
     const { error } = await supabase.from("production_assignments").insert({
       production_id: productionId,
-      composer_id: composerId,
-      role_in_project: (role || defaultRole) || null,
+      person_id: personId,
+      role_in_project: role,
       start_date: start || null,
       end_date: end || null,
     });
     if (error) return toast.error(error.message);
-    setComposerId(""); setRole(""); setStart(""); setEnd("");
+    setPersonId(""); setRole(""); setStart(""); setEnd("");
     qc.invalidateQueries({ queryKey: ["prod-assigns", productionId] });
   }
 
@@ -601,23 +588,28 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_1fr_160px_160px_auto] sm:items-end">
         <div>
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Cliente</Label>
-          <Select value={composerId} onValueChange={setComposerId}>
-            <SelectTrigger><SelectValue placeholder="Selecciona cliente…" /></SelectTrigger>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Equipo IC</Label>
+          <Select value={personId || undefined} onValueChange={setPersonId}>
+            <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
             <SelectContent>
-              {(composersQ.data ?? []).map((c: any) => (
-                <SelectItem key={c.id} value={c.id}>{c.artistic_name || c.full_name}</SelectItem>
+              {(peopleIcQ.data ?? []).map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Profesión</Label>
-          <Select value={role || defaultRole} onValueChange={setRole}>
-            <SelectTrigger><SelectValue placeholder="Profesión…" /></SelectTrigger>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Rol</Label>
+          <Select value={role || undefined} onValueChange={(v) => setRole(v as IcTeamFunction)}>
+            <SelectTrigger><SelectValue placeholder="Categoría IC…" /></SelectTrigger>
             <SelectContent>
-              {ROSTER_ROLES.map((r) => (
-                <SelectItem key={r} value={ROSTER_ROLE_LABEL[r]}>{ROSTER_ROLE_LABEL[r]}</SelectItem>
+              {IC_FUNCTION_GROUPS.map((g) => (
+                <div key={g.label}>
+                  <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{g.label}</div>
+                  {g.items.map((it) => (
+                    <SelectItem key={it.value} value={it.value}>{IC_FUNCTION_LABEL[it.value]}</SelectItem>
+                  ))}
+                </div>
               ))}
             </SelectContent>
           </Select>
@@ -630,7 +622,7 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
           <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Final</Label>
           <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
         </div>
-        <Button onClick={add} disabled={!composerId}><Plus className="mr-1 h-4 w-4" /> Asignar</Button>
+        <Button onClick={add} disabled={!personId || !role}><Plus className="mr-1 h-4 w-4" /> Asignar</Button>
       </div>
       {(assignsQ.data ?? []).length === 0 ? (
         <p className="text-sm text-muted-foreground">Sin asignaciones.</p>
@@ -638,8 +630,9 @@ function AssignmentsEditor({ productionId }: { productionId: string }) {
         <div className="divide-y divide-border rounded-sm border border-border">
           {(assignsQ.data ?? []).map((a: any) => (
             <div key={a.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
-              <span className="font-display">{a.composers?.artistic_name || a.composers?.full_name || a.people?.full_name}</span>
-              {a.role_in_project && <span className="text-xs text-muted-foreground">{a.role_in_project}</span>}
+              <span className="font-display">{a.people?.full_name || a.composers?.artistic_name || a.composers?.full_name}</span>
+              {a.composer_id && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Asignación anterior de cliente</span>}
+              {a.role_in_project && <span className="text-xs text-muted-foreground">{IC_FUNCTION_LABEL[a.role_in_project as IcTeamFunction] ?? a.role_in_project}</span>}
               {(a.start_date || a.end_date) && (
                 <span className="text-xs text-muted-foreground">Inicio: {a.start_date ? formatDateEs(a.start_date) : "—"} · Final: {a.end_date ? formatDateEs(a.end_date) : "—"}</span>
               )}
