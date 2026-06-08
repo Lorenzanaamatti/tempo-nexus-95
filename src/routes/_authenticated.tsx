@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -13,6 +13,8 @@ function Shell() {
   const { loading, user } = useAuth();
   const { role, loading: roleLoading } = useCurrentRole();
   const [ready, setReady] = useState(false);
+  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const isPortal = pathname.startsWith("/portal");
 
   useEffect(() => {
     if (loading) return;
@@ -29,6 +31,11 @@ function Shell() {
         Abriendo el archivo…
       </div>
     );
+  }
+
+  // Portal del representado: experiencia inmersiva sin chrome del back-office.
+  if (isPortal) {
+    return <Outlet />;
   }
 
   return (
