@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 
 const ES_PROVINCES = [
@@ -13,23 +13,24 @@ const ES_PROVINCES = [
 const REGIONS = ["EUROPA", "USA", "WORLD"] as const;
 type Region = (typeof REGIONS)[number];
 
-function parse(value: string | null | undefined): { kind: "es" | Region | ""; detail: string } {
+type Kind = "" | "es" | Region;
+
+function parse(value: string | null | undefined): { kind: Kind; detail: string } {
   if (!value) return { kind: "", detail: "" };
   for (const r of REGIONS) {
+    if (value === r) return { kind: r, detail: "" };
     const prefix = `${r}: `;
     if (value.startsWith(prefix)) return { kind: r, detail: value.slice(prefix.length) };
   }
   if ((ES_PROVINCES as readonly string[]).includes(value)) return { kind: "es", detail: value };
-  // fallback: treat as ES free text
   return { kind: "es", detail: value };
 }
 
-function serialize(kind: "es" | Region | "", detail: string): string | null {
+function serialize(kind: Kind, detail: string): string | null {
   if (!kind) return null;
   const d = detail.trim();
-  if (!d) return null;
-  if (kind === "es") return d;
-  return `${kind}: ${d}`;
+  if (kind === "es") return d ? d : null;
+  return d ? `${kind}: ${d}` : kind; // keep region selection even without detail
 }
 
 export function CurrentLocationEditor({
@@ -39,39 +40,47 @@ export function CurrentLocationEditor({
   value: string | null | undefined;
   onChange: (next: string | null) => void;
 }) {
-  const parsed = useMemo(() => parse(value), [value]);
+  const initial = parse(value);
+  const [kind, setKind] = useState<Kind>(initial.kind);
+  const [detail, setDetail] = useState<string>(initial.detail);
 
-  function setKind(kind: "es" | Region | "") {
-    if (!kind) return onChange(null);
-    if (kind === "es") return onChange(null); // wait for province pick
-    onChange(null); // wait for detail input
-    // store kind in parsed via re-render: use detail empty
-    queueMicrotask(() => onChange(serialize(kind, "")));
+  // Sync from prop when it changes externally.
+  useEffect(() => {
+    const p = parse(value);
+    setKind(p.kind);
+    setDetail(p.detail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  function changeKind(next: Kind) {
+    setKind(next);
+    setDetail("");
+    onChange(serialize(next, ""));
+  }
+  function changeDetail(next: string) {
+    setDetail(next);
+    onChange(serialize(kind, next));
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <select
         className="h-9 rounded-sm border border-input bg-background px-2 text-sm"
-        value={parsed.kind || ""}
-        onChange={(e) => setKind(e.target.value as "es" | Region | "")}
+        value={kind || ""}
+        onChange={(e) => changeKind(e.target.value as Kind)}
       >
         <option value="">Ubicación actual…</option>
-        <optgroup label="España (provincia)">
-          <option value="es">— Elegir provincia —</option>
-        </optgroup>
-        <optgroup label="Otras zonas">
-          <option value="EUROPA">Europa</option>
-          <option value="USA">USA</option>
-          <option value="WORLD">World</option>
-        </optgroup>
+        <option value="es">España (provincia)</option>
+        <option value="EUROPA">Europa</option>
+        <option value="USA">USA</option>
+        <option value="WORLD">World</option>
       </select>
 
-      {parsed.kind === "es" && (
+      {kind === "es" && (
         <select
           className="h-9 rounded-sm border border-input bg-background px-2 text-sm"
-          value={(ES_PROVINCES as readonly string[]).includes(parsed.detail) ? parsed.detail : ""}
-          onChange={(e) => onChange(serialize("es", e.target.value))}
+          value={(ES_PROVINCES as readonly string[]).includes(detail) ? detail : ""}
+          onChange={(e) => changeDetail(e.target.value)}
         >
           <option value="">— Provincia —</option>
           {ES_PROVINCES.map((p) => (
@@ -80,16 +89,16 @@ export function CurrentLocationEditor({
         </select>
       )}
 
-      {(parsed.kind === "EUROPA" || parsed.kind === "USA" || parsed.kind === "WORLD") && (
+      {(kind === "EUROPA" || kind === "USA" || kind === "WORLD") && (
         <Input
           className="h-9 w-56"
           placeholder={
-            parsed.kind === "EUROPA" ? "Ej. Francia, París…"
-            : parsed.kind === "USA" ? "Ej. Chicago, NY…"
+            kind === "EUROPA" ? "Ej. Francia, París…"
+            : kind === "USA" ? "Ej. Chicago, NY…"
             : "Ej. Rusia, Tokio…"
           }
-          value={parsed.detail}
-          onChange={(e) => onChange(serialize(parsed.kind as Region, e.target.value))}
+          value={detail}
+          onChange={(e) => changeDetail(e.target.value)}
         />
       )}
     </div>
