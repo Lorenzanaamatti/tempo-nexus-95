@@ -149,7 +149,7 @@ ${ctxBlock}`;
       await supabase.from("deal_memo_eventos").insert({
         deal_memo_id: dm.id,
         tipo_evento: "correcciones_solicitadas",
-        actor_email: context.claims?.email ?? null,
+        actor_email: (context.claims as { email?: string } | undefined)?.email ?? null,
         payload: { comentarios: data.correctionComments, version_base: lastVer!.numero_version },
       });
     }
@@ -173,7 +173,7 @@ ${ctxBlock}`;
     await supabase.from("deal_memo_eventos").insert({
       deal_memo_id: dm.id,
       tipo_evento: "version_generada",
-      actor_email: context.claims?.email ?? null,
+      actor_email: (context.claims as { email?: string } | undefined)?.email ?? null,
       payload: { numero_version: nextNumber, correccion: isCorrection },
     });
 
