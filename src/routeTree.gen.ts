@@ -47,7 +47,6 @@ import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from './routes/_authenticated/_admin/opportunities.$opportunityId'
 import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
-import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
@@ -278,12 +277,6 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
     path: '/directors/$directorId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminDealMemosDealMemoIdRoute =
-  AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
-    id: '/$dealMemoId',
-    path: '/$dealMemoId',
-    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
-  } as any)
 const AuthenticatedAdminContractsContractIdRoute =
   AuthenticatedAdminContractsContractIdRouteImport.update({
     id: '/contracts/$contractId',
@@ -382,7 +375,6 @@ export interface FileRoutesByFullPath {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
-  '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -431,7 +423,6 @@ export interface FileRoutesByTo {
   '/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
-  '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -485,7 +476,6 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/$composerId': typeof AuthenticatedAdminComposersComposerIdRoute
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
-  '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -538,7 +528,6 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/contracts/$contractId'
-    | '/deal-memos/$dealMemoId'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -587,7 +576,6 @@ export interface FileRouteTypes {
     | '/composers/$composerId'
     | '/composers/new'
     | '/contracts/$contractId'
-    | '/deal-memos/$dealMemoId'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -640,7 +628,6 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/$composerId'
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
-    | '/_authenticated/_admin/deal-memos/$dealMemoId'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/marketing/calendar'
     | '/_authenticated/_admin/opportunities/$opportunityId'
@@ -940,13 +927,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/_admin/deal-memos/$dealMemoId': {
-      id: '/_authenticated/_admin/deal-memos/$dealMemoId'
-      path: '/$dealMemoId'
-      fullPath: '/deal-memos/$dealMemoId'
-      preLoaderRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRouteImport
-      parentRoute: typeof AuthenticatedAdminDealMemosRoute
-    }
     '/_authenticated/_admin/contracts/$contractId': {
       id: '/_authenticated/_admin/contracts/$contractId'
       path: '/contracts/$contractId'
@@ -1035,14 +1015,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminDealMemosRouteChildren {
-  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
 }
 
 const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRouteChildren =
   {
-    AuthenticatedAdminDealMemosDealMemoIdRoute:
-      AuthenticatedAdminDealMemosDealMemoIdRoute,
     AuthenticatedAdminDealMemosIndexRoute:
       AuthenticatedAdminDealMemosIndexRoute,
   }
@@ -1201,3 +1178,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
