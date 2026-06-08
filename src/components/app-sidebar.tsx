@@ -25,8 +25,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
 
   const composerActive = pathname.startsWith("/composers");
   const composersRole = composerActive ? (search?.role ?? "composer") : null;
-  const isPeople = pathname.startsWith("/people");
-  const peopleRole = isPeople ? search?.role ?? "all" : null;
 
   type NavItem = {
     title: string;
@@ -45,7 +43,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Otros",               to: "/composers", search: { role: "other" },      icon: MoreHorizontal,   active: composersRole === "other" },
   ];
   const otherItems: NavItem[] = [
-    { title: "Equipo IC", to: "/people", search: { role: "ic_team" }, icon: UserCircle2, active: peopleRole === "ic_team" },
     { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
     { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
