@@ -60,6 +60,7 @@ import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './rou
 import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
 import { Route as AuthenticatedAdminMarketingCaseStudiesIndexRouteImport } from './routes/_authenticated/_admin/marketing.case-studies.index'
 import { Route as AuthenticatedAdminMarketingBrandIndexRouteImport } from './routes/_authenticated/_admin/marketing.brand.index'
+import { Route as AuthenticatedAdminDealMemosPlantillasIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -357,6 +358,12 @@ const AuthenticatedAdminMarketingBrandIndexRoute =
     path: '/marketing/brand/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosPlantillasIndexRoute =
+  AuthenticatedAdminDealMemosPlantillasIndexRouteImport.update({
+    id: '/plantillas/',
+    path: '/plantillas/',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
 const AuthenticatedAdminMarketingTargetAccountsAccountIdRoute =
   AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport.update({
     id: '/marketing/target-accounts/$accountId',
@@ -407,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -457,6 +465,7 @@ export interface FileRoutesByTo {
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/marketing/case-studies': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -512,6 +521,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/_authenticated/_admin/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/_authenticated/_admin/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/production-companies/'
     | '/productions/'
     | '/marketing/target-accounts/$accountId'
+    | '/deal-memos/plantillas/'
     | '/marketing/brand/'
     | '/marketing/case-studies/'
     | '/marketing/clippings/'
@@ -616,6 +627,7 @@ export interface FileRouteTypes {
     | '/production-companies'
     | '/productions'
     | '/marketing/target-accounts/$accountId'
+    | '/deal-memos/plantillas'
     | '/marketing/brand'
     | '/marketing/case-studies'
     | '/marketing/clippings'
@@ -670,6 +682,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
+    | '/_authenticated/_admin/deal-memos/plantillas/'
     | '/_authenticated/_admin/marketing/brand/'
     | '/_authenticated/_admin/marketing/case-studies/'
     | '/_authenticated/_admin/marketing/clippings/'
@@ -1044,6 +1057,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingBrandIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/plantillas/': {
+      id: '/_authenticated/_admin/deal-memos/plantillas/'
+      path: '/plantillas'
+      fullPath: '/deal-memos/plantillas/'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosPlantillasIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
     '/_authenticated/_admin/marketing/target-accounts/$accountId': {
       id: '/_authenticated/_admin/marketing/target-accounts/$accountId'
       path: '/marketing/target-accounts/$accountId'
@@ -1058,6 +1078,7 @@ interface AuthenticatedAdminDealMemosRouteChildren {
   AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDealMemosListaRoute: typeof AuthenticatedAdminDealMemosListaRoute
   AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
+  AuthenticatedAdminDealMemosPlantillasIndexRoute: typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
 }
 
 const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRouteChildren =
@@ -1068,6 +1089,8 @@ const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRoute
       AuthenticatedAdminDealMemosListaRoute,
     AuthenticatedAdminDealMemosIndexRoute:
       AuthenticatedAdminDealMemosIndexRoute,
+    AuthenticatedAdminDealMemosPlantillasIndexRoute:
+      AuthenticatedAdminDealMemosPlantillasIndexRoute,
   }
 
 const AuthenticatedAdminDealMemosRouteWithChildren =
@@ -1224,3 +1247,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
