@@ -1,14 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Sparkles, RefreshCw, Loader2, MoreHorizontal,
+  Copy, Ban, Download, Lock, Mail, Send, FileText, Clock,
+} from "lucide-react";
 import { toast } from "sonner";
-import { ArrowLeft, Sparkles, RefreshCw, Loader2 } from "lucide-react";
-import { generateDealMemoVersion } from "@/lib/deal-memos.functions";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import { formatDateEs } from "@/lib/dates";
+import { ESTADO_LABEL, EVENTO_LABEL, formatMoneyEs, buildNextReference, type DealMemoEstado } from "@/lib/deal-memo-constants";
+import { EstadoBadge } from "@/components/deal-memos/estado-badge";
+import { generateDealMemoVersion } from "@/lib/deal-memos.functions";
 
 export const Route = createFileRoute("/_authenticated/_admin/deal-memos/$dealMemoId")({
   component: DealMemoDetail,
@@ -17,181 +34,527 @@ export const Route = createFileRoute("/_authenticated/_admin/deal-memos/$dealMem
 function DealMemoDetail() {
   const { dealMemoId } = Route.useParams();
   const qc = useQueryClient();
-  const generate = useServerFn(generateDealMemoVersion);
-  const [comments, setComments] = useState("");
-  const [busy, setBusy] = useState(false);
 
   const dmQ = useQuery({
     queryKey: ["deal-memo", dealMemoId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deal_memos")
-        .select("*, plantilla:dm_plantillas(id, nombre, activa)")
+        .select("*, plantilla:plantilla_id(id, nombre, activa), cliente:cliente_id(id, nombre, empresa), contraparte:contraparte_id(id, nombre, empresa), validador_interno:validador_interno_id(id, nombre), validador_final:validador_final_id(id, nombre)")
         .eq("id", dealMemoId)
         .single();
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
-  const versionsQ = useQuery({
-    queryKey: ["deal-memo-versions", dealMemoId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("deal_memo_versiones")
-        .select("*")
-        .eq("deal_memo_id", dealMemoId)
-        .order("numero_version", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const eventsQ = useQuery({
-    queryKey: ["deal-memo-events", dealMemoId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("deal_memo_eventos")
-        .select("id, tipo_evento, actor_email, payload, created_at")
-        .eq("deal_memo_id", dealMemoId)
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    },
-  });
-
-  async function handleGenerate(isCorrection: boolean) {
-    if (isCorrection && !comments.trim()) {
-      toast.error("Describe las correcciones primero");
-      return;
-    }
-    setBusy(true);
-    try {
-      await generate({
-        data: {
-          dealMemoId,
-          correctionComments: isCorrection ? comments.trim() : undefined,
-        },
-      });
-      toast.success(isCorrection ? "Nueva versión con correcciones" : "Nueva versión generada");
-      setComments("");
-      qc.invalidateQueries({ queryKey: ["deal-memo", dealMemoId] });
-      qc.invalidateQueries({ queryKey: ["deal-memo-versions", dealMemoId] });
-      qc.invalidateQueries({ queryKey: ["deal-memo-events", dealMemoId] });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Error al generar la versión";
-      toast.error(msg);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (dmQ.isLoading) return <p className="p-10 text-muted-foreground">Cargando…</p>;
+  if (dmQ.isLoading) return <div className="mx-auto max-w-[1100px] px-6 py-8"><Skeleton className="h-[400px]" /></div>;
   if (dmQ.error || !dmQ.data) return <p className="p-10 text-rose-600">No se pudo cargar el deal memo</p>;
 
-  const dm = dmQ.data as any;
-  const hasVersion = (versionsQ.data ?? []).length > 0;
+  const dm = dmQ.data;
+  return <DealMemoView dm={dm} onChange={() => qc.invalidateQueries({ queryKey: ["deal-memo", dealMemoId] })} />;
+}
+
+function DealMemoView({ dm, onChange }: { dm: any; onChange: () => void }) {
+  return (
+    <div>
+      <DealMemoHeader dm={dm} onChange={onChange} />
+      <div className="mx-auto max-w-[1100px] px-6 py-6">
+        <Tabs defaultValue="datos">
+          <TabsList>
+            <TabsTrigger value="datos">Datos</TabsTrigger>
+            <TabsTrigger value="versiones">Versiones</TabsTrigger>
+            <TabsTrigger value="log">Log</TabsTrigger>
+            <TabsTrigger value="notas">Notas</TabsTrigger>
+          </TabsList>
+          <TabsContent value="datos" className="pt-4"><DealMemoForm dm={dm} onSaved={onChange} /></TabsContent>
+          <TabsContent value="versiones" className="pt-4"><DealMemoVersions dm={dm} onChange={onChange} /></TabsContent>
+          <TabsContent value="log" className="pt-4"><DealMemoLog dealMemoId={dm.id} /></TabsContent>
+          <TabsContent value="notas" className="pt-4"><DealMemoNotas dm={dm} /></TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void }) {
+  const qc = useQueryClient();
+  const generate = useServerFn(generateDealMemoVersion);
+  const [busy, setBusy] = useState(false);
+
+  const allRefsQ = useQuery({
+    queryKey: ["dm-refs-min"],
+    queryFn: async () => ((await supabase.from("deal_memos").select("referencia")).data ?? []).map((r) => r.referencia as string),
+  });
+
+  async function duplicate() {
+    const refs = allRefsQ.data ?? [];
+    const next = buildNextReference(refs);
+    const { data: ins, error } = await supabase.from("deal_memos").insert({
+      referencia: next,
+      obra: dm.obra + " (copia)",
+      descripcion_uso: dm.descripcion_uso,
+      cliente_id: dm.cliente_id,
+      contraparte_id: dm.contraparte_id,
+      importe_propuesto: dm.importe_propuesto,
+      moneda: dm.moneda,
+      plantilla_id: dm.plantilla_id,
+      validador_interno_id: dm.validador_interno_id,
+      validador_final_id: dm.validador_final_id,
+      destinatario_final_email: dm.destinatario_final_email,
+      plazo_respuesta_dias: dm.plazo_respuesta_dias,
+      notas_internas: dm.notas_internas,
+    }).select("id").single();
+    if (error || !ins) return toast.error(error?.message ?? "Error");
+    await supabase.from("deal_memo_eventos").insert({ deal_memo_id: ins.id, tipo_evento: "creado", payload: { duplicado_de: dm.id } });
+    toast.success(`Duplicado como ${next}`);
+  }
+
+  async function cancelDm() {
+    if (!confirm("¿Cancelar este deal memo?")) return;
+    const { error } = await supabase.from("deal_memos").update({ estado: "cancelado" }).eq("id", dm.id);
+    if (error) return toast.error(error.message);
+    await supabase.from("deal_memo_eventos").insert({ deal_memo_id: dm.id, tipo_evento: "cerrado", payload: { motivo: "cancelado_desde_ficha" } });
+    toast.success("Cancelado");
+    onChange();
+  }
+
+  async function aiGenerate() {
+    if (!dm.plantilla_id) return toast.error("Asigna una plantilla primero");
+    setBusy(true);
+    try {
+      await generate({ data: { dealMemoId: dm.id } });
+      toast.success("Versión generada");
+      qc.invalidateQueries({ queryKey: ["dm-versions", dm.id] });
+      qc.invalidateQueries({ queryKey: ["dm-events", dm.id] });
+      onChange();
+    } catch (e: any) { toast.error(e?.message ?? "Error generando"); }
+    finally { setBusy(false); }
+  }
+
+  const estado = dm.estado as DealMemoEstado;
 
   return (
-    <div className="mx-auto max-w-[1100px] px-6 py-10">
-      <Link to="/deal-memos" className="mb-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-3 w-3" /> Deal memos
-      </Link>
-
-      <div className="mb-6 border-b border-border pb-6">
-        <p className="smallcaps text-muted-foreground">{dm.referencia}</p>
-        <h1 className="mt-1 font-display text-4xl">{dm.obra}</h1>
-        <div className="mt-2 grid gap-1 text-sm text-muted-foreground md:grid-cols-2">
-          <div><span className="smallcaps text-[10px]">Estado:</span> {dm.estado.replace(/_/g, " ")}</div>
-          <div><span className="smallcaps text-[10px]">Destinatario:</span> {dm.destinatario_final_email}</div>
-          {dm.importe_propuesto && <div><span className="smallcaps text-[10px]">Importe:</span> {dm.importe_propuesto} {dm.moneda}</div>}
-          {dm.plantilla && <div><span className="smallcaps text-[10px]">Plantilla:</span> {dm.plantilla.nombre}</div>}
+    <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
+      <div className="mx-auto max-w-[1100px] px-6 py-4">
+        <nav className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
+          <Link to="/deal-memos" className="hover:text-foreground">Dashboard</Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link to="/deal-memos/lista" className="hover:text-foreground">Deal Memos</Link>
+          <ChevronRight className="h-3 w-3" />
+          <span className="font-mono text-foreground">{dm.referencia}</span>
+        </nav>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-2xl">{dm.obra}</h2>
+              <EstadoBadge estado={estado} />
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              <span className="font-mono">{dm.referencia}</span>
+              <span className="mx-2">·</span>
+              {dm.cliente?.nombre ?? "Sin cliente"}
+              <ArrowRight className="mx-1 inline h-3 w-3" />
+              {dm.contraparte?.nombre ?? "Sin contraparte"}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <ContextualActions dm={dm} busy={busy} onAiGenerate={aiGenerate} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={duplicate}><Copy className="mr-2 h-4 w-4" />Duplicar</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => toast("Función disponible en Bloque 5")}><Download className="mr-2 h-4 w-4" />Exportar log</DropdownMenuItem>
+                <DropdownMenuItem onSelect={cancelDm} className="text-rose-600"><Ban className="mr-2 h-4 w-4" />Cancelar deal memo</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        {dm.descripcion_uso && (
-          <p className="mt-3 text-sm">{dm.descripcion_uso}</p>
+      </div>
+    </div>
+  );
+}
+
+function ContextualActions({ dm, busy, onAiGenerate }: { dm: any; busy: boolean; onAiGenerate: () => void }) {
+  const estado = dm.estado as DealMemoEstado;
+  if (estado === "borrador") {
+    return (
+      <Button onClick={onAiGenerate} disabled={busy} size="sm">
+        {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+        Generar draft con IA
+      </Button>
+    );
+  }
+  if (estado === "generando") {
+    return <span className="inline-flex items-center gap-1 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Generando…</span>;
+  }
+  if (estado === "revision_interna") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="rounded-sm bg-muted px-2 py-1 text-xs text-muted-foreground">⏳ Esperando revisión de {dm.validador_interno?.nombre ?? "—"}</span>
+        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
+      </div>
+    );
+  }
+  if (estado === "corrigiendo") {
+    return <Button size="sm" onClick={onAiGenerate} disabled={busy}><RefreshCw className="mr-1 h-4 w-4" />Generar nueva versión</Button>;
+  }
+  if (estado === "revision_final") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="rounded-sm bg-muted px-2 py-1 text-xs text-muted-foreground">⏳ Esperando aprobación de {dm.validador_final?.nombre ?? "—"}</span>
+        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
+      </div>
+    );
+  }
+  if (estado === "enviado") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">
+          Enviado el {formatDateEs(dm.fecha_envio)} · Plazo: {formatDateEs(dm.fecha_limite_respuesta)}
+        </span>
+        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Send className="mr-1 h-4 w-4" />Enviar reminder</Button>
+      </div>
+    );
+  }
+  if (estado === "respondido") {
+    return <Button size="sm" onClick={() => toast("Función disponible en Bloque 5")}><Sparkles className="mr-1 h-4 w-4" />Procesar respuesta con IA</Button>;
+  }
+  return null;
+}
+
+function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
+  const editable = dm.estado === "borrador";
+  const [form, setForm] = useState({
+    referencia: dm.referencia,
+    obra: dm.obra,
+    descripcion_uso: dm.descripcion_uso ?? "",
+    cliente_id: dm.cliente_id ?? "",
+    contraparte_id: dm.contraparte_id ?? "",
+    destinatario_final_email: dm.destinatario_final_email,
+    importe_propuesto: dm.importe_propuesto ?? "",
+    moneda: dm.moneda ?? "EUR",
+    plantilla_id: dm.plantilla_id ?? "",
+    validador_interno_id: dm.validador_interno_id ?? "",
+    validador_final_id: dm.validador_final_id ?? "",
+    plazo_respuesta_dias: dm.plazo_respuesta_dias ?? 7,
+    notas_internas: dm.notas_internas ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const plantillasQ = useQuery({
+    queryKey: ["dm-plantillas-min"],
+    queryFn: async () => (await supabase.from("dm_plantillas").select("id, nombre, activa")).data ?? [],
+  });
+  const contactosQ = useQuery({
+    queryKey: ["dm-contactos-min"],
+    queryFn: async () => (await supabase.from("dm_contactos").select("id, nombre, tipo, empresa, email")).data ?? [],
+  });
+
+  const byTipo = (t: string) => (contactosQ.data ?? []).filter((c) => c.tipo === t);
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("deal_memos")
+      .update({
+        referencia: form.referencia,
+        obra: form.obra,
+        descripcion_uso: form.descripcion_uso || null,
+        cliente_id: form.cliente_id || null,
+        contraparte_id: form.contraparte_id || null,
+        destinatario_final_email: form.destinatario_final_email,
+        importe_propuesto: form.importe_propuesto === "" ? null : Number(form.importe_propuesto),
+        moneda: form.moneda,
+        plantilla_id: form.plantilla_id || null,
+        validador_interno_id: form.validador_interno_id || null,
+        validador_final_id: form.validador_final_id || null,
+        plazo_respuesta_dias: Number(form.plazo_respuesta_dias) || 7,
+        notas_internas: form.notas_internas || null,
+      })
+      .eq("id", dm.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Cambios guardados");
+    onSaved();
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); save(); }} className="space-y-6">
+      {!editable && (
+        <div className="flex items-center gap-2 rounded-sm border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+          <Lock className="h-3.5 w-3.5" /> Editable solo en estado borrador
+        </div>
+      )}
+
+      <FormSection title="Identificación">
+        <Field label="Referencia"><Input value={form.referencia} onChange={(e) => setForm({ ...form, referencia: e.target.value })} disabled={!editable} className="font-mono" /></Field>
+        <Field label="Obra" className="md:col-span-2"><Input value={form.obra} onChange={(e) => setForm({ ...form, obra: e.target.value })} disabled={!editable} /></Field>
+        <Field label="Descripción del uso" className="md:col-span-3"><Textarea rows={3} value={form.descripcion_uso} onChange={(e) => setForm({ ...form, descripcion_uso: e.target.value })} disabled={!editable} /></Field>
+      </FormSection>
+
+      <FormSection title="Partes">
+        <Field label="Cliente">
+          <ContactoSelect value={form.cliente_id} onChange={(v) => setForm({ ...form, cliente_id: v })} contactos={byTipo("cliente")} disabled={!editable} />
+        </Field>
+        <Field label="Contraparte">
+          <ContactoSelect value={form.contraparte_id} onChange={(v) => setForm({ ...form, contraparte_id: v })} contactos={byTipo("contraparte")} disabled={!editable} />
+        </Field>
+        <Field label="Destinatario final (email)"><Input type="email" value={form.destinatario_final_email} onChange={(e) => setForm({ ...form, destinatario_final_email: e.target.value })} disabled={!editable} /></Field>
+      </FormSection>
+
+      <FormSection title="Económico">
+        <Field label="Importe propuesto"><Input type="number" step="0.01" value={form.importe_propuesto} onChange={(e) => setForm({ ...form, importe_propuesto: e.target.value })} disabled={!editable} /></Field>
+        <Field label="Moneda">
+          <Select value={form.moneda} onValueChange={(v) => setForm({ ...form, moneda: v })} disabled={!editable}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="EUR">EUR (€)</SelectItem>
+              <SelectItem value="USD">USD ($)</SelectItem>
+              <SelectItem value="GBP">GBP (£)</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      </FormSection>
+
+      <FormSection title="Workflow">
+        <Field label="Plantilla">
+          <Select value={form.plantilla_id} onValueChange={(v) => setForm({ ...form, plantilla_id: v })} disabled={!editable}>
+            <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+            <SelectContent>
+              {(plantillasQ.data ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}{!p.activa ? " (inactiva)" : ""}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Validador interno">
+          <ContactoSelect value={form.validador_interno_id} onChange={(v) => setForm({ ...form, validador_interno_id: v })} contactos={byTipo("validador")} disabled={!editable} />
+        </Field>
+        <Field label="Validador final">
+          <ContactoSelect value={form.validador_final_id} onChange={(v) => setForm({ ...form, validador_final_id: v })} contactos={byTipo("validador")} disabled={!editable} />
+        </Field>
+        <Field label="Plazo de respuesta (días)"><Input type="number" min={1} value={form.plazo_respuesta_dias} onChange={(e) => setForm({ ...form, plazo_respuesta_dias: Number(e.target.value) })} disabled={!editable} /></Field>
+      </FormSection>
+
+      <FormSection title="Notas internas">
+        <Field label="" className="md:col-span-3"><Textarea rows={5} value={form.notas_internas} onChange={(e) => setForm({ ...form, notas_internas: e.target.value })} disabled={!editable} /></Field>
+      </FormSection>
+
+      {editable && (
+        <div className="flex justify-end">
+          <Button type="submit" disabled={saving}>{saving ? "Guardando…" : "Guardar cambios"}</Button>
+        </div>
+      )}
+    </form>
+  );
+}
+
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-sm border border-border bg-card p-4">
+      <h3 className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">{title}</h3>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">{children}</div>
+    </section>
+  );
+}
+function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={className}>
+      {label && <Label className="mb-1 text-xs text-muted-foreground">{label}</Label>}
+      {children}
+    </div>
+  );
+}
+function ContactoSelect({ value, onChange, contactos, disabled }: {
+  value: string; onChange: (v: string) => void;
+  contactos: { id: string; nombre: string; empresa: string | null }[]; disabled?: boolean;
+}) {
+  return (
+    <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+      <SelectContent>
+        {contactos.length === 0 && <SelectItem value="__none" disabled>Sin contactos</SelectItem>}
+        {contactos.map((c) => (
+          <SelectItem key={c.id} value={c.id}>
+            {c.nombre}{c.empresa ? ` · ${c.empresa}` : ""}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => void }) {
+  const qc = useQueryClient();
+  const generate = useServerFn(generateDealMemoVersion);
+  const [busy, setBusy] = useState(false);
+  const [comments, setComments] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [modalVersion, setModalVersion] = useState<any | null>(null);
+
+  const versionsQ = useQuery({
+    queryKey: ["dm-versions", dm.id],
+    queryFn: async () => ((await supabase.from("deal_memo_versiones").select("*").eq("deal_memo_id", dm.id).order("numero_version", { ascending: false })).data ?? []),
+  });
+
+  async function regenerate(isCorrection: boolean) {
+    if (!dm.plantilla_id) return toast.error("Asigna una plantilla primero");
+    if (isCorrection && !comments.trim()) return toast.error("Escribe las correcciones");
+    setBusy(true);
+    try {
+      await generate({ data: { dealMemoId: dm.id, correctionComments: isCorrection ? comments : undefined } });
+      toast.success("Nueva versión generada");
+      setComments("");
+      qc.invalidateQueries({ queryKey: ["dm-versions", dm.id] });
+      qc.invalidateQueries({ queryKey: ["dm-events", dm.id] });
+      onChange();
+    } catch (e: any) { toast.error(e?.message ?? "Error"); }
+    finally { setBusy(false); }
+  }
+
+  const versions = versionsQ.data ?? [];
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-sm border border-border bg-card p-4">
+        <h3 className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">Generación con IA</h3>
+        {!dm.plantilla_id ? (
+          <p className="text-sm text-amber-600">Asigna una plantilla en la pestaña Datos para generar versiones.</p>
+        ) : versions.length === 0 ? (
+          <Button onClick={() => regenerate(false)} disabled={busy}>
+            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+            Generar primera versión
+          </Button>
+        ) : (
+          <div className="space-y-2">
+            <Textarea rows={3} value={comments} onChange={(e) => setComments(e.target.value)} placeholder="Correcciones para la siguiente versión…" />
+            <div className="flex gap-2">
+              <Button onClick={() => regenerate(false)} disabled={busy} variant="outline" size="sm"><RefreshCw className="mr-1 h-4 w-4" />Regenerar</Button>
+              <Button onClick={() => regenerate(true)} disabled={busy || !comments.trim()} size="sm"><Sparkles className="mr-1 h-4 w-4" />Pedir correcciones</Button>
+            </div>
+          </div>
         )}
       </div>
 
-      <section className="mb-6 rounded-sm border border-border bg-card p-4">
-        <h2 className="mb-2 font-display text-lg">Generación con IA</h2>
-        {!dm.plantilla_id ? (
-          <p className="text-sm text-amber-600">Asigna una plantilla a este deal memo para poder generar versiones.</p>
-        ) : (
-          <>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => handleGenerate(false)} disabled={busy}>
-                {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
-                {hasVersion ? "Regenerar (nueva versión)" : "Generar primera versión"}
-              </Button>
-            </div>
-            {hasVersion && (
-              <div className="mt-4 space-y-2 border-t border-border pt-4">
-                <p className="smallcaps text-[10px] text-muted-foreground">Solicitar correcciones sobre la última versión</p>
-                <Textarea
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  placeholder="Ej: rebaja el tono, sube el importe a 8.000€, añade cláusula de exclusividad..."
-                  rows={3}
-                />
-                <Button variant="outline" onClick={() => handleGenerate(true)} disabled={busy || !comments.trim()}>
-                  {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
-                  Pedir correcciones y regenerar
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-
-      <section className="mb-6">
-        <h2 className="mb-3 font-display text-lg">Versiones</h2>
-        {(versionsQ.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aún no hay versiones generadas.</p>
-        ) : (
-          <div className="space-y-3">
-            {(versionsQ.data ?? []).map((v: any) => (
-              <div key={v.id} className="rounded-sm border border-border bg-card p-4">
-                <div className="mb-2 flex items-center justify-between gap-2">
+      {versionsQ.isLoading ? <Skeleton className="h-32" /> :
+       versions.length === 0 ? (
+        <div className="rounded-sm border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+          <FileText className="mx-auto mb-2 h-6 w-6 opacity-50" />
+          Aún no hay versiones generadas
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {versions.map((v: any) => {
+            const open = openId === v.id;
+            return (
+              <div key={v.id} className="rounded-sm border border-border bg-card">
+                <button onClick={() => setOpenId(open ? null : v.id)} className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left">
                   <div className="flex items-center gap-2">
+                    {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     <span className="rounded-sm bg-foreground px-2 py-0.5 text-[10px] uppercase tracking-wider text-background">v{v.numero_version}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {v.generada_por === "agente_ia" ? "IA" : "Corrección humana"}
-                    </span>
+                    <span className="text-sm font-medium">{v.email_asunto}</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">{formatDateEs(v.created_at)}</span>
-                </div>
-                {v.comentarios_revision && (
-                  <p className="mb-2 rounded-sm border-l-2 border-amber-500 bg-amber-500/5 px-2 py-1 text-xs italic text-muted-foreground">
-                    Correcciones pedidas: {v.comentarios_revision}
-                  </p>
+                  <span className="text-xs text-muted-foreground">{v.generada_por === "agente_ia" ? "IA" : "Corrección humana"} · {formatDistanceToNow(new Date(v.created_at), { locale: es, addSuffix: true })}</span>
+                </button>
+                {open && (
+                  <div className="border-t border-border px-4 py-3">
+                    {v.comentarios_revision && (
+                      <p className="mb-3 rounded-sm border-l-2 border-amber-500 bg-amber-500/10 px-3 py-2 text-xs italic">
+                        Correcciones aplicadas: {v.comentarios_revision}
+                      </p>
+                    )}
+                    <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{v.email_cuerpo}</pre>
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setModalVersion(v)}>Ver completo</Button>
+                      <Button size="sm" variant="outline" onClick={() => toast("Función disponible en Bloque 5")}><Download className="mr-1 h-4 w-4" />Descargar .docx</Button>
+                    </div>
+                  </div>
                 )}
-                <p className="text-xs font-semibold text-muted-foreground">ASUNTO</p>
-                <p className="mb-2 text-sm">{v.email_asunto}</p>
-                <p className="text-xs font-semibold text-muted-foreground">CUERPO</p>
-                <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">{v.email_cuerpo}</pre>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
+            );
+          })}
+        </div>
+      )}
 
-      <section>
-        <h2 className="mb-3 font-display text-lg">Auditoría</h2>
-        {(eventsQ.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin eventos.</p>
-        ) : (
-          <ul className="space-y-1 text-xs">
-            {(eventsQ.data ?? []).map((e: any) => (
-              <li key={e.id} className="flex items-center gap-2 text-muted-foreground">
-                <span className="font-mono">{formatDateEs(e.created_at)}</span>
-                <span className="rounded-sm border border-border px-1.5 py-[1px] text-[10px] uppercase tracking-wider">
-                  {e.tipo_evento.replace(/_/g, " ")}
-                </span>
-                {e.actor_email && <span>· {e.actor_email}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <Dialog open={!!modalVersion} onOpenChange={(o) => !o && setModalVersion(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle>Versión {modalVersion?.numero_version}</DialogTitle></DialogHeader>
+          {modalVersion && (
+            <div className="space-y-3">
+              <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Asunto</p><p className="text-sm font-medium">{modalVersion.email_asunto}</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cuerpo</p>
+                <pre className="mt-1 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-sm border border-border bg-muted/30 p-3 font-sans text-sm leading-relaxed">{modalVersion.email_cuerpo}</pre>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function DealMemoLog({ dealMemoId }: { dealMemoId: string }) {
+  const q = useQuery({
+    queryKey: ["dm-events", dealMemoId],
+    queryFn: async () => ((await supabase.from("deal_memo_eventos").select("*").eq("deal_memo_id", dealMemoId).order("created_at", { ascending: false })).data ?? []),
+  });
+  if (q.isLoading) return <Skeleton className="h-40" />;
+  const events = q.data ?? [];
+  if (events.length === 0) return <div className="rounded-sm border border-dashed border-border p-10 text-center text-sm text-muted-foreground"><Clock className="mx-auto mb-2 h-6 w-6 opacity-50" />Sin eventos</div>;
+  return (
+    <ol className="relative space-y-3 border-l border-border pl-6">
+      {events.map((e: any) => (
+        <li key={e.id} className="relative">
+          <span className="absolute -left-[29px] mt-1.5 h-2.5 w-2.5 rounded-full bg-foreground" />
+          <div className="rounded-sm border border-border bg-card p-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-medium">{EVENTO_LABEL[e.tipo_evento as keyof typeof EVENTO_LABEL] ?? e.tipo_evento}</p>
+              <span className="text-[10px] text-muted-foreground">{formatDateEs(e.created_at)} · {formatDistanceToNow(new Date(e.created_at), { locale: es, addSuffix: true })}</span>
+            </div>
+            {e.actor_email && <p className="mt-0.5 text-xs text-muted-foreground">{e.actor_email}</p>}
+            {e.payload && Object.keys(e.payload).length > 0 && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-[10px] uppercase tracking-wider text-muted-foreground">Detalles</summary>
+                <pre className="mt-1 overflow-x-auto rounded-sm bg-muted p-2 text-[11px]">{JSON.stringify(e.payload, null, 2)}</pre>
+              </details>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function DealMemoNotas({ dm }: { dm: any }) {
+  const [value, setValue] = useState(dm.notas_internas ?? "");
+  const [saving, setSaving] = useState<"idle" | "saving" | "saved">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSaved = useRef(value);
+
+  useEffect(() => {
+    if (value === lastSaved.current) return;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      setSaving("saving");
+      const { error } = await supabase.from("deal_memos").update({ notas_internas: value || null }).eq("id", dm.id);
+      if (error) { toast.error(error.message); setSaving("idle"); return; }
+      lastSaved.current = value;
+      setSaving("saved");
+      setTimeout(() => setSaving("idle"), 1500);
+    }, 3000);
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [value, dm.id]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">Las notas se autoguardan tras 3 segundos de inactividad.</p>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          {saving === "saving" ? "Guardando…" : saving === "saved" ? "Guardado" : ""}
+        </span>
+      </div>
+      <Textarea rows={14} value={value} onChange={(e) => setValue(e.target.value)} placeholder="Notas internas del equipo…" />
     </div>
   );
 }

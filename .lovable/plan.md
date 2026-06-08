@@ -1,93 +1,67 @@
+## Apartado DEAL MEMOS — interfaz completa
 
-# Vídeos en ficha + Módulo Redes Sociales IC
+Ampliación del apartado actual `Contratos y Deal Memos` añadiendo una sección dedicada con sub-navegación, Kanban, ficha completa con tabs, gestor de plantillas y contactos, y vista pública de aprobación. Solo UI + persistencia CRUD: IA, email, calendario y tokens reales quedan para bloques posteriores (placeholders con toast "Función disponible en Bloque X").
 
-## 1. Vídeos en ficha de compositor
+## Decisiones clave
+- **Reaprovecho** las tablas existentes (`deal_memos`, `deal_memo_versiones`, `deal_memo_eventos`, `dm_plantillas`, `dm_contactos`). El esquema ya cubre todos los campos pedidos. No se necesitan migraciones nuevas salvo un pequeño helper SQL (ver más abajo).
+- **Sub-navegación** (no un sidebar global nuevo): añado un layout `/_authenticated/_admin/deal-memos.tsx` con cabecera + tabs/links horizontales (Dashboard, Lista, Plantillas, Contactos, Configuración). El sidebar principal de la app se conserva; el bloque luce coherente con el resto sin romper el shell.
+- **Vista pública** `/aprobar/$token` se monta fuera de `_authenticated` (ruta pública, layout propio).
+- **Numeración correlativa** anual (`DM-IC-YYYY-NNN`, arranque 011 en 2026): la calculo en cliente al crear, leyendo el máximo correlativo del año via `supabase.from('deal_memos').select('referencia')`. Si el resultado es < 11, arranco en 011.
+- **Idioma**: textos en español, fechas con `date-fns/locale/es` (ya disponible via dependencias del proyecto; si no, `bun add date-fns`).
+- Las placeholders de IA / email / token muestran `toast("Función disponible en Bloque N")`.
 
-Reutilizamos la tabla existente `composer_demos` (que ya soporta `url`) extendida con almacenamiento propio. Mejor: una tabla limpia análoga a `composer_photos`.
-
-**Nueva tabla `composer_videos`** (paralela a `composer_photos`, cap 12):
-- `composer_id`, `storage_path` (bucket privado), `external_url` (YouTube/Vimeo opcional), `poster_path` (miniatura opcional), `title`, `duration_seconds`, `year`, `copyright`, `position`
-
-Subida al bucket `composer-assets` (ya existe). Reproductor `<video>` nativo o embed si es URL externa.
-
-**UI**: nueva sección "Vídeos" en la ficha admin del compositor, debajo de "Fotografías". Mismo patrón de grid + drag-reorder + borrar. En el portal del representado, se muestran en lectura.
-
-## 2. Módulo Redes Sociales IC
-
-Nueva sección en `/marketing/social` con sub-navegación por canal: **Instagram · Facebook · LinkedIn · YouTube · TikTok · Otras**.
-
-Cada canal es un feed editorial de **posts planificables**, filtrables por **representado** y por **producción**.
-
-### Modelo de post (`social_posts`)
-- `channel`: enum (`instagram` | `facebook` | `linkedin` | `youtube` | `tiktok` | `otra`)
-- `format`: enum (`feed` | `reel` | `story` | `carousel` | `video` | `live` | `articulo`)
-- `composer_id` (nullable — opcional)
-- `production_id` (nullable — opcional)
-- `title` (interno)
-- `copy_es`, `copy_en`, `copy_ca` — textos por idioma
-- `hashtags` (text[])
-- `cta` (texto + URL)
-- `scheduled_for` (fecha y hora prevista)
-- `published_at` (fecha real)
-- `published_url` (link al post en la red)
-- `status`: enum (`borrador` | `en_revision` | `aprobado` | `programado` | `publicado` | `archivado`)
-- `owner_person_id` (responsable interno)
-- `notes`
-
-### Adjuntos (`social_post_assets`)
-N por post:
-- `kind`: `image` | `video` | `audio` | `gif` | `documento`
-- `storage_path` o `external_url`
-- `caption`, `alt_text`, `position`
-
-### Otros recursos sugeridos (parte del módulo, no separado)
-Propongo añadir, además del post en sí:
-- **Variantes por canal**: un mismo concepto con copies distintos para IG/LinkedIn/etc. (campo `parent_post_id` para agrupar).
-- **Stories y Reels**: como formatos del mismo modelo.
-- **Campañas** (`social_campaigns`): agrupador de posts con objetivo, fechas y KPIs (alcance, engagement, leads).
-- **Plantillas de copy** (`social_copy_templates`): copies tipo por tipo de hito (estreno, premio, BSO publicada, entrevista, evento) con variables `{compositor}`, `{producción}`, `{director}`, `{plataforma}`.
-- **Calendario editorial**: vista mensual de `social_posts.scheduled_for` con filtro por canal/representado/producción.
-- **Briefs de contenido**: nota corta interna para grabar/diseñar (qué se necesita y para cuándo).
-- **Hashtags maestros**: banco reutilizable (`social_hashtag_sets`) con sets por canal y por género.
-- **Métricas post-publicación** (`social_post_metrics`): impresiones, alcance, likes, comentarios, guardados, clics — entrada manual.
-- **Embajadores/menciones**: enlazar otros perfiles tagueados (productoras, directores).
-
-## 3. Navegación
-
-- Sidebar Marketing → nuevo grupo "Redes sociales": calendario, posts, campañas, plantillas de copy, hashtags.
-- Filtros globales por **representado** y por **producción** en cada vista.
-- Cada ficha de representado y cada ficha de producción incorpora un panel "Actividad en redes" con sus posts y métricas agregadas.
-
-## 4. Esquema de datos (resumen)
+## Rutas que se crearán / modificarán
 
 ```text
-composer_videos          (foto, pero vídeo · cap 12)
-social_posts             (post planificable, por canal)
-social_post_assets       (N imágenes/vídeos por post)
-social_campaigns         (agrupador con objetivo y KPIs)
-social_copy_templates    (plantillas con variables)
-social_hashtag_sets      (banco de hashtags por canal/género)
-social_post_metrics      (1:1 con post tras publicación)
+src/routes/_authenticated/_admin/
+  deal-memos.tsx                  (NUEVO: layout con sub-nav + <Outlet/>)
+  deal-memos.index.tsx            (REEMPLAZADO: Dashboard Kanban)
+  deal-memos.lista.tsx            (NUEVO: vista tabla)
+  deal-memos.plantillas.index.tsx (NUEVO)
+  deal-memos.plantillas.$id.tsx   (NUEVO: editor)
+  deal-memos.contactos.tsx        (NUEVO)
+  deal-memos.configuracion.tsx    (NUEVO: placeholder)
+  deal-memos.$dealMemoId.tsx      (REESCRITO: ficha con tabs)
+src/routes/
+  aprobar.$token.tsx              (NUEVO: vista pública mobile-first)
 ```
 
-RLS: admin escribe todo; lectura para `authenticated`. Compositor lee sólo posts donde `composer_id` = el suyo (vía `can_access_composer`).
+## Componentes principales (`src/components/deal-memos/`)
+- `deal-memo-subnav.tsx` — barra horizontal con `Link`s activos
+- `kanban-board.tsx` + `kanban-card.tsx` — 6 columnas con scroll interno, badge urgencia por borde izquierdo
+- `deal-memo-form.tsx` — formulario de la pestaña Datos (modo solo-lectura si estado ≠ borrador)
+- `deal-memo-versions.tsx` — lista expandible de versiones
+- `deal-memo-timeline.tsx` — timeline vertical de eventos
+- `deal-memo-notes.tsx` — textarea con auto-save (debounce 3s)
+- `deal-memo-actions.tsx` — barra contextual según estado + menú `...` (Duplicar, Cancelar, Exportar)
+- `plantilla-form.tsx`, `contacto-dialog.tsx`
+- `estado-badge.tsx`, `format-money.ts`, `format-date-es.ts` (helpers)
 
-Bucket: `marketing-assets` (ya existe) para imágenes/vídeos de los posts.
+## Tabla / migración
+Migración pequeña para una RPC opcional `next_dm_reference(year int)` que devuelva el siguiente correlativo de forma atómica (evita colisiones). Si se considera innecesario, se calcula en cliente. Lo incluyo como migración separada y segura.
 
-## 5. UI clave
+## Datos semilla
+Inserto vía `supabase.insert` (no migración, son datos):
+- 3 contactos: "Acceso a la base de datos (CRM) de equipo IC", "...productoras", "...clientes" (tipo `cliente`/`contraparte` según corresponda)
+- 3 plantillas: "Deal Memo Representación", "Deal Memo Presupuesto Producción", "Deal Memo Cesión de Derechos" con asunto/cuerpo de muestra y `activa = true`
+- 4–6 deal memos mock distribuidos por estados para poblar el Kanban, con eventos y versiones de ejemplo
 
-- **`/marketing/social`**: tabs por canal + filtros (representado, producción, estado, fechas).
-- **Editor de post**: dos columnas — izquierda copies por idioma + hashtags + CTA + scheduling; derecha adjuntos (drag & drop), preview tipo mock del canal.
-- **`/marketing/social/calendario`**: calendario mensual con códigos por canal.
-- **`/marketing/social/campañas`**: tabla con objetivos y KPIs agregados.
-- **`/marketing/social/plantillas`**: editor de copies con sustitución de variables.
+## Detalles de calidad
+- Skeletons (`Skeleton` de shadcn) durante `isLoading`
+- Empty states con icono Lucide + texto gris
+- Tooltips en iconos (`@/components/ui/tooltip`)
+- Formato `85.000 €` con `Intl.NumberFormat('es-ES')`
+- Fechas relativas con `formatDistanceToNow(date, { locale: es, addSuffix: true })`
+- Validación de formularios con `react-hook-form` + `zod` (ya en stack) y mensajes en español
+- Toasts con `sonner`
 
-## Entregable si apruebas
+## Fuera de alcance (placeholders)
+- Generación IA real (ya existe `generateDealMemoVersion` server fn — la dejo conectada solo en ficha si el plantilla_id existe; si no, toast)
+- Envío email, recordatorios, calendario, tokens de aprobación reales
+- Auth real para `/aprobar/$token` (la ruta es pública, sin login)
 
-1. Migración: `composer_videos` + 6 tablas `social_*` + RLS + grants.
-2. Editor de vídeos en ficha compositor (subida al bucket).
-3. Módulo Marketing → Redes sociales: posts, calendario, campañas, plantillas, hashtags.
-4. Filtros por representado y producción en todas las vistas.
-5. Paneles "Actividad en redes" en fichas de representado y producción.
-
-¿Avanzo con todo el alcance o prefieres acotar a fase 1 (vídeos + posts + calendario) y dejar campañas/plantillas/hashtags/métricas para una segunda iteración?
+## Entregable final
+Al terminar, listo:
+- Rutas creadas (con URLs)
+- Componentes principales y su ubicación
+- Datos semilla insertados (cantidad y referencias)

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AprobarTokenRouteImport } from './routes/aprobar.$token'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authen
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
+import { Route as AuthenticatedAdminDealMemosRouteImport } from './routes/_authenticated/_admin/deal-memos'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenticated/_admin/budget'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
@@ -46,6 +48,9 @@ import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from './routes/_authenticated/_admin/opportunities.$opportunityId'
 import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
+import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
+import { Route as AuthenticatedAdminDealMemosContactosRouteImport } from './routes/_authenticated/_admin/deal-memos.contactos'
+import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
@@ -58,7 +63,9 @@ import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './rou
 import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
 import { Route as AuthenticatedAdminMarketingCaseStudiesIndexRouteImport } from './routes/_authenticated/_admin/marketing.case-studies.index'
 import { Route as AuthenticatedAdminMarketingBrandIndexRouteImport } from './routes/_authenticated/_admin/marketing.brand.index'
+import { Route as AuthenticatedAdminDealMemosPlantillasIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
+import { Route as AuthenticatedAdminDealMemosPlantillasPlantillaIdRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.$plantillaId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -73,6 +80,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AprobarTokenRoute = AprobarTokenRouteImport.update({
+  id: '/aprobar/$token',
+  path: '/aprobar/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   id: '/portal',
@@ -163,6 +175,12 @@ const AuthenticatedAdminFinanceRoute =
     path: '/finance',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosRoute =
+  AuthenticatedAdminDealMemosRouteImport.update({
+    id: '/deal-memos',
+    path: '/deal-memos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCalendarRoute =
   AuthenticatedAdminCalendarRouteImport.update({
     id: '/calendar',
@@ -219,9 +237,9 @@ const AuthenticatedAdminDirectorsIndexRoute =
   } as any)
 const AuthenticatedAdminDealMemosIndexRoute =
   AuthenticatedAdminDealMemosIndexRouteImport.update({
-    id: '/deal-memos/',
-    path: '/deal-memos/',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
 const AuthenticatedAdminContractsIndexRoute =
   AuthenticatedAdminContractsIndexRouteImport.update({
@@ -271,11 +289,29 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
     path: '/directors/$directorId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosListaRoute =
+  AuthenticatedAdminDealMemosListaRouteImport.update({
+    id: '/lista',
+    path: '/lista',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
+const AuthenticatedAdminDealMemosContactosRoute =
+  AuthenticatedAdminDealMemosContactosRouteImport.update({
+    id: '/contactos',
+    path: '/contactos',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
+const AuthenticatedAdminDealMemosConfiguracionRoute =
+  AuthenticatedAdminDealMemosConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
 const AuthenticatedAdminDealMemosDealMemoIdRoute =
   AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
-    id: '/deal-memos/$dealMemoId',
-    path: '/deal-memos/$dealMemoId',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/$dealMemoId',
+    path: '/$dealMemoId',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
 const AuthenticatedAdminContractsContractIdRoute =
   AuthenticatedAdminContractsContractIdRouteImport.update({
@@ -343,11 +379,23 @@ const AuthenticatedAdminMarketingBrandIndexRoute =
     path: '/marketing/brand/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDealMemosPlantillasIndexRoute =
+  AuthenticatedAdminDealMemosPlantillasIndexRouteImport.update({
+    id: '/plantillas/',
+    path: '/plantillas/',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
 const AuthenticatedAdminMarketingTargetAccountsAccountIdRoute =
   AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport.update({
     id: '/marketing/target-accounts/$accountId',
     path: '/marketing/target-accounts/$accountId',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute =
+  AuthenticatedAdminDealMemosPlantillasPlantillaIdRouteImport.update({
+    id: '/plantillas/$plantillaId',
+    path: '/plantillas/$plantillaId',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -356,9 +404,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
@@ -375,6 +425,9 @@ export interface FileRoutesByFullPath {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
+  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
+  '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -390,7 +443,9 @@ export interface FileRoutesByFullPath {
   '/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -405,6 +460,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
@@ -424,6 +480,9 @@ export interface FileRoutesByTo {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
+  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
+  '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -439,7 +498,9 @@ export interface FileRoutesByTo {
   '/platforms': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
+  '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/marketing/case-studies': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -457,10 +518,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/_admin/budget': typeof AuthenticatedAdminBudgetRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/_authenticated/_admin/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
@@ -477,6 +540,9 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
+  '/_authenticated/_admin/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
+  '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -492,7 +558,9 @@ export interface FileRoutesById {
   '/_authenticated/_admin/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/_authenticated/_admin/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
+  '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/_authenticated/_admin/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
   '/_authenticated/_admin/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
   '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
@@ -510,9 +578,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/portal'
+    | '/aprobar/$token'
     | '/billing'
     | '/budget'
     | '/calendar'
+    | '/deal-memos'
     | '/finance'
     | '/roster'
     | '/portal/agenda'
@@ -529,6 +599,9 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/configuracion'
+    | '/deal-memos/contactos'
+    | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -544,7 +617,9 @@ export interface FileRouteTypes {
     | '/platforms/'
     | '/production-companies/'
     | '/productions/'
+    | '/deal-memos/plantillas/$plantillaId'
     | '/marketing/target-accounts/$accountId'
+    | '/deal-memos/plantillas/'
     | '/marketing/brand/'
     | '/marketing/case-studies/'
     | '/marketing/clippings/'
@@ -559,6 +634,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
+    | '/aprobar/$token'
     | '/billing'
     | '/budget'
     | '/calendar'
@@ -578,6 +654,9 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/configuracion'
+    | '/deal-memos/contactos'
+    | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
     | '/opportunities/$opportunityId'
@@ -593,7 +672,9 @@ export interface FileRouteTypes {
     | '/platforms'
     | '/production-companies'
     | '/productions'
+    | '/deal-memos/plantillas/$plantillaId'
     | '/marketing/target-accounts/$accountId'
+    | '/deal-memos/plantillas'
     | '/marketing/brand'
     | '/marketing/case-studies'
     | '/marketing/clippings'
@@ -610,10 +691,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/me'
     | '/_authenticated/portal'
+    | '/aprobar/$token'
     | '/_authenticated/'
     | '/_authenticated/_admin/billing'
     | '/_authenticated/_admin/budget'
     | '/_authenticated/_admin/calendar'
+    | '/_authenticated/_admin/deal-memos'
     | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/roster'
     | '/_authenticated/portal/agenda'
@@ -630,6 +713,9 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
+    | '/_authenticated/_admin/deal-memos/configuracion'
+    | '/_authenticated/_admin/deal-memos/contactos'
+    | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/marketing/calendar'
     | '/_authenticated/_admin/opportunities/$opportunityId'
@@ -645,7 +731,9 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/platforms/'
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
+    | '/_authenticated/_admin/deal-memos/plantillas/$plantillaId'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
+    | '/_authenticated/_admin/deal-memos/plantillas/'
     | '/_authenticated/_admin/marketing/brand/'
     | '/_authenticated/_admin/marketing/case-studies/'
     | '/_authenticated/_admin/marketing/clippings/'
@@ -659,6 +747,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  AprobarTokenRoute: typeof AprobarTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -683,6 +772,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/aprobar/$token': {
+      id: '/aprobar/$token'
+      path: '/aprobar/$token'
+      fullPath: '/aprobar/$token'
+      preLoaderRoute: typeof AprobarTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/portal': {
       id: '/_authenticated/portal'
@@ -796,6 +892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos': {
+      id: '/_authenticated/_admin/deal-memos'
+      path: '/deal-memos'
+      fullPath: '/deal-memos'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/calendar': {
       id: '/_authenticated/_admin/calendar'
       path: '/calendar'
@@ -861,10 +964,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/_admin/deal-memos/': {
       id: '/_authenticated/_admin/deal-memos/'
-      path: '/deal-memos'
+      path: '/'
       fullPath: '/deal-memos/'
       preLoaderRoute: typeof AuthenticatedAdminDealMemosIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
     '/_authenticated/_admin/contracts/': {
       id: '/_authenticated/_admin/contracts/'
@@ -922,12 +1025,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/lista': {
+      id: '/_authenticated/_admin/deal-memos/lista'
+      path: '/lista'
+      fullPath: '/deal-memos/lista'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosListaRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
+    '/_authenticated/_admin/deal-memos/contactos': {
+      id: '/_authenticated/_admin/deal-memos/contactos'
+      path: '/contactos'
+      fullPath: '/deal-memos/contactos'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosContactosRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
+    '/_authenticated/_admin/deal-memos/configuracion': {
+      id: '/_authenticated/_admin/deal-memos/configuracion'
+      path: '/configuracion'
+      fullPath: '/deal-memos/configuracion'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
     '/_authenticated/_admin/deal-memos/$dealMemoId': {
       id: '/_authenticated/_admin/deal-memos/$dealMemoId'
-      path: '/deal-memos/$dealMemoId'
+      path: '/$dealMemoId'
       fullPath: '/deal-memos/$dealMemoId'
       preLoaderRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
     '/_authenticated/_admin/contracts/$contractId': {
       id: '/_authenticated/_admin/contracts/$contractId'
@@ -1006,6 +1130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingBrandIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/plantillas/': {
+      id: '/_authenticated/_admin/deal-memos/plantillas/'
+      path: '/plantillas'
+      fullPath: '/deal-memos/plantillas/'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosPlantillasIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
     '/_authenticated/_admin/marketing/target-accounts/$accountId': {
       id: '/_authenticated/_admin/marketing/target-accounts/$accountId'
       path: '/marketing/target-accounts/$accountId'
@@ -1013,19 +1144,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/deal-memos/plantillas/$plantillaId': {
+      id: '/_authenticated/_admin/deal-memos/plantillas/$plantillaId'
+      path: '/plantillas/$plantillaId'
+      fullPath: '/deal-memos/plantillas/$plantillaId'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
   }
 }
+
+interface AuthenticatedAdminDealMemosRouteChildren {
+  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  AuthenticatedAdminDealMemosConfiguracionRoute: typeof AuthenticatedAdminDealMemosConfiguracionRoute
+  AuthenticatedAdminDealMemosContactosRoute: typeof AuthenticatedAdminDealMemosContactosRoute
+  AuthenticatedAdminDealMemosListaRoute: typeof AuthenticatedAdminDealMemosListaRoute
+  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
+  AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute: typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
+  AuthenticatedAdminDealMemosPlantillasIndexRoute: typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
+}
+
+const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRouteChildren =
+  {
+    AuthenticatedAdminDealMemosDealMemoIdRoute:
+      AuthenticatedAdminDealMemosDealMemoIdRoute,
+    AuthenticatedAdminDealMemosConfiguracionRoute:
+      AuthenticatedAdminDealMemosConfiguracionRoute,
+    AuthenticatedAdminDealMemosContactosRoute:
+      AuthenticatedAdminDealMemosContactosRoute,
+    AuthenticatedAdminDealMemosListaRoute:
+      AuthenticatedAdminDealMemosListaRoute,
+    AuthenticatedAdminDealMemosIndexRoute:
+      AuthenticatedAdminDealMemosIndexRoute,
+    AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute:
+      AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute,
+    AuthenticatedAdminDealMemosPlantillasIndexRoute:
+      AuthenticatedAdminDealMemosPlantillasIndexRoute,
+  }
+
+const AuthenticatedAdminDealMemosRouteWithChildren =
+  AuthenticatedAdminDealMemosRoute._addFileChildren(
+    AuthenticatedAdminDealMemosRouteChildren,
+  )
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBudgetRoute: typeof AuthenticatedAdminBudgetRoute
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
+  AuthenticatedAdminDealMemosRoute: typeof AuthenticatedAdminDealMemosRouteWithChildren
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
-  AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminMarketingCalendarRoute: typeof AuthenticatedAdminMarketingCalendarRoute
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
@@ -1034,7 +1205,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
-  AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
@@ -1056,6 +1226,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBudgetRoute: AuthenticatedAdminBudgetRoute,
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
+  AuthenticatedAdminDealMemosRoute:
+    AuthenticatedAdminDealMemosRouteWithChildren,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
   AuthenticatedAdminComposersComposerIdRoute:
@@ -1063,8 +1235,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
   AuthenticatedAdminContractsContractIdRoute:
     AuthenticatedAdminContractsContractIdRoute,
-  AuthenticatedAdminDealMemosDealMemoIdRoute:
-    AuthenticatedAdminDealMemosDealMemoIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminMarketingCalendarRoute:
@@ -1078,7 +1248,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
-  AuthenticatedAdminDealMemosIndexRoute: AuthenticatedAdminDealMemosIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
@@ -1163,6 +1332,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  AprobarTokenRoute: AprobarTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
