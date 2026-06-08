@@ -48,6 +48,7 @@ import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from
 import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
+import { Route as AuthenticatedAdminDealMemosContactosRouteImport } from './routes/_authenticated/_admin/deal-memos.contactos'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
@@ -287,6 +288,12 @@ const AuthenticatedAdminDealMemosListaRoute =
     path: '/lista',
     getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
+const AuthenticatedAdminDealMemosContactosRoute =
+  AuthenticatedAdminDealMemosContactosRouteImport.update({
+    id: '/contactos',
+    path: '/contactos',
+    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
+  } as any)
 const AuthenticatedAdminDealMemosDealMemoIdRoute =
   AuthenticatedAdminDealMemosDealMemoIdRouteImport.update({
     id: '/$dealMemoId',
@@ -404,6 +411,7 @@ export interface FileRoutesByFullPath {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -456,6 +464,7 @@ export interface FileRoutesByTo {
   '/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -513,6 +522,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/composers/new': typeof AuthenticatedAdminComposersNewRoute
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  '/_authenticated/_admin/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -569,6 +579,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
@@ -621,6 +632,7 @@ export interface FileRouteTypes {
     | '/composers/new'
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
+    | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
@@ -677,6 +689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/composers/new'
     | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
+    | '/_authenticated/_admin/deal-memos/contactos'
     | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/marketing/calendar'
@@ -986,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealMemosListaRouteImport
       parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
+    '/_authenticated/_admin/deal-memos/contactos': {
+      id: '/_authenticated/_admin/deal-memos/contactos'
+      path: '/contactos'
+      fullPath: '/deal-memos/contactos'
+      preLoaderRoute: typeof AuthenticatedAdminDealMemosContactosRouteImport
+      parentRoute: typeof AuthenticatedAdminDealMemosRoute
+    }
     '/_authenticated/_admin/deal-memos/$dealMemoId': {
       id: '/_authenticated/_admin/deal-memos/$dealMemoId'
       path: '/$dealMemoId'
@@ -1096,6 +1116,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminDealMemosRouteChildren {
   AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
+  AuthenticatedAdminDealMemosContactosRoute: typeof AuthenticatedAdminDealMemosContactosRoute
   AuthenticatedAdminDealMemosListaRoute: typeof AuthenticatedAdminDealMemosListaRoute
   AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute: typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
@@ -1106,6 +1127,8 @@ const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRoute
   {
     AuthenticatedAdminDealMemosDealMemoIdRoute:
       AuthenticatedAdminDealMemosDealMemoIdRoute,
+    AuthenticatedAdminDealMemosContactosRoute:
+      AuthenticatedAdminDealMemosContactosRoute,
     AuthenticatedAdminDealMemosListaRoute:
       AuthenticatedAdminDealMemosListaRoute,
     AuthenticatedAdminDealMemosIndexRoute:
