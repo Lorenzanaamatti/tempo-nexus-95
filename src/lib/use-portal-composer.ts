@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
 
@@ -16,10 +17,22 @@ export function usePortalComposer() {
   const { role, composerId: ownId, loading } = useCurrentRole();
   const isAdmin = role === "admin";
 
+  // Permite forzar el composer a previsualizar vía ?as=<id> en la URL.
+  const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  const asParam = typeof search?.as === "string" ? (search.as as string) : null;
+
   const [previewId, setPreviewId] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(KEY);
   });
+
+  // Si llega ?as=<id>, sincroniza la selección persistida.
+  useEffect(() => {
+    if (!isAdmin || !asParam) return;
+    if (asParam === previewId) return;
+    window.localStorage.setItem(KEY, asParam);
+    setPreviewId(asParam);
+  }, [isAdmin, asParam, previewId]);
 
   const composersQ = useQuery({
     queryKey: ["portal-preview-composers"],
@@ -49,7 +62,7 @@ export function usePortalComposer() {
     setPreviewId(id);
   }
 
-  const composerId = isAdmin ? previewId : ownId;
+  const composerId = isAdmin ? (asParam || previewId) : ownId;
 
   return {
     composerId,
