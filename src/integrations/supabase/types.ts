@@ -1120,6 +1120,7 @@ export type Database = {
           contract_type: string | null
           counterparty: string | null
           created_at: string
+          deal_memo_id: string | null
           end_date: string | null
           id: string
           language: Database["public"]["Enums"]["contract_language"]
@@ -1141,6 +1142,7 @@ export type Database = {
           contract_type?: string | null
           counterparty?: string | null
           created_at?: string
+          deal_memo_id?: string | null
           end_date?: string | null
           id?: string
           language?: Database["public"]["Enums"]["contract_language"]
@@ -1162,6 +1164,7 @@ export type Database = {
           contract_type?: string | null
           counterparty?: string | null
           created_at?: string
+          deal_memo_id?: string | null
           end_date?: string | null
           id?: string
           language?: Database["public"]["Enums"]["contract_language"]
@@ -1178,7 +1181,15 @@ export type Database = {
           updated_at?: string
           url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contracts_deal_memo_id_fkey"
+            columns: ["deal_memo_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deal_memo_eventos: {
         Row: {
@@ -1276,6 +1287,7 @@ export type Database = {
           moneda: string
           notas_internas: string | null
           obra: string
+          opportunity_id: string | null
           plantilla_id: string | null
           plazo_respuesta_dias: number
           referencia: string
@@ -1299,6 +1311,7 @@ export type Database = {
           moneda?: string
           notas_internas?: string | null
           obra: string
+          opportunity_id?: string | null
           plantilla_id?: string | null
           plazo_respuesta_dias?: number
           referencia: string
@@ -1322,6 +1335,7 @@ export type Database = {
           moneda?: string
           notas_internas?: string | null
           obra?: string
+          opportunity_id?: string | null
           plantilla_id?: string | null
           plazo_respuesta_dias?: number
           referencia?: string
@@ -1342,6 +1356,13 @@ export type Database = {
             columns: ["contraparte_id"]
             isOneToOne: false
             referencedRelation: "dm_contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
           {
@@ -2363,6 +2384,7 @@ export type Database = {
           award_date: string | null
           color: string | null
           composer_id: string | null
+          contract_id: string | null
           created_at: string
           delivery_date: string | null
           director: string | null
@@ -2401,6 +2423,7 @@ export type Database = {
           award_date?: string | null
           color?: string | null
           composer_id?: string | null
+          contract_id?: string | null
           created_at?: string
           delivery_date?: string | null
           director?: string | null
@@ -2439,6 +2462,7 @@ export type Database = {
           award_date?: string | null
           color?: string | null
           composer_id?: string | null
+          contract_id?: string | null
           created_at?: string
           delivery_date?: string | null
           director?: string | null
@@ -2479,6 +2503,13 @@ export type Database = {
             columns: ["composer_id"]
             isOneToOne: false
             referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
