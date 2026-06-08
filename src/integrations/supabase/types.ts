@@ -1900,6 +1900,60 @@ export type Database = {
           },
         ]
       }
+      person_verifier_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          kpi_review: string | null
+          kpi_review_date: string | null
+          objectives: string | null
+          person_id: string
+          position: number
+          start_date: string | null
+          updated_at: string
+          verifier_person_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kpi_review?: string | null
+          kpi_review_date?: string | null
+          objectives?: string | null
+          person_id: string
+          position?: number
+          start_date?: string | null
+          updated_at?: string
+          verifier_person_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kpi_review?: string | null
+          kpi_review_date?: string | null
+          objectives?: string | null
+          person_id?: string
+          position?: number
+          start_date?: string | null
+          updated_at?: string
+          verifier_person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_verifier_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_verifier_assignments_verifier_person_id_fkey"
+            columns: ["verifier_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platforms: {
         Row: {
           contact_name: string | null
