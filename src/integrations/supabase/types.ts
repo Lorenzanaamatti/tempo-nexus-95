@@ -3171,7 +3171,7 @@ export type Database = {
         | "seguimiento_producciones"
         | "ai_envia_presus_productoras"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
-      opportunity_kind: "fichaje" | "pitch"
+      opportunity_kind: "fichaje" | "pitch" | "fichaje_productora"
       opportunity_status:
         | "identificado"
         | "primer_contacto"
@@ -3179,6 +3179,11 @@ export type Database = {
         | "negociacion"
         | "cerrado"
         | "descartado"
+        | "sin_contacto"
+        | "contactado"
+        | "reunion"
+        | "cliente_activo"
+        | "en_pausa"
       outreach_template_kind:
         | "cold"
         | "follow_up"
@@ -3553,7 +3558,7 @@ export const Constants = {
         "ai_envia_presus_productoras",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
-      opportunity_kind: ["fichaje", "pitch"],
+      opportunity_kind: ["fichaje", "pitch", "fichaje_productora"],
       opportunity_status: [
         "identificado",
         "primer_contacto",
@@ -3561,6 +3566,11 @@ export const Constants = {
         "negociacion",
         "cerrado",
         "descartado",
+        "sin_contacto",
+        "contactado",
+        "reunion",
+        "cliente_activo",
+        "en_pausa",
       ],
       outreach_template_kind: [
         "cold",
