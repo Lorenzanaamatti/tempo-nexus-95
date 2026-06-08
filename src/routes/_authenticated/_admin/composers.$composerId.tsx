@@ -796,7 +796,7 @@ function Inner({
         />
       </Section>
 
-      <Section title="Equipo asignado a este representado">
+      <Section title="Equipo / Representación">
         <ComposerTeamEditor composerId={c.id} />
       </Section>
 
