@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
 import {
   FolderKanban,
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 });
 
 function PortalHome() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data } = useQuery({
     queryKey: ["portal-home", composerId],
     enabled: !!composerId,

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useMemo, useState } from "react";
 import { formatDateEs } from "@/lib/dates";
 
@@ -36,7 +36,7 @@ type Production = {
 };
 
 function Facturacion() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const [tab, setTab] = useState<"resumen" | "emitidas" | "cobros" | "ic" | "costes" | "calendario">("resumen");
 
   const { data, isLoading } = useQuery({

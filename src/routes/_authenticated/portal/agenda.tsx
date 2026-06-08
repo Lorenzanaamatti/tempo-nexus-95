@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 
 export const Route = createFileRoute("/_authenticated/portal/agenda")({
   component: Agenda,
 });
 
 function Agenda() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
     queryKey: ["portal-agenda", composerId],
     enabled: !!composerId,

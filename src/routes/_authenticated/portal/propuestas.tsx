@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, type OpportunityStatus } from "@/lib/opportunity-constants";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/portal/propuestas")({
 });
 
 function Propuestas() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
     queryKey: ["portal-propuestas", composerId],
     enabled: !!composerId,

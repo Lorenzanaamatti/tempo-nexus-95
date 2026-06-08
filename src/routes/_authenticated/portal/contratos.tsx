@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { CONTRACT_STATUS_LABEL, CONTRACT_STATUS_TONE, type ContractStatus } from "@/lib/contract-constants";
 import { formatDateEs } from "@/lib/dates";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/portal/contratos")({
 });
 
 function Contratos() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
     queryKey: ["portal-contratos", composerId],
     enabled: !!composerId,

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
 import {
   Mail,
@@ -36,7 +36,7 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
 ] as const;
 
 function PortalLayout() {
-  const { composerId } = useCurrentRole();
+  const { composerId, isAdmin, previewComposers, selectPreview } = usePortalComposer();
   const { user, signOut } = useAuth();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
 
@@ -99,6 +99,20 @@ function PortalLayout() {
             </div>
           </Link>
           <div className="ml-auto flex items-center gap-2">
+            {isAdmin && (
+              <select
+                value={composerId ?? ""}
+                onChange={(e) => selectPreview(e.target.value)}
+                className="h-10 rounded-full bg-white/80 px-3 text-xs font-medium text-foreground shadow-sm ring-1 ring-black/5 transition hover:bg-white"
+                aria-label="Previsualizar portal como"
+                title="Previsualizar portal como representado"
+              >
+                <option value="" disabled>Ver portal como…</option>
+                {previewComposers.map((c) => (
+                  <option key={c.id} value={c.id}>{c.artistic_name || c.full_name}</option>
+                ))}
+              </select>
+            )}
             <Link
               to="/portal/chat"
               aria-label={`Buzón${unread ? `: ${unread} sin leer` : ""}`}

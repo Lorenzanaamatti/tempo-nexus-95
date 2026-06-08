@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { ComposerChat } from "@/components/composer-chat";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/portal/chat")({
 });
 
 function PortalChat() {
-  const { composerId, loading } = useCurrentRole();
+  const { composerId, loading } = usePortalComposer();
   const { user } = useAuth();
   const qc = useQueryClient();
   const { ch } = Route.useSearch();

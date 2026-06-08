@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { PRODUCTION_STATUS_LABEL, PRODUCTION_KIND_LABEL, type ProductionStatus, type ProductionKind } from "@/lib/production-constants";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/portal/proyectos")({
 });
 
 function Proyectos() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
     queryKey: ["portal-proyectos", composerId],
     enabled: !!composerId,
