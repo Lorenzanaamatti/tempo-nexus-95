@@ -1,7 +1,7 @@
 import { SaveButton } from "@/components/save-button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { photoUrl, uploadComposerPhoto } from "@/lib/composers-api";
+import { useComposerPhotoUrl, uploadComposerPhoto } from "@/lib/composers-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -128,7 +128,7 @@ function PhotoCard({
   onSave: (patch: Partial<Photo>) => Promise<void>;
   onRemove: () => void;
 }) {
-  const url = photoUrl(photo.storage_path);
+  const url = useComposerPhotoUrl(photo.storage_path).data ?? null;
   const [year, setYear] = useState<string>(photo.year != null ? String(photo.year) : "");
   const [copyright, setCopyright] = useState<string>(photo.copyright ?? "");
   const [saving, setSaving] = useState(false);
