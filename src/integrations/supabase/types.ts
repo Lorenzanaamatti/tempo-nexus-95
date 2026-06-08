@@ -2139,36 +2139,46 @@ export type Database = {
       }
       production_assignments: {
         Row: {
+          composer_id: string | null
           created_at: string
           end_date: string | null
           id: string
           note: string | null
-          person_id: string
+          person_id: string | null
           production_id: string
           role_in_project: string | null
           start_date: string | null
         }
         Insert: {
+          composer_id?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
           note?: string | null
-          person_id: string
+          person_id?: string | null
           production_id: string
           role_in_project?: string | null
           start_date?: string | null
         }
         Update: {
+          composer_id?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
           note?: string | null
-          person_id?: string
+          person_id?: string | null
           production_id?: string
           role_in_project?: string | null
           start_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "production_assignments_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "production_assignments_person_id_fkey"
             columns: ["person_id"]
