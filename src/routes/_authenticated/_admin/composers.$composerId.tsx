@@ -222,7 +222,8 @@ function Inner({
   });
   const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
   const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
-  const portalLink = c.portal_url || `${typeof window !== "undefined" ? window.location.origin : ""}/me`;
+  const portalLink = c.portal_url
+    || `${typeof window !== "undefined" ? window.location.origin : ""}/portal?as=${c.id}`;
 
   function copyPortal() {
     navigator.clipboard.writeText(portalLink).then(
