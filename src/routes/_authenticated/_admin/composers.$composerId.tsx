@@ -588,6 +588,15 @@ function Inner({
               <option value="other">Otros</option>
             </select>
           </Field>
+          {(c as { roster_role?: string }).roster_role === "specialist" && (
+            <Field label="Tipo de especialista">
+              <Input
+                value={(c as { specialist_subtype?: string | null }).specialist_subtype ?? ""}
+                onChange={(e) => field("specialist_subtype" as never, (e.target.value || null) as never)}
+                placeholder="Ej. sound designer, foley artist, ingeniero de mezcla…"
+              />
+            </Field>
+          )}
           <Field label="Año de nacimiento">
             <Input
               type="number"
@@ -865,7 +874,7 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
     (p.billing_sprints ?? []).map((s: any) => ({ ...s, production_title: p.title, production_id: p.id })),
   );
   if (productions.length === 0) {
-    return <p className="text-sm text-muted-foreground">Asigna al compositor a una producción para ver su facturación.</p>;
+    return <p className="text-sm text-muted-foreground">Asigna al representado a una producción para ver su facturación.</p>;
   }
   if (sprints.length === 0) {
     return (

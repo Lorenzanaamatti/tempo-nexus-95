@@ -1,0 +1,1 @@
+ALTER TABLE public.composers ADD COLUMN IF NOT EXISTS specialist_subtype text;
