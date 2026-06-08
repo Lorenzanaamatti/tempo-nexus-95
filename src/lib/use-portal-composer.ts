@@ -18,7 +18,7 @@ export function usePortalComposer() {
   const isAdmin = role === "admin";
 
   // Permite forzar el composer a previsualizar vía ?as=<id> en la URL.
-  const search = useRouterState({ select: (s) => s.location.search }) as Record<string, unknown>;
+  const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const asParam = typeof search?.as === "string" ? (search.as as string) : null;
 
   const [previewId, setPreviewId] = useState<string | null>(() => {
