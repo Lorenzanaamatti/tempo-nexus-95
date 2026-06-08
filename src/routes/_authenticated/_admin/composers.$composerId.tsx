@@ -874,7 +874,7 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
     (p.billing_sprints ?? []).map((s: any) => ({ ...s, production_title: p.title, production_id: p.id })),
   );
   if (productions.length === 0) {
-    return <p className="text-sm text-muted-foreground">Asigna al compositor a una producción para ver su facturación.</p>;
+    return <p className="text-sm text-muted-foreground">Asigna al representado a una producción para ver su facturación.</p>;
   }
   if (sprints.length === 0) {
     return (
