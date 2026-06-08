@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
 import {
   Mail,
@@ -36,7 +36,7 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
 ] as const;
 
 function PortalLayout() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { user, signOut } = useAuth();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
 

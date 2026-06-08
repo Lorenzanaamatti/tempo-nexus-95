@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 import { IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 
 export const Route = createFileRoute("/_authenticated/portal/carrera")({
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/portal/carrera")({
 });
 
 function Carrera() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data } = useQuery({
     queryKey: ["portal-carrera", composerId],
     enabled: !!composerId,

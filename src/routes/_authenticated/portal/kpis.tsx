@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentRole } from "@/lib/use-role";
+import { usePortalComposer } from "@/lib/use-portal-composer";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
   component: Kpis,
@@ -11,7 +11,7 @@ const fmt = (n: number) =>
   new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
 
 function Kpis() {
-  const { composerId } = useCurrentRole();
+  const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
     queryKey: ["portal-kpis", composerId],
     enabled: !!composerId,
