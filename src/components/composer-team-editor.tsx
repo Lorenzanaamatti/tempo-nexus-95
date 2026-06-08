@@ -52,7 +52,7 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
           .eq("composer_id", composerId)
           .order("position"),
         supabase
-          .from("people")
+          .from("ic_team")
           .select("id, full_name, email")
           .eq("role", "ic_team")
           .order("full_name"),

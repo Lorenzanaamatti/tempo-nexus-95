@@ -59,7 +59,7 @@ function ComposerEditPage() {
         supabase.from("composer_languages").select("language_code").eq("composer_id", composerId),
         supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
-        supabase.from("people").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
+        supabase.from("ic_team").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
         (supabase as any)
           .from("opportunity_candidates")
           .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
