@@ -265,6 +265,7 @@ function Inner({
         renewal_date: c.renewal_date,
         career_notes: c.career_notes,
         portal_url: c.portal_url,
+        current_location: (c as { current_location?: string | null }).current_location ?? null,
       })
       .eq("id", c.id);
     setSaving(false);
