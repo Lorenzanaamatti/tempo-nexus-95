@@ -399,10 +399,18 @@ function Inner({
       <header className="mb-10 border-b border-border pb-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-5xl">{c.artistic_name || c.full_name}</h1>
-            {(c.legal_name || c.full_name) && (c.artistic_name && (c.legal_name || c.full_name) !== c.artistic_name) && (
-              <p className="mt-1 text-sm text-muted-foreground">Nombre legal: {c.legal_name || c.full_name}</p>
-            )}
+            <input
+              className="w-full max-w-2xl bg-transparent font-display text-5xl outline-none focus:border-b focus:border-primary"
+              value={c.artistic_name ?? c.full_name ?? ""}
+              placeholder="Nombre artístico…"
+              onChange={(e) => field(c.artistic_name != null ? "artistic_name" : "full_name", e.target.value || null)}
+            />
+            <input
+              className="mt-1 w-full max-w-xl bg-transparent text-sm text-muted-foreground outline-none focus:border-b focus:border-primary"
+              value={c.legal_name ?? c.full_name ?? ""}
+              placeholder="Nombre legal…"
+              onChange={(e) => field("legal_name", e.target.value || null)}
+            />
             <p className="mt-1 text-sm text-muted-foreground">
               {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización base"}
             </p>
