@@ -3,7 +3,7 @@ import {
   User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal,
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
-  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone,
+  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -75,6 +75,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
     { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature, active: pathname.startsWith("/deal-memos/plantillas") },
     { title: "Contactos DM", to: "/deal-memos/contactos", icon: User, active: pathname.startsWith("/deal-memos/contactos") },
+    { title: "Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
   ];
 
   // 6. MKTG
