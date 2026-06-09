@@ -980,26 +980,53 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
     );
   }
   const today = new Date().toISOString().slice(0, 10);
+  // Bruto = trabajo (lo que el representado factura). Comisión IC = lo que IC le descuenta.
+  // Neto representado = bruto − comisión IC. Nunca sumar ambos como "previsto".
   const totals = sprints.reduce(
     (acc: any, s: any) => {
       const a = Number(s.amount) || 0;
-      acc.previsto += a;
-      if (s.invoiced_date) acc.fact += a;
-      if (s.paid_date) acc.cob += a;
-      if (s.due_date && !s.invoiced_date && s.due_date < today) acc.venc += a;
+      const bucket = s.kind === "comision" ? acc.comision : acc.trabajo;
+      bucket.previsto += a;
+      if (s.invoiced_date) bucket.fact += a;
+      if (s.paid_date) bucket.cob += a;
+      if (s.due_date && !s.invoiced_date && s.due_date < today) bucket.venc += a;
       return acc;
     },
-    { previsto: 0, fact: 0, cob: 0, venc: 0 },
+    {
+      trabajo: { previsto: 0, fact: 0, cob: 0, venc: 0 },
+      comision: { previsto: 0, fact: 0, cob: 0, venc: 0 },
+    },
   );
+  const neto = {
+    previsto: totals.trabajo.previsto - totals.comision.previsto,
+    fact: totals.trabajo.fact - totals.comision.fact,
+    cob: totals.trabajo.cob - totals.comision.cob,
+  };
   sprints.sort((a: any, b: any) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Previsto" value={`${totals.previsto.toLocaleString("es-ES")} €`} />
-        <KPI label="Facturado" value={`${totals.fact.toLocaleString("es-ES")} €`} />
-        <KPI label="Cobrado" value={`${totals.cob.toLocaleString("es-ES")} €`} />
-        <KPI label="Vencido sin facturar" value={`${totals.venc.toLocaleString("es-ES")} €`} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="rounded-sm border border-primary/30 bg-card p-3">
+          <div className="smallcaps text-xs text-muted-foreground">Bruto (lo que factura el representado)</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">{totals.trabajo.previsto.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado {totals.trabajo.fact.toLocaleString("es-ES")} € · Cobrado {totals.trabajo.cob.toLocaleString("es-ES")} €</div>
+        </div>
+        <div className="rounded-sm border border-amber-500/40 bg-card p-3">
+          <div className="smallcaps text-xs text-muted-foreground">− Comisión IC</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">−{totals.comision.previsto.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturada {totals.comision.fact.toLocaleString("es-ES")} € · Cobrada {totals.comision.cob.toLocaleString("es-ES")} €</div>
+        </div>
+        <div className="rounded-sm border border-emerald-500/40 bg-card p-3">
+          <div className="smallcaps text-xs text-muted-foreground">Neto representado</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">{neto.previsto.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado {neto.fact.toLocaleString("es-ES")} € · Cobrado {neto.cob.toLocaleString("es-ES")} €</div>
+        </div>
       </div>
+      {totals.trabajo.venc > 0 && (
+        <p className="text-xs text-amber-600 dark:text-amber-400">
+          Vencido sin facturar (trabajo): {totals.trabajo.venc.toLocaleString("es-ES")} €
+        </p>
+      )}
       <div className="overflow-x-auto rounded-sm border border-border">
         <table className="min-w-full text-sm">
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
