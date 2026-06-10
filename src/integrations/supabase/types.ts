@@ -3530,7 +3530,12 @@ export type Database = {
       availability_status: "available" | "partial" | "unavailable"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
-      calendar_category: "operativo" | "marketing" | "facturacion" | "personal"
+      calendar_category:
+        | "operativo"
+        | "marketing"
+        | "facturacion"
+        | "personal"
+        | "legal"
       calendar_subject_type:
         | "person"
         | "production"
@@ -3939,7 +3944,13 @@ export const Constants = {
       availability_status: ["available", "partial", "unavailable"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
-      calendar_category: ["operativo", "marketing", "facturacion", "personal"],
+      calendar_category: [
+        "operativo",
+        "marketing",
+        "facturacion",
+        "personal",
+        "legal",
+      ],
       calendar_subject_type: [
         "person",
         "production",
