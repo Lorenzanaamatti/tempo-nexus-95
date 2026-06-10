@@ -36,6 +36,14 @@ const FAMILY_TO_CATEGORY: Record<string, string> = {
   tasks: "operativo",
 };
 
+const PRESETS = [
+  { key: "todos",        label: "Todos",         cats: ["personal","operativo","facturacion","marketing"] },
+  { key: "producciones", label: "Producciones",  cats: ["operativo"] },
+  { key: "facturacion",  label: "Facturación",   cats: ["facturacion"] },
+  { key: "marketing",    label: "Marketing",     cats: ["marketing"] },
+  { key: "personal",     label: "Personal",      cats: ["personal"] },
+] as const;
+
 function Agenda() {
   const { composerId } = usePortalComposer();
   const { data, isLoading } = useQuery({
@@ -58,7 +66,8 @@ function Agenda() {
             .from("calendar_events")
             .select("id, title, note, kind, start_date, end_date, subject_type")
             .eq("subject_type", s.type as any)
-            .eq("subject_id", s.id),
+            .eq("subject_id", s.id)
+            .eq("visible_to_composer" as any, true as any),
         ),
       );
       const seen = new Set<string>();
@@ -84,30 +93,34 @@ function Agenda() {
   });
 
   const [tab, setTab] = useState<"kanban" | "calendar" | "gantt">("kanban");
+  const [preset, setPreset] = useState<(typeof PRESETS)[number]["key"]>("todos");
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const [view, setView] = useState<CalendarView>("month");
 
   const flat: FlatCalendarEvent[] = useMemo(() => {
     const all = data?.all ?? [];
-    return all.map((e) => {
+    const cats = PRESETS.find((p) => p.key === preset)!.cats as readonly string[];
+    return all.flatMap((e) => {
       const family = KIND_FAMILY[e.kind] ?? "tasks";
       const subjectLabel =
         e.subject_type === "production" ? "Producción" :
         e.subject_type === "person" ? "Persona" :
         e.subject_type === "composer" ? "Compositor" : e.subject_type;
-      return {
+      const category = FAMILY_TO_CATEGORY[family] ?? "operativo";
+      if (!cats.includes(category)) return [];
+      return [{
         id: e.id,
         start: new Date(e.start_date),
         end: new Date(e.end_date ?? e.start_date),
         kind: e.kind,
         title: e.title ?? undefined,
         note: e.note,
-        category: FAMILY_TO_CATEGORY[family] ?? "operativo",
+        category,
         subjectLabel,
         subjectGroup: family,
-      } satisfies FlatCalendarEvent;
+      } satisfies FlatCalendarEvent];
     });
-  }, [data]);
+  }, [data, preset]);
 
   const range = useMemo(() => computeRange(view, anchor), [view, anchor]);
 
@@ -149,6 +162,21 @@ function Agenda() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-2">
+        <div className="flex flex-wrap items-center gap-1.5 pr-3">
+          {PRESETS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setPreset(p.key)}
+              className={`rounded-full px-3 py-1 text-xs transition ${
+                preset === p.key
+                  ? "bg-gradient-to-r from-[#e85d3a] to-[#c44569] text-white"
+                  : "bg-white/60 text-foreground/70 ring-1 ring-black/5 hover:bg-white"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
         {[
           { k: "kanban" as const, label: "Kanban", icon: KanbanSquare },
           { k: "calendar" as const, label: "Calendario", icon: CalendarDays },
