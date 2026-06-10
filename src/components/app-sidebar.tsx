@@ -81,7 +81,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
 
   // 6. MKTG
   const marketingItems: NavItem[] = [
-    { title: "Calendario MKTG", to: "/marketing/calendar", icon: CalendarDays, active: pathname.startsWith("/marketing/calendar") },
     { title: "Decks de venta", to: "/marketing/decks", icon: Presentation, active: pathname.startsWith("/marketing/decks") },
     { title: "Clipping", to: "/marketing/clippings", icon: Newspaper, active: pathname.startsWith("/marketing/clippings") },
     { title: "Libro de estilo", to: "/marketing/brand", icon: Palette, active: pathname.startsWith("/marketing/brand") },
