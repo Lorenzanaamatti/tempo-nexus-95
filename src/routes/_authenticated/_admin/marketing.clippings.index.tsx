@@ -37,6 +37,7 @@ type Clipping = {
   tags: string[];
   featured: boolean;
   notes: string | null;
+  visible_to_composer: boolean;
 };
 
 function ClippingsIndex() {
@@ -192,6 +193,7 @@ function ClippingSheet({ item, composers, onClose }: { item: Clipping | null; co
       outlet: form.outlet, headline: form.headline, author: form.author,
       published_date: form.published_date, language: form.language, url: form.url,
       composer_id: form.composer_id, tags: form.tags ?? [], featured: form.featured, notes: form.notes,
+      visible_to_composer: form.visible_to_composer,
     }).eq("id", form.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -267,6 +269,10 @@ function ClippingSheet({ item, composers, onClose }: { item: Clipping | null; co
           <div className="flex items-center gap-3 rounded-sm border border-border p-3">
             <Switch checked={form.featured} onCheckedChange={(v) => update("featured", v)} />
             <Label className="text-sm">Marcar como destacada</Label>
+          </div>
+          <div className="flex items-center gap-3 rounded-sm border border-border p-3">
+            <Switch checked={!!form.visible_to_composer} onCheckedChange={(v) => update("visible_to_composer", v)} />
+            <Label className="text-sm">Visible en el portal del representado</Label>
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps mb-2 block text-xs text-muted-foreground">Captura</Label>

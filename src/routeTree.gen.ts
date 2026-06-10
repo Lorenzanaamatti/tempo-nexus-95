@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
 import { Route as AuthenticatedPortalProyectosRouteImport } from './routes/_authenticated/portal/proyectos'
 import { Route as AuthenticatedPortalPropuestasRouteImport } from './routes/_authenticated/portal/propuestas'
+import { Route as AuthenticatedPortalPrensaRouteImport } from './routes/_authenticated/portal/prensa'
 import { Route as AuthenticatedPortalMensajesRouteImport } from './routes/_authenticated/portal/mensajes'
 import { Route as AuthenticatedPortalKpisRouteImport } from './routes/_authenticated/portal/kpis'
 import { Route as AuthenticatedPortalFacturacionRouteImport } from './routes/_authenticated/portal/facturacion'
@@ -122,6 +123,12 @@ const AuthenticatedPortalPropuestasRoute =
   AuthenticatedPortalPropuestasRouteImport.update({
     id: '/propuestas',
     path: '/propuestas',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalPrensaRoute =
+  AuthenticatedPortalPrensaRouteImport.update({
+    id: '/prensa',
+    path: '/prensa',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
 const AuthenticatedPortalMensajesRoute =
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
@@ -481,6 +489,7 @@ export interface FileRoutesByTo {
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
@@ -542,6 +551,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/_authenticated/portal/kpis': typeof AuthenticatedPortalKpisRoute
   '/_authenticated/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
+  '/_authenticated/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/_authenticated/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
   '/_authenticated/portal/proyectos': typeof AuthenticatedPortalProyectosRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
@@ -602,6 +612,7 @@ export interface FileRouteTypes {
     | '/portal/facturacion'
     | '/portal/kpis'
     | '/portal/mensajes'
+    | '/portal/prensa'
     | '/portal/propuestas'
     | '/portal/proyectos'
     | '/portal/'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/portal/facturacion'
     | '/portal/kpis'
     | '/portal/mensajes'
+    | '/portal/prensa'
     | '/portal/propuestas'
     | '/portal/proyectos'
     | '/portal'
@@ -718,6 +730,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/facturacion'
     | '/_authenticated/portal/kpis'
     | '/_authenticated/portal/mensajes'
+    | '/_authenticated/portal/prensa'
     | '/_authenticated/portal/propuestas'
     | '/_authenticated/portal/proyectos'
     | '/_authenticated/portal/'
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/propuestas'
       fullPath: '/portal/propuestas'
       preLoaderRoute: typeof AuthenticatedPortalPropuestasRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/prensa': {
+      id: '/_authenticated/portal/prensa'
+      path: '/prensa'
+      fullPath: '/portal/prensa'
+      preLoaderRoute: typeof AuthenticatedPortalPrensaRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/portal/mensajes': {
@@ -1310,6 +1330,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalFacturacionRoute: typeof AuthenticatedPortalFacturacionRoute
   AuthenticatedPortalKpisRoute: typeof AuthenticatedPortalKpisRoute
   AuthenticatedPortalMensajesRoute: typeof AuthenticatedPortalMensajesRoute
+  AuthenticatedPortalPrensaRoute: typeof AuthenticatedPortalPrensaRoute
   AuthenticatedPortalPropuestasRoute: typeof AuthenticatedPortalPropuestasRoute
   AuthenticatedPortalProyectosRoute: typeof AuthenticatedPortalProyectosRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
@@ -1323,6 +1344,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalFacturacionRoute: AuthenticatedPortalFacturacionRoute,
   AuthenticatedPortalKpisRoute: AuthenticatedPortalKpisRoute,
   AuthenticatedPortalMensajesRoute: AuthenticatedPortalMensajesRoute,
+  AuthenticatedPortalPrensaRoute: AuthenticatedPortalPrensaRoute,
   AuthenticatedPortalPropuestasRoute: AuthenticatedPortalPropuestasRoute,
   AuthenticatedPortalProyectosRoute: AuthenticatedPortalProyectosRoute,
   AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,

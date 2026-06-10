@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ type Kit = {
   external_url: string | null;
   public_link: string | null;
   notes: string | null;
+  visible_to_composer: boolean;
 };
 
 function PressKitsIndex() {
@@ -157,7 +159,7 @@ function KitSheet({ item, composers, onClose }: { item: Kit | null; composers: {
     const { error } = await (supabase as any).from("press_kits").update({
       title: f!.title, scope: f!.scope, composer_id: f!.scope === "compositor" ? f!.composer_id : null,
       language: f!.language, version: f!.version, external_url: f!.external_url,
-      public_link: f!.public_link, notes: f!.notes,
+      public_link: f!.public_link, notes: f!.notes, visible_to_composer: f!.visible_to_composer,
     }).eq("id", f!.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -243,6 +245,13 @@ function KitSheet({ item, composers, onClose }: { item: Kit | null; composers: {
           <Field label="Enlace externo"><Input value={f.external_url ?? ""} onChange={(e) => up("external_url", e.target.value || null)} placeholder="https://…" /></Field>
           <Field label="Enlace público compartible"><Input value={f.public_link ?? ""} onChange={(e) => up("public_link", e.target.value || null)} /></Field>
           <Field label="Notas"><Textarea rows={3} value={f.notes ?? ""} onChange={(e) => up("notes", e.target.value || null)} /></Field>
+
+          {f.scope === "compositor" && (
+            <div className="flex items-center gap-3 rounded-sm border border-border p-3">
+              <Switch checked={!!f.visible_to_composer} onCheckedChange={(v) => up("visible_to_composer", v)} />
+              <Label className="text-sm">Visible en el portal del representado</Label>
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-3 pt-2">
             <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive"><Trash2 className="mr-1 h-4 w-4" /> Eliminar</Button>
