@@ -1,10 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { FinanceDashboard } from "@/components/finance-dashboard";
 import { formatEUR } from "@/lib/money";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 const searchSchema = z.object({ composerId: z.string().uuid().optional() });
 
@@ -54,6 +63,19 @@ function FinancePage() {
         <h2 className="font-display text-2xl">Presupuesto por proyecto</h2>
         <BudgetTable composerId={composerId ?? null} />
       </section>
+
+      {!composerId && (
+        <>
+          <section className="mt-12 space-y-3">
+            <h2 className="font-display text-2xl">Business Plan · Presupuesto vs. real</h2>
+            <BusinessPlanPanel />
+          </section>
+          <section className="mt-12 space-y-3">
+            <h2 className="font-display text-2xl">Gastos operativos IC</h2>
+            <IcExpensesPanel />
+          </section>
+        </>
+      )}
     </div>
   );
 }
