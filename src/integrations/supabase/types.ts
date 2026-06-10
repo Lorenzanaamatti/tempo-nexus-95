@@ -2738,6 +2738,71 @@ export type Database = {
         }
         Relationships: []
       }
+      providers: {
+        Row: {
+          city: string | null
+          composer_id: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          kind: Database["public"]["Enums"]["provider_kind"]
+          name: string
+          notes: string | null
+          phone: string | null
+          rate_notes: string | null
+          shared_with_ic: boolean
+          tags: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          composer_id?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["provider_kind"]
+          name: string
+          notes?: string | null
+          phone?: string | null
+          rate_notes?: string | null
+          shared_with_ic?: boolean
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          composer_id?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["provider_kind"]
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          rate_notes?: string | null
+          shared_with_ic?: boolean
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_campaigns: {
         Row: {
           composer_id: string | null
@@ -3514,6 +3579,24 @@ export type Database = {
         | "premiada"
         | "comunicada_nominacion"
         | "comunicado_premio"
+      provider_kind:
+        | "estudio_grabacion"
+        | "mezcla"
+        | "mastering"
+        | "musico"
+        | "orquesta"
+        | "copista"
+        | "editor_musical"
+        | "sonido"
+        | "post_produccion"
+        | "abogado"
+        | "gestoria"
+        | "fotografo"
+        | "video"
+        | "diseno"
+        | "web"
+        | "pr_marketing"
+        | "otros"
       representation_status:
         | "activo"
         | "pausa"
@@ -3915,6 +3998,25 @@ export const Constants = {
         "premiada",
         "comunicada_nominacion",
         "comunicado_premio",
+      ],
+      provider_kind: [
+        "estudio_grabacion",
+        "mezcla",
+        "mastering",
+        "musico",
+        "orquesta",
+        "copista",
+        "editor_musical",
+        "sonido",
+        "post_produccion",
+        "abogado",
+        "gestoria",
+        "fotografo",
+        "video",
+        "diseno",
+        "web",
+        "pr_marketing",
+        "otros",
       ],
       representation_status: [
         "activo",
