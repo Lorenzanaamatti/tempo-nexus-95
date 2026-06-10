@@ -84,12 +84,12 @@ function PortalLayout() {
     <div className="portal-shell min-h-screen">
       {/* Top bar */}
       <header className="sticky top-0 z-20 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-bg)]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-3">
-          <Link to="/portal" className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
+          <Link to="/portal" className="flex items-center gap-4">
             <img
               src={icLogo.url}
               alt="Interesante Compañía"
-              className="h-9 w-auto object-contain"
+              className="h-16 w-auto object-contain"
             />
             <div className="leading-tight">
               <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">Portal del representado</p>
