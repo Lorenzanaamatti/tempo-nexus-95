@@ -16,6 +16,7 @@ import {
   MessagesSquare,
   FolderOpen,
   LogOut,
+  Newspaper,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal")({
@@ -31,6 +32,7 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
   { to: "/portal/facturacion", label: "Facturación", icon: Receipt },
   { to: "/portal/contratos", label: "Contratos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda", icon: CalendarDays },
+  { to: "/portal/prensa", label: "Prensa", icon: Newspaper },
   { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
   { to: "/portal/chat", label: "Chat IC", icon: FolderOpen },
 ] as const;

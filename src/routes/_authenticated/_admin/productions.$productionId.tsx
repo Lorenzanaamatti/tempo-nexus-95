@@ -12,6 +12,7 @@ import { Trash2, Plus } from "lucide-react";
 import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
+import { ProductionPhasesEditor } from "@/components/production-phases-editor";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { SuggestInput } from "@/components/suggest-input";
@@ -455,6 +456,12 @@ function ProductionEdit() {
           title="Sprints de facturación · Comisión IC"
           totalReference={computedCommission ?? (form.ic_commission === "" ? null : Number(form.ic_commission))}
         />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="mb-1 font-display text-2xl">Fases de la producción</h2>
+        <p className="mb-3 text-sm text-muted-foreground">Define las fases libres de esta producción (composición, grabación, mezcla, mastering, entrega…). Se sincronizan al calendario operativo.</p>
+        <ProductionPhasesEditor productionId={productionId} />
       </div>
 
       <div className="mt-10">
