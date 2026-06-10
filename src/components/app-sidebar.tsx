@@ -115,16 +115,16 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
-        <Link to="/" className="flex items-center gap-2">
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-5">
+        <Link to="/" className="flex items-center gap-3">
           <img
             src={icLogo.url}
             alt="Interesante Compañía"
-            className="h-9 w-9 object-contain"
+            className={collapsed ? "h-10 w-10 object-contain" : "h-14 w-14 object-contain"}
           />
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-lg text-sidebar-foreground">Interesante</span>
+              <span className="font-display text-xl text-sidebar-foreground">Interesante</span>
               <span className="smallcaps text-sidebar-foreground/60">Compañía</span>
             </div>
           )}
