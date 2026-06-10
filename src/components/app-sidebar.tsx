@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppSidebar({ role }: { role: AppRole | null }) {
   const { state } = useSidebar();
@@ -193,6 +194,14 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div className={collapsed ? "flex justify-center py-1" : "flex items-center justify-between gap-2 px-2 py-1"}>
+              {!collapsed && (
+                <span className="smallcaps text-sidebar-foreground/60">Tema</span>
+              )}
+              <ThemeToggle />
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => signOut()}>
               <LogOut className="h-4 w-4" />
