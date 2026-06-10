@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
+import icLogo from "@/assets/interesante-compania-logo.png.asset.json";
 import {
   Mail,
   Home,
@@ -78,37 +79,32 @@ function PortalLayout() {
   });
 
   const name = composer?.artistic_name || composer?.full_name || "Bienvenido/a";
-  const initials = name
-    .split(/\s+/)
-    .map((s: string) => s[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   return (
-    <div className="portal-shell min-h-screen text-foreground">
+    <div className="portal-shell min-h-screen">
       {/* Top bar */}
-      <header className="sticky top-0 z-20 border-b border-white/40 bg-white/60 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-bg)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-3">
           <Link to="/portal" className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-[#e85d3a] via-[#c44569] to-[#6c5ce7] font-display text-base italic text-white shadow-lg shadow-[#c44569]/30">
-              {initials || "IC"}
-            </div>
+            <img
+              src={icLogo.url}
+              alt="Interesante Compañía"
+              className="h-9 w-auto object-contain"
+            />
             <div className="leading-tight">
-              <p className="smallcaps text-[10px] text-muted-foreground">Portal del representado</p>
-              <p className="font-display text-base">{name}</p>
+              <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">Portal del representado</p>
+              <p className="font-display text-base text-[color:var(--portal-fg)]">{name}</p>
             </div>
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <Link
               to="/portal/chat"
               aria-label={`Buzón${unread ? `: ${unread} sin leer` : ""}`}
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-foreground shadow-sm ring-1 ring-black/5 transition hover:scale-105 hover:bg-white"
+              className="relative inline-flex h-10 w-10 items-center justify-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)] transition hover:border-[color:var(--portal-border-strong)]"
             >
               <Mail className="h-4 w-4" />
               {unread > 0 && (
-                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#c44569] px-1 text-[10px] font-semibold text-white shadow">
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--accent-coral)] px-1 text-[10px] font-semibold text-[color:var(--portal-bg)]">
                   {unread > 99 ? "99+" : unread}
                 </span>
               )}
@@ -117,7 +113,7 @@ function PortalLayout() {
               type="button"
               onClick={() => signOut()}
               aria-label="Salir"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/60 text-muted-foreground ring-1 ring-black/5 transition hover:bg-white hover:text-foreground"
+              className="inline-flex h-10 w-10 items-center justify-center border border-[color:var(--portal-border)] text-[color:var(--portal-muted)] transition hover:border-[color:var(--portal-border-strong)] hover:text-[color:var(--portal-fg)]"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -125,7 +121,7 @@ function PortalLayout() {
         </div>
         {/* Sub-nav */}
         <nav className="mx-auto max-w-6xl overflow-x-auto px-6 pb-3">
-          <ul className="flex gap-1.5 whitespace-nowrap">
+          <ul className="flex gap-5 whitespace-nowrap">
             {NAV.map((item) => {
               const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
               return (
@@ -133,10 +129,10 @@ function PortalLayout() {
                   <Link
                     to={item.to as never}
                     className={
-                      "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition " +
+                      "relative inline-flex items-center gap-1.5 py-1.5 text-xs font-medium transition " +
                       (active
-                        ? "bg-gradient-to-r from-[#e85d3a] to-[#c44569] text-white shadow-md shadow-[#c44569]/30"
-                        : "bg-white/60 text-foreground/70 ring-1 ring-black/5 hover:bg-white hover:text-foreground")
+                        ? "text-[color:var(--portal-fg)] after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-px after:bg-[color:var(--accent-coral)]"
+                        : "text-[color:var(--portal-muted)] hover:text-[color:var(--portal-fg)]")
                     }
                   >
                     <item.icon className="h-3.5 w-3.5" />
@@ -148,7 +144,7 @@ function PortalLayout() {
           </ul>
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10 text-[color:var(--portal-fg)]">
         <Outlet />
       </main>
     </div>

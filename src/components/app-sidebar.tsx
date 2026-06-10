@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth-context";
 import type { AppRole } from "@/lib/use-role";
+import icLogo from "@/assets/interesante-compania-logo.png.asset.json";
 
 export function AppSidebar({ role }: { role: AppRole | null }) {
   const { state } = useSidebar();
@@ -116,9 +117,11 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-sm border border-sidebar-primary/60 bg-sidebar-primary/20 font-display text-lg italic text-sidebar-primary-foreground">
-            ic
-          </div>
+          <img
+            src={icLogo.url}
+            alt="Interesante Compañía"
+            className="h-9 w-9 object-contain"
+          />
           {!collapsed && (
             <div className="flex flex-col leading-tight">
               <span className="font-display text-lg text-sidebar-foreground">Interesante</span>

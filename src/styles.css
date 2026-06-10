@@ -102,6 +102,17 @@
   --sidebar-accent-foreground: oklch(0.97 0.005 75);
   --sidebar-border: oklch(0.28 0.010 60);
   --sidebar-ring: oklch(0.62 0.14 25);
+  /* Coral accent (used by portal noir surfaces and selective brand moments) */
+  --accent-coral: oklch(0.68 0.18 30);
+  --accent-coral-soft: oklch(0.72 0.14 30);
+  /* Portal noir tokens — editorial grid hairline */
+  --portal-bg: oklch(0.15 0.005 60);
+  --portal-fg: oklch(0.94 0.005 70);
+  --portal-surface: oklch(0.18 0.006 60);
+  --portal-surface-hover: oklch(0.21 0.007 60);
+  --portal-border: oklch(0.28 0.008 60);
+  --portal-border-strong: oklch(0.40 0.010 60);
+  --portal-muted: oklch(0.58 0.008 60);
 }
 
 .dark {
@@ -162,30 +173,25 @@
 }
 
 @utility portal-shell {
-  background:
-    radial-gradient(60rem 40rem at 110% -10%, oklch(0.88 0.14 30 / 0.55), transparent 60%),
-    radial-gradient(50rem 36rem at -10% 10%, oklch(0.86 0.10 320 / 0.45), transparent 60%),
-    radial-gradient(70rem 50rem at 50% 110%, oklch(0.90 0.10 260 / 0.45), transparent 60%),
-    linear-gradient(180deg, oklch(0.985 0.01 80) 0%, oklch(0.97 0.015 60) 100%);
+  background: var(--portal-bg);
+  color: var(--portal-fg);
 }
 
 @utility portal-card {
   position: relative;
-  background: color-mix(in oklab, white 86%, transparent);
-  backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in oklab, white 70%, transparent);
-  border-radius: var(--radius-2xl);
-  box-shadow:
-    0 1px 0 white inset,
-    0 12px 30px -18px oklch(0.30 0.10 20 / 0.25);
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  background: var(--portal-surface);
+  border: 1px solid var(--portal-border);
+  border-radius: 2px;
+  transition: border-color 200ms ease, background-color 200ms ease;
 }
 
 @utility portal-card-hover {
   &:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 1px 0 white inset,
-      0 18px 40px -18px oklch(0.30 0.10 20 / 0.35);
+    border-color: var(--portal-border-strong);
+    background: var(--portal-surface-hover);
   }
+}
+
+@utility portal-accent {
+  color: var(--accent-coral);
 }
