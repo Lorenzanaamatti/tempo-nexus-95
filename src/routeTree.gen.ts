@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminDealMemosRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenticated/_admin/budget'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
+import { Route as AuthenticatedAdminProvidersIndexRouteImport } from './routes/_authenticated/_admin/providers.index'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
 import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_authenticated/_admin/platforms.index'
@@ -197,6 +198,12 @@ const AuthenticatedAdminBillingRoute =
   AuthenticatedAdminBillingRouteImport.update({
     id: '/billing',
     path: '/billing',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProvidersIndexRoute =
+  AuthenticatedAdminProvidersIndexRouteImport.update({
+    id: '/providers/',
+    path: '/providers/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminProductionsIndexRoute =
@@ -443,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/providers/': typeof AuthenticatedAdminProvidersIndexRoute
   '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -498,6 +506,7 @@ export interface FileRoutesByTo {
   '/platforms': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/productions': typeof AuthenticatedAdminProductionsIndexRoute
+  '/providers': typeof AuthenticatedAdminProvidersIndexRoute
   '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -558,6 +567,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
   '/_authenticated/_admin/productions/': typeof AuthenticatedAdminProductionsIndexRoute
+  '/_authenticated/_admin/providers/': typeof AuthenticatedAdminProvidersIndexRoute
   '/_authenticated/_admin/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -617,6 +627,7 @@ export interface FileRouteTypes {
     | '/platforms/'
     | '/production-companies/'
     | '/productions/'
+    | '/providers/'
     | '/deal-memos/plantillas/$plantillaId'
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas/'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/platforms'
     | '/production-companies'
     | '/productions'
+    | '/providers'
     | '/deal-memos/plantillas/$plantillaId'
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas'
@@ -731,6 +743,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/platforms/'
     | '/_authenticated/_admin/production-companies/'
     | '/_authenticated/_admin/productions/'
+    | '/_authenticated/_admin/providers/'
     | '/_authenticated/_admin/deal-memos/plantillas/$plantillaId'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
     | '/_authenticated/_admin/deal-memos/plantillas/'
@@ -918,6 +931,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/providers/': {
+      id: '/_authenticated/_admin/providers/'
+      path: '/providers'
+      fullPath: '/providers/'
+      preLoaderRoute: typeof AuthenticatedAdminProvidersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/productions/': {
@@ -1211,6 +1231,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPlatformsIndexRoute: typeof AuthenticatedAdminPlatformsIndexRoute
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
   AuthenticatedAdminProductionsIndexRoute: typeof AuthenticatedAdminProductionsIndexRoute
+  AuthenticatedAdminProvidersIndexRoute: typeof AuthenticatedAdminProvidersIndexRoute
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   AuthenticatedAdminMarketingBrandIndexRoute: typeof AuthenticatedAdminMarketingBrandIndexRoute
   AuthenticatedAdminMarketingCaseStudiesIndexRoute: typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
@@ -1257,6 +1278,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionCompaniesIndexRoute,
   AuthenticatedAdminProductionsIndexRoute:
     AuthenticatedAdminProductionsIndexRoute,
+  AuthenticatedAdminProvidersIndexRoute: AuthenticatedAdminProvidersIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute:
     AuthenticatedAdminMarketingTargetAccountsAccountIdRoute,
   AuthenticatedAdminMarketingBrandIndexRoute:
