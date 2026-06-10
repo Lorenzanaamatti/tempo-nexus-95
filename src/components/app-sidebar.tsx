@@ -3,7 +3,7 @@ import {
   User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic, MoreHorizontal,
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
-  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users,
+  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +55,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
+    { title: "Proveedores", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
   ];
 
   // 3. OPORTUNIDADES
