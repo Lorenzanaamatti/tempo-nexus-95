@@ -1618,6 +1618,89 @@ export type Database = {
         }
         Relationships: []
       }
+      ic_budget_lines: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          created_at: string
+          id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          created_at?: string
+          id?: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          created_at?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      ic_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          concept: string
+          created_at: string
+          expense_date: string
+          id: string
+          notes: string | null
+          paid_date: string | null
+          provider_id: string | null
+          updated_at: string
+          vat_pct: number | null
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          concept: string
+          created_at?: string
+          expense_date: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          provider_id?: string | null
+          updated_at?: string
+          vat_pct?: number | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          concept?: string
+          created_at?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          provider_id?: string | null
+          updated_at?: string
+          vat_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ic_expenses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       languages: {
         Row: {
           code: string
@@ -3456,6 +3539,13 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      ic_budget_category:
+        | "ingreso_comision"
+        | "ingreso_otros"
+        | "gasto_personal"
+        | "gasto_operativo"
+        | "gasto_marketing"
+        | "gasto_otros"
       ic_team_function:
         | "equipo_virtual"
         | "direccion_general"
@@ -3868,6 +3958,14 @@ export const Constants = {
         "spot",
         "game",
         "other",
+      ],
+      ic_budget_category: [
+        "ingreso_comision",
+        "ingreso_otros",
+        "gasto_personal",
+        "gasto_operativo",
+        "gasto_marketing",
+        "gasto_otros",
       ],
       ic_team_function: [
         "equipo_virtual",
