@@ -111,7 +111,7 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
 
   return (
     <div className="grid gap-4 md:grid-cols-[220px_1fr]">
-      <aside className="rounded-sm border border-border bg-card/40 p-2">
+      <aside className="rounded-sm border border-border bg-muted p-2">
         <ul className="space-y-0.5">
           {(channelsQ.data ?? []).map((c) => (
             <li key={c.id}>
@@ -119,7 +119,9 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
                 type="button"
                 onClick={() => setActiveId(c.id)}
                 className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition ${
-                  c.id === activeId ? "bg-primary/15 text-foreground" : "hover:bg-muted/50 text-muted-foreground"
+                  c.id === activeId
+                    ? "bg-primary/15 text-foreground font-medium"
+                    : "text-foreground/80 hover:bg-background hover:text-foreground"
                 }`}
               >
                 <Hash className="h-3.5 w-3.5 opacity-60" />
