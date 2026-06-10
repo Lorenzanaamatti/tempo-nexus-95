@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
-import icLogo from "@/assets/interesante-compania-logo.png.asset.json";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   Mail,
   Home,
@@ -86,11 +86,7 @@ function PortalLayout() {
       <header className="sticky top-0 z-20 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-bg)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
           <Link to="/portal" className="flex items-center gap-4">
-            <img
-              src={icLogo.url}
-              alt="Interesante Compañía"
-              className="h-16 w-auto object-contain"
-            />
+            <BrandLogo variant="noir" className="h-16 w-auto object-contain" />
             <div className="leading-tight">
               <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">Portal del representado</p>
               <p className="font-display text-base text-[color:var(--portal-fg)]">{name}</p>
