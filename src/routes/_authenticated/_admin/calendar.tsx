@@ -72,12 +72,12 @@ const LAYOUT_ICONS: Record<Layout, typeof GanttChartSquare> = {
 };
 
 const CAL_VIEWS = [
-  { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[] },
-  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[] },
-  { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[] },
-  { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[] },
-  { key: "personal",     label: "Personal",     cats: ["personal"] as Category[] },
-  { key: "legal",        label: "Legal",        cats: ["operativo"] as Category[] },
+  { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
+  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false },
+  { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[], onlyMine: false },
+  { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[], onlyMine: false },
+  { key: "personal",     label: "Personal",     cats: ["personal"] as Category[], onlyMine: true },
+  { key: "legal",        label: "Legal",        cats: ["operativo"] as Category[], onlyMine: false },
 ] as const;
 
 function GlobalCalendar() {
@@ -103,6 +103,7 @@ function GlobalCalendar() {
       <CalendarBoard
         key={preset.key}
         initialCategories={preset.cats}
+        initialOnlyMine={preset.onlyMine}
         title={preset.key === "global" ? "Calendario general" : `Calendario · ${preset.label}`}
       />
     </div>
@@ -112,12 +113,14 @@ function GlobalCalendar() {
 export function CalendarBoard({
   lockedCategory,
   initialCategories,
+  initialOnlyMine = false,
   title = "Calendario general",
   eyebrow = "Interesante Compañía",
   description,
 }: {
   lockedCategory?: Category;
   initialCategories?: Category[];
+  initialOnlyMine?: boolean;
   title?: string;
   eyebrow?: string;
   description?: React.ReactNode;
@@ -126,7 +129,7 @@ export function CalendarBoard({
   const [view, setView] = useState<CalendarView>("month");
   const [layout, setLayout] = useState<Layout>("gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
-  const [onlyMine, setOnlyMine] = useState(false);
+  const [onlyMine, setOnlyMine] = useState(initialOnlyMine);
   const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(() => {
     if (lockedCategory) {
       return { operativo: false, marketing: false, facturacion: false, personal: false, oportunidades: false, [lockedCategory]: true };
