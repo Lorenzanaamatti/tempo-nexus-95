@@ -2867,6 +2867,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          theme_preference: string | null
           updated_at: string
         }
         Insert: {
@@ -2875,6 +2876,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          theme_preference?: string | null
           updated_at?: string
         }
         Update: {
@@ -2883,6 +2885,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          theme_preference?: string | null
           updated_at?: string
         }
         Relationships: []
