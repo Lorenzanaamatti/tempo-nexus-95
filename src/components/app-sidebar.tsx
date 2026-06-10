@@ -91,6 +91,18 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Redes sociales", to: "/marketing/social", icon: Share2, active: pathname.startsWith("/marketing/social") },
   ];
 
+  // 7. CALENDARIOS — todas las vistas (presets de /calendar)
+  const calView = (search as { view?: string } | undefined)?.view;
+  const onCal = pathname.startsWith("/calendar");
+  const calendarItems: NavItem[] = [
+    { title: "General",      to: "/calendar", search: { view: "global" },       icon: CalendarDays, active: onCal && (calView === "global" || !calView) },
+    { title: "Producciones", to: "/calendar", search: { view: "producciones" }, icon: Film,         active: onCal && calView === "producciones" },
+    { title: "Facturación",  to: "/calendar", search: { view: "economico" },    icon: Receipt,      active: onCal && calView === "economico" },
+    { title: "Marketing",    to: "/calendar", search: { view: "marketing" },    icon: Megaphone,    active: onCal && calView === "marketing" },
+    { title: "Legal",        to: "/calendar", search: { view: "legal" },        icon: Scale,        active: onCal && calView === "legal" },
+    { title: "Personal · mis tareas", to: "/calendar", search: { view: "personal" }, icon: User,    active: onCal && calView === "personal" },
+  ];
+
   const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
     { label: "Roster",        icon: LibraryBig,  items: rosterItems },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
@@ -98,6 +110,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { label: "Económico",     icon: Wallet,      items: economicoItems },
     { label: "Legal",         icon: Scale,       items: legalItems },
     { label: "Marketing",     icon: Megaphone,   items: marketingItems },
+    { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
   ];
 
   return (
