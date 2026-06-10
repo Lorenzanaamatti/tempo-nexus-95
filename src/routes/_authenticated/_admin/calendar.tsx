@@ -21,6 +21,7 @@ import {
 } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/_admin/calendar")({
+  validateSearch: (s: Record<string, unknown>) => ({ view: (s.view as string) ?? "global" }),
   component: GlobalCalendar,
 });
 
@@ -70,17 +71,53 @@ const LAYOUT_ICONS: Record<Layout, typeof GanttChartSquare> = {
   kanban: KanbanSquare,
 };
 
+const CAL_VIEWS = [
+  { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[] },
+  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[] },
+  { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[] },
+  { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[] },
+  { key: "personal",     label: "Personal",     cats: ["personal"] as Category[] },
+  { key: "legal",        label: "Legal",        cats: ["operativo"] as Category[] },
+] as const;
+
 function GlobalCalendar() {
-  return <CalendarBoard />;
+  const { view } = Route.useSearch();
+  const nav = Route.useNavigate();
+  const preset = CAL_VIEWS.find((v) => v.key === view) ?? CAL_VIEWS[0];
+  return (
+    <div>
+      <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-1.5 px-6 pt-6">
+        {CAL_VIEWS.map((v) => (
+          <button
+            key={v.key}
+            type="button"
+            onClick={() => nav({ search: { view: v.key } })}
+            className={`rounded-sm border px-3 py-1 text-xs transition ${
+              preset.key === v.key ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+      <CalendarBoard
+        key={preset.key}
+        initialCategories={preset.cats}
+        title={preset.key === "global" ? "Calendario general" : `Calendario · ${preset.label}`}
+      />
+    </div>
+  );
 }
 
 export function CalendarBoard({
   lockedCategory,
+  initialCategories,
   title = "Calendario general",
   eyebrow = "Interesante Compañía",
   description,
 }: {
   lockedCategory?: Category;
+  initialCategories?: Category[];
   title?: string;
   eyebrow?: string;
   description?: React.ReactNode;
@@ -90,11 +127,17 @@ export function CalendarBoard({
   const [layout, setLayout] = useState<Layout>("gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
   const [onlyMine, setOnlyMine] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(
-    lockedCategory
-      ? { operativo: false, marketing: false, facturacion: false, personal: false, oportunidades: false, [lockedCategory]: true }
-      : { operativo: true, marketing: true, facturacion: true, personal: true, oportunidades: true },
-  );
+  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(() => {
+    if (lockedCategory) {
+      return { operativo: false, marketing: false, facturacion: false, personal: false, oportunidades: false, [lockedCategory]: true };
+    }
+    if (initialCategories) {
+      const base: Record<Category, boolean> = { operativo: false, marketing: false, facturacion: false, personal: false, oportunidades: false };
+      for (const c of initialCategories) base[c] = true;
+      return base;
+    }
+    return { operativo: true, marketing: true, facturacion: true, personal: true, oportunidades: true };
+  });
   // Per-subject filters: when a subject id maps to `false`, hide all its events.
   // Subjects not present in the map are considered visible (default-on).
   const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());

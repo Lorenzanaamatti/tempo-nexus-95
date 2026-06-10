@@ -1618,6 +1618,89 @@ export type Database = {
         }
         Relationships: []
       }
+      ic_budget_lines: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          created_at: string
+          id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          created_at?: string
+          id?: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          created_at?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      ic_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["ic_budget_category"]
+          concept: string
+          created_at: string
+          expense_date: string
+          id: string
+          notes: string | null
+          paid_date: string | null
+          provider_id: string | null
+          updated_at: string
+          vat_pct: number | null
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          concept: string
+          created_at?: string
+          expense_date: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          provider_id?: string | null
+          updated_at?: string
+          vat_pct?: number | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["ic_budget_category"]
+          concept?: string
+          created_at?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          provider_id?: string | null
+          updated_at?: string
+          vat_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ic_expenses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       languages: {
         Row: {
           code: string
@@ -2738,6 +2821,71 @@ export type Database = {
         }
         Relationships: []
       }
+      providers: {
+        Row: {
+          city: string | null
+          composer_id: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          kind: Database["public"]["Enums"]["provider_kind"]
+          name: string
+          notes: string | null
+          phone: string | null
+          rate_notes: string | null
+          shared_with_ic: boolean
+          tags: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          composer_id?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["provider_kind"]
+          name: string
+          notes?: string | null
+          phone?: string | null
+          rate_notes?: string | null
+          shared_with_ic?: boolean
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          composer_id?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["provider_kind"]
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          rate_notes?: string | null
+          shared_with_ic?: boolean
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_campaigns: {
         Row: {
           composer_id: string | null
@@ -3391,6 +3539,13 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      ic_budget_category:
+        | "ingreso_comision"
+        | "ingreso_otros"
+        | "gasto_personal"
+        | "gasto_operativo"
+        | "gasto_marketing"
+        | "gasto_otros"
       ic_team_function:
         | "equipo_virtual"
         | "direccion_general"
@@ -3514,6 +3669,24 @@ export type Database = {
         | "premiada"
         | "comunicada_nominacion"
         | "comunicado_premio"
+      provider_kind:
+        | "estudio_grabacion"
+        | "mezcla"
+        | "mastering"
+        | "musico"
+        | "orquesta"
+        | "copista"
+        | "editor_musical"
+        | "sonido"
+        | "post_produccion"
+        | "abogado"
+        | "gestoria"
+        | "fotografo"
+        | "video"
+        | "diseno"
+        | "web"
+        | "pr_marketing"
+        | "otros"
       representation_status:
         | "activo"
         | "pausa"
@@ -3786,6 +3959,14 @@ export const Constants = {
         "game",
         "other",
       ],
+      ic_budget_category: [
+        "ingreso_comision",
+        "ingreso_otros",
+        "gasto_personal",
+        "gasto_operativo",
+        "gasto_marketing",
+        "gasto_otros",
+      ],
       ic_team_function: [
         "equipo_virtual",
         "direccion_general",
@@ -3915,6 +4096,25 @@ export const Constants = {
         "premiada",
         "comunicada_nominacion",
         "comunicado_premio",
+      ],
+      provider_kind: [
+        "estudio_grabacion",
+        "mezcla",
+        "mastering",
+        "musico",
+        "orquesta",
+        "copista",
+        "editor_musical",
+        "sonido",
+        "post_produccion",
+        "abogado",
+        "gestoria",
+        "fotografo",
+        "video",
+        "diseno",
+        "web",
+        "pr_marketing",
+        "otros",
       ],
       representation_status: [
         "activo",
