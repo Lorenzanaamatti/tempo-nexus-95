@@ -167,6 +167,7 @@ export type Database = {
           source_kind: string | null
           source_opp_action_id: string | null
           source_opportunity_id: string | null
+          source_phase_id: string | null
           source_production_id: string | null
           source_social_post_id: string | null
           source_sprint_id: string | null
@@ -176,6 +177,7 @@ export type Database = {
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
           title: string | null
           updated_at: string
+          visible_to_composer: boolean
         }
         Insert: {
           assignee_person_id?: string | null
@@ -191,6 +193,7 @@ export type Database = {
           source_kind?: string | null
           source_opp_action_id?: string | null
           source_opportunity_id?: string | null
+          source_phase_id?: string | null
           source_production_id?: string | null
           source_social_post_id?: string | null
           source_sprint_id?: string | null
@@ -200,6 +203,7 @@ export type Database = {
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
           title?: string | null
           updated_at?: string
+          visible_to_composer?: boolean
         }
         Update: {
           assignee_person_id?: string | null
@@ -215,6 +219,7 @@ export type Database = {
           source_kind?: string | null
           source_opp_action_id?: string | null
           source_opportunity_id?: string | null
+          source_phase_id?: string | null
           source_production_id?: string | null
           source_social_post_id?: string | null
           source_sprint_id?: string | null
@@ -224,6 +229,7 @@ export type Database = {
           subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
           title?: string | null
           updated_at?: string
+          visible_to_composer?: boolean
         }
         Relationships: []
       }
@@ -2227,6 +2233,7 @@ export type Database = {
           tags: string[]
           updated_at: string
           url: string | null
+          visible_to_composer: boolean
         }
         Insert: {
           author?: string | null
@@ -2243,6 +2250,7 @@ export type Database = {
           tags?: string[]
           updated_at?: string
           url?: string | null
+          visible_to_composer?: boolean
         }
         Update: {
           author?: string | null
@@ -2259,6 +2267,7 @@ export type Database = {
           tags?: string[]
           updated_at?: string
           url?: string | null
+          visible_to_composer?: boolean
         }
         Relationships: [
           {
@@ -2284,6 +2293,7 @@ export type Database = {
           title: string
           updated_at: string
           version: string | null
+          visible_to_composer: boolean
         }
         Insert: {
           composer_id?: string | null
@@ -2298,6 +2308,7 @@ export type Database = {
           title: string
           updated_at?: string
           version?: string | null
+          visible_to_composer?: boolean
         }
         Update: {
           composer_id?: string | null
@@ -2312,6 +2323,7 @@ export type Database = {
           title?: string
           updated_at?: string
           version?: string | null
+          visible_to_composer?: boolean
         }
         Relationships: [
           {
@@ -2575,6 +2587,60 @@ export type Database = {
           },
           {
             foreignKeyName: "production_documents_production_fk"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_phases: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          position: number
+          production_id: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          position?: number
+          production_id: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          position?: number
+          production_id?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_phases_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_phases_production_id_fkey"
             columns: ["production_id"]
             isOneToOne: false
             referencedRelation: "productions_roster_view"
