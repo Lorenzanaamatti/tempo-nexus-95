@@ -10,7 +10,6 @@ import {
   FileSignature,
   User,
   MessagesSquare,
-  Sparkles,
   TrendingUp,
   Receipt,
   ArrowUpRight,
@@ -107,66 +106,60 @@ function PortalHome() {
     new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       {/* Hero */}
-      <section className="portal-card overflow-hidden p-8 sm:p-10">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gradient-to-br from-[#ff6b6b]/40 via-[#c44569]/30 to-[#6c5ce7]/30 blur-2xl" />
-        <div className="pointer-events-none absolute -left-12 -bottom-16 h-48 w-48 rounded-full bg-gradient-to-tr from-[#f7931e]/40 via-[#e85d3a]/30 to-transparent blur-2xl" />
-        <div className="relative">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-foreground/70 ring-1 ring-black/5">
-            <Sparkles className="h-3 w-3" /> Tu espacio
-          </span>
-          <h2 className="mt-4 font-display text-5xl tracking-tight">
-            Hola, <span className="bg-gradient-to-r from-[#e85d3a] via-[#c44569] to-[#6c5ce7] bg-clip-text text-transparent">{name}</span>
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm text-foreground/70">
-            Tu espacio privado en Interesante Compañía. Desde aquí gestionas tu carrera, proyectos, propuestas, contratos y la comunicación con el equipo.
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <Chip label="Estado" value={composer?.representation_status ?? "—"} tone="amber" />
-            <Chip label="Tier" value={composer?.tier ?? "—"} tone="rose" />
-            <Chip label="Renovación" value={formatDateEs(composer?.renewal_date) || "—"} tone="violet" />
-          </div>
+      <section className="border-t border-b border-[color:var(--portal-border)] py-10 sm:py-14">
+        <p className="smallcaps text-[10px] text-[color:var(--accent-coral)]">Tu espacio</p>
+        <h2 className="mt-4 font-display text-5xl font-light tracking-tight text-[color:var(--portal-fg)] sm:text-6xl">
+          Hola, <span className="text-[color:var(--accent-coral)]">{name}</span>
+        </h2>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--portal-muted)]">
+          Tu espacio privado en Interesante Compañía. Desde aquí gestionas tu carrera, proyectos, propuestas, contratos y la comunicación con el equipo.
+        </p>
+        <div className="mt-8 grid gap-px bg-[color:var(--portal-border)] sm:grid-cols-3">
+          <Chip label="Estado" value={composer?.representation_status ?? "—"} />
+          <Chip label="Tier" value={composer?.tier ?? "—"} />
+          <Chip label="Renovación" value={formatDateEs(composer?.renewal_date) || "—"} />
         </div>
       </section>
 
       {/* KPIs */}
       <section>
-        <div className="mb-4 flex items-baseline justify-between">
-          <h3 className="font-display text-2xl">
-            Resumen IC · <span className="text-foreground/50">{data?.kpis.year}</span>
+        <div className="mb-5 flex items-baseline justify-between">
+          <h3 className="smallcaps text-xs text-[color:var(--portal-fg)]">
+            Resumen IC · <span className="text-[color:var(--portal-muted)]">{data?.kpis.year}</span>
           </h3>
-          <Link to="/portal/kpis" className="inline-flex items-center gap-1 text-xs text-foreground/60 hover:text-foreground">
+          <Link to="/portal/kpis" className="inline-flex items-center gap-1 text-xs text-[color:var(--portal-muted)] transition hover:text-[color:var(--accent-coral)]">
             Ver detalle <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat label="Producciones activas" value={String(data?.kpis.activeProds ?? 0)} icon={TrendingUp} gradient="from-[#ff6b6b] to-[#c44569]" />
-          <Stat label="Facturación año" value={data ? fmt(data.kpis.facturacionYearProds) : "—"} icon={Receipt} gradient="from-[#f7931e] to-[#e85d3a]" />
-          <Stat label="Propuestas abiertas" value={String(data?.kpis.openCands ?? 0)} icon={Inbox} gradient="from-[#6c5ce7] to-[#a78bfa]" />
-          <Stat label="Contratos firmados" value={String(data?.kpis.signedContracts ?? 0)} icon={FileSignature} gradient="from-[#0d7a5f] to-[#2dd4a8]" />
+        <div className="grid gap-px border border-[color:var(--portal-border)] bg-[color:var(--portal-border)] sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label="Producciones activas" value={String(data?.kpis.activeProds ?? 0)} icon={TrendingUp} />
+          <Stat label="Facturación año" value={data ? fmt(data.kpis.facturacionYearProds) : "—"} icon={Receipt} />
+          <Stat label="Propuestas abiertas" value={String(data?.kpis.openCands ?? 0)} icon={Inbox} />
+          <Stat label="Contratos firmados" value={String(data?.kpis.signedContracts ?? 0)} icon={FileSignature} />
         </div>
-        <p className="mt-3 text-xs text-foreground/55">
+        <p className="mt-3 text-xs text-[color:var(--portal-muted)]">
           Total histórico: {data?.kpis.totalHist ?? 0} proyectos · facturación {data ? fmt(data.kpis.revenueHist) : "—"}.
         </p>
       </section>
 
       {/* Next milestone */}
-      <section className="portal-card relative overflow-hidden p-6">
-        <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#e85d3a] via-[#c44569] to-[#6c5ce7]" />
-        <div className="flex items-center gap-4">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#c44569] to-[#6c5ce7] text-white shadow-lg shadow-[#c44569]/30">
-            <CalendarDays className="h-5 w-5" />
+      <section className="relative flex items-stretch border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]">
+        <div className="w-1 bg-[color:var(--accent-coral)]" />
+        <div className="flex flex-1 items-center gap-5 p-6">
+          <div className="grid h-12 w-12 shrink-0 place-items-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)]">
+            <CalendarDays className="h-5 w-5" strokeWidth={1.25} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="smallcaps text-[10px] text-foreground/60">Próximo hito</p>
+            <p className="smallcaps text-[10px] text-[color:var(--accent-coral)]">Próximo hito</p>
             {data?.nextEvent ? (
               <div className="mt-0.5 flex flex-wrap items-baseline justify-between gap-3">
-                <p className="font-display text-xl">{data.nextEvent.title || "Sin título"}</p>
-                <span className="text-sm text-foreground/60">{formatDateEs(data.nextEvent.start_date)}</span>
+                <p className="font-display text-2xl font-light text-[color:var(--portal-fg)]">{data.nextEvent.title || "Sin título"}</p>
+                <span className="font-mono text-xs text-[color:var(--portal-muted)]">{formatDateEs(data.nextEvent.start_date)}</span>
               </div>
             ) : (
-              <p className="mt-0.5 text-sm text-foreground/60">No hay hitos próximos programados.</p>
+              <p className="mt-0.5 text-sm text-[color:var(--portal-muted)]">No hay hitos próximos programados.</p>
             )}
           </div>
         </div>
@@ -174,31 +167,25 @@ function PortalHome() {
 
       {/* Quick access */}
       <section>
-        <h3 className="mb-4 font-display text-2xl">Accesos rápidos</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Quick to="/portal/proyectos" title="Proyectos activos" desc="Lo que tienes en marcha ahora mismo." icon={FolderKanban} gradient="from-[#ff6b6b] to-[#c44569]" />
-          <Quick to="/portal/propuestas" title="Propuestas en curso" desc="Oportunidades en negociación." icon={Inbox} gradient="from-[#f7931e] to-[#e85d3a]" />
-          <Quick to="/portal/agenda" title="Agenda y reuniones" desc="Tus próximas citas y compromisos." icon={CalendarDays} gradient="from-[#6c5ce7] to-[#a78bfa]" />
-          <Quick to="/portal/contratos" title="Contratos y derechos" desc="Documentación contractual." icon={FileSignature} gradient="from-[#0d7a5f] to-[#2dd4a8]" />
-          <Quick to="/portal/carrera" title="Mi carrera" desc="Biografía, materiales y equipo IC." icon={User} gradient="from-[#c9a84c] to-[#f0d78c]" />
-          <Quick to="/portal/chat" title="Chat con IC" desc="Conversación directa con tu equipo." icon={MessagesSquare} gradient="from-[#2e6b8a] to-[#5cbdb9]" />
+        <h3 className="mb-5 smallcaps text-xs text-[color:var(--portal-fg)]">Accesos rápidos</h3>
+        <div className="grid gap-px border border-[color:var(--portal-border)] bg-[color:var(--portal-border)] sm:grid-cols-2 lg:grid-cols-3">
+          <Quick to="/portal/proyectos" title="Proyectos activos" desc="Lo que tienes en marcha ahora mismo." icon={FolderKanban} />
+          <Quick to="/portal/propuestas" title="Propuestas en curso" desc="Oportunidades en negociación." icon={Inbox} />
+          <Quick to="/portal/agenda" title="Agenda y reuniones" desc="Tus próximas citas y compromisos." icon={CalendarDays} />
+          <Quick to="/portal/contratos" title="Contratos y derechos" desc="Documentación contractual." icon={FileSignature} />
+          <Quick to="/portal/carrera" title="Mi carrera" desc="Biografía, materiales y equipo IC." icon={User} />
+          <Quick to="/portal/chat" title="Chat con IC" desc="Conversación directa con tu equipo." icon={MessagesSquare} />
         </div>
       </section>
     </div>
   );
 }
 
-const TONE: Record<string, string> = {
-  amber: "from-[#fde68a]/60 to-[#fcd34d]/60 text-[#7c4a00]",
-  rose: "from-[#fecdd3]/60 to-[#fda4af]/60 text-[#9f1239]",
-  violet: "from-[#ddd6fe]/60 to-[#c4b5fd]/60 text-[#5b21b6]",
-};
-
-function Chip({ label, value, tone }: { label: string; value: string; tone: keyof typeof TONE }) {
+function Chip({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`rounded-2xl bg-gradient-to-br ${TONE[tone]} px-4 py-3 ring-1 ring-white/60`}>
-      <p className="smallcaps text-[10px] opacity-70">{label}</p>
-      <p className="mt-0.5 font-display text-lg">{value}</p>
+    <div className="bg-[color:var(--portal-bg)] px-5 py-4">
+      <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">{label}</p>
+      <p className="mt-1 font-display text-xl font-light text-[color:var(--portal-fg)]">{value}</p>
     </div>
   );
 }
@@ -207,20 +194,18 @@ function Stat({
   label,
   value,
   icon: Icon,
-  gradient,
 }: {
   label: string;
   value: string;
   icon: typeof FolderKanban;
-  gradient: string;
 }) {
   return (
-    <div className="portal-card p-5">
-      <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md`}>
-        <Icon className="h-4 w-4" />
+    <div className="bg-[color:var(--portal-surface)] p-5">
+      <div className="mb-4 inline-flex h-9 w-9 items-center justify-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)]">
+        <Icon className="h-4 w-4" strokeWidth={1.25} />
       </div>
-      <p className="smallcaps text-[10px] text-foreground/55">{label}</p>
-      <p className="mt-1 font-display text-3xl tracking-tight">{value}</p>
+      <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">{label}</p>
+      <p className="mt-1 font-display text-4xl font-light tracking-tight text-[color:var(--portal-fg)]">{value}</p>
     </div>
   );
 }
@@ -230,28 +215,26 @@ function Quick({
   title,
   desc,
   icon: Icon,
-  gradient,
 }: {
   to: string;
   title: string;
   desc: string;
   icon: typeof FolderKanban;
-  gradient: string;
 }) {
   return (
     <Link
       to={to as string}
-      className="portal-card portal-card-hover group block p-5"
+      className="group relative block bg-[color:var(--portal-surface)] p-5 transition hover:bg-[color:var(--portal-surface-hover)]"
     >
-      <div className="flex items-start gap-3">
-        <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md transition group-hover:scale-110`}>
-          <Icon className="h-5 w-5" />
+      <div className="flex items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)] transition group-hover:border-[color:var(--accent-coral)] group-hover:text-[color:var(--accent-coral)]">
+          <Icon className="h-5 w-5" strokeWidth={1.25} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-display text-lg leading-tight">{title}</p>
-          <p className="mt-1 text-sm text-foreground/60">{desc}</p>
+          <p className="font-display text-xl font-light leading-tight text-[color:var(--portal-fg)]">{title}</p>
+          <p className="mt-1 text-sm leading-relaxed text-[color:var(--portal-muted)]">{desc}</p>
         </div>
-        <ArrowUpRight className="h-4 w-4 text-foreground/30 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+        <ArrowUpRight className="h-4 w-4 text-[color:var(--portal-muted)] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[color:var(--accent-coral)]" strokeWidth={1.25} />
       </div>
     </Link>
   );
