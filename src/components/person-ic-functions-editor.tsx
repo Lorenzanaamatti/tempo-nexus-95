@@ -10,6 +10,7 @@ export type IcTeamFunction =
   | "equipo_virtual"
   | "direccion_general"
   | "agente"
+  | "manager"
   | "produccion"
   | "post_produccion"
   | "legal"
