@@ -3659,6 +3659,7 @@ export type Database = {
         | "fotos_videos_clientes"
         | "seguimiento_producciones"
         | "ai_envia_presus_productoras"
+        | "manager"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       opportunity_kind:
         | "fichaje"
@@ -4086,6 +4087,7 @@ export const Constants = {
         "fotos_videos_clientes",
         "seguimiento_producciones",
         "ai_envia_presus_productoras",
+        "manager",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       opportunity_kind: [
