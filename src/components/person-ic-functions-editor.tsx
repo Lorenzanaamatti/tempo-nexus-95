@@ -54,6 +54,7 @@ export const IC_FUNCTION_GROUPS: { label: string; items: { value: IcTeamFunction
       { value: "equipo_virtual", label: "Equipo Virtual" },
       { value: "direccion_general", label: "Dirección General" },
       { value: "agente", label: "Agente" },
+      { value: "manager", label: "Manager" },
       { value: "produccion", label: "Producción" },
       { value: "post_produccion", label: "Post producción" },
       { value: "seguimiento_producciones", label: "Seguimiento producciones" },
