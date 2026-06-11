@@ -29,6 +29,9 @@ export function useTheme() {
   // echo it back as a write.
   const skipNextPushRef = useRef(false);
   const lastPushedRef = useRef<ThemeMode | null>(null);
+  // Once the user explicitly toggles the theme in this tab, ignore any
+  // remote pulls that arrive late (they would race and revert the choice).
+  const userTouchedRef = useRef(false);
 
   useEffect(() => {
     applyTheme(mode);
@@ -56,6 +59,9 @@ export function useTheme() {
         .eq("id", userId)
         .maybeSingle();
       if (cancelled) return;
+      // If the user already toggled in this tab, do not override their choice
+      // with a (possibly stale) remote value. The push effect will sync it.
+      if (userTouchedRef.current) return;
       const remote = (data?.theme_preference as ThemeMode | null) ?? null;
       if (remote && remote !== mode) {
         skipNextPushRef.current = true;
@@ -111,8 +117,14 @@ export function useTheme() {
   }, [mode]);
 
   const cycle = useCallback(() => {
+    userTouchedRef.current = true;
     setMode((m) => (m === "light" ? "dark" : m === "dark" ? "system" : "light"));
   }, []);
 
-  return { mode, setMode, cycle, resolved: resolveTheme(mode) };
+  const setModeExplicit = useCallback((next: ThemeMode) => {
+    userTouchedRef.current = true;
+    setMode(next);
+  }, []);
+
+  return { mode, setMode: setModeExplicit, cycle, resolved: resolveTheme(mode) };
 }
