@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ThemeMode = "light" | "dark" | "system";
@@ -25,6 +25,10 @@ export function useTheme() {
     if (typeof window === "undefined") return "system";
     return (localStorage.getItem(KEY) as ThemeMode | null) ?? "system";
   });
+  // Track whether the latest setMode came from a remote pull, so we don't
+  // echo it back as a write.
+  const skipNextPushRef = useRef(false);
+  const lastPushedRef = useRef<ThemeMode | null>(null);
 
   useEffect(() => {
     applyTheme(mode);
@@ -54,10 +58,15 @@ export function useTheme() {
       if (cancelled) return;
       const remote = (data?.theme_preference as ThemeMode | null) ?? null;
       if (remote && remote !== mode) {
+        skipNextPushRef.current = true;
+        lastPushedRef.current = remote;
         setMode(remote);
       } else if (!remote) {
         // No remote yet → seed from current local preference.
         await supabase.from("profiles").update({ theme_preference: mode }).eq("id", userId);
+        lastPushedRef.current = mode;
+      } else {
+        lastPushedRef.current = remote;
       }
     };
 
@@ -86,10 +95,16 @@ export function useTheme() {
 
   // Push local changes to the profile (fire-and-forget).
   useEffect(() => {
+    if (skipNextPushRef.current) {
+      skipNextPushRef.current = false;
+      return;
+    }
+    if (lastPushedRef.current === mode) return;
     let cancelled = false;
     supabase.auth.getUser().then(({ data }) => {
       const uid = data.user?.id;
       if (!uid || cancelled) return;
+      lastPushedRef.current = mode;
       supabase.from("profiles").update({ theme_preference: mode }).eq("id", uid);
     });
     return () => { cancelled = true; };
