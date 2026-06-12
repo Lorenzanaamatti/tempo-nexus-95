@@ -76,7 +76,7 @@ function SpanishFilmsPage() {
       let query = supabase
         .from("spanish_films")
         .select(
-          "id, tmdb_id, year, title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path",
+          "id, tmdb_id, year, title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids",
         )
         .order("year", { ascending: false })
         .order("title");
