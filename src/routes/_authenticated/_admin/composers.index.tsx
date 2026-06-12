@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
+import { ExportButton, type ExportField } from "@/components/export-button";
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
@@ -105,6 +106,21 @@ function ComposersIndex() {
             placeholder="Buscar por nombre, bio o filmografía…"
             className="w-72 rounded-sm"
           />
+          <ExportButton
+            entityLabel={meta.title}
+            filename={`roster-${role}`}
+            sheetName={meta.title}
+            fetchAll={async () => {
+              const { data, error } = await supabase
+                .from("composers")
+                .select("*")
+                .eq("roster_role", role)
+                .order("full_name");
+              if (error) throw error;
+              return data ?? [];
+            }}
+            fields={composerExportFields()}
+          />
           <Button asChild size="sm">
             <Link to="/composers/new" search={{ role }}><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
           </Button>
@@ -181,4 +197,40 @@ function ComposersIndex() {
       )}
     </div>
   );
+}
+
+function composerExportFields(): ExportField<any>[] {
+  return [
+    { key: "full_name", label: "Nombre completo", get: (r) => r.full_name },
+    { key: "artistic_name", label: "Nombre artístico", get: (r) => r.artistic_name },
+    { key: "legal_name", label: "Nombre legal", default: false, get: (r) => r.legal_name },
+    { key: "roster_role", label: "Rol", get: (r) => r.roster_role },
+    { key: "tier", label: "Tier", get: (r) => r.tier },
+    { key: "representation_status", label: "Estado representación", get: (r) => r.representation_status },
+    { key: "representation_start_date", label: "Inicio representación", get: (r) => r.representation_start_date },
+    { key: "renewal_date", label: "Renovación", get: (r) => r.renewal_date },
+    { key: "email", label: "Email", get: (r) => r.email },
+    { key: "email_secondary", label: "Email secundario", default: false, get: (r) => r.email_secondary },
+    { key: "phone", label: "Teléfono", get: (r) => r.phone },
+    { key: "city", label: "Ciudad", get: (r) => r.city },
+    { key: "country", label: "País", get: (r) => r.country },
+    { key: "province", label: "Provincia", default: false, get: (r) => r.province },
+    { key: "address", label: "Dirección", default: false, get: (r) => r.address },
+    { key: "postal_code", label: "Código postal", default: false, get: (r) => r.postal_code },
+    { key: "nif", label: "NIF", default: false, get: (r) => r.nif },
+    { key: "birth_year", label: "Año nacimiento", default: false, get: (r) => r.birth_year },
+    { key: "availability", label: "Disponibilidad", get: (r) => r.availability },
+    { key: "next_available_on", label: "Próx. disponibilidad", default: false, get: (r) => r.next_available_on },
+    { key: "tags", label: "Etiquetas", get: (r) => r.tags },
+    { key: "bio_short", label: "Bio corta", default: false, get: (r) => r.bio_short },
+    { key: "bio_long", label: "Bio larga", default: false, get: (r) => r.bio_long },
+    { key: "reel_url", label: "Reel URL", default: false, get: (r) => r.reel_url },
+    { key: "portal_url", label: "Portal URL", default: false, get: (r) => r.portal_url },
+    { key: "team_name", label: "Equipo", default: false, get: (r) => r.team_name },
+    { key: "team_email", label: "Email del equipo", default: false, get: (r) => r.team_email },
+    { key: "owner_email", label: "Email propietario", default: false, get: (r) => r.owner_email },
+    { key: "internal_notes", label: "Notas internas", default: false, get: (r) => r.internal_notes },
+    { key: "career_notes", label: "Notas de carrera", default: false, get: (r) => r.career_notes },
+    { key: "created_at", label: "Creado", default: false, get: (r) => r.created_at },
+  ];
 }
