@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes
 import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
 import { Route as AuthenticatedAdminPlatformsIndexRouteImport } from './routes/_authenticated/_admin/platforms.index'
 import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_authenticated/_admin/people.index'
+import { Route as AuthenticatedAdminPeliculasEsIndexRouteImport } from './routes/_authenticated/_admin/peliculas-es.index'
 import { Route as AuthenticatedAdminOpportunitiesIndexRouteImport } from './routes/_authenticated/_admin/opportunities.index'
 import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
 import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.index'
@@ -235,6 +236,12 @@ const AuthenticatedAdminPeopleIndexRoute =
   AuthenticatedAdminPeopleIndexRouteImport.update({
     id: '/people/',
     path: '/people/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPeliculasEsIndexRoute =
+  AuthenticatedAdminPeliculasEsIndexRouteImport.update({
+    id: '/peliculas-es/',
+    path: '/peliculas-es/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminOpportunitiesIndexRoute =
@@ -454,6 +461,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
+  '/peliculas-es/': typeof AuthenticatedAdminPeliculasEsIndexRoute
   '/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
@@ -511,6 +519,7 @@ export interface FileRoutesByTo {
   '/deal-memos': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
   '/opportunities': typeof AuthenticatedAdminOpportunitiesIndexRoute
+  '/peliculas-es': typeof AuthenticatedAdminPeliculasEsIndexRoute
   '/people': typeof AuthenticatedAdminPeopleIndexRoute
   '/platforms': typeof AuthenticatedAdminPlatformsIndexRoute
   '/production-companies': typeof AuthenticatedAdminProductionCompaniesIndexRoute
@@ -573,6 +582,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
   '/_authenticated/_admin/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
+  '/_authenticated/_admin/peliculas-es/': typeof AuthenticatedAdminPeliculasEsIndexRoute
   '/_authenticated/_admin/people/': typeof AuthenticatedAdminPeopleIndexRoute
   '/_authenticated/_admin/platforms/': typeof AuthenticatedAdminPlatformsIndexRoute
   '/_authenticated/_admin/production-companies/': typeof AuthenticatedAdminProductionCompaniesIndexRoute
@@ -634,6 +644,7 @@ export interface FileRouteTypes {
     | '/deal-memos/'
     | '/directors/'
     | '/opportunities/'
+    | '/peliculas-es/'
     | '/people/'
     | '/platforms/'
     | '/production-companies/'
@@ -691,6 +702,7 @@ export interface FileRouteTypes {
     | '/deal-memos'
     | '/directors'
     | '/opportunities'
+    | '/peliculas-es'
     | '/people'
     | '/platforms'
     | '/production-companies'
@@ -752,6 +764,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/deal-memos/'
     | '/_authenticated/_admin/directors/'
     | '/_authenticated/_admin/opportunities/'
+    | '/_authenticated/_admin/peliculas-es/'
     | '/_authenticated/_admin/people/'
     | '/_authenticated/_admin/platforms/'
     | '/_authenticated/_admin/production-companies/'
@@ -986,6 +999,13 @@ declare module '@tanstack/react-router' {
       path: '/people'
       fullPath: '/people/'
       preLoaderRoute: typeof AuthenticatedAdminPeopleIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/peliculas-es/': {
+      id: '/_authenticated/_admin/peliculas-es/'
+      path: '/peliculas-es'
+      fullPath: '/peliculas-es/'
+      preLoaderRoute: typeof AuthenticatedAdminPeliculasEsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/opportunities/': {
@@ -1247,6 +1267,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
+  AuthenticatedAdminPeliculasEsIndexRoute: typeof AuthenticatedAdminPeliculasEsIndexRoute
   AuthenticatedAdminPeopleIndexRoute: typeof AuthenticatedAdminPeopleIndexRoute
   AuthenticatedAdminPlatformsIndexRoute: typeof AuthenticatedAdminPlatformsIndexRoute
   AuthenticatedAdminProductionCompaniesIndexRoute: typeof AuthenticatedAdminProductionCompaniesIndexRoute
@@ -1292,6 +1313,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
+  AuthenticatedAdminPeliculasEsIndexRoute:
+    AuthenticatedAdminPeliculasEsIndexRoute,
   AuthenticatedAdminPeopleIndexRoute: AuthenticatedAdminPeopleIndexRoute,
   AuthenticatedAdminPlatformsIndexRoute: AuthenticatedAdminPlatformsIndexRoute,
   AuthenticatedAdminProductionCompaniesIndexRoute:
