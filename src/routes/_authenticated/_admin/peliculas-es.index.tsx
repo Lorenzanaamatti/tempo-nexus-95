@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -302,27 +302,20 @@ function EditDialog({
   const [needsReview, setNeedsReview] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // Reset cuando cambia la película
-  if (film && composer === "" && supervisor === "" && platform === "" && !needsReview) {
-    // No-op: solo inicializa cuando abre por primera vez
-  }
+  useEffect(() => {
+    if (film) {
+      setComposer(film.composer ?? "");
+      setSupervisor(film.music_supervisor ?? "");
+      setPlatform(film.platform ?? "");
+      setNeedsReview(film.needs_review);
+    }
+  }, [film]);
 
   return (
     <Dialog
       open={!!film}
       onOpenChange={(o) => {
-        if (!o) {
-          onClose();
-          setComposer("");
-          setSupervisor("");
-          setPlatform("");
-          setNeedsReview(false);
-        } else if (film) {
-          setComposer(film.composer ?? "");
-          setSupervisor(film.music_supervisor ?? "");
-          setPlatform(film.platform ?? "");
-          setNeedsReview(film.needs_review);
-        }
+        if (!o) onClose();
       }}
     >
       <DialogContent>
