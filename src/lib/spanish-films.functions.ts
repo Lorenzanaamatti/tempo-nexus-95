@@ -216,6 +216,10 @@ export const updateSpanishFilm = createServerFn({ method: "POST" })
         review_reason: z.string().nullable().optional(),
         composer_person_id: z.string().uuid().nullable().optional(),
         music_supervisor_person_id: z.string().uuid().nullable().optional(),
+        directors: z.array(z.string()).optional(),
+        director_ids: z.array(z.string().uuid()).optional(),
+        production_companies: z.array(z.string()).optional(),
+        production_company_ids: z.array(z.string().uuid()).optional(),
       })
       .parse(input),
   )

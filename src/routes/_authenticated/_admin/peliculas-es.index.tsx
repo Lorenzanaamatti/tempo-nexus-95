@@ -53,7 +53,12 @@ type Film = {
   review_reason: string | null;
   completeness: number;
   poster_path: string | null;
+  director_ids: string[] | null;
+  production_company_ids: string[] | null;
 };
+
+type RosterDirector = { id: string; full_name: string };
+type RosterCompany = { id: string; name: string };
 
 function SpanishFilmsPage() {
   const qc = useQueryClient();
@@ -73,7 +78,7 @@ function SpanishFilmsPage() {
       let query = supabase
         .from("spanish_films")
         .select(
-          "id, tmdb_id, year, title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path",
+          "id, tmdb_id, year, title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids",
         )
         .order("year", { ascending: false })
         .order("title");
@@ -83,6 +88,30 @@ function SpanishFilmsPage() {
       const { data, error } = await query.limit(500);
       if (error) throw error;
       return (data ?? []) as Film[];
+    },
+  });
+
+  const { data: rosterDirectors } = useQuery({
+    queryKey: ["roster-directors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directors")
+        .select("id, full_name")
+        .order("full_name");
+      if (error) throw error;
+      return (data ?? []) as RosterDirector[];
+    },
+  });
+
+  const { data: rosterCompanies } = useQuery({
+    queryKey: ["roster-companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("production_companies")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as RosterCompany[];
     },
   });
 
@@ -265,6 +294,8 @@ function SpanishFilmsPage() {
 
       <EditDialog
         film={editing}
+        rosterDirectors={rosterDirectors ?? []}
+        rosterCompanies={rosterCompanies ?? []}
         onClose={() => setEditing(null)}
         onSave={async (patch) => {
           if (!editing) return;
@@ -284,16 +315,24 @@ function SpanishFilmsPage() {
 
 function EditDialog({
   film,
+  rosterDirectors,
+  rosterCompanies,
   onClose,
   onSave,
 }: {
   film: Film | null;
+  rosterDirectors: RosterDirector[];
+  rosterCompanies: RosterCompany[];
   onClose: () => void;
   onSave: (patch: {
     composer: string | null;
     music_supervisor: string | null;
     platform: string | null;
     needs_review: boolean;
+    directors: string[];
+    director_ids: string[];
+    production_companies: string[];
+    production_company_ids: string[];
   }) => Promise<void>;
 }) {
   const [composer, setComposer] = useState("");
@@ -301,6 +340,8 @@ function EditDialog({
   const [platform, setPlatform] = useState("");
   const [needsReview, setNeedsReview] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [directors, setDirectors] = useState<Array<{ name: string; id: string | null }>>([]);
+  const [companies, setCompanies] = useState<Array<{ name: string; id: string | null }>>([]);
 
   useEffect(() => {
     if (film) {
@@ -308,6 +349,14 @@ function EditDialog({
       setSupervisor(film.music_supervisor ?? "");
       setPlatform(film.platform ?? "");
       setNeedsReview(film.needs_review);
+      const dIds = film.director_ids ?? [];
+      setDirectors(
+        (film.directors ?? []).map((name, i) => ({ name, id: dIds[i] ?? null })),
+      );
+      const cIds = film.production_company_ids ?? [];
+      setCompanies(
+        (film.production_companies ?? []).map((name, i) => ({ name, id: cIds[i] ?? null })),
+      );
     }
   }, [film]);
 
@@ -318,14 +367,28 @@ function EditDialog({
         if (!o) onClose();
       }}
     >
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{film?.title}</DialogTitle>
           <DialogDescription>
-            {film?.year} · {film?.directors.join(", ")}
+            {film?.year} · TMDb {film?.tmdb_id}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          <EntityListEditor
+            title="Directores"
+            items={directors}
+            onChange={setDirectors}
+            roster={rosterDirectors.map((d) => ({ id: d.id, label: d.full_name }))}
+            placeholder="Nombre del director"
+          />
+          <EntityListEditor
+            title="Productoras"
+            items={companies}
+            onChange={setCompanies}
+            roster={rosterCompanies.map((c) => ({ id: c.id, label: c.name }))}
+            placeholder="Nombre de la productora"
+          />
           <div className="space-y-1.5">
             <Label>Compositor BSO</Label>
             <Input value={composer} onChange={(e) => setComposer(e.target.value)} />
@@ -360,6 +423,10 @@ function EditDialog({
                 music_supervisor: supervisor.trim() || null,
                 platform: platform.trim() || null,
                 needs_review: needsReview,
+                directors: directors.map((d) => d.name.trim()).filter(Boolean),
+                director_ids: directors.map((d) => d.id).filter((x): x is string => !!x),
+                production_companies: companies.map((c) => c.name.trim()).filter(Boolean),
+                production_company_ids: companies.map((c) => c.id).filter((x): x is string => !!x),
               });
               setBusy(false);
             }}
@@ -370,6 +437,130 @@ function EditDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function EntityListEditor({
+  title,
+  items,
+  onChange,
+  roster,
+  placeholder,
+}: {
+  title: string;
+  items: Array<{ name: string; id: string | null }>;
+  onChange: (next: Array<{ name: string; id: string | null }>) => void;
+  roster: Array<{ id: string; label: string }>;
+  placeholder: string;
+}) {
+  function normalize(s: string) {
+    return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label>{title}</Label>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => onChange([...items, { name: "", id: null }])}
+        >
+          + Añadir
+        </Button>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground">Sin entradas.</p>
+      ) : (
+        <ul className="space-y-2">
+          {items.map((it, idx) => {
+            const n = normalize(it.name);
+            const suggestions = !it.id && n
+              ? roster
+                  .filter((r) => normalize(r.label).includes(n))
+                  .slice(0, 4)
+              : [];
+            return (
+              <li key={idx} className="rounded-sm border border-border p-2">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={it.name}
+                    placeholder={placeholder}
+                    onChange={(e) => {
+                      const next = [...items];
+                      next[idx] = { name: e.target.value, id: null };
+                      onChange(next);
+                    }}
+                    className="flex-1"
+                  />
+                  <Select
+                    value={it.id ?? "none"}
+                    onValueChange={(v) => {
+                      const next = [...items];
+                      if (v === "none") {
+                        next[idx] = { ...next[idx], id: null };
+                      } else {
+                        const picked = roster.find((r) => r.id === v);
+                        next[idx] = {
+                          name: picked?.label ?? next[idx].name,
+                          id: v,
+                        };
+                      }
+                      onChange(next);
+                    }}
+                  >
+                    <SelectTrigger className="w-56 rounded-sm">
+                      <SelectValue placeholder="Vincular CRM…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— Sin vincular —</SelectItem>
+                      {roster.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onChange(items.filter((_, i) => i !== idx))}
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-xs">
+                  {it.id ? (
+                    <span className="text-green-600">● Vinculado al CRM</span>
+                  ) : (
+                    <span className="text-muted-foreground">○ Sin vincular</span>
+                  )}
+                  {suggestions.length > 0 && (
+                    <span className="flex flex-wrap gap-1">
+                      {suggestions.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          className="rounded-sm border border-dashed border-border px-1.5 py-0.5 hover:bg-muted"
+                          onClick={() => {
+                            const next = [...items];
+                            next[idx] = { name: s.label, id: s.id };
+                            onChange(next);
+                          }}
+                        >
+                          ↳ {s.label}
+                        </button>
+                      ))}
+                    </span>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
