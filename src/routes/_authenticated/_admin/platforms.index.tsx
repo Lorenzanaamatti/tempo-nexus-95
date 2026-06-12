@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
+import { ExportButton } from "@/components/export-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/platforms/")({
   component: PlatformsIndex,
@@ -49,11 +50,35 @@ function PlatformsIndex() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 border-b border-border pb-6">
-        <p className="smallcaps text-muted-foreground">CRM</p>
-        <h1 className="mt-1 font-display text-5xl">Plataformas</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Plataformas de distribución y streaming vinculables a las producciones.
-        </p>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="smallcaps text-muted-foreground">CRM</p>
+            <h1 className="mt-1 font-display text-5xl">Plataformas</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              Plataformas de distribución y streaming vinculables a las producciones.
+            </p>
+          </div>
+          <ExportButton
+            entityLabel="Plataformas"
+            filename="plataformas"
+            sheetName="Plataformas"
+            fetchAll={async () => {
+              const { data, error } = await supabase.from("platforms").select("*").order("name");
+              if (error) throw error;
+              return data ?? [];
+            }}
+            fields={[
+              { key: "name", label: "Nombre", get: (r: any) => r.name },
+              { key: "contact_name", label: "Contacto", get: (r: any) => r.contact_name },
+              { key: "email", label: "Email", get: (r: any) => r.email },
+              { key: "phone", label: "Teléfono", get: (r: any) => r.phone },
+              { key: "website", label: "Web", get: (r: any) => r.website },
+              { key: "country", label: "País", get: (r: any) => r.country },
+              { key: "notes", label: "Notas", default: false, get: (r: any) => r.notes },
+              { key: "created_at", label: "Creado", default: false, get: (r: any) => r.created_at },
+            ]}
+          />
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Switch } from "@/components/ui/switch";
 import { Plus, Search, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { ExportButton } from "@/components/export-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/providers/")({
   component: ProvidersPage,
@@ -119,6 +120,32 @@ function ProvidersPage() {
         <Button onClick={() => setEditing({ kind: "estudio_grabacion", shared_with_ic: true, composer_id: null })}>
           <Plus className="mr-1 h-4 w-4" />Nuevo proveedor
         </Button>
+        <ExportButton
+          entityLabel="Proveedores"
+          filename="proveedores"
+          sheetName="Proveedores"
+          fetchAll={async () => {
+            const { data, error } = await (supabase as any).from("providers").select("*").order("name");
+            if (error) throw error;
+            return data ?? [];
+          }}
+          fields={[
+            { key: "name", label: "Nombre", get: (r: any) => r.name },
+            { key: "kind", label: "Categoría", get: (r: any) => KIND_LABEL[r.kind] ?? r.kind },
+            { key: "contact_name", label: "Contacto", get: (r: any) => r.contact_name },
+            { key: "email", label: "Email", get: (r: any) => r.email },
+            { key: "phone", label: "Teléfono", get: (r: any) => r.phone },
+            { key: "website", label: "Web", get: (r: any) => r.website },
+            { key: "city", label: "Ciudad", get: (r: any) => r.city },
+            { key: "country", label: "País", get: (r: any) => r.country },
+            { key: "shared_with_ic", label: "Compartido con IC", get: (r: any) => (r.shared_with_ic ? "Sí" : "No") },
+            { key: "composer_id", label: "Representado (ID)", default: false, get: (r: any) => r.composer_id },
+            { key: "tags", label: "Etiquetas", default: false, get: (r: any) => r.tags },
+            { key: "rate_notes", label: "Tarifas", default: false, get: (r: any) => r.rate_notes },
+            { key: "notes", label: "Notas", default: false, get: (r: any) => r.notes },
+            { key: "created_at", label: "Creado", default: false, get: (r: any) => r.created_at },
+          ]}
+        />
       </div>
 
       {dataQ.isLoading ? <Skeleton className="h-[300px]" /> : filtered.length === 0 ? (

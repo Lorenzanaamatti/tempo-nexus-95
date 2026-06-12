@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
+import { ExportButton } from "@/components/export-button";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
   component: OpportunitiesIndex,
@@ -116,6 +117,35 @@ function OpportunitiesIndex() {
             </SelectContent>
           </Select>
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar oportunidad…" className="w-56 rounded-sm" />
+          <ExportButton
+            entityLabel="Oportunidades"
+            filename="oportunidades"
+            sheetName="Oportunidades"
+            fetchAll={async () => {
+              const { data, error } = await (supabase as any)
+                .from("opportunities")
+                .select("*, partner_company:production_companies(name), target_production:productions(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
+                .order("created_at", { ascending: false });
+              if (error) throw error;
+              return data ?? [];
+            }}
+            fields={[
+              { key: "title", label: "Oportunidad", get: (r: any) => r.title },
+              { key: "kind", label: "Tipo", get: (r: any) => OPPORTUNITY_KIND_LABEL[(r.kind ?? "pitch") as OpportunityKind] },
+              { key: "partner", label: "Partner", get: (r: any) => r.partner_company?.name || r.partner_name },
+              { key: "production", label: "Producción", get: (r: any) => r.target_production?.title || r.target_production_text },
+              { key: "candidates", label: "Candidatos", get: (r: any) => (r.candidates ?? []).map((c: any) => c.composer?.artistic_name || c.composer?.full_name).filter(Boolean) },
+              { key: "statuses", label: "Estado", get: (r: any) => (r.statuses ?? []).map((s: OpportunityStatus) => OPPORTUNITY_STATUS_LABEL[s] ?? s) },
+              { key: "probability_pct", label: "Probabilidad %", get: (r: any) => r.probability_pct },
+              { key: "estimated_value", label: "Valor estimado (€)", get: (r: any) => r.estimated_value },
+              { key: "detected_date", label: "Detectada", get: (r: any) => r.detected_date },
+              { key: "expected_close_date", label: "Cierre estimado", get: (r: any) => r.expected_close_date },
+              { key: "last_contact_date", label: "Último contacto", get: (r: any) => r.last_contact_date },
+              { key: "responsible", label: "Responsable", get: (r: any) => r.responsible?.full_name },
+              { key: "notes", label: "Notas", default: false, get: (r: any) => r.notes },
+              { key: "created_at", label: "Creado", default: false, get: (r: any) => r.created_at },
+            ]}
+          />
         </div>
       </div>
 
