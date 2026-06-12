@@ -294,6 +294,8 @@ function SpanishFilmsPage() {
 
       <EditDialog
         film={editing}
+        rosterDirectors={rosterDirectors ?? []}
+        rosterCompanies={rosterCompanies ?? []}
         onClose={() => setEditing(null)}
         onSave={async (patch) => {
           if (!editing) return;
