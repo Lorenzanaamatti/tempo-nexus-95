@@ -20,6 +20,28 @@ export type ExportField<T> = {
   get: (row: T) => unknown;
 };
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[T ].*)?$/;
+
+function pad(n: number) {
+  return n < 10 ? `0${n}` : String(n);
+}
+
+function toDDMMYYYY(d: Date): string {
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+
+function formatCellValue(v: unknown): string | number | boolean {
+  if (v == null) return "";
+  if (v instanceof Date) return toDDMMYYYY(v);
+  if (Array.isArray(v)) return v.map((x) => formatCellValue(x)).join(", ");
+  if (typeof v === "string" && ISO_DATE_RE.test(v)) {
+    const [y, m, d] = v.slice(0, 10).split("-");
+    return `${d}/${m}/${y}`;
+  }
+  if (typeof v === "object") return JSON.stringify(v);
+  return v as string | number | boolean;
+}
+
 type Props<T> = {
   filename: string;
   sheetName?: string;
@@ -62,19 +84,13 @@ export function ExportButton<T>({
       const aoa: unknown[][] = [cols.map((c) => c.label)];
       for (const r of rows) {
         aoa.push(
-          cols.map((c) => {
-            const v = c.get(r);
-            if (v == null) return "";
-            if (Array.isArray(v)) return v.join(", ");
-            if (typeof v === "object") return JSON.stringify(v);
-            return v as string | number | boolean;
-          }),
+          cols.map((c) => formatCellValue(c.get(r))),
         );
       }
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
-      const stamp = new Date().toISOString().slice(0, 10);
+      const stamp = toDDMMYYYY(new Date()).replace(/\//g, "-");
       XLSX.writeFile(wb, `${filename}-${stamp}.xlsx`);
       toast.success(`Exportadas ${rows.length} filas`);
       setOpen(false);
