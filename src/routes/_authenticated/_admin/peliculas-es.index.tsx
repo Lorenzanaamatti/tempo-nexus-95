@@ -89,6 +89,30 @@ function SpanishFilmsPage() {
     },
   });
 
+  const { data: rosterDirectors } = useQuery({
+    queryKey: ["roster-directors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directors")
+        .select("id, full_name")
+        .order("full_name");
+      if (error) throw error;
+      return (data ?? []) as RosterDirector[];
+    },
+  });
+
+  const { data: rosterCompanies } = useQuery({
+    queryKey: ["roster-companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("production_companies")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as RosterCompany[];
+    },
+  });
+
   async function runImport() {
     setImporting(true);
     try {
