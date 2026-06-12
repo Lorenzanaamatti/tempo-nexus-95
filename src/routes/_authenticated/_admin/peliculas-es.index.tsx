@@ -55,6 +55,9 @@ type Film = {
   poster_path: string | null;
 };
 
+type RosterDirector = { id: string; full_name: string };
+type RosterCompany = { id: string; name: string };
+
 function SpanishFilmsPage() {
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
