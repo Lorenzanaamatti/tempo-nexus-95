@@ -53,6 +53,8 @@ type Film = {
   review_reason: string | null;
   completeness: number;
   poster_path: string | null;
+  director_ids: string[] | null;
+  production_company_ids: string[] | null;
 };
 
 type RosterDirector = { id: string; full_name: string };
