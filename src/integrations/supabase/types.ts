@@ -3330,6 +3330,116 @@ export type Database = {
           },
         ]
       }
+      spanish_films: {
+        Row: {
+          box_office_eur: number | null
+          completeness: number
+          composer: string | null
+          composer_person_id: string | null
+          created_at: string
+          director_ids: string[]
+          directors: string[]
+          id: string
+          last_synced_at: string | null
+          music_supervisor: string | null
+          music_supervisor_person_id: string | null
+          needs_review: boolean
+          original_title: string | null
+          overview: string | null
+          platform: string | null
+          poster_path: string | null
+          production_companies: string[]
+          production_company_ids: string[]
+          release_date: string | null
+          review_reason: string | null
+          title: string
+          tmdb_id: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          box_office_eur?: number | null
+          completeness?: number
+          composer?: string | null
+          composer_person_id?: string | null
+          created_at?: string
+          director_ids?: string[]
+          directors?: string[]
+          id?: string
+          last_synced_at?: string | null
+          music_supervisor?: string | null
+          music_supervisor_person_id?: string | null
+          needs_review?: boolean
+          original_title?: string | null
+          overview?: string | null
+          platform?: string | null
+          poster_path?: string | null
+          production_companies?: string[]
+          production_company_ids?: string[]
+          release_date?: string | null
+          review_reason?: string | null
+          title: string
+          tmdb_id: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          box_office_eur?: number | null
+          completeness?: number
+          composer?: string | null
+          composer_person_id?: string | null
+          created_at?: string
+          director_ids?: string[]
+          directors?: string[]
+          id?: string
+          last_synced_at?: string | null
+          music_supervisor?: string | null
+          music_supervisor_person_id?: string | null
+          needs_review?: boolean
+          original_title?: string | null
+          overview?: string | null
+          platform?: string | null
+          poster_path?: string | null
+          production_companies?: string[]
+          production_company_ids?: string[]
+          release_date?: string | null
+          review_reason?: string | null
+          title?: string
+          tmdb_id?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spanish_films_composer_person_id_fkey"
+            columns: ["composer_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spanish_films_composer_person_id_fkey"
+            columns: ["composer_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spanish_films_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spanish_films_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       target_accounts: {
         Row: {
           created_at: string
@@ -3518,6 +3628,8 @@ export type Database = {
         Args: { _composer_id: string }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "composer"
