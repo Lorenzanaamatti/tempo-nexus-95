@@ -1,0 +1,1 @@
+ALTER TABLE public.spanish_films ADD COLUMN IF NOT EXISTS title_es text;
