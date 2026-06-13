@@ -246,6 +246,7 @@ export function CalendarBoard({
     };
 
     for (const e of events) {
+      if (subjectTypes && !subjectTypes.includes(e.subject_type)) continue;
       const fam0 = KIND_FAMILY[e.kind] as string | undefined;
       const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
       // Person availability kinds (vacaciones, ausencias, etc.) always belong to "Personal"
@@ -399,7 +400,7 @@ export function CalendarBoard({
       };
     });
     return { rows: out, flatEvents };
-  }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine]);
+    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
 
   const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
 
