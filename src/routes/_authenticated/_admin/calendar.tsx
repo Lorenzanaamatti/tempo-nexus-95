@@ -247,6 +247,10 @@ export function CalendarBoard({
 
     for (const e of events) {
       if (subjectTypes && !subjectTypes.includes(e.subject_type)) continue;
+      // Skip orphan references (e.g. a production that was deleted).
+      if (e.subject_type === "production" && !productionsMap.has(e.subject_id)) continue;
+      if (e.subject_type === "opportunity" && !opportunitiesMap.has(e.subject_id)) continue;
+      if (e.subject_type === "contract" && !contractsMap.has(e.subject_id)) continue;
       const fam0 = KIND_FAMILY[e.kind] as string | undefined;
       const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
       // Person availability kinds (vacaciones, ausencias, etc.) always belong to "Personal"
