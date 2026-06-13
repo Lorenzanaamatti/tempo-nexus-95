@@ -293,7 +293,11 @@ function MessageList({
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const qc = useQueryClient();
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = bottomRef.current;
+    if (!el) return;
+    // Scroll only within the chat container, never the page.
+    const scroller = el.closest('[data-chat-scroll]') as HTMLElement | null;
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
   }, [messages.length]);
 
   const onDelete = async (m: Message) => {
