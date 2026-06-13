@@ -79,7 +79,11 @@ export function formatMoneyEs(amount: number | string | null | undefined, moneda
   const n = typeof amount === "string" ? Number(amount) : amount;
   if (!Number.isFinite(n)) return "—";
   const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  return `${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 }).format(n)} ${symbol}`;
+  const hasDecimals = Math.round(n) !== n;
+  return `${new Intl.NumberFormat("es-ES", {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(n)} ${symbol}`;
 }
 
 /**
