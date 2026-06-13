@@ -66,6 +66,21 @@ function normalizeName(s: string | null | undefined): string {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
+function renderComposerLink(name: string | null, byName: Map<string, string>) {
+  if (!name) return <span className="text-muted-foreground">—</span>;
+  const id = byName.get(normalizeName(name));
+  if (!id) return <>{name}</>;
+  return (
+    <Link
+      to="/composers/$composerId"
+      params={{ composerId: id }}
+      className="text-primary underline-offset-2 hover:underline"
+    >
+      {name}
+    </Link>
+  );
+}
+
 function SpanishFilmsPage() {
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
