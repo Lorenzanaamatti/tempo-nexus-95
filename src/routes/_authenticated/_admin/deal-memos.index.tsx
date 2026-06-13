@@ -37,6 +37,11 @@ type Row = {
   contraparte_nombre?: string | null;
 };
 
+type PartyOption = { value: string; nombre: string };
+type ValidatorOption = { id: string; nombre: string };
+
+const partyValue = (kind: string | null, id: string | null) => (kind && id ? `${kind}:${id}` : "");
+
 function DealMemosKanban() {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -88,27 +93,25 @@ function DealMemosKanban() {
     queryKey: ["dm-clientes-options"],
     queryFn: async () => {
       const [composers, companies] = await Promise.all([
-        supabase.from("composers").select("id, full_name").order("full_name").then((r) => r.data ?? []),
+        supabase.from("composers").select("id, full_name").neq("roster_role", "ic_company").order("full_name").then((r) => r.data ?? []),
         supabase.from("production_companies").select("id, name").order("name").then((r) => r.data ?? []),
       ]);
       return [
-        ...composers.map((c) => ({ id: c.id, nombre: c.full_name })),
-        ...companies.map((c) => ({ id: c.id, nombre: c.name })),
-      ];
+        ...composers.map((c) => ({ value: `composer:${c.id}`, nombre: `Roster · ${c.full_name}` })),
+        ...companies.map((c) => ({ value: `company:${c.id}`, nombre: `Productora · ${c.name}` })),
+      ] satisfies PartyOption[];
     },
   });
   const validadoresQ = useQuery({
     queryKey: ["dm-validadores-options"],
     queryFn: async () => {
       const { data } = await supabase
-        .from("person_ic_functions")
-        .select("person_id, people:person_id(id, full_name)")
-        .eq("function", "validacion_contratos_deal_memos");
-      const rows = (data ?? []) as unknown as { people: { id: string; full_name: string } | null }[];
-      return rows
-        .map((r) => r.people)
-        .filter((p): p is { id: string; full_name: string } => !!p)
-        .map((p) => ({ id: p.id, nombre: p.full_name }));
+        .from("people")
+        .select("id, full_name")
+        .eq("role", "ic_team")
+        .eq("is_virtual_assistant", false)
+        .order("full_name");
+      return ((data ?? []) as { id: string; full_name: string }[]).map((p) => ({ id: p.id, nombre: p.full_name })) satisfies ValidatorOption[];
     },
   });
   const plantillasQ = useQuery({
@@ -121,7 +124,7 @@ function DealMemosKanban() {
 
   const filtered = useMemo(() => {
     return (dmQ.data ?? []).filter((r) => {
-      if (clienteFilter !== "all" && r.cliente_id !== clienteFilter) return false;
+      if (clienteFilter !== "all" && partyValue(r.cliente_kind, r.cliente_id) !== clienteFilter) return false;
       if (plantillaFilter !== "all" && r.plantilla_id !== plantillaFilter) return false;
       if (validadorFilter !== "all" && r.validador_final_id !== validadorFilter) return false;
       return true;
@@ -157,7 +160,7 @@ function DealMemosKanban() {
             <SelectTrigger className="h-9 w-[200px]"><SelectValue placeholder="Cliente" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los clientes</SelectItem>
-              {clienteOptions.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+              {clienteOptions.map((c) => <SelectItem key={c.value} value={c.value}>{c.nombre}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={plantillaFilter} onValueChange={setPlantillaFilter}>

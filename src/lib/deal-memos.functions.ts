@@ -31,6 +31,14 @@ function extractJson(text: string): { email_asunto: string; email_cuerpo: string
   return { email_asunto: parsed.email_asunto, email_cuerpo: parsed.email_cuerpo };
 }
 
+const formatMoneyEs = (amount: number | string | null | undefined, moneda = "EUR") => {
+  if (amount === null || amount === undefined || amount === "") return "(sin especificar)";
+  const n = typeof amount === "string" ? Number(amount) : amount;
+  if (!Number.isFinite(n)) return "(sin especificar)";
+  const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
+  return `${new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ${symbol}`;
+};
+
 export const generateDealMemoVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validate)
@@ -42,7 +50,7 @@ export const generateDealMemoVersion = createServerFn({ method: "POST" })
     // Load deal memo
     const { data: dm, error: dmErr } = await supabase
       .from("deal_memos")
-      .select("id, referencia, obra, descripcion_uso, importe_propuesto, moneda, destinatario_final_email, plantilla_id, cliente_id, contraparte_id, estado, notas_internas")
+      .select("id, referencia, obra, descripcion_uso, importe_propuesto, moneda, destinatario_final_email, plantilla_id, cliente_id, cliente_kind, contraparte_id, contraparte_kind, estado, notas_internas")
       .eq("id", data.dealMemoId)
       .single();
     if (dmErr || !dm) throw new Error(dmErr?.message ?? "Deal memo no encontrado");
@@ -56,18 +64,19 @@ export const generateDealMemoVersion = createServerFn({ method: "POST" })
     if (plErr || !plantilla) throw new Error("Plantilla no encontrada");
     if (!plantilla.activa) throw new Error("La plantilla no está activa");
 
-    // Optional contact context
-    const contactIds = [dm.cliente_id, dm.contraparte_id].filter(Boolean) as string[];
-    let contactsCtx = "";
-    if (contactIds.length) {
-      const { data: contactos } = await supabase
-        .from("dm_contactos")
-        .select("id, nombre, email, tipo, rol, empresa")
-        .in("id", contactIds);
-      contactsCtx = (contactos ?? [])
-        .map((c) => `- ${c.tipo}: ${c.nombre} <${c.email}>${c.rol ? " · " + c.rol : ""}${c.empresa ? " · " + c.empresa : ""}`)
-        .join("\n");
-    }
+    const resolveParty = async (label: "Cliente" | "Contraparte", kind: string | null, id: string | null) => {
+      if (!kind || !id) return null;
+      if (kind === "company") {
+        const { data: company } = await supabase.from("production_companies").select("name, email").eq("id", id).maybeSingle();
+        return company ? `- ${label}: ${company.name}${company.email ? ` <${company.email}>` : ""} · Productora` : null;
+      }
+      const { data: composer } = await supabase.from("composers").select("full_name, email").eq("id", id).maybeSingle();
+      return composer ? `- ${label}: ${composer.full_name}${composer.email ? ` <${composer.email}>` : ""} · Roster` : null;
+    };
+    const contactsCtx = (await Promise.all([
+      resolveParty("Cliente", dm.cliente_kind, dm.cliente_id),
+      resolveParty("Contraparte", dm.contraparte_kind, dm.contraparte_id),
+    ])).filter(Boolean).join("\n");
 
     // Determine next version number + previous version (for corrections)
     const { data: lastVer } = await supabase
@@ -94,7 +103,7 @@ ${plantilla.email_firma}`;
 - Referencia: ${dm.referencia}
 - Obra: ${dm.obra}
 - Descripción de uso: ${dm.descripcion_uso ?? "(sin especificar)"}
-- Importe propuesto: ${dm.importe_propuesto != null ? `${dm.importe_propuesto} ${dm.moneda}` : "(sin especificar)"}
+- Importe propuesto: ${formatMoneyEs(dm.importe_propuesto, dm.moneda ?? "EUR")}
 - Destinatario: ${dm.destinatario_final_email}
 - Notas internas: ${dm.notas_internas ?? "(ninguna)"}
 ${contactsCtx ? `\n# Contactos\n${contactsCtx}` : ""}

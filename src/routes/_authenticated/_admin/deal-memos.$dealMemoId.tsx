@@ -121,7 +121,9 @@ function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void }) {
       obra: dm.obra + " (copia)",
       descripcion_uso: dm.descripcion_uso,
       cliente_id: dm.cliente_id,
+      cliente_kind: dm.cliente_kind,
       contraparte_id: dm.contraparte_id,
+      contraparte_kind: dm.contraparte_kind,
       importe_propuesto: dm.importe_propuesto,
       moneda: dm.moneda,
       plantilla_id: dm.plantilla_id,
@@ -282,7 +284,7 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     queryKey: ["dm-crm-entities"],
     queryFn: async () => {
       const [composers, companies] = await Promise.all([
-        supabase.from("composers").select("id, full_name").order("full_name"),
+        supabase.from("composers").select("id, full_name").neq("roster_role", "ic_company").order("full_name"),
         supabase.from("production_companies").select("id, name").order("name"),
       ]);
       const items: { kind: "composer" | "company"; id: string; label: string; group: string }[] = [];
@@ -295,20 +297,12 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     queryKey: ["dm-validadores-people"],
     queryFn: async () => {
       const { data } = await supabase
-        .from("person_ic_functions")
-        .select("person_id, people:person_id(id, full_name, email)")
-        .eq("function", "validacion_contratos_deal_memos");
-      const seen = new Set<string>();
-      const out: { id: string; full_name: string; email: string | null }[] = [];
-      for (const row of (data ?? []) as any[]) {
-        const p = row.people;
-        if (p && !seen.has(p.id)) {
-          seen.add(p.id);
-          out.push(p);
-        }
-      }
-      out.sort((a, b) => a.full_name.localeCompare(b.full_name));
-      return out;
+        .from("people")
+        .select("id, full_name, email")
+        .eq("role", "ic_team")
+        .eq("is_virtual_assistant", false)
+        .order("full_name");
+      return (data ?? []) as { id: string; full_name: string; email: string | null }[];
     },
   });
 
@@ -483,9 +477,9 @@ function CrmEntitySelect({ value, onChange, items, disabled }: {
   const groups = ["Roster", "Productoras"];
   return (
     <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger><SelectValue placeholder="Selecciona del CRM…" /></SelectTrigger>
+      <SelectTrigger><SelectValue placeholder="Selecciona roster o productora…" /></SelectTrigger>
       <SelectContent>
-        {items.length === 0 && <SelectItem value="__none" disabled>Sin entidades en el CRM</SelectItem>}
+        {items.length === 0 && <SelectItem value="__none" disabled>Sin roster ni productoras disponibles</SelectItem>}
         {groups.map((g) => {
           const sub = items.filter((i) => i.group === g);
           if (sub.length === 0) return null;
