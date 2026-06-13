@@ -3353,6 +3353,7 @@ export type Database = {
           release_date: string | null
           review_reason: string | null
           title: string
+          title_es: string | null
           tmdb_id: number
           updated_at: string
           year: number
@@ -3379,6 +3380,7 @@ export type Database = {
           release_date?: string | null
           review_reason?: string | null
           title: string
+          title_es?: string | null
           tmdb_id: number
           updated_at?: string
           year: number
@@ -3405,6 +3407,7 @@ export type Database = {
           release_date?: string | null
           review_reason?: string | null
           title?: string
+          title_es?: string | null
           tmdb_id?: number
           updated_at?: string
           year?: number
