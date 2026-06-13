@@ -29,6 +29,7 @@ import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_auth
 import { Route as AuthenticatedPortalChatRouteImport } from './routes/_authenticated/portal/chat'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminIcRouteImport } from './routes/_authenticated/_admin/ic'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
@@ -179,6 +180,11 @@ const AuthenticatedPortalAgendaRoute =
     path: '/agenda',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminRosterRoute =
   AuthenticatedAdminRosterRouteImport.update({
     id: '/roster',
@@ -446,6 +452,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -506,6 +513,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -571,6 +579,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/ic': typeof AuthenticatedAdminIcRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
+  '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/_authenticated/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -635,6 +644,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/chat'
@@ -695,6 +705,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/chat'
@@ -759,6 +770,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/ic'
     | '/_authenticated/_admin/roster'
+    | '/_authenticated/_admin/users'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
     | '/_authenticated/portal/chat'
@@ -954,6 +966,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/agenda'
       preLoaderRoute: typeof AuthenticatedPortalAgendaRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/_admin/users': {
+      id: '/_authenticated/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/roster': {
       id: '/_authenticated/_admin/roster'
@@ -1293,6 +1312,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIcRoute: typeof AuthenticatedAdminIcRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
@@ -1332,6 +1352,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIcRoute: AuthenticatedAdminIcRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,

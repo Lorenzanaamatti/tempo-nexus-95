@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Check, X, Clock } from "lucide-react";
+import { useCurrentRole } from "@/lib/use-role";
 
 export const Route = createFileRoute("/_authenticated/_admin/users")({
   component: UsersPage,
@@ -21,14 +22,28 @@ const ROLE_OPTIONS: { value: AppRole; label: string; desc: string }[] = [
 ];
 
 function UsersPage() {
+  const { isBigC, loading: roleLoading } = useCurrentRole();
   const fetchUsers = useServerFn(listUsers);
   const updateAccess = useServerFn(setUserAccess);
   const qc = useQueryClient();
 
   const usersQ = useQuery({
     queryKey: ["admin-users"],
+    enabled: isBigC,
     queryFn: () => fetchUsers(),
   });
+
+  if (roleLoading) {
+    return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
+  }
+  if (!isBigC) {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
+        <p className="smallcaps text-muted-foreground">Acceso restringido</p>
+        <h1 className="mt-2 font-display text-4xl">Solo BIG C</h1>
+      </div>
+    );
+  }
 
   const mut = useMutation({
     mutationFn: (vars: { userId: string; role: AppRole | null; status: "pending" | "active" | "rejected" }) =>
