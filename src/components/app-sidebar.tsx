@@ -48,7 +48,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Supervisores musicales", to: "/composers", search: { role: "supervisor" }, icon: Headphones,    active: composersRole === "supervisor" },
     { title: "Especialistas",       to: "/composers", search: { role: "specialist" }, icon: Sparkles,         active: composersRole === "specialist" },
     { title: "Curadores musicales", to: "/composers", search: { role: "curator" },    icon: ListMusic,        active: composersRole === "curator" },
-    { title: "Otros",               to: "/composers", search: { role: "other" },      icon: MoreHorizontal,   active: composersRole === "other" },
+    { title: "Interesante Compañía", to: "/ic", icon: Building2,                       active: pathname.startsWith("/ic") },
   ];
 
   // 2. PARTNERS (productoras, plataformas, directores, cuentas objetivo)
