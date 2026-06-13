@@ -19,6 +19,7 @@ import { PersonVerifiersEditor } from "@/components/person-verifiers-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { RelatedWorks } from "@/components/related-works";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -207,6 +208,20 @@ function PersonEdit() {
         <h2 className="mb-3 font-display text-2xl">Eventos en el calendario</h2>
         <PersonEventsEditor personId={personId} />
       </div>
+
+      {(form.role === "supervisor" || form.role === "composer" || form.role === "artist") && (
+        <div className="mt-10">
+          <RelatedWorks
+            kind={form.role === "supervisor" ? "supervisor" : "composer-person"}
+            id={data.composer_id ?? personId}
+            personId={personId}
+            title="Obras vinculadas (cruce CRM)"
+          />
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Aparecen automáticamente las Producciones IC y Películas ES donde esta persona figura.
+          </p>
+        </div>
+      )}
 
       {form.role === "ic_team" && (
         <div className="mt-10">
