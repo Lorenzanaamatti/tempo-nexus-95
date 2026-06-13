@@ -325,6 +325,7 @@ export function CalendarBoard({
     if (!onlyMine && activeCategories.personal) {
       for (const a of avail) {
         if (hiddenSubjects.has(`composer::${a.composer_id}`)) continue;
+        if (!composersMap.has(a.composer_id)) continue;
         const ev = {
           id: "ca-" + a.id,
           start: new Date(a.start_date + "T00:00:00"),
