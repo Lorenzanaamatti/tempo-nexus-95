@@ -62,6 +62,114 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_actions: {
+        Row: {
+          agent_person_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by_user_id: string | null
+          decision_notes: string | null
+          error_message: string | null
+          id: string
+          payload: Json
+          requested_at: string
+          requested_by_user_id: string | null
+          resulting_entity_id: string | null
+          resulting_entity_kind: string | null
+          status: Database["public"]["Enums"]["agent_action_status"]
+          summary: string | null
+          tool_name: string
+          updated_at: string
+        }
+        Insert: {
+          agent_person_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by_user_id?: string | null
+          decision_notes?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          requested_at?: string
+          requested_by_user_id?: string | null
+          resulting_entity_id?: string | null
+          resulting_entity_kind?: string | null
+          status?: Database["public"]["Enums"]["agent_action_status"]
+          summary?: string | null
+          tool_name: string
+          updated_at?: string
+        }
+        Update: {
+          agent_person_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by_user_id?: string | null
+          decision_notes?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          requested_at?: string
+          requested_by_user_id?: string | null
+          resulting_entity_id?: string | null
+          resulting_entity_kind?: string | null
+          status?: Database["public"]["Enums"]["agent_action_status"]
+          summary?: string | null
+          tool_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_actions_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_actions_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_tools: {
+        Row: {
+          agent_person_id: string
+          created_at: string
+          enabled: boolean
+          tool_name: string
+        }
+        Insert: {
+          agent_person_id: string
+          created_at?: string
+          enabled?: boolean
+          tool_name: string
+        }
+        Update: {
+          agent_person_id?: string
+          created_at?: string
+          enabled?: boolean
+          tool_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_tools_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_tools_agent_person_id_fkey"
+            columns: ["agent_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       av_genres: {
         Row: {
           id: string
@@ -3761,6 +3869,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      agent_action_status: "pending" | "approved" | "rejected" | "failed"
       app_role: "admin" | "composer" | "team"
       availability_kind:
         | "libre"
@@ -4178,6 +4287,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_action_status: ["pending", "approved", "rejected", "failed"],
       app_role: ["admin", "composer", "team"],
       availability_kind: [
         "libre",
