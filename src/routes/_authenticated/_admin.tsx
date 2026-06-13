@@ -7,13 +7,18 @@ export const Route = createFileRoute("/_authenticated/_admin")({
 });
 
 function AdminLayout() {
-  const { role, loading } = useCurrentRole();
+  const { role, status, isStaff, loading } = useCurrentRole();
   useEffect(() => {
-    if (!loading && role && role !== "admin") window.location.replace("/me");
-  }, [role, loading]);
+    if (loading) return;
+    if (status === "pending" || status === "rejected") {
+      window.location.replace("/pending");
+      return;
+    }
+    if (!isStaff) window.location.replace("/me");
+  }, [role, status, isStaff, loading]);
   if (loading) {
     return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
   }
-  if (role !== "admin") return null;
+  if (!isStaff || status !== "active") return null;
   return <Outlet />;
 }

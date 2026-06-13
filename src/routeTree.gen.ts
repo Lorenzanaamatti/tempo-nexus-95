@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AprobarTokenRouteImport } from './routes/aprobar.$token'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedPendingRouteImport } from './routes/_authenticated/pending'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_auth
 import { Route as AuthenticatedPortalChatRouteImport } from './routes/_authenticated/portal/chat'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminIcRouteImport } from './routes/_authenticated/_admin/ic'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
@@ -93,6 +95,11 @@ const AprobarTokenRoute = AprobarTokenRouteImport.update({
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   id: '/portal',
   path: '/portal',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPendingRoute = AuthenticatedPendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
@@ -173,6 +180,11 @@ const AuthenticatedPortalAgendaRoute =
     path: '/agenda',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminRosterRoute =
   AuthenticatedAdminRosterRouteImport.update({
     id: '/roster',
@@ -430,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/pending': typeof AuthenticatedPendingRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -439,6 +452,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -491,6 +505,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/pending': typeof AuthenticatedPendingRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
@@ -498,6 +513,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -552,6 +568,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/pending': typeof AuthenticatedPendingRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -562,6 +579,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/ic': typeof AuthenticatedAdminIcRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
+  '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/_authenticated/portal/chat': typeof AuthenticatedPortalChatRoute
@@ -616,6 +634,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/me'
+    | '/pending'
     | '/portal'
     | '/aprobar/$token'
     | '/billing'
@@ -625,6 +644,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/chat'
@@ -677,6 +697,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
+    | '/pending'
     | '/aprobar/$token'
     | '/billing'
     | '/budget'
@@ -684,6 +705,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/chat'
@@ -737,6 +759,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/me'
+    | '/_authenticated/pending'
     | '/_authenticated/portal'
     | '/aprobar/$token'
     | '/_authenticated/'
@@ -747,6 +770,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/ic'
     | '/_authenticated/_admin/roster'
+    | '/_authenticated/_admin/users'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
     | '/_authenticated/portal/chat'
@@ -836,6 +860,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pending': {
+      id: '/_authenticated/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof AuthenticatedPendingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/me': {
@@ -935,6 +966,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/agenda'
       preLoaderRoute: typeof AuthenticatedPortalAgendaRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/_admin/users': {
+      id: '/_authenticated/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/roster': {
       id: '/_authenticated/_admin/roster'
@@ -1274,6 +1312,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIcRoute: typeof AuthenticatedAdminIcRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
@@ -1313,6 +1352,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIcRoute: AuthenticatedAdminIcRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,
   AuthenticatedAdminComposersNewRoute: AuthenticatedAdminComposersNewRoute,
@@ -1401,6 +1441,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedPendingRoute: typeof AuthenticatedPendingRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -1409,6 +1450,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedPendingRoute: AuthenticatedPendingRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
