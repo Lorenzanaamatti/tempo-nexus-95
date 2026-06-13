@@ -9,14 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { slugify } from "@/lib/composers-api";
 import { toast } from "sonner";
 
-type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 const ROLE_LABEL: Record<RosterRole, string> = {
   composer: "Compositor",
   artist: "Artista",
   supervisor: "Supervisor musical",
   specialist: "Especialista",
   curator: "Curador musical",
-  other: "Otros",
 };
 const ROLES = Object.keys(ROLE_LABEL) as RosterRole[];
 
