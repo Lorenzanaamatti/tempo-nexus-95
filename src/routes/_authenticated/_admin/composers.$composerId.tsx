@@ -26,6 +26,7 @@ import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { X } from "lucide-react";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
+import { SocialLinksEditor, type SocialLinks } from "@/components/social-links";
 
 const SPECIALIST_TAG_OPTIONS = [
   "Instrumentista",
@@ -303,6 +304,7 @@ function Inner({
         career_notes: c.career_notes,
         portal_url: c.portal_url,
         current_location: (c as { current_location?: string | null }).current_location ?? null,
+        social_links: (c as { social_links?: SocialLinks | null }).social_links ?? {},
       })
       .eq("id", c.id);
     setSaving(false);
