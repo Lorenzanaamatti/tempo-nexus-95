@@ -425,12 +425,14 @@ function EditDialog({
   film,
   rosterDirectors,
   rosterCompanies,
+  rosterPeople,
   onClose,
   onSave,
 }: {
   film: Film | null;
   rosterDirectors: RosterDirector[];
   rosterCompanies: RosterCompany[];
+  rosterPeople: RosterPerson[];
   onClose: () => void;
   onSave: (patch: {
     composer: string | null;
@@ -441,6 +443,8 @@ function EditDialog({
     director_ids: string[];
     production_companies: string[];
     production_company_ids: string[];
+    composer_person_id: string | null;
+    music_supervisor_person_id: string | null;
   }) => Promise<void>;
 }) {
   const [composer, setComposer] = useState("");
@@ -450,6 +454,8 @@ function EditDialog({
   const [busy, setBusy] = useState(false);
   const [directors, setDirectors] = useState<Array<{ name: string; id: string | null }>>([]);
   const [companies, setCompanies] = useState<Array<{ name: string; id: string | null }>>([]);
+  const [composerPersonId, setComposerPersonId] = useState<string | null>(null);
+  const [supervisorPersonId, setSupervisorPersonId] = useState<string | null>(null);
 
   useEffect(() => {
     if (film) {
@@ -465,8 +471,13 @@ function EditDialog({
       setCompanies(
         (film.production_companies ?? []).map((name, i) => ({ name, id: cIds[i] ?? null })),
       );
+      setComposerPersonId(film.composer_person_id ?? null);
+      setSupervisorPersonId(film.music_supervisor_person_id ?? null);
     }
   }, [film]);
+
+  const composerOptions = rosterPeople.filter((p) => p.role === "composer");
+  const supervisorOptions = rosterPeople.filter((p) => p.role === "supervisor");
 
   return (
     <Dialog
@@ -500,10 +511,60 @@ function EditDialog({
           <div className="space-y-1.5">
             <Label>Compositor BSO</Label>
             <Input value={composer} onChange={(e) => setComposer(e.target.value)} />
+            <Select
+              value={composerPersonId ?? "none"}
+              onValueChange={(v) => {
+                if (v === "none") {
+                  setComposerPersonId(null);
+                } else {
+                  setComposerPersonId(v);
+                  const picked = composerOptions.find((p) => p.id === v);
+                  if (picked) setComposer(picked.full_name);
+                }
+              }}
+            >
+              <SelectTrigger className="rounded-sm">
+                <SelectValue placeholder="Vincular compositor del CRM…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Sin vincular —</SelectItem>
+                {composerOptions.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              {composerPersonId ? "● Vinculado al CRM" : "○ Solo texto (no aparecerá en su ficha)"}
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label>Supervisor musical</Label>
             <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} />
+            <Select
+              value={supervisorPersonId ?? "none"}
+              onValueChange={(v) => {
+                if (v === "none") {
+                  setSupervisorPersonId(null);
+                } else {
+                  setSupervisorPersonId(v);
+                  const picked = supervisorOptions.find((p) => p.id === v);
+                  if (picked) setSupervisor(picked.full_name);
+                }
+              }}
+            >
+              <SelectTrigger className="rounded-sm">
+                <SelectValue placeholder="Vincular supervisor/a del CRM…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Sin vincular —</SelectItem>
+                {supervisorOptions.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              {supervisorPersonId ? "● Vinculado al CRM" : "○ Solo texto (no aparecerá en su ficha)"}
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label>Plataforma</Label>
@@ -535,6 +596,8 @@ function EditDialog({
                 director_ids: directors.map((d) => d.id).filter((x): x is string => !!x),
                 production_companies: companies.map((c) => c.name.trim()).filter(Boolean),
                 production_company_ids: companies.map((c) => c.id).filter((x): x is string => !!x),
+                composer_person_id: composerPersonId,
+                music_supervisor_person_id: supervisorPersonId,
               });
               setBusy(false);
             }}
