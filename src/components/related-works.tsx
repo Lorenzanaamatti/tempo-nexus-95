@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
-type Kind = "director" | "company" | "platform" | "composer-person";
+type Kind = "director" | "company" | "platform" | "composer-person" | "supervisor";
 
 /**
  * Lista unificada de obras (Filmografía manual + Películas ES + Producciones IC)
@@ -44,6 +44,7 @@ export function RelatedWorks({
       if (kind === "company") prodQ = prodQ.eq("partner_company_id", id);
       if (kind === "platform") prodQ = prodQ.eq("platform_id", id);
       if (kind === "composer-person") prodQ = prodQ.eq("composer_id", id);
+      if (kind === "supervisor") prodQ = prodQ.eq("music_supervisor_person_id", id);
       const prod = await prodQ;
 
       // 3) Películas ES
@@ -56,6 +57,7 @@ export function RelatedWorks({
         sfQ = sfQ.or(
           `composer_person_id.eq.${personId},music_supervisor_person_id.eq.${personId}`,
         );
+      else if (kind === "supervisor") sfQ = sfQ.eq("music_supervisor_person_id", id);
       else sfQ = null;
       const sf = sfQ ? await sfQ : { data: [] as any[] };
 
