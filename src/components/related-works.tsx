@@ -32,6 +32,7 @@ export function RelatedWorks({
       if (kind === "company") filmoQ = filmoQ.eq("production_company_id", id);
       if (kind === "platform") filmoQ = filmoQ.eq("platform_id", id);
       if (kind === "composer-person") filmoQ = filmoQ.eq("composer_id", id);
+      if (kind === "supervisor") filmoQ = filmoQ.eq("music_supervisor_person_id", id);
       const filmo = await filmoQ;
 
       // 2) Producciones IC
