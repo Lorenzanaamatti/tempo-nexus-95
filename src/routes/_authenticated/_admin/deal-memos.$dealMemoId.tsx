@@ -647,20 +647,107 @@ function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => void }) {
         </div>
       )}
 
-      <Dialog open={!!modalVersion} onOpenChange={(o) => !o && setModalVersion(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader><DialogTitle>Versión {modalVersion?.numero_version}</DialogTitle></DialogHeader>
-          {modalVersion && (
-            <div className="space-y-3">
-              <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Asunto</p><p className="text-sm font-medium">{modalVersion.email_asunto}</p></div>
-              <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cuerpo</p>
-                <pre className="mt-1 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-sm border border-border bg-muted/30 p-3 font-sans text-sm leading-relaxed">{modalVersion.email_cuerpo}</pre>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <VersionModal
+        version={modalVersion}
+        onClose={() => setModalVersion(null)}
+        onSaved={() => {
+          qc.invalidateQueries({ queryKey: ["dm-versions", dm.id] });
+          qc.invalidateQueries({ queryKey: ["dm-events", dm.id] });
+          setModalVersion(null);
+        }}
+        dealMemoId={dm.id}
+      />
     </div>
+  );
+}
+
+function VersionModal({ version, onClose, onSaved, dealMemoId }: { version: any; onClose: () => void; onSaved: () => void; dealMemoId: string }) {
+  const [asunto, setAsunto] = useState("");
+  const [cuerpo, setCuerpo] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (version) {
+      setAsunto(version.email_asunto ?? "");
+      setCuerpo(version.email_cuerpo ?? "");
+      setEditing(!!version._editing);
+    }
+  }, [version]);
+
+  async function save() {
+    if (!asunto.trim() || !cuerpo.trim()) return toast.error("Asunto y cuerpo son obligatorios");
+    setSaving(true);
+    try {
+      const { data: maxRow } = await supabase
+        .from("deal_memo_versiones")
+        .select("numero_version")
+        .eq("deal_memo_id", dealMemoId)
+        .order("numero_version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextNumber = (maxRow?.numero_version ?? 0) + 1;
+      const { error } = await supabase.from("deal_memo_versiones").insert({
+        deal_memo_id: dealMemoId,
+        numero_version: nextNumber,
+        email_asunto: asunto,
+        email_cuerpo: cuerpo,
+        generada_por: "humano",
+        comentarios_revision: `Editado manualmente sobre v${version.numero_version}`,
+      });
+      if (error) throw error;
+      toast.success(`Versión v${nextNumber} guardada`);
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al guardar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!version} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>
+            Versión {version?.numero_version} {editing && <span className="ml-2 text-xs font-normal text-muted-foreground">(editando — se guardará como nueva versión)</span>}
+          </DialogTitle>
+        </DialogHeader>
+        {version && (
+          <div className="space-y-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Asunto</p>
+              {editing ? (
+                <Input value={asunto} onChange={(e) => setAsunto(e.target.value)} className="mt-1" />
+              ) : (
+                <p className="text-sm font-medium">{version.email_asunto}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cuerpo</p>
+              {editing ? (
+                <Textarea value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} rows={20} className="mt-1 font-sans text-sm leading-relaxed" />
+              ) : (
+                <pre className="mt-1 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-sm border border-border bg-muted/30 p-3 font-sans text-sm leading-relaxed">{version.email_cuerpo}</pre>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              {editing ? (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => setEditing(false)} disabled={saving}>Cancelar edición</Button>
+                  <Button size="sm" onClick={save} disabled={saving}>
+                    {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+                    Guardar como v{(version.numero_version ?? 0) + 1}
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil className="mr-1 h-4 w-4" />Editar</Button>
+              )}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
