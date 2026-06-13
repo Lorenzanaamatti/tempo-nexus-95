@@ -1670,42 +1670,6 @@ export type Database = {
         }
         Relationships: []
       }
-      dm_contactos: {
-        Row: {
-          created_at: string
-          email: string
-          empresa: string | null
-          id: string
-          nombre: string
-          notas: string | null
-          rol: string | null
-          tipo: Database["public"]["Enums"]["dm_contacto_tipo"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          empresa?: string | null
-          id?: string
-          nombre: string
-          notas?: string | null
-          rol?: string | null
-          tipo: Database["public"]["Enums"]["dm_contacto_tipo"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          empresa?: string | null
-          id?: string
-          nombre?: string
-          notas?: string | null
-          rol?: string | null
-          tipo?: Database["public"]["Enums"]["dm_contacto_tipo"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       dm_plantillas: {
         Row: {
           activa: boolean

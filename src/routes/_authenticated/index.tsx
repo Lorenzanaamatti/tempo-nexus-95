@@ -70,7 +70,6 @@ const GROUPS: Group[] = [
     items: [
       { title: "Contratos", to: "/contracts", icon: ScrollText },
       { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature },
-      { title: "Contactos DM", to: "/deal-memos/contactos", icon: User },
       { title: "Equipo IC", to: "/people", icon: Users },
     ],
   },

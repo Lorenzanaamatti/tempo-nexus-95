@@ -56,7 +56,6 @@ import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from
 import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './routes/_authenticated/_admin/marketing.calendar'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
-import { Route as AuthenticatedAdminDealMemosContactosRouteImport } from './routes/_authenticated/_admin/deal-memos.contactos'
 import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
@@ -341,12 +340,6 @@ const AuthenticatedAdminDealMemosListaRoute =
     path: '/lista',
     getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
-const AuthenticatedAdminDealMemosContactosRoute =
-  AuthenticatedAdminDealMemosContactosRouteImport.update({
-    id: '/contactos',
-    path: '/contactos',
-    getParentRoute: () => AuthenticatedAdminDealMemosRoute,
-  } as any)
 const AuthenticatedAdminDealMemosConfiguracionRoute =
   AuthenticatedAdminDealMemosConfiguracionRouteImport.update({
     id: '/configuracion',
@@ -477,7 +470,6 @@ export interface FileRoutesByFullPath {
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
-  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -539,7 +531,6 @@ export interface FileRoutesByTo {
   '/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
-  '/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -606,7 +597,6 @@ export interface FileRoutesById {
   '/_authenticated/_admin/contracts/$contractId': typeof AuthenticatedAdminContractsContractIdRoute
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
-  '/_authenticated/_admin/deal-memos/contactos': typeof AuthenticatedAdminDealMemosContactosRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/marketing/calendar': typeof AuthenticatedAdminMarketingCalendarRoute
@@ -672,7 +662,6 @@ export interface FileRouteTypes {
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
-    | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
@@ -734,7 +723,6 @@ export interface FileRouteTypes {
     | '/contracts/$contractId'
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
-    | '/deal-memos/contactos'
     | '/deal-memos/lista'
     | '/directors/$directorId'
     | '/marketing/calendar'
@@ -800,7 +788,6 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/contracts/$contractId'
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
     | '/_authenticated/_admin/deal-memos/configuracion'
-    | '/_authenticated/_admin/deal-memos/contactos'
     | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/marketing/calendar'
@@ -1169,13 +1156,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealMemosListaRouteImport
       parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
-    '/_authenticated/_admin/deal-memos/contactos': {
-      id: '/_authenticated/_admin/deal-memos/contactos'
-      path: '/contactos'
-      fullPath: '/deal-memos/contactos'
-      preLoaderRoute: typeof AuthenticatedAdminDealMemosContactosRouteImport
-      parentRoute: typeof AuthenticatedAdminDealMemosRoute
-    }
     '/_authenticated/_admin/deal-memos/configuracion': {
       id: '/_authenticated/_admin/deal-memos/configuracion'
       path: '/configuracion'
@@ -1294,7 +1274,6 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminDealMemosRouteChildren {
   AuthenticatedAdminDealMemosDealMemoIdRoute: typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   AuthenticatedAdminDealMemosConfiguracionRoute: typeof AuthenticatedAdminDealMemosConfiguracionRoute
-  AuthenticatedAdminDealMemosContactosRoute: typeof AuthenticatedAdminDealMemosContactosRoute
   AuthenticatedAdminDealMemosListaRoute: typeof AuthenticatedAdminDealMemosListaRoute
   AuthenticatedAdminDealMemosIndexRoute: typeof AuthenticatedAdminDealMemosIndexRoute
   AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute: typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
@@ -1307,8 +1286,6 @@ const AuthenticatedAdminDealMemosRouteChildren: AuthenticatedAdminDealMemosRoute
       AuthenticatedAdminDealMemosDealMemoIdRoute,
     AuthenticatedAdminDealMemosConfiguracionRoute:
       AuthenticatedAdminDealMemosConfiguracionRoute,
-    AuthenticatedAdminDealMemosContactosRoute:
-      AuthenticatedAdminDealMemosContactosRoute,
     AuthenticatedAdminDealMemosListaRoute:
       AuthenticatedAdminDealMemosListaRoute,
     AuthenticatedAdminDealMemosIndexRoute:

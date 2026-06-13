@@ -93,7 +93,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const legalItems: NavItem[] = [
     { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
     { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature, active: pathname.startsWith("/deal-memos/plantillas") },
-    { title: "Contactos DM", to: "/deal-memos/contactos", icon: User, active: pathname.startsWith("/deal-memos/contactos") },
     { title: "Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
     { title: "Acciones agentes", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
   ];
