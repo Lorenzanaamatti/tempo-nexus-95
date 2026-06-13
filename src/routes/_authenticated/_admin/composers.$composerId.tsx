@@ -26,6 +26,7 @@ import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { X } from "lucide-react";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
+import { SocialLinksEditor, type SocialLinks } from "@/components/social-links";
 
 const SPECIALIST_TAG_OPTIONS = [
   "Instrumentista",
@@ -303,6 +304,7 @@ function Inner({
         career_notes: c.career_notes,
         portal_url: c.portal_url,
         current_location: (c as { current_location?: string | null }).current_location ?? null,
+        social_links: (c as { social_links?: SocialLinks | null }).social_links ?? {},
       })
       .eq("id", c.id);
     setSaving(false);
@@ -839,6 +841,17 @@ function Inner({
             onChange={(e) => field("reel_url", e.target.value || null)}
           />
         </Field>
+      </Section>
+
+      {/* Redes sociales y portales */}
+      <Section title="Redes sociales y portales">
+        <p className="mb-3 text-xs text-muted-foreground">
+          Enlaces públicos del representado. Aparecerán como badges clicables en su Portal del Representado.
+        </p>
+        <SocialLinksEditor
+          value={(c as { social_links?: SocialLinks | null }).social_links ?? {}}
+          onChange={(next) => field("social_links" as never, next as never)}
+        />
       </Section>
 
       {/* Estilos / Géneros / Idiomas */}

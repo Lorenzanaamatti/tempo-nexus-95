@@ -1052,6 +1052,7 @@ export type Database = {
           roster_role: Database["public"]["Enums"]["roster_role"]
           search_tsv: unknown
           slug: string
+          social_links: Json
           specialist_detail: string | null
           specialist_subtype: string | null
           specialist_tags: string[]
@@ -1097,6 +1098,7 @@ export type Database = {
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug: string
+          social_links?: Json
           specialist_detail?: string | null
           specialist_subtype?: string | null
           specialist_tags?: string[]
@@ -1142,6 +1144,7 @@ export type Database = {
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug?: string
+          social_links?: Json
           specialist_detail?: string | null
           specialist_subtype?: string | null
           specialist_tags?: string[]
