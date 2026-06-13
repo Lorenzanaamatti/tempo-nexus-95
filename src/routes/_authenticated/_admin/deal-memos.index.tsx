@@ -93,7 +93,7 @@ function DealMemosKanban() {
     queryKey: ["dm-clientes-options"],
     queryFn: async () => {
       const [composers, companies] = await Promise.all([
-        supabase.from("composers").select("id, full_name").order("full_name").then((r) => r.data ?? []),
+        supabase.from("composers").select("id, full_name").neq("roster_role", "ic_company").order("full_name").then((r) => r.data ?? []),
         supabase.from("production_companies").select("id, name").order("name").then((r) => r.data ?? []),
       ]);
       return [

@@ -284,7 +284,7 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     queryKey: ["dm-crm-entities"],
     queryFn: async () => {
       const [composers, companies] = await Promise.all([
-        supabase.from("composers").select("id, full_name").order("full_name"),
+        supabase.from("composers").select("id, full_name").neq("roster_role", "ic_company").order("full_name"),
         supabase.from("production_companies").select("id, name").order("name"),
       ]);
       const items: { kind: "composer" | "company"; id: string; label: string; group: string }[] = [];
