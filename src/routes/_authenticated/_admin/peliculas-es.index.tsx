@@ -442,6 +442,7 @@ function EditDialog({
   rosterPeople,
   onClose,
   onSave,
+  onDelete,
 }: {
   film: Film | null;
   rosterDirectors: RosterDirector[];
@@ -460,6 +461,7 @@ function EditDialog({
     composer_person_id: string | null;
     music_supervisor_person_id: string | null;
   }) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   const [composer, setComposer] = useState("");
   const [supervisor, setSupervisor] = useState("");
@@ -594,6 +596,18 @@ function EditDialog({
           </label>
         </div>
         <DialogFooter>
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              setBusy(true);
+              await onDelete();
+              setBusy(false);
+            }}
+            disabled={busy}
+            className="mr-auto"
+          >
+            Eliminar
+          </Button>
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancelar
           </Button>
