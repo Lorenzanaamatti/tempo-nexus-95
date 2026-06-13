@@ -73,7 +73,7 @@ const LAYOUT_ICONS: Record<Layout, typeof GanttChartSquare> = {
 
 const CAL_VIEWS = [
   { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
-  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false },
+  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["production"] as string[] },
   { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[], onlyMine: false },
   { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[], onlyMine: false },
   { key: "personal",     label: "Personal",     cats: ["personal"] as Category[], onlyMine: true },
@@ -104,6 +104,7 @@ function GlobalCalendar() {
         key={preset.key}
         initialCategories={preset.cats}
         initialOnlyMine={preset.onlyMine}
+        subjectTypes={"subjectTypes" in preset ? (preset as { subjectTypes?: string[] }).subjectTypes : undefined}
         title={preset.key === "global" ? "Calendario general" : `Calendario · ${preset.label}`}
       />
     </div>
@@ -114,6 +115,7 @@ export function CalendarBoard({
   lockedCategory,
   initialCategories,
   initialOnlyMine = false,
+  subjectTypes,
   title = "Calendario general",
   eyebrow = "Interesante Compañía",
   description,
@@ -121,6 +123,7 @@ export function CalendarBoard({
   lockedCategory?: Category;
   initialCategories?: Category[];
   initialOnlyMine?: boolean;
+  subjectTypes?: string[];
   title?: string;
   eyebrow?: string;
   description?: React.ReactNode;
@@ -243,6 +246,7 @@ export function CalendarBoard({
     };
 
     for (const e of events) {
+      if (subjectTypes && !subjectTypes.includes(e.subject_type)) continue;
       const fam0 = KIND_FAMILY[e.kind] as string | undefined;
       const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
       // Person availability kinds (vacaciones, ausencias, etc.) always belong to "Personal"
@@ -396,7 +400,7 @@ export function CalendarBoard({
       };
     });
     return { rows: out, flatEvents };
-  }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine]);
+    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
 
   const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
 
