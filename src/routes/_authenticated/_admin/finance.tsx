@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { useCurrentRole } from "@/lib/use-role";
 
 const searchSchema = z.object({ composerId: z.string().uuid().optional() });
 
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/_admin/finance")({
 
 function FinancePage() {
   const { composerId } = Route.useSearch();
+  const { isBigC, loading: roleLoading } = useCurrentRole();
   const composerQ = useQuery({
     queryKey: ["finance-composer", composerId ?? null],
     enabled: !!composerId,
@@ -37,6 +39,21 @@ function FinancePage() {
       return data;
     },
   });
+
+  if (roleLoading) {
+    return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
+  }
+  if (!isBigC) {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
+        <p className="smallcaps text-muted-foreground">Acceso restringido</p>
+        <h1 className="mt-2 font-display text-4xl">Solo BIG C</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          El módulo económico contiene datos financieros sensibles y solo está disponible para usuarios con rol BIG C.
+        </p>
+      </div>
+    );
+  }
 
   const title = composerId
     ? `Económico · ${composerQ.data?.artistic_name || composerQ.data?.full_name || ""}`
