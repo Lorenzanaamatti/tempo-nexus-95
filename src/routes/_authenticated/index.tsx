@@ -7,7 +7,7 @@ import {
   Target, Wallet, LineChart, Film, KanbanSquare, Receipt,
   Scale, ScrollText, FileSignature, User, Users,
   Megaphone, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, Share2,
-  CalendarDays,
+  CalendarDays, UserCog,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -102,19 +102,29 @@ const GROUPS: Group[] = [
 ];
 
 function Index() {
-  const { role, loading } = useCurrentRole();
+  const { role, status, isStaff, isBigC, loading } = useCurrentRole();
   useEffect(() => {
     if (loading) return;
-    if (role && role !== "admin") window.location.replace("/me");
-  }, [role, loading]);
+    if (status === "pending" || status === "rejected") {
+      window.location.replace("/pending");
+      return;
+    }
+    if (!isStaff) window.location.replace("/me");
+  }, [role, status, isStaff, loading]);
 
-  if (loading || (role && role !== "admin")) {
+  if (loading || !isStaff || status !== "active") {
     return (
       <div className="flex min-h-screen items-center justify-center font-display text-muted-foreground">
         Abriendo el archivo…
       </div>
     );
   }
+
+  const visibleGroups = GROUPS.filter((g) => isBigC || g.label !== "Económico").map((g) =>
+    g.label === "Legal" && isBigC
+      ? { ...g, items: [...g.items, { title: "Usuarios y permisos", to: "/users", icon: UserCog }] as typeof g.items }
+      : g,
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
@@ -127,7 +137,7 @@ function Index() {
       </header>
 
       <div className="space-y-10">
-        {GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <section key={group.label}>
             <div className="mb-3 flex items-end justify-between border-b border-border pb-2">
               <h2 className="flex items-center gap-2 font-display text-2xl">
