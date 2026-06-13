@@ -73,14 +73,31 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
   const productionsQ = useQuery({
     queryKey: ["chat-productions", composerId],
     queryFn: async (): Promise<ProductionLite[]> => {
-      const { data, error } = await supabase
-        .from("productions")
-        .select("id, title, premiere_date, created_at")
-        .eq("composer_id", composerId)
-        .order("premiere_date", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []).map((p: any) => ({
+      const [owned, assigned] = await Promise.all([
+        supabase
+          .from("productions")
+          .select("id, title, premiere_date, created_at")
+          .eq("composer_id", composerId),
+        supabase
+          .from("production_assignments")
+          .select("production:productions(id, title, premiere_date, created_at)")
+          .eq("composer_id", composerId),
+      ]);
+      if (owned.error) throw owned.error;
+      if (assigned.error) throw assigned.error;
+      const map = new Map<string, any>();
+      for (const p of (owned.data ?? []) as any[]) map.set(p.id, p);
+      for (const row of (assigned.data ?? []) as any[]) {
+        const p = row.production;
+        if (p && !map.has(p.id)) map.set(p.id, p);
+      }
+      const list = Array.from(map.values());
+      list.sort((a, b) => {
+        const da = a.premiere_date ?? a.created_at ?? "";
+        const db = b.premiere_date ?? b.created_at ?? "";
+        return db.localeCompare(da);
+      });
+      return list.map((p: any) => ({
         id: p.id,
         title: p.title,
         year: p.premiere_date ? new Date(p.premiere_date).getFullYear() : null,
