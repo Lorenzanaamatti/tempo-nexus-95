@@ -61,7 +61,7 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
     if (!resp.ok) {
       const txt = await resp.text();
       console.error("Claude API error", resp.status, txt);
-      throw new Error(`Claude error ${resp.status}`);
+      throw new Error(`Claude error ${resp.status}: ${txt.slice(0, 500)}`);
     }
     const json = (await resp.json()) as {
       content?: Array<{ type: string; text?: string }>;
