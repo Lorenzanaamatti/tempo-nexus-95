@@ -59,7 +59,7 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     queryFn: async (): Promise<Channel[]> => {
       // Asegura los canales por defecto si faltan
       await supabase.rpc("ensure_composer_chat_channels", { _composer_id: composerId });
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("chat_channels")
         .select("id, kind, label, position, production_id")
         .eq("composer_id", composerId)
@@ -103,7 +103,7 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
       setActiveId(existing.id);
       return;
     }
-    const { data, error } = await supabase.rpc("ensure_production_chat_channel", {
+    const { data, error } = await (supabase as any).rpc("ensure_production_chat_channel", {
       _composer_id: composerId,
       _production_id: productionId,
     });
