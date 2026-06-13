@@ -722,7 +722,6 @@ function Inner({
               <option value="supervisor">Supervisor musical</option>
               <option value="specialist">Especialista</option>
               <option value="curator">Curador musical</option>
-              <option value="other">Otros</option>
             </select>
           </Field>
           {(c as { roster_role?: string }).roster_role === "specialist" && (
