@@ -283,7 +283,7 @@ function Inner({
       .from("composers")
       .update({
         full_name: c.full_name,
-        roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other" }).roster_role) ?? "composer",
+        roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "ic_company" }).roster_role) ?? "composer",
         city: c.city,
         country: c.country,
         birth_year: c.birth_year,
