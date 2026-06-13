@@ -224,6 +224,22 @@ export function CalendarBoard({
     queryKey: ["calendar-contracts-min"],
     queryFn: async () => (await supabase.from("contracts").select("id, title, counterparty")).data ?? [],
   });
+  const actionsQ = useQuery({
+    queryKey: ["calendar-actions-min"],
+    queryFn: async () => (await supabase.from("actions").select("id")).data ?? [],
+  });
+  const oppActionsQ = useQuery({
+    queryKey: ["calendar-opportunity-actions-min"],
+    queryFn: async () => (await supabase.from("opportunity_actions").select("id")).data ?? [],
+  });
+  const phasesQ = useQuery({
+    queryKey: ["calendar-production-phases-min"],
+    queryFn: async () => (await supabase.from("production_phases").select("id")).data ?? [],
+  });
+  const sprintsQ = useQuery({
+    queryKey: ["calendar-production-billing-sprints-min"],
+    queryFn: async () => (await supabase.from("production_billing_sprints").select("id")).data ?? [],
+  });
 
   const { rows, flatEvents } = useMemo(() => {
     const events = (eventsQ.data ?? []) as any[];
@@ -235,6 +251,10 @@ export function CalendarBoard({
     const productionsMap = new Map<string, any>((productionsQ.data ?? []).map((p: any) => [p.id, p]));
     const opportunitiesMap = new Map<string, any>((opportunitiesQ.data ?? []).map((o: any) => [o.id, o]));
     const contractsMap = new Map<string, any>((contractsQ.data ?? []).map((c: any) => [c.id, c]));
+    const actionsMap = new Map<string, any>((actionsQ.data ?? []).map((a: any) => [a.id, a]));
+    const oppActionsMap = new Map<string, any>((oppActionsQ.data ?? []).map((a: any) => [a.id, a]));
+    const phasesMap = new Map<string, any>((phasesQ.data ?? []).map((p: any) => [p.id, p]));
+    const sprintsMap = new Map<string, any>((sprintsQ.data ?? []).map((s: any) => [s.id, s]));
 
     type Bag = { subject_type: string; subject_id: string; events: any[] };
     const byKey = new Map<string, Bag>();
@@ -247,10 +267,17 @@ export function CalendarBoard({
 
     for (const e of events) {
       if (subjectTypes && !subjectTypes.includes(e.subject_type)) continue;
-      // Skip orphan references (e.g. a production that was deleted).
+      // Skip orphan references so rows never fall back to UUID-like labels.
       if (e.subject_type === "production" && !productionsMap.has(e.subject_id)) continue;
       if (e.subject_type === "opportunity" && !opportunitiesMap.has(e.subject_id)) continue;
       if (e.subject_type === "contract" && !contractsMap.has(e.subject_id)) continue;
+      if (e.subject_type === "composer" && !composersMap.has(e.subject_id)) continue;
+      if (e.subject_type === "person" && !peopleMap.has(e.subject_id)) continue;
+      if (e.assignee_person_id && !peopleMap.has(e.assignee_person_id)) continue;
+      if (e.source_action_id && !actionsMap.has(e.source_action_id)) continue;
+      if (e.source_opp_action_id && !oppActionsMap.has(e.source_opp_action_id)) continue;
+      if (e.source_phase_id && !phasesMap.has(e.source_phase_id)) continue;
+      if (e.source_sprint_id && !sprintsMap.has(e.source_sprint_id)) continue;
       const fam0 = KIND_FAMILY[e.kind] as string | undefined;
       const isOpp = e.subject_type === "opportunity" || fam0 === "opportunities";
       // Person availability kinds (vacaciones, ausencias, etc.) always belong to "Personal"
@@ -404,9 +431,9 @@ export function CalendarBoard({
       };
     });
     return { rows: out, flatEvents };
-    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
+    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, actionsQ.data, oppActionsQ.data, phasesQ.data, sprintsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
 
-  const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading;
+  const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || actionsQ.isLoading || oppActionsQ.isLoading || phasesQ.isLoading || sprintsQ.isLoading;
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
