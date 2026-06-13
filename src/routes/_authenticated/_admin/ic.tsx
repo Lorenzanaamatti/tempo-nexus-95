@@ -176,14 +176,16 @@ function Kpi({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ICCombinedFilmographySection({ icId }: { icId: string }) {
+function ICCombinedFilmographySection({ icId: _icId }: { icId: string }) {
   const { data } = useQuery({
     queryKey: ["ic-combined-filmo"],
     queryFn: async () => {
       const [prods, filmo, sf] = await Promise.all([
         (supabase as any)
           .from("productions")
-          .select("id, title, year, project_type, composers(full_name, artistic_name)")
+          .select(
+            "id, title, year, project_type, external_composer, composer_id, spanish_film_id, composers(id, full_name, artistic_name), spanish_film:spanish_films(title_es)",
+          )
           .order("year", { ascending: false, nullsFirst: false }),
         supabase
           .from("composer_filmography")
@@ -191,42 +193,90 @@ function ICCombinedFilmographySection({ icId }: { icId: string }) {
           .order("year", { ascending: false, nullsFirst: false }),
         supabase
           .from("spanish_films")
-          .select("id, title, title_es, year")
+          .select("id, title, title_es, year, composer, composer_person_id, music_supervisor, music_supervisor_person_id")
           .order("year", { ascending: false, nullsFirst: false })
           .limit(500),
       ]);
-      type Row = { key: string; title: string; year: number | null; kind: string; composer?: string | null; source: "Producción" | "Filmografía" | "Película ES" };
+      // Map people.id (composer_person_id / music_supervisor_person_id) → composer.id for linking
+      const personIds = new Set<string>();
+      ((sf.data ?? []) as any[]).forEach((s) => {
+        if (s.composer_person_id) personIds.add(s.composer_person_id);
+        if (s.music_supervisor_person_id) personIds.add(s.music_supervisor_person_id);
+      });
+      const composerByPerson = new Map<string, { id: string; name: string }>();
+      if (personIds.size) {
+        const { data: people } = await supabase
+          .from("people")
+          .select("id, composer:composers(id, full_name, artistic_name)")
+          .in("id", Array.from(personIds));
+        for (const p of people ?? []) {
+          const c: any = (p as any).composer;
+          if (c?.id) composerByPerson.set(p.id, { id: c.id, name: c.artistic_name || c.full_name });
+        }
+      }
+
+      type Row = {
+        key: string;
+        title: string;
+        titleEs?: string | null;
+        year: number | null;
+        kind: string;
+        composer: { id: string; name: string } | null;
+        composerText: string | null;
+        source: "Producción" | "Filmografía" | "Película ES";
+        href: { to: string; params?: any };
+      };
       const rows: Row[] = [];
-      ((prods.data ?? []) as any[]).forEach((p) =>
+      // Track which spanish_films are already covered by a production to dedupe
+      const sfCoveredByProd = new Set<string>();
+      ((prods.data ?? []) as any[]).forEach((p) => {
+        if (p.spanish_film_id) sfCoveredByProd.add(p.spanish_film_id);
+        const c = p.composers;
         rows.push({
           key: "p-" + p.id,
           title: p.title,
+          titleEs: p.spanish_film?.title_es ?? null,
           year: p.year ?? null,
           kind: p.project_type ?? "—",
-          composer: p.composers?.artistic_name ?? p.composers?.full_name ?? null,
+          composer: c?.id ? { id: c.id, name: c.artistic_name || c.full_name } : null,
+          composerText: c ? null : p.external_composer || null,
           source: "Producción",
-        }),
-      );
-      ((filmo.data ?? []) as any[]).forEach((f) =>
+          href: { to: "/productions/$productionId", params: { productionId: p.id } },
+        });
+      });
+      ((filmo.data ?? []) as any[]).forEach((f) => {
+        const c = f.composer;
         rows.push({
           key: "f-" + f.id,
           title: f.title,
           year: f.year ?? null,
           kind: "filmografía",
-          composer: f.composer?.artistic_name ?? f.composer?.full_name ?? null,
+          composer: c?.id ? { id: c.id, name: c.artistic_name || c.full_name } : null,
+          composerText: null,
           source: "Filmografía",
-        }),
-      );
-      ((sf.data ?? []) as any[]).forEach((s) =>
+          href: c?.id
+            ? { to: "/composers/$composerId", params: { composerId: c.id } }
+            : { to: "/composers" },
+        });
+      });
+      ((sf.data ?? []) as any[]).forEach((s) => {
+        if (sfCoveredByProd.has(s.id)) return; // ya aparece como producción
+        const linkedComp = s.composer_person_id ? composerByPerson.get(s.composer_person_id) ?? null : null;
+        const linkedSup = s.music_supervisor_person_id ? composerByPerson.get(s.music_supervisor_person_id) ?? null : null;
+        const linked = linkedComp || linkedSup;
+        const text = !linked ? [s.composer, s.music_supervisor].filter(Boolean).join(" / ") || null : null;
         rows.push({
           key: "s-" + s.id,
-          title: s.title_es || s.title,
+          title: s.title,
+          titleEs: s.title_es ?? null,
           year: s.year ?? null,
           kind: "cine",
-          composer: null,
+          composer: linked,
+          composerText: text,
           source: "Película ES",
-        }),
-      );
+          href: { to: "/peliculas-es" },
+        });
+      });
       rows.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
       return rows;
     },
@@ -244,9 +294,11 @@ function ICCombinedFilmographySection({ icId }: { icId: string }) {
               <tr>
                 <th className="px-3 py-2">Año</th>
                 <th className="px-3 py-2">Título</th>
+                <th className="px-3 py-2">Título ES</th>
                 <th className="px-3 py-2">Tipo</th>
                 <th className="px-3 py-2">Compositor/a</th>
                 <th className="px-3 py-2">Fuente</th>
+                <th className="px-3 py-2 text-right"></th>
               </tr>
             </thead>
             <tbody>
@@ -254,10 +306,34 @@ function ICCombinedFilmographySection({ icId }: { icId: string }) {
                 <tr key={r.key} className="border-b border-border/50 hover:bg-muted/20">
                   <td className="px-3 py-2 font-mono text-xs">{r.year ?? "—"}</td>
                   <td className="px-3 py-2">{r.title}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
+                    {r.titleEs && r.titleEs !== r.title ? r.titleEs : "—"}
+                  </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{r.kind}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.composer ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {r.composer ? (
+                      <Link
+                        to="/composers/$composerId"
+                        params={{ composerId: r.composer.id }}
+                        className="text-primary underline-offset-2 hover:underline"
+                      >
+                        {r.composer.name}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">{r.composerText ?? "—"}</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2">
                     <Badge variant="outline" className="rounded-sm text-[10px]">{r.source}</Badge>
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <Link
+                      to={r.href.to as any}
+                      params={r.href.params as any}
+                      className="text-xs text-primary underline-offset-2 hover:underline"
+                    >
+                      Editar
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -270,7 +346,6 @@ function ICCombinedFilmographySection({ icId }: { icId: string }) {
           )}
         </div>
       )}
-      <p className="mt-2 text-xs text-muted-foreground">Reservado: <span className="font-mono">{icId.slice(0, 6)}…</span></p>
     </section>
   );
 }
