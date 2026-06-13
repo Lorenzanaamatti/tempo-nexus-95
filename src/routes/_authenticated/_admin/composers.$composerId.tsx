@@ -16,6 +16,7 @@ import { VideoGallery } from "@/components/video-gallery";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
+import { FilmographyEditor } from "@/components/filmography-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
