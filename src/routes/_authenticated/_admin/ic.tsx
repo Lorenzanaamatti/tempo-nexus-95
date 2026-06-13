@@ -387,11 +387,11 @@ function ICTeamSection() {
       if (ids.length) {
         const { data: fns } = await supabase
           .from("person_ic_functions")
-          .select("person_id, ic_function")
+          .select("person_id, function")
           .in("person_id", ids);
         for (const f of fns ?? []) {
           const cur = fnsByPerson.get(f.person_id) ?? [];
-          cur.push(f.ic_function as string);
+          cur.push(f.function as string);
           fnsByPerson.set(f.person_id, cur);
         }
       }
