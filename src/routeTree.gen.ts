@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AprobarTokenRouteImport } from './routes/aprobar.$token'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedPendingRouteImport } from './routes/_authenticated/pending'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
@@ -93,6 +94,11 @@ const AprobarTokenRoute = AprobarTokenRouteImport.update({
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   id: '/portal',
   path: '/portal',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPendingRoute = AuthenticatedPendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
@@ -430,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/pending': typeof AuthenticatedPendingRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
+  '/pending': typeof AuthenticatedPendingRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
@@ -552,6 +560,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/pending': typeof AuthenticatedPendingRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -616,6 +625,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/me'
+    | '/pending'
     | '/portal'
     | '/aprobar/$token'
     | '/billing'
@@ -677,6 +687,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/me'
+    | '/pending'
     | '/aprobar/$token'
     | '/billing'
     | '/budget'
@@ -737,6 +748,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/me'
+    | '/_authenticated/pending'
     | '/_authenticated/portal'
     | '/aprobar/$token'
     | '/_authenticated/'
@@ -836,6 +848,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pending': {
+      id: '/_authenticated/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof AuthenticatedPendingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/me': {
@@ -1401,6 +1420,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedPendingRoute: typeof AuthenticatedPendingRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -1409,6 +1429,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedPendingRoute: AuthenticatedPendingRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
