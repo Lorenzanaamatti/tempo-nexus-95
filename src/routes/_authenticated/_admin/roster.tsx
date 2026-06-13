@@ -9,16 +9,16 @@ export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
 });
 
-type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "ic_company";
 const ROLE_LABEL: Record<RosterRole, string> = {
   composer: "Compositores",
   artist: "Artistas",
   supervisor: "Supervisores musicales",
   specialist: "Especialistas",
   curator: "Curadores musicales",
-  other: "Otros",
+  ic_company: "Interesante Filmografía",
 };
-const ORDER: RosterRole[] = ["composer", "artist", "supervisor", "specialist", "curator", "other"];
+const ORDER: RosterRole[] = ["ic_company", "composer", "artist", "supervisor", "specialist", "curator"];
 
 function RosterAll() {
   const [q, setQ] = useState("");
@@ -37,10 +37,10 @@ function RosterAll() {
   });
 
   const grouped = (data ?? []).reduce<Record<RosterRole, typeof data>>((acc, row) => {
-    const r = (row.roster_role as RosterRole) ?? "other";
+    const r = (row.roster_role as RosterRole) ?? "composer";
     (acc[r] ||= [] as never).push(row);
     return acc;
-  }, { composer: [], artist: [], supervisor: [], specialist: [], curator: [], other: [] } as never);
+  }, { composer: [], artist: [], supervisor: [], specialist: [], curator: [], ic_company: [] } as never);
 
   const total = data?.length ?? 0;
 
@@ -75,17 +75,19 @@ function RosterAll() {
               <section key={r}>
                 <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
                   <h2 className="font-display text-3xl">{ROLE_LABEL[r]}</h2>
-                  <Link to="/composers" search={{ role: r }} className="smallcaps text-xs text-muted-foreground hover:text-foreground">
-                    Ver categoría →
-                  </Link>
+                  {r !== "ic_company" && (
+                    <Link to="/composers" search={{ role: r }} className="smallcaps text-xs text-muted-foreground hover:text-foreground">
+                      Ver categoría →
+                    </Link>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {rows.map((c) => {
                     return (
                       <Link
                         key={c.id}
-                        to="/composers/$composerId"
-                        params={{ composerId: c.id }}
+                        to={r === "ic_company" ? "/ic" : "/composers/$composerId"}
+                        params={r === "ic_company" ? undefined : { composerId: c.id }}
                         className="group flex items-center gap-4 rounded-sm border border-border p-3 transition hover:border-primary/60"
                       >
                         <ComposerThumb
