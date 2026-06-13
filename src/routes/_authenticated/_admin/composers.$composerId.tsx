@@ -163,6 +163,26 @@ function ComposerEditPage() {
           .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
           .order("signed_date", { ascending: false, nullsFirst: false }),
       ]);
+      // Películas ES vinculadas: a través de people.composer_id
+      const { data: personRow } = await supabase
+        .from("people")
+        .select("id")
+        .eq("composer_id", composerId)
+        .maybeSingle();
+      let spanishFilms: any[] = [];
+      if (personRow?.id) {
+        const { data: sf } = await supabase
+          .from("spanish_films")
+          .select("id, year, title, title_es, composer_person_id, music_supervisor_person_id, platform, directors")
+          .or(
+            `composer_person_id.eq.${personRow.id},music_supervisor_person_id.eq.${personRow.id}`,
+          )
+          .order("year", { ascending: false });
+        spanishFilms = (sf ?? []).map((f: any) => ({
+          ...f,
+          role: f.composer_person_id === personRow.id ? "Compositor BSO" : "Supervisor musical",
+        }));
+      }
       return {
         demos: demos.data ?? [],
         films: films.data ?? [],
@@ -176,6 +196,7 @@ function ComposerEditPage() {
         candidacies: (candidacies as any).data ?? [],
         productions: productions.data ?? [],
         contracts: contracts.data ?? [],
+        spanishFilms,
       };
     },
   });
@@ -225,6 +246,7 @@ function Inner({
   const candidacies: any[] = initialRelations.candidacies ?? [];
   const productionsRel: any[] = initialRelations.productions ?? [];
   const contractsRel: any[] = initialRelations.contracts ?? [];
+  const spanishFilms: any[] = initialRelations.spanishFilms ?? [];
   const [tagInput, setTagInput] = useState("");
 
   function field<K extends string>(k: K, v: any) {
@@ -889,6 +911,38 @@ function Inner({
             { key: "url", label: "URL", type: "url" },
           ]}
         />
+        {spanishFilms.length > 0 && (
+          <div className="mt-6 rounded-sm border border-border p-4">
+            <div className="mb-2 flex items-baseline justify-between">
+              <h4 className="font-display text-lg">Películas ES (CRM)</h4>
+              <span className="smallcaps text-xs text-muted-foreground">
+                {spanishFilms.length} cruces automáticos
+              </span>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Detectadas en el catálogo Películas ES por coincidencia de nombre.
+            </p>
+            <ul className="divide-y divide-border text-sm">
+              {spanishFilms.map((f) => (
+                <li key={f.id} className="flex items-center justify-between gap-3 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">
+                      <a href={`/peliculas-es`} className="hover:underline">
+                        {f.title_es || f.title}
+                      </a>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {[f.year, (f.directors ?? []).join(", "), f.platform].filter(Boolean).join(" · ")}
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-sm border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                    {f.role}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Section>
 
       {/* Awards */}
