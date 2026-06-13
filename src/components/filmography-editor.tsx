@@ -96,7 +96,10 @@ export function FilmographyEditor({
 
   async function update(id: string, patch: Partial<Row>) {
     onChange(rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-    const { error } = await supabase.from("composer_filmography").update(patch).eq("id", id);
+    const { error } = await (supabase as any)
+      .from("composer_filmography")
+      .update(patch)
+      .eq("id", id);
     if (error) toast.error(error.message);
   }
 
