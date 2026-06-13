@@ -115,6 +115,7 @@ export function CalendarBoard({
   lockedCategory,
   initialCategories,
   initialOnlyMine = false,
+  subjectTypes,
   title = "Calendario general",
   eyebrow = "Interesante Compañía",
   description,
@@ -122,6 +123,7 @@ export function CalendarBoard({
   lockedCategory?: Category;
   initialCategories?: Category[];
   initialOnlyMine?: boolean;
+  subjectTypes?: string[];
   title?: string;
   eyebrow?: string;
   description?: React.ReactNode;
