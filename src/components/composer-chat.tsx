@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, Trash2, FileText, Download, Hash } from "lucide-react";
+import { Paperclip, Send, Trash2, FileText, Download, Hash, Folder, FolderOpen, ChevronRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { Link } from "@tanstack/react-router";
@@ -97,6 +97,8 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     return map;
   }, [channelsQ.data]);
 
+  const [produccionesOpen, setProduccionesOpen] = useState(true);
+
   const openProductionChannel = async (productionId: string) => {
     const existing = productionChannelByProductionId.get(productionId);
     if (existing) {
@@ -116,7 +118,11 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
   };
 
   useEffect(() => {
-    if (!activeId && channelsQ.data?.length) setActiveId(channelsQ.data[0].id);
+    if (!activeId && channelsQ.data?.length) {
+      // No seleccionar la carpeta "Producciones" por defecto: es un folder.
+      const first = channelsQ.data.find((c) => c.kind !== "producciones");
+      if (first) setActiveId(first.id);
+    }
   }, [channelsQ.data, activeId]);
 
   // Switch when parent provides a new initial channel.
@@ -164,13 +170,64 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
             .filter((c) => (c as any).production_id == null)
             .map((c) => {
               const isProducciones = c.kind === "producciones";
+              if (isProducciones) {
+                const FolderIcon = produccionesOpen ? FolderOpen : Folder;
+                const ChevIcon = produccionesOpen ? ChevronDown : ChevronRight;
+                return (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      onClick={() => setProduccionesOpen((v) => !v)}
+                      aria-expanded={produccionesOpen}
+                      className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-foreground/80 transition hover:bg-background hover:text-foreground"
+                      title="Carpeta · una conversación por producción"
+                    >
+                      <ChevIcon className="h-3.5 w-3.5 opacity-60" />
+                      <FolderIcon className="h-3.5 w-3.5 opacity-70" />
+                      <span className="truncate">{c.label}</span>
+                    </button>
+                    {produccionesOpen && (
+                      <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                        {(productionsQ.data ?? []).length === 0 ? (
+                          <li className="px-2 py-1 text-[11px] text-muted-foreground">
+                            Sin producciones asignadas
+                          </li>
+                        ) : (
+                          (productionsQ.data ?? []).map((p) => {
+                            const ch = productionChannelByProductionId.get(p.id);
+                            const isActive = ch && ch.id === activeId;
+                            return (
+                              <li key={p.id}>
+                                <button
+                                  type="button"
+                                  onClick={() => openProductionChannel(p.id)}
+                                  className={`flex w-full items-center gap-1.5 rounded-sm px-2 py-1 text-left text-xs transition ${
+                                    isActive
+                                      ? "bg-primary/15 text-foreground font-medium"
+                                      : "text-foreground/70 hover:bg-background hover:text-foreground"
+                                  }`}
+                                  title={p.title ?? "Producción"}
+                                >
+                                  <Hash className="h-3 w-3 opacity-50" />
+                                  <span className="truncate">
+                                    {p.title ?? "—"}
+                                    {p.year ? ` · ${p.year}` : ""}
+                                  </span>
+                                </button>
+                              </li>
+                            );
+                          })
+                        )}
+                      </ul>
+                    )}
+                  </li>
+                );
+              }
               return (
                 <li key={c.id}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setActiveId(c.id);
-                    }}
+                    onClick={() => setActiveId(c.id)}
                     className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition ${
                       c.id === activeId
                         ? "bg-primary/15 text-foreground font-medium"
@@ -180,40 +237,6 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
                     <Hash className="h-3.5 w-3.5 opacity-60" />
                     <span className="truncate">{c.label}</span>
                   </button>
-                  {isProducciones && (
-                    <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-2">
-                      {(productionsQ.data ?? []).length === 0 ? (
-                        <li className="px-2 py-1 text-[11px] text-muted-foreground">
-                          Sin producciones asignadas
-                        </li>
-                      ) : (
-                        (productionsQ.data ?? []).map((p) => {
-                          const ch = productionChannelByProductionId.get(p.id);
-                          const isActive = ch && ch.id === activeId;
-                          return (
-                            <li key={p.id}>
-                              <button
-                                type="button"
-                                onClick={() => openProductionChannel(p.id)}
-                                className={`flex w-full items-center gap-1.5 rounded-sm px-2 py-1 text-left text-xs transition ${
-                                  isActive
-                                    ? "bg-primary/15 text-foreground font-medium"
-                                    : "text-foreground/70 hover:bg-background hover:text-foreground"
-                                }`}
-                                title={p.title ?? "Producción"}
-                              >
-                                <Hash className="h-3 w-3 opacity-50" />
-                                <span className="truncate">
-                                  {p.title ?? "—"}
-                                  {p.year ? ` · ${p.year}` : ""}
-                                </span>
-                              </button>
-                            </li>
-                          );
-                        })
-                      )}
-                    </ul>
-                  )}
                 </li>
               );
             })}
