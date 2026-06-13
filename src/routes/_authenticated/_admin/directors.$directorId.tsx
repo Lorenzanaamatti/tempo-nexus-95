@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ExternalLink, Plus } from "lucide-react";
 import { useState } from "react";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { RelatedWorks } from "@/components/related-works";
 
 export const Route = createFileRoute("/_authenticated/_admin/directors/$directorId")({
   component: DirectorDetail,
@@ -185,6 +186,10 @@ function DirectorDetail() {
           </div>
         )}
       </section>
+
+      <div className="mt-10">
+        <RelatedWorks kind="director" id={directorId} title="Obras vinculadas (cruce CRM)" />
+      </div>
     </div>
   );
 }

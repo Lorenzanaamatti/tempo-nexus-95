@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
+import { RelatedWorks } from "@/components/related-works";
 
 export const Route = createFileRoute("/_authenticated/_admin/production-companies/$companyId")({
   component: CompanyDetail,
@@ -122,6 +123,10 @@ function CompanyDetail() {
           </div>
         )}
       </section>
+
+      <div className="mt-10">
+        <RelatedWorks kind="company" id={companyId} title="Obras vinculadas (cruce CRM)" />
+      </div>
     </div>
   );
 }

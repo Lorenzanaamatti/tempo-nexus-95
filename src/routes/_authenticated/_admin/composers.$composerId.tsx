@@ -16,6 +16,7 @@ import { VideoGallery } from "@/components/video-gallery";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { MultiChipSelect } from "@/components/multi-chip-select";
 import { RelationListEditor } from "@/components/relation-list-editor";
+import { FilmographyEditor } from "@/components/filmography-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
@@ -895,22 +896,7 @@ function Inner({
 
       {/* Filmografía */}
       <Section>
-        <RelationListEditor
-          title="Filmografía"
-          table="composer_filmography"
-          composerId={c.id}
-          rows={films}
-          onChange={setFilms}
-          newDefaults={{ title: "Nuevo título", format: "feature" }}
-          fields={[
-            { key: "title", label: "Título" },
-            { key: "year", label: "Año", type: "number" },
-            { key: "director", label: "Dirección" },
-            { key: "production_company", label: "Productora" },
-            { key: "country", label: "País" },
-            { key: "url", label: "URL", type: "url" },
-          ]}
-        />
+        <FilmographyEditor composerId={c.id} rows={films} onChange={setFilms} />
         {spanishFilms.length > 0 && (
           <div className="mt-6 rounded-sm border border-border p-4">
             <div className="mb-2 flex items-baseline justify-between">
