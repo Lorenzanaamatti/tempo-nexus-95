@@ -843,6 +843,17 @@ function Inner({
         </Field>
       </Section>
 
+      {/* Redes sociales y portales */}
+      <Section title="Redes sociales y portales">
+        <p className="mb-3 text-xs text-muted-foreground">
+          Enlaces públicos del representado. Aparecerán como badges clicables en su Portal del Representado.
+        </p>
+        <SocialLinksEditor
+          value={(c as { social_links?: SocialLinks | null }).social_links ?? {}}
+          onChange={(next) => field("social_links" as never, next as never)}
+        />
+      </Section>
+
       {/* Estilos / Géneros / Idiomas */}
       <Section title="Estilos musicales">
         <MultiChipSelect
