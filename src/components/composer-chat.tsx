@@ -311,7 +311,7 @@ function MessageList({
   };
 
   return (
-    <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+    <div data-chat-scroll className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
       {messages.length === 0 ? (
         <p className="text-center text-sm text-muted-foreground">No hay mensajes en este canal todavía.</p>
       ) : (
