@@ -3707,6 +3707,13 @@ export type Database = {
     }
     Functions: {
       add_business_days: { Args: { _d: string; _n: number }; Returns: string }
+      backfill_spanish_films_to_productions: {
+        Args: never
+        Returns: {
+          created_count: number
+          linked_count: number
+        }[]
+      }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
       current_user_is_admin: { Args: never; Returns: boolean }
       ensure_composer_chat_channels: {
