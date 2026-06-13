@@ -252,3 +252,117 @@ export const deleteSpanishFilm = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+/**
+ * Recorre todas las películas y vuelve a calcular director_ids / production_company_ids /
+ * composer_person_id / music_supervisor_person_id a partir de los nombres ya guardados,
+ * cruzándolos con el roster actual (directors, production_companies, composers + people).
+ *
+ * Útil cuando se añade un director/productora/compositor al CRM DESPUÉS de la importación.
+ */
+export const rematchSpanishFilmsWithCrm = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await adminCheck(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: composers }, { data: directors }, { data: companies }, { data: people }] =
+      await Promise.all([
+        supabaseAdmin.from("composers").select("id, full_name, artistic_name, roster_role"),
+        supabaseAdmin.from("directors").select("id, full_name"),
+        supabaseAdmin.from("production_companies").select("id, name, legal_name"),
+        supabaseAdmin.from("people").select("id, composer_id"),
+      ]);
+    const personByComposer = new Map<string, string>();
+    for (const p of people ?? []) if (p.composer_id) personByComposer.set(p.composer_id, p.id);
+
+    function findDirectorIds(names: string[]): string[] {
+      const out: string[] = [];
+      for (const name of names) {
+        const n = normalize(name);
+        if (!n) continue;
+        const m = (directors ?? []).filter((d) => normalize(d.full_name) === n);
+        if (m.length === 1) out.push(m[0].id);
+      }
+      return out;
+    }
+    function findCompanyIds(names: string[]): string[] {
+      const out: string[] = [];
+      for (const name of names) {
+        const n = normalize(name);
+        if (!n) continue;
+        const m = (companies ?? []).filter(
+          (c) => normalize(c.name) === n || normalize(c.legal_name) === n,
+        );
+        if (m.length === 1) out.push(m[0].id);
+      }
+      return out;
+    }
+    function findPersonId(name: string | null, role: "composer" | "supervisor"): string | null {
+      if (!name) return null;
+      const n = normalize(name);
+      if (!n) return null;
+      const m = (composers ?? []).filter(
+        (c) =>
+          c.roster_role === role &&
+          (normalize(c.full_name) === n || normalize(c.artistic_name) === n),
+      );
+      if (m.length !== 1) return null;
+      return personByComposer.get(m[0].id) ?? null;
+    }
+
+    let scanned = 0;
+    let updated = 0;
+    let linkedDirectors = 0;
+    let linkedCompanies = 0;
+    let linkedComposers = 0;
+    let linkedSupervisors = 0;
+    const PAGE = 500;
+    for (let from = 0; ; from += PAGE) {
+      const { data: rows, error } = await supabaseAdmin
+        .from("spanish_films")
+        .select(
+          "id, directors, production_companies, composer, music_supervisor, director_ids, production_company_ids, composer_person_id, music_supervisor_person_id",
+        )
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      if (!rows?.length) break;
+      for (const r of rows) {
+        scanned++;
+        const newDirIds = findDirectorIds(r.directors ?? []);
+        const newCoIds = findCompanyIds(r.production_companies ?? []);
+        const newCompPid = findPersonId(r.composer, "composer");
+        const newSupPid = findPersonId(r.music_supervisor, "supervisor");
+
+        const dirChanged =
+          JSON.stringify((r.director_ids ?? []).slice().sort()) !==
+          JSON.stringify(newDirIds.slice().sort());
+        const coChanged =
+          JSON.stringify((r.production_company_ids ?? []).slice().sort()) !==
+          JSON.stringify(newCoIds.slice().sort());
+        const compChanged = (r.composer_person_id ?? null) !== newCompPid;
+        const supChanged = (r.music_supervisor_person_id ?? null) !== newSupPid;
+
+        if (!dirChanged && !coChanged && !compChanged && !supChanged) continue;
+
+        const { error: upErr } = await supabaseAdmin
+          .from("spanish_films")
+          .update({
+            director_ids: newDirIds,
+            production_company_ids: newCoIds,
+            composer_person_id: newCompPid,
+            music_supervisor_person_id: newSupPid,
+          })
+          .eq("id", r.id);
+        if (upErr) throw upErr;
+        updated++;
+        if (dirChanged) linkedDirectors += newDirIds.length - (r.director_ids?.length ?? 0);
+        if (coChanged) linkedCompanies += newCoIds.length - (r.production_company_ids?.length ?? 0);
+        if (compChanged && newCompPid) linkedComposers++;
+        if (supChanged && newSupPid) linkedSupervisors++;
+      }
+      if (rows.length < PAGE) break;
+    }
+
+    return { scanned, updated, linkedDirectors, linkedCompanies, linkedComposers, linkedSupervisors };
+  });
