@@ -17,7 +17,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Sparkles, RefreshCw, Loader2, MoreHorizontal,
-  Copy, Ban, Download, Lock, Mail, Send, FileText, Clock,
+  Copy, Ban, Download, Lock, Mail, Send, FileText, Clock, Pencil, Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
