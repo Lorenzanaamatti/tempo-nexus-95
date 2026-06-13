@@ -29,6 +29,7 @@ import { ExportButton, type ExportField } from "@/components/export-button";
 import {
   importSpanishFilmsByYear,
   updateSpanishFilm,
+  deleteSpanishFilm,
 } from "@/lib/spanish-films.functions";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -90,6 +91,7 @@ function SpanishFilmsPage() {
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
   const updateFn = useServerFn(updateSpanishFilm);
+  const deleteFn = useServerFn(deleteSpanishFilm);
 
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [reviewOnly, setReviewOnly] = useState(false);
@@ -405,6 +407,18 @@ function SpanishFilmsPage() {
         rosterCompanies={rosterCompanies ?? []}
         rosterPeople={rosterPeople ?? []}
         onClose={() => setEditing(null)}
+        onDelete={async () => {
+          if (!editing) return;
+          if (!confirm(`¿Eliminar "${editing.title_es || editing.title}" del catálogo? Esta acción no se puede deshacer.`)) return;
+          try {
+            await deleteFn({ data: { id: editing.id } });
+            toast.success("Película eliminada");
+            qc.invalidateQueries({ queryKey: ["spanish-films"] });
+            setEditing(null);
+          } catch (e: any) {
+            toast.error(e?.message ?? "Error al eliminar");
+          }
+        }}
         onSave={async (patch) => {
           if (!editing) return;
           try {
