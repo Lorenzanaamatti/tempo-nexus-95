@@ -49,6 +49,8 @@ function PersonEdit() {
   const [saving, setSaving] = useState(false);
   const [fnPicker, setFnPicker] = useState<string>("");
   const [isVirtual, setIsVirtual] = useState(false);
+  const [assistantModel, setAssistantModel] = useState<string>("claude-sonnet-4-5-20250929");
+  const [assistantPersona, setAssistantPersona] = useState<string>("");
 
   async function addIcFunction(fn: IcTeamFunction) {
     const { error } = await (supabase as any)
@@ -72,6 +74,8 @@ function PersonEdit() {
         notes: data.notes ?? "",
       });
       setIsVirtual(!!data.is_virtual_assistant);
+      setAssistantModel((data as any).assistant_model || "claude-sonnet-4-5-20250929");
+      setAssistantPersona((data as any).assistant_persona || "");
     }
   }, [data]);
 
@@ -86,6 +90,8 @@ function PersonEdit() {
         phone: form.phone || null,
         notes: form.notes || null,
         is_virtual_assistant: isVirtual,
+        assistant_model: isVirtual ? assistantModel : null,
+        assistant_persona: isVirtual ? (assistantPersona || null) : null,
       })
       .eq("id", personId);
     setSaving(false);
