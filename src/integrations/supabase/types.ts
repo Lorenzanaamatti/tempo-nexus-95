@@ -303,6 +303,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["chat_channel_kind"]
           label: string
           position: number
+          production_id: string | null
           updated_at: string
         }
         Insert: {
@@ -312,6 +313,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["chat_channel_kind"]
           label: string
           position?: number
+          production_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -321,9 +323,25 @@ export type Database = {
           kind?: Database["public"]["Enums"]["chat_channel_kind"]
           label?: string
           position?: number
+          production_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_channels_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_channels_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_message_reads: {
         Row: {
@@ -3720,6 +3738,10 @@ export type Database = {
         Args: { _composer_id: string }
         Returns: undefined
       }
+      ensure_production_chat_channel: {
+        Args: { _composer_id: string; _production_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3778,6 +3800,7 @@ export type Database = {
         | "actas"
         | "calendario"
         | "contratos"
+        | "produccion"
       composer_team_role:
         | "agente"
         | "manager"
@@ -4196,6 +4219,7 @@ export const Constants = {
         "actas",
         "calendario",
         "contratos",
+        "produccion",
       ],
       composer_team_role: [
         "agente",

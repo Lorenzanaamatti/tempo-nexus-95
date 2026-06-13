@@ -11,6 +11,7 @@ import { formatDateEs } from "@/lib/dates";
 import { Link } from "@tanstack/react-router";
 
 type Channel = { id: string; kind: string; label: string; position: number };
+type ProductionLite = { id: string; title: string | null; year: number | null };
 type Attachment = { name: string; path?: string; url?: string; mime?: string; size?: number; kind: "file" | "link" };
 type Message = {
   id: string;
@@ -58,15 +59,61 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     queryFn: async (): Promise<Channel[]> => {
       // Asegura los canales por defecto si faltan
       await supabase.rpc("ensure_composer_chat_channels", { _composer_id: composerId });
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("chat_channels")
-        .select("id, kind, label, position")
+        .select("id, kind, label, position, production_id")
         .eq("composer_id", composerId)
         .order("position");
       if (error) throw error;
-      return (data ?? []) as Channel[];
+      return (data ?? []) as unknown as Channel[];
     },
   });
+
+  // Producciones asignadas al compositor (para subcanales de #Producciones)
+  const productionsQ = useQuery({
+    queryKey: ["chat-productions", composerId],
+    queryFn: async (): Promise<ProductionLite[]> => {
+      const { data, error } = await supabase
+        .from("productions")
+        .select("id, title, premiere_date, created_at")
+        .eq("composer_id", composerId)
+        .order("premiere_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        year: p.premiere_date ? new Date(p.premiere_date).getFullYear() : null,
+      }));
+    },
+  });
+
+  const productionChannelByProductionId = useMemo(() => {
+    const map = new Map<string, Channel>();
+    for (const c of channelsQ.data ?? []) {
+      const pid = (c as any).production_id as string | null | undefined;
+      if (pid) map.set(pid, c);
+    }
+    return map;
+  }, [channelsQ.data]);
+
+  const openProductionChannel = async (productionId: string) => {
+    const existing = productionChannelByProductionId.get(productionId);
+    if (existing) {
+      setActiveId(existing.id);
+      return;
+    }
+    const { data, error } = await (supabase as any).rpc("ensure_production_chat_channel", {
+      _composer_id: composerId,
+      _production_id: productionId,
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["chat-channels", composerId] });
+    if (data) setActiveId(data as string);
+  };
 
   useEffect(() => {
     if (!activeId && channelsQ.data?.length) setActiveId(channelsQ.data[0].id);
@@ -113,22 +160,63 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     <div className="grid gap-4 md:grid-cols-[220px_1fr]">
       <aside className="rounded-sm border border-border bg-muted p-2">
         <ul className="space-y-0.5">
-          {(channelsQ.data ?? []).map((c) => (
-            <li key={c.id}>
-              <button
-                type="button"
-                onClick={() => setActiveId(c.id)}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition ${
-                  c.id === activeId
-                    ? "bg-primary/15 text-foreground font-medium"
-                    : "text-foreground/80 hover:bg-background hover:text-foreground"
-                }`}
-              >
-                <Hash className="h-3.5 w-3.5 opacity-60" />
-                <span className="truncate">{c.label}</span>
-              </button>
-            </li>
-          ))}
+          {(channelsQ.data ?? [])
+            .filter((c) => (c as any).production_id == null)
+            .map((c) => {
+              const isProducciones = c.kind === "producciones";
+              return (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveId(c.id);
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition ${
+                      c.id === activeId
+                        ? "bg-primary/15 text-foreground font-medium"
+                        : "text-foreground/80 hover:bg-background hover:text-foreground"
+                    }`}
+                  >
+                    <Hash className="h-3.5 w-3.5 opacity-60" />
+                    <span className="truncate">{c.label}</span>
+                  </button>
+                  {isProducciones && (
+                    <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                      {(productionsQ.data ?? []).length === 0 ? (
+                        <li className="px-2 py-1 text-[11px] text-muted-foreground">
+                          Sin producciones asignadas
+                        </li>
+                      ) : (
+                        (productionsQ.data ?? []).map((p) => {
+                          const ch = productionChannelByProductionId.get(p.id);
+                          const isActive = ch && ch.id === activeId;
+                          return (
+                            <li key={p.id}>
+                              <button
+                                type="button"
+                                onClick={() => openProductionChannel(p.id)}
+                                className={`flex w-full items-center gap-1.5 rounded-sm px-2 py-1 text-left text-xs transition ${
+                                  isActive
+                                    ? "bg-primary/15 text-foreground font-medium"
+                                    : "text-foreground/70 hover:bg-background hover:text-foreground"
+                                }`}
+                                title={p.title ?? "Producción"}
+                              >
+                                <Hash className="h-3 w-3 opacity-50" />
+                                <span className="truncate">
+                                  {p.title ?? "—"}
+                                  {p.year ? ` · ${p.year}` : ""}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })
+                      )}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
         </ul>
       </aside>
       <div className="flex min-h-[480px] flex-col rounded-sm border border-border bg-background">
