@@ -1026,6 +1026,7 @@ export type Database = {
           birth_year: number | null
           career_notes: string | null
           city: string | null
+          company_profile: Json
           country: string | null
           created_at: string
           current_location: string | null
@@ -1072,6 +1073,7 @@ export type Database = {
           birth_year?: number | null
           career_notes?: string | null
           city?: string | null
+          company_profile?: Json
           country?: string | null
           created_at?: string
           current_location?: string | null
@@ -1118,6 +1120,7 @@ export type Database = {
           birth_year?: number | null
           career_notes?: string | null
           city?: string | null
+          company_profile?: Json
           country?: string | null
           created_at?: string
           current_location?: string | null
@@ -3980,6 +3983,7 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+        | "ic_company"
       social_asset_kind: "image" | "video" | "audio" | "gif" | "documento"
       social_channel:
         | "instagram"
@@ -4417,6 +4421,7 @@ export const Constants = {
         "specialist",
         "curator",
         "other",
+        "ic_company",
       ],
       social_asset_kind: ["image", "video", "audio", "gif", "documento"],
       social_channel: [
