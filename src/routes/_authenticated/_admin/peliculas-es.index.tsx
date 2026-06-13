@@ -44,6 +44,7 @@ type Film = {
   year: number;
   title: string;
   title_es: string | null;
+  original_title: string | null;
   directors: string[];
   production_companies: string[];
   composer: string | null;
@@ -100,7 +101,7 @@ function SpanishFilmsPage() {
       let query = supabase
         .from("spanish_films")
         .select(
-          "id, tmdb_id, year, title, title_es, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids",
+          "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids",
         )
         .order("year", { ascending: false })
         .order("title");
@@ -299,7 +300,7 @@ function SpanishFilmsPage() {
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{f.title}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{f.original_title || "—"}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
                     {f.directors.length === 0 ? (
                       "—"
