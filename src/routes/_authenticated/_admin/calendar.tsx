@@ -73,7 +73,7 @@ const LAYOUT_ICONS: Record<Layout, typeof GanttChartSquare> = {
 
 const CAL_VIEWS = [
   { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
-  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false },
+  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["production"] as string[] },
   { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[], onlyMine: false },
   { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[], onlyMine: false },
   { key: "personal",     label: "Personal",     cats: ["personal"] as Category[], onlyMine: true },
@@ -104,6 +104,7 @@ function GlobalCalendar() {
         key={preset.key}
         initialCategories={preset.cats}
         initialOnlyMine={preset.onlyMine}
+        subjectTypes={"subjectTypes" in preset ? (preset as { subjectTypes?: string[] }).subjectTypes : undefined}
         title={preset.key === "global" ? "Calendario general" : `Calendario · ${preset.label}`}
       />
     </div>
