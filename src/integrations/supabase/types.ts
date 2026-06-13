@@ -3738,6 +3738,10 @@ export type Database = {
         Args: { _composer_id: string }
         Returns: undefined
       }
+      ensure_production_chat_channel: {
+        Args: { _composer_id: string; _production_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
