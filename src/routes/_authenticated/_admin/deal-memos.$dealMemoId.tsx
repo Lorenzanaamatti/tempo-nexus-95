@@ -635,7 +635,8 @@ function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => void }) {
                     )}
                     <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{v.email_cuerpo}</pre>
                     <div className="mt-3 flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setModalVersion(v)}>Ver completo</Button>
+                      <Button size="sm" variant="outline" onClick={() => setModalVersion({ ...v, _editing: false })}>Ver completo</Button>
+                      <Button size="sm" variant="outline" onClick={() => setModalVersion({ ...v, _editing: true })}><Pencil className="mr-1 h-4 w-4" />Editar y guardar como nueva versión</Button>
                       <Button size="sm" variant="outline" onClick={() => toast("Función disponible en Bloque 5")}><Download className="mr-1 h-4 w-4" />Descargar .docx</Button>
                     </div>
                   </div>
