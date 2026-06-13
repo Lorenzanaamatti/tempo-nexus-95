@@ -472,6 +472,86 @@ function ContactoSelect({ value, onChange, contactos, disabled }: {
   );
 }
 
+function CrmEntitySelect({ value, onChange, items, disabled }: {
+  value: string;
+  onChange: (combo: string) => void;
+  items: { kind: "composer" | "company"; id: string; label: string; group: string }[];
+  disabled?: boolean;
+}) {
+  const groups = ["Roster", "Productoras"];
+  return (
+    <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger><SelectValue placeholder="Selecciona del CRM…" /></SelectTrigger>
+      <SelectContent>
+        {items.length === 0 && <SelectItem value="__none" disabled>Sin entidades en el CRM</SelectItem>}
+        {groups.map((g) => {
+          const sub = items.filter((i) => i.group === g);
+          if (sub.length === 0) return null;
+          return (
+            <div key={g}>
+              <p className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{g}</p>
+              {sub.map((i) => (
+                <SelectItem key={`${i.kind}:${i.id}`} value={`${i.kind}:${i.id}`}>
+                  {i.label}
+                </SelectItem>
+              ))}
+            </div>
+          );
+        })}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function PersonSelect({ value, onChange, people, disabled }: {
+  value: string; onChange: (v: string) => void;
+  people: { id: string; full_name: string; email: string | null }[]; disabled?: boolean;
+}) {
+  return (
+    <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+      <SelectContent>
+        {people.length === 0 && <SelectItem value="__none" disabled>Sin personas con rol validador</SelectItem>}
+        {people.map((p) => (
+          <SelectItem key={p.id} value={p.id}>
+            {p.full_name}{p.email ? ` · ${p.email}` : ""}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function ImporteInput({ value, onChange, disabled }: {
+  value: string; onChange: (v: string) => void; disabled?: boolean;
+}) {
+  // Permite dígitos, puntos (miles) y una coma decimal — formato es-ES.
+  return (
+    <Input
+      inputMode="decimal"
+      value={value}
+      placeholder="0,00"
+      disabled={disabled}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/[^0-9.,]/g, "");
+        onChange(raw);
+      }}
+      onBlur={() => {
+        if (value === "") return;
+        const n = Number(value.replace(/\./g, "").replace(",", "."));
+        if (Number.isFinite(n)) {
+          onChange(
+            new Intl.NumberFormat("es-ES", {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2,
+            }).format(n),
+          );
+        }
+      }}
+    />
+  );
+}
+
 function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => void }) {
   const qc = useQueryClient();
   const generate = useServerFn(generateDealMemoVersion);
