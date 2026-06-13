@@ -40,11 +40,23 @@ function DealMemoDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deal_memos")
-        .select("*, plantilla:plantilla_id(id, nombre, activa), cliente:cliente_id(id, nombre, empresa), contraparte:contraparte_id(id, nombre, empresa), validador_interno:validador_interno_id(id, nombre), validador_final:validador_final_id(id, nombre)")
+        .select("*, plantilla:plantilla_id(id, nombre, activa)")
         .eq("id", dealMemoId)
         .single();
       if (error) throw error;
-      return data as any;
+      const dm: any = data;
+      // Resolver nombres de cliente/contraparte/validadores (ya no son FKs)
+      const [cliente, contraparte, vi, vf] = await Promise.all([
+        resolveEntity(dm.cliente_kind, dm.cliente_id),
+        resolveEntity(dm.contraparte_kind, dm.contraparte_id),
+        dm.validador_interno_id ? supabase.from("people").select("id, full_name, email").eq("id", dm.validador_interno_id).maybeSingle().then((r) => r.data) : null,
+        dm.validador_final_id ? supabase.from("people").select("id, full_name, email").eq("id", dm.validador_final_id).maybeSingle().then((r) => r.data) : null,
+      ]);
+      dm.cliente = cliente;
+      dm.contraparte = contraparte;
+      dm.validador_interno = vi ? { id: vi.id, nombre: vi.full_name } : null;
+      dm.validador_final = vf ? { id: vf.id, nombre: vf.full_name } : null;
+      return dm;
     },
   });
 
@@ -56,6 +68,41 @@ function DealMemoDetail() {
 }
 
 function DealMemoView({ dm, onChange }: { dm: any; onChange: () => void }) {
+  return (
+    <div>
+      <DealMemoHeader dm={dm} onChange={onChange} />
+      <div className="mx-auto max-w-[1100px] px-6 py-6">
+        <Tabs defaultValue="datos">
+          <TabsList>
+            <TabsTrigger value="datos">Datos</TabsTrigger>
+            <TabsTrigger value="versiones">Versiones</TabsTrigger>
+            <TabsTrigger value="log">Log</TabsTrigger>
+            <TabsTrigger value="notas">Notas</TabsTrigger>
+          </TabsList>
+          <TabsContent value="datos" className="pt-4"><DealMemoForm dm={dm} onSaved={onChange} /></TabsContent>
+          <TabsContent value="versiones" className="pt-4"><DealMemoVersions dm={dm} onChange={onChange} /></TabsContent>
+          <TabsContent value="log" className="pt-4"><DealMemoLog dealMemoId={dm.id} /></TabsContent>
+          <TabsContent value="notas" className="pt-4"><DealMemoNotas dm={dm} /></TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+async function resolveEntity(kind: string | null, id: string | null): Promise<{ id: string; nombre: string } | null> {
+  if (!id || !kind) return null;
+  if (kind === "composer") {
+    const { data } = await supabase.from("composers").select("id, full_name").eq("id", id).maybeSingle();
+    return data ? { id: data.id, nombre: data.full_name } : null;
+  }
+  if (kind === "company") {
+    const { data } = await supabase.from("production_companies").select("id, name").eq("id", id).maybeSingle();
+    return data ? { id: data.id, nombre: data.name } : null;
+  }
+  return null;
+}
+
+function _legacyDealMemoView({ dm, onChange }: { dm: any; onChange: () => void }) {
   return (
     <div>
       <DealMemoHeader dm={dm} onChange={onChange} />
