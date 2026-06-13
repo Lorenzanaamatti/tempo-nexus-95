@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -59,6 +59,27 @@ type Film = {
 
 type RosterDirector = { id: string; full_name: string };
 type RosterCompany = { id: string; name: string };
+type RosterComposer = { id: string; full_name: string; artistic_name: string | null };
+
+function normalizeName(s: string | null | undefined): string {
+  if (!s) return "";
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function renderComposerLink(name: string | null, byName: Map<string, string>) {
+  if (!name) return <span className="text-muted-foreground">—</span>;
+  const id = byName.get(normalizeName(name));
+  if (!id) return <>{name}</>;
+  return (
+    <Link
+      to="/composers/$composerId"
+      params={{ composerId: id }}
+      className="text-primary underline-offset-2 hover:underline"
+    >
+      {name}
+    </Link>
+  );
+}
 
 function SpanishFilmsPage() {
   const qc = useQueryClient();
@@ -114,6 +135,27 @@ function SpanishFilmsPage() {
       return (data ?? []) as RosterCompany[];
     },
   });
+
+  const { data: rosterComposers } = useQuery({
+    queryKey: ["roster-composers-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("composers")
+        .select("id, full_name, artistic_name");
+      if (error) throw error;
+      return (data ?? []) as RosterComposer[];
+    },
+  });
+
+  const directorByName = new Map<string, string>();
+  for (const d of rosterDirectors ?? []) directorByName.set(normalizeName(d.full_name), d.id);
+  const companyByName = new Map<string, string>();
+  for (const c of rosterCompanies ?? []) companyByName.set(normalizeName(c.name), c.id);
+  const composerByName = new Map<string, string>();
+  for (const c of rosterComposers ?? []) {
+    composerByName.set(normalizeName(c.full_name), c.id);
+    if (c.artistic_name) composerByName.set(normalizeName(c.artistic_name), c.id);
+  }
 
   async function runImport() {
     setImporting(true);
@@ -256,14 +298,54 @@ function SpanishFilmsPage() {
                     )}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.directors.join(", ") || "—"}
+                    {f.directors.length === 0 ? "—" : f.directors.map((name, i) => {
+                      const id = directorByName.get(normalizeName(name));
+                      return (
+                        <span key={i}>
+                          {i > 0 && ", "}
+                          {id ? (
+                            <Link
+                              to="/directors/$directorId"
+                              params={{ directorId: id }}
+                              className="text-primary underline-offset-2 hover:underline"
+                            >
+                              {name}
+                            </Link>
+                          ) : (
+                            name
+                          )}
+                        </span>
+                      );
+                    })}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.production_companies.slice(0, 2).join(", ")}
-                    {f.production_companies.length > 2 && ` +${f.production_companies.length - 2}`}
+                    {f.production_companies.length === 0 ? "—" : (
+                      <>
+                        {f.production_companies.slice(0, 2).map((name, i) => {
+                          const id = companyByName.get(normalizeName(name));
+                          return (
+                            <span key={i}>
+                              {i > 0 && ", "}
+                              {id ? (
+                                <Link
+                                  to="/production-companies/$companyId"
+                                  params={{ companyId: id }}
+                                  className="text-primary underline-offset-2 hover:underline"
+                                >
+                                  {name}
+                                </Link>
+                              ) : (
+                                name
+                              )}
+                            </span>
+                          );
+                        })}
+                        {f.production_companies.length > 2 && ` +${f.production_companies.length - 2}`}
+                      </>
+                    )}
                   </td>
-                  <td className="px-3 py-2 text-xs">{f.composer || <span className="text-muted-foreground">—</span>}</td>
-                  <td className="px-3 py-2 text-xs">{f.music_supervisor || <span className="text-muted-foreground">—</span>}</td>
+                  <td className="px-3 py-2 text-xs">{renderComposerLink(f.composer, composerByName)}</td>
+                  <td className="px-3 py-2 text-xs">{renderComposerLink(f.music_supervisor, composerByName)}</td>
                   <td className="px-3 py-2 text-xs">{f.platform || <span className="text-muted-foreground">—</span>}</td>
                   <td className="px-3 py-2 text-center">
                     <Badge
@@ -565,6 +647,7 @@ function EntityListEditor({
 }
 
 function exportFields(): ExportField<Film>[] {
+  // exported below
   return [
     { key: "year", label: "Año", get: (r) => r.year },
     { key: "title", label: "Título", get: (r) => r.title },
