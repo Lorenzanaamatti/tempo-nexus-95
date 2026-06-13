@@ -163,6 +163,26 @@ function ComposerEditPage() {
           .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
           .order("signed_date", { ascending: false, nullsFirst: false }),
       ]);
+      // Películas ES vinculadas: a través de people.composer_id
+      const { data: personRow } = await supabase
+        .from("people")
+        .select("id")
+        .eq("composer_id", composerId)
+        .maybeSingle();
+      let spanishFilms: any[] = [];
+      if (personRow?.id) {
+        const { data: sf } = await supabase
+          .from("spanish_films")
+          .select("id, year, title, title_es, composer_person_id, music_supervisor_person_id, platform, directors")
+          .or(
+            `composer_person_id.eq.${personRow.id},music_supervisor_person_id.eq.${personRow.id}`,
+          )
+          .order("year", { ascending: false });
+        spanishFilms = (sf ?? []).map((f: any) => ({
+          ...f,
+          role: f.composer_person_id === personRow.id ? "Compositor BSO" : "Supervisor musical",
+        }));
+      }
       return {
         demos: demos.data ?? [],
         films: films.data ?? [],
@@ -176,6 +196,7 @@ function ComposerEditPage() {
         candidacies: (candidacies as any).data ?? [],
         productions: productions.data ?? [],
         contracts: contracts.data ?? [],
+        spanishFilms,
       };
     },
   });
