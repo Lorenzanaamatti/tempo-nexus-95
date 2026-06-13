@@ -17,6 +17,11 @@ function Shell() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isPortal = pathname.startsWith("/portal");
 
+  // Asegura que cada navegación entre páginas comienza arriba del todo.
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
+
   useEffect(() => {
     if (loading) return;
     if (!user) {
