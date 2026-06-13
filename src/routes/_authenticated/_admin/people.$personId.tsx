@@ -90,9 +90,9 @@ function PersonEdit() {
         phone: form.phone || null,
         notes: form.notes || null,
         is_virtual_assistant: isVirtual,
-        assistant_model: isVirtual ? assistantModel : null,
-        assistant_persona: isVirtual ? (assistantPersona || null) : null,
-      })
+        assistant_model: isVirtual ? assistantModel : undefined,
+        assistant_persona: isVirtual ? (assistantPersona || undefined) : undefined,
+      } as any)
       .eq("id", personId);
     setSaving(false);
     if (error) return toast.error(error.message);
