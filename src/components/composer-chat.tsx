@@ -97,9 +97,6 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
     return map;
   }, [channelsQ.data]);
 
-  const produccionesParent = (channelsQ.data ?? []).find((c) => c.kind === "producciones") ?? null;
-  const [openProducciones, setOpenProducciones] = useState(true);
-
   const openProductionChannel = async (productionId: string) => {
     const existing = productionChannelByProductionId.get(productionId);
     if (existing) {
@@ -173,7 +170,6 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
                     type="button"
                     onClick={() => {
                       setActiveId(c.id);
-                      if (isProducciones) setOpenProducciones(true);
                     }}
                     className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition ${
                       c.id === activeId
@@ -222,8 +218,6 @@ export function ComposerChat({ composerId, initialChannelId }: { composerId: str
               );
             })}
         </ul>
-        {/* Marca para evitar warning de variables sin usar */}
-        <span className="hidden">{produccionesParent?.id}{openProducciones ? "" : ""}</span>
       </aside>
       <div className="flex min-h-[480px] flex-col rounded-sm border border-border bg-background">
         <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
