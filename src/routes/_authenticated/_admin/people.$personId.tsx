@@ -213,7 +213,7 @@ function PersonEdit() {
         <div className="mt-10">
           <RelatedWorks
             kind={form.role === "supervisor" ? "supervisor" : "composer-person"}
-            id={data.composer_id ?? personId}
+            id={form.role === "supervisor" ? personId : (data.composer_id ?? personId)}
             personId={personId}
             title="Obras vinculadas (cruce CRM)"
           />
