@@ -115,6 +115,7 @@ export const importSpanishFilmsByYear = createServerFn({ method: "POST" })
       for (const r of list.results) {
         const detail = (await tmdbFetch(`/movie/${r.id}`, {
           append_to_response: "credits,watch/providers",
+          language: "es-ES",
         })) as {
           id: number;
           title: string;
@@ -156,6 +157,7 @@ export const importSpanishFilmsByYear = createServerFn({ method: "POST" })
           tmdb_id: detail.id,
           year: data.year,
           title: detail.title,
+          title_es: detail.title,
           original_title: detail.original_title,
           release_date: detail.release_date || null,
           poster_path: detail.poster_path,
