@@ -262,7 +262,9 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     contraparte_id: dm.contraparte_id ?? "",
     contraparte_kind: (dm.contraparte_kind ?? "") as "" | "composer" | "company",
     destinatario_final_email: dm.destinatario_final_email,
-    importe_propuesto: dm.importe_propuesto == null ? "" : String(dm.importe_propuesto),
+    importe_propuesto: dm.importe_propuesto == null
+      ? ""
+      : new Intl.NumberFormat("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(dm.importe_propuesto)),
     moneda: dm.moneda ?? "EUR",
     plantilla_id: dm.plantilla_id ?? "",
     validador_interno_id: dm.validador_interno_id ?? "",
