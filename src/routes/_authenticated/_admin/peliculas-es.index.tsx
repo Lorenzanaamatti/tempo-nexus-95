@@ -319,13 +319,14 @@ function SpanishFilmsPage() {
                     })}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.production_companies.length === 0 ? "—" : (
-                      <>
-                        {f.production_companies.slice(0, 2).map((name, i) => {
+                    {f.production_companies.length === 0 ? (
+                      "—"
+                    ) : (
+                      <ul className="space-y-0.5">
+                        {f.production_companies.map((name, i) => {
                           const id = companyByName.get(normalizeName(name));
                           return (
-                            <span key={i}>
-                              {i > 0 && ", "}
+                            <li key={i}>
                               {id ? (
                                 <Link
                                   to="/production-companies/$companyId"
@@ -337,11 +338,10 @@ function SpanishFilmsPage() {
                               ) : (
                                 name
                               )}
-                            </span>
+                            </li>
                           );
                         })}
-                        {f.production_companies.length > 2 && ` +${f.production_companies.length - 2}`}
-                      </>
+                      </ul>
                     )}
                   </td>
                   <td className="px-3 py-2 text-xs">{renderComposerLink(f.composer, composerByName)}</td>
