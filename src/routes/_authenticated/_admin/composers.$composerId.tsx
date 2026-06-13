@@ -122,6 +122,13 @@ function ComposerEditPage() {
     },
   });
 
+  // La ficha singleton de "Interesante Compañía" se edita en su propia página.
+  useEffect(() => {
+    if (composerQ.data && (composerQ.data as { roster_role?: string }).roster_role === "ic_company") {
+      navigate({ to: "/ic" });
+    }
+  }, [composerQ.data, navigate]);
+
   const catalogsQ = useQuery({ queryKey: ["catalogs"], queryFn: fetchCatalogs });
 
   const relationsQ = useQuery({
