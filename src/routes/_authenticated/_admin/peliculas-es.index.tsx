@@ -30,6 +30,7 @@ import {
   importSpanishFilmsByYear,
   updateSpanishFilm,
   deleteSpanishFilm,
+  rematchSpanishFilmsWithCrm,
 } from "@/lib/spanish-films.functions";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -92,12 +93,14 @@ function SpanishFilmsPage() {
   const importFn = useServerFn(importSpanishFilmsByYear);
   const updateFn = useServerFn(updateSpanishFilm);
   const deleteFn = useServerFn(deleteSpanishFilm);
+  const rematchFn = useServerFn(rematchSpanishFilmsWithCrm);
 
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [reviewOnly, setReviewOnly] = useState(false);
   const [q, setQ] = useState("");
   const [importYear, setImportYear] = useState<string>(String(CURRENT_YEAR));
   const [importing, setImporting] = useState(false);
+  const [rematching, setRematching] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -192,6 +195,21 @@ function SpanishFilmsPage() {
     }
   }
 
+  async function runRematch() {
+    setRematching(true);
+    try {
+      const res = await rematchFn({});
+      toast.success(
+        `Re-cruce CRM: ${res.updated}/${res.scanned} actualizadas · +${res.linkedDirectors} dir · +${res.linkedCompanies} prod · +${res.linkedComposers} comp · +${res.linkedSupervisors} sup`,
+      );
+      qc.invalidateQueries({ queryKey: ["spanish-films"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error en el re-cruce");
+    } finally {
+      setRematching(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
@@ -228,6 +246,17 @@ function SpanishFilmsPage() {
               ) : (
                 <>
                   <RefreshCw className="mr-1 h-4 w-4" /> Importar desde TMDb
+                </>
+              )}
+            </Button>
+            <Button onClick={runRematch} disabled={rematching} size="sm" variant="outline">
+              {rematching ? (
+                <>
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Cruzando…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-1 h-4 w-4" /> Re-cruzar con CRM
                 </>
               )}
             </Button>
