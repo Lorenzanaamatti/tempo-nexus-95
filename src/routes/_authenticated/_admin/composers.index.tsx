@@ -9,7 +9,7 @@ import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 
-type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other";
+type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
 const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
 const TIER_LABEL: Record<Tier, string> = {
@@ -34,7 +34,6 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
   supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Supervisores musicales del roster." },
   specialist: { title: "Especialistas",        singular: "especialista",       intro: "Especialistas que colaboran con la compañía." },
   curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
-  other:      { title: "Otros",                singular: "perfil",             intro: "Otros perfiles del roster." },
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
 

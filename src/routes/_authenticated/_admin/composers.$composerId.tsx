@@ -122,6 +122,13 @@ function ComposerEditPage() {
     },
   });
 
+  // La ficha singleton de "Interesante Compañía" se edita en su propia página.
+  useEffect(() => {
+    if (composerQ.data && (composerQ.data as { roster_role?: string }).roster_role === "ic_company") {
+      navigate({ to: "/ic" });
+    }
+  }, [composerQ.data, navigate]);
+
   const catalogsQ = useQuery({ queryKey: ["catalogs"], queryFn: fetchCatalogs });
 
   const relationsQ = useQuery({
@@ -276,7 +283,7 @@ function Inner({
       .from("composers")
       .update({
         full_name: c.full_name,
-        roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "other" }).roster_role) ?? "composer",
+        roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "ic_company" }).roster_role) ?? "composer",
         city: c.city,
         country: c.country,
         birth_year: c.birth_year,
@@ -715,7 +722,6 @@ function Inner({
               <option value="supervisor">Supervisor musical</option>
               <option value="specialist">Especialista</option>
               <option value="curator">Curador musical</option>
-              <option value="other">Otros</option>
             </select>
           </Field>
           {(c as { roster_role?: string }).roster_role === "specialist" && (
