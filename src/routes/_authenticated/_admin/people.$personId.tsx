@@ -16,6 +16,7 @@ import { AssistantChat } from "@/components/assistant-chat";
 import { PersonIcFunctionsEditor } from "@/components/person-ic-functions-editor";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { PersonVerifiersEditor } from "@/components/person-verifiers-editor";
+import { AgentToolsEditor } from "@/components/agent-tools-editor";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -286,6 +287,17 @@ function PersonEdit() {
             Asigna una o varias personas reales del equipo IC como verificadoras de este agente virtual.
           </p>
           <PersonVerifiersEditor personId={personId} />
+        </div>
+      )}
+
+      {form.role === "ic_team" && isVirtual && (
+        <div className="mt-10">
+          <h2 className="mb-3 font-display text-2xl">Herramientas disponibles</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Define qué puede hacer este agente dentro del chat: consultar datos o proponer acciones.
+            Las propuestas pasan por la cola de <Link to="/agent-actions" className="text-primary hover:underline">Acciones de agentes</Link>.
+          </p>
+          <AgentToolsEditor personId={personId} />
         </div>
       )}
 

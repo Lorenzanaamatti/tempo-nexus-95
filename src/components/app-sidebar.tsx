@@ -5,6 +5,8 @@ import {
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
   Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +31,19 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const search = useRouterState({ select: (r) => r.location.search as { role?: string } });
   const { user, signOut } = useAuth();
+
+  const { data: pendingAgentActions } = useQuery({
+    queryKey: ["agent-actions-pending-count"],
+    enabled: role === "admin",
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("agent_actions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+  });
 
   const composerActive = pathname.startsWith("/composers");
   const composersRole = composerActive ? (search?.role ?? "composer") : null;
@@ -80,6 +95,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature, active: pathname.startsWith("/deal-memos/plantillas") },
     { title: "Contactos DM", to: "/deal-memos/contactos", icon: User, active: pathname.startsWith("/deal-memos/contactos") },
     { title: "Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
+    { title: "Acciones agentes", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
   ];
 
   // 6. MKTG
@@ -149,7 +165,16 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
                         <SidebarMenuButton asChild isActive={item.active}>
                           <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
-                            {!collapsed && <span>{item.title}</span>}
+                            {!collapsed && (
+                              <span className="flex flex-1 items-center justify-between gap-2">
+                                <span>{item.title}</span>
+                                {item.to === "/agent-actions" && (pendingAgentActions ?? 0) > 0 && (
+                                  <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                                    {pendingAgentActions}
+                                  </span>
+                                )}
+                              </span>
+                            )}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
