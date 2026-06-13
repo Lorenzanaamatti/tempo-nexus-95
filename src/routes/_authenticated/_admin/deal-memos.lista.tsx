@@ -30,10 +30,32 @@ function ListaDealMemos() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deal_memos")
-        .select("id, referencia, obra, estado, importe_propuesto, moneda, fecha_limite_respuesta, validador_final_id, cliente_id, contraparte_id, created_at, cliente:cliente_id(nombre, empresa), contraparte:contraparte_id(nombre, empresa), validador_final:validador_final_id(nombre)")
+        .select("id, referencia, obra, estado, importe_propuesto, moneda, fecha_limite_respuesta, validador_final_id, cliente_id, cliente_kind, contraparte_id, contraparte_kind, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const rows = (data ?? []) as any[];
+      const composerIds = new Set<string>();
+      const companyIds = new Set<string>();
+      const personIds = new Set<string>();
+      for (const r of rows) {
+        if (r.cliente_id) (r.cliente_kind === "company" ? companyIds : composerIds).add(r.cliente_id);
+        if (r.contraparte_id) (r.contraparte_kind === "company" ? companyIds : composerIds).add(r.contraparte_id);
+        if (r.validador_final_id) personIds.add(r.validador_final_id);
+      }
+      const [composers, companies, people] = await Promise.all([
+        composerIds.size ? supabase.from("composers").select("id, full_name").in("id", Array.from(composerIds)).then((r) => r.data ?? []) : Promise.resolve([]),
+        companyIds.size ? supabase.from("production_companies").select("id, name").in("id", Array.from(companyIds)).then((r) => r.data ?? []) : Promise.resolve([]),
+        personIds.size ? supabase.from("people").select("id, full_name").in("id", Array.from(personIds)).then((r) => r.data ?? []) : Promise.resolve([]),
+      ]);
+      const cMap = new Map((composers as any[]).map((c) => [c.id, c.full_name]));
+      const pMap = new Map((companies as any[]).map((c) => [c.id, c.name]));
+      const peopleMap = new Map((people as any[]).map((p) => [p.id, p.full_name]));
+      for (const r of rows) {
+        r.cliente_nombre = r.cliente_id ? (r.cliente_kind === "company" ? pMap.get(r.cliente_id) : cMap.get(r.cliente_id)) ?? null : null;
+        r.contraparte_nombre = r.contraparte_id ? (r.contraparte_kind === "company" ? pMap.get(r.contraparte_id) : cMap.get(r.contraparte_id)) ?? null : null;
+        r.validador_final_nombre = r.validador_final_id ? peopleMap.get(r.validador_final_id) ?? null : null;
+      }
+      return rows;
     },
   });
 
@@ -45,8 +67,8 @@ function ListaDealMemos() {
       return (
         r.referencia.toLowerCase().includes(term) ||
         r.obra.toLowerCase().includes(term) ||
-        (r.cliente?.nombre ?? "").toLowerCase().includes(term) ||
-        (r.contraparte?.nombre ?? "").toLowerCase().includes(term)
+        (r.cliente_nombre ?? "").toLowerCase().includes(term) ||
+        (r.contraparte_nombre ?? "").toLowerCase().includes(term)
       );
     });
   }, [dmQ.data, q, estadoFilter]);
@@ -138,11 +160,11 @@ function ListaDealMemos() {
                     </Link>
                   </td>
                   <td className="px-3 py-2">{r.obra}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.cliente?.nombre ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.contraparte?.empresa ?? r.contraparte?.nombre ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.cliente_nombre ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.contraparte_nombre ?? "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatMoneyEs(r.importe_propuesto, r.moneda)}</td>
                   <td className="px-3 py-2"><EstadoBadge estado={r.estado} /></td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.validador_final?.nombre ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.validador_final_nombre ?? "—"}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{formatDateEs(r.fecha_limite_respuesta)}</td>
                   <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
