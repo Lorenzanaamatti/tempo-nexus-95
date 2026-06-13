@@ -583,10 +583,17 @@ export type Database = {
           country: string | null
           created_at: string
           director: string | null
+          director_id: string | null
           format: Database["public"]["Enums"]["film_format"]
           id: string
+          music_supervisor_person_id: string | null
+          platform: string | null
+          platform_id: string | null
           position: number
           production_company: string | null
+          production_company_id: string | null
+          production_id: string | null
+          spanish_film_id: string | null
           title: string
           url: string | null
           year: number | null
@@ -596,10 +603,17 @@ export type Database = {
           country?: string | null
           created_at?: string
           director?: string | null
+          director_id?: string | null
           format?: Database["public"]["Enums"]["film_format"]
           id?: string
+          music_supervisor_person_id?: string | null
+          platform?: string | null
+          platform_id?: string | null
           position?: number
           production_company?: string | null
+          production_company_id?: string | null
+          production_id?: string | null
+          spanish_film_id?: string | null
           title: string
           url?: string | null
           year?: number | null
@@ -609,10 +623,17 @@ export type Database = {
           country?: string | null
           created_at?: string
           director?: string | null
+          director_id?: string | null
           format?: Database["public"]["Enums"]["film_format"]
           id?: string
+          music_supervisor_person_id?: string | null
+          platform?: string | null
+          platform_id?: string | null
           position?: number
           production_company?: string | null
+          production_company_id?: string | null
+          production_id?: string | null
+          spanish_film_id?: string | null
           title?: string
           url?: string | null
           year?: number | null
@@ -623,6 +644,62 @@ export type Database = {
             columns: ["composer_id"]
             isOneToOne: false
             referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_music_supervisor_person_id_fkey"
+            columns: ["music_supervisor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "platforms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_production_company_id_fkey"
+            columns: ["production_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_filmography_spanish_film_id_fkey"
+            columns: ["spanish_film_id"]
+            isOneToOne: false
+            referencedRelation: "spanish_films"
             referencedColumns: ["id"]
           },
         ]
