@@ -49,6 +49,8 @@ function PersonEdit() {
   const [saving, setSaving] = useState(false);
   const [fnPicker, setFnPicker] = useState<string>("");
   const [isVirtual, setIsVirtual] = useState(false);
+  const [assistantModel, setAssistantModel] = useState<string>("claude-sonnet-4-5-20250929");
+  const [assistantPersona, setAssistantPersona] = useState<string>("");
 
   async function addIcFunction(fn: IcTeamFunction) {
     const { error } = await (supabase as any)
@@ -72,6 +74,8 @@ function PersonEdit() {
         notes: data.notes ?? "",
       });
       setIsVirtual(!!data.is_virtual_assistant);
+      setAssistantModel((data as any).assistant_model || "claude-sonnet-4-5-20250929");
+      setAssistantPersona((data as any).assistant_persona || "");
     }
   }, [data]);
 
@@ -86,7 +90,9 @@ function PersonEdit() {
         phone: form.phone || null,
         notes: form.notes || null,
         is_virtual_assistant: isVirtual,
-      })
+        assistant_model: isVirtual ? assistantModel : undefined,
+        assistant_persona: isVirtual ? (assistantPersona || undefined) : undefined,
+      } as any)
       .eq("id", personId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -201,6 +207,38 @@ function PersonEdit() {
             </div>
             <Switch checked={isVirtual} onCheckedChange={setIsVirtual} />
           </div>
+        )}
+        {form.role === "ic_team" && isVirtual && (
+          <>
+            <div className="sm:col-span-2">
+              <Label>Modelo Claude</Label>
+              <Select value={assistantModel} onValueChange={setAssistantModel}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (recomendado)</SelectItem>
+                  <SelectItem value="claude-sonnet-4-20250514">Claude Sonnet 4</SelectItem>
+                  <SelectItem value="claude-opus-4-20250514">Claude Opus 4 (máxima calidad)</SelectItem>
+                  <SelectItem value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (rápido y barato)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Sonnet 4.5 va bien para la mayoría de agentes. Opus solo para razonamiento complejo.
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Persona / System prompt</Label>
+              <Textarea
+                value={assistantPersona}
+                onChange={(e) => setAssistantPersona(e.target.value)}
+                rows={10}
+                placeholder={`Eres ${form.full_name || "AGENTE"}, asistente virtual de Interesante Compañía.\n\nRol: …\nTono: …\nReglas: …\nQué NO debes hacer: …`}
+                className="font-mono text-xs"
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Define quién es el agente, su rol dentro del equipo IC, tono y límites. Se envía como <code>system</code> en cada conversación.
+              </p>
+            </div>
+          </>
         )}
       </div>
 
