@@ -101,6 +101,7 @@ function SpanishFilmsPage() {
   const [importYear, setImportYear] = useState<string>(String(CURRENT_YEAR));
   const [importing, setImporting] = useState(false);
   const [rematching, setRematching] = useState(false);
+  const [projecting, setProjecting] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -210,6 +211,25 @@ function SpanishFilmsPage() {
     }
   }
 
+  async function runProject() {
+    setProjecting(true);
+    try {
+      const { data, error } = await (supabase as any).rpc(
+        "backfill_spanish_films_to_productions",
+      );
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      toast.success(
+        `Proyección a Producciones: ${row?.created_count ?? 0} creadas · ${row?.linked_count ?? 0} completadas`,
+      );
+      qc.invalidateQueries({ queryKey: ["spanish-films"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error proyectando a Producciones");
+    } finally {
+      setProjecting(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
@@ -257,6 +277,17 @@ function SpanishFilmsPage() {
               ) : (
                 <>
                   <RefreshCw className="mr-1 h-4 w-4" /> Re-cruzar con CRM
+                </>
+              )}
+            </Button>
+            <Button onClick={runProject} disabled={projecting} size="sm" variant="outline">
+              {projecting ? (
+                <>
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Proyectando…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-1 h-4 w-4" /> Películas ES → Producciones
                 </>
               )}
             </Button>
