@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -490,14 +490,14 @@ function CrmEntitySelect({ value, onChange, items, disabled }: {
           const sub = items.filter((i) => i.group === g);
           if (sub.length === 0) return null;
           return (
-            <div key={g}>
-              <p className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{g}</p>
+            <SelectGroup key={g}>
+              <SelectLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{g}</SelectLabel>
               {sub.map((i) => (
                 <SelectItem key={`${i.kind}:${i.id}`} value={`${i.kind}:${i.id}`}>
                   {i.label}
                 </SelectItem>
               ))}
-            </div>
+            </SelectGroup>
           );
         })}
       </SelectContent>
