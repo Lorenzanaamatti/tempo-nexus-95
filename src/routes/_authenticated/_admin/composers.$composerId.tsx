@@ -26,7 +26,7 @@ import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { X } from "lucide-react";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
-import { SocialLinksEditor, type SocialLinks } from "@/components/social-links";
+import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 
 const SPECIALIST_TAG_OPTIONS = [
   "Instrumentista",
@@ -474,6 +474,10 @@ function Inner({
               {({ activo: "Activo", pausa: "En pausa", en_negociacion: "En negociación", finalizado: "Finalizado" } as Record<string, string>)[c.representation_status ?? "activo"]}
             </Badge>
           </div>
+        </div>
+        <div className="mt-5">
+          <div className="smallcaps mb-2 text-[10px] text-muted-foreground">Redes sociales y portales</div>
+          <SocialLinksBadges value={(c as { social_links?: SocialLinks | null }).social_links ?? {}} />
         </div>
       </header>
 
