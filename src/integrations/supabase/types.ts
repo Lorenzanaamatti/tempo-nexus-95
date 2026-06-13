@@ -2978,6 +2978,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          status: Database["public"]["Enums"]["profile_status"]
           theme_preference: string | null
           updated_at: string
         }
@@ -2987,6 +2988,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          status?: Database["public"]["Enums"]["profile_status"]
           theme_preference?: string | null
           updated_at?: string
         }
@@ -2996,6 +2998,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["profile_status"]
           theme_preference?: string | null
           updated_at?: string
         }
@@ -3734,6 +3737,7 @@ export type Database = {
       }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
       current_user_is_admin: { Args: never; Returns: boolean }
+      current_user_is_big_c: { Args: never; Returns: boolean }
       ensure_composer_chat_channels: {
         Args: { _composer_id: string }
         Returns: undefined
@@ -3757,7 +3761,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      app_role: "admin" | "composer"
+      app_role: "admin" | "composer" | "team"
       availability_kind:
         | "libre"
         | "ocupado"
@@ -3982,6 +3986,7 @@ export type Database = {
         | "premiada"
         | "comunicada_nominacion"
         | "comunicado_premio"
+      profile_status: "pending" | "active" | "rejected"
       provider_kind:
         | "estudio_grabacion"
         | "mezcla"
@@ -4173,7 +4178,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "composer"],
+      app_role: ["admin", "composer", "team"],
       availability_kind: [
         "libre",
         "ocupado",
@@ -4419,6 +4424,7 @@ export const Constants = {
         "comunicada_nominacion",
         "comunicado_premio",
       ],
+      profile_status: ["pending", "active", "rejected"],
       provider_kind: [
         "estudio_grabacion",
         "mezcla",
