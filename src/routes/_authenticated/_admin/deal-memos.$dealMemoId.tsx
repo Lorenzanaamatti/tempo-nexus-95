@@ -102,27 +102,6 @@ async function resolveEntity(kind: string | null, id: string | null): Promise<{ 
   return null;
 }
 
-function _legacyDealMemoView({ dm, onChange }: { dm: any; onChange: () => void }) {
-  return (
-    <div>
-      <DealMemoHeader dm={dm} onChange={onChange} />
-      <div className="mx-auto max-w-[1100px] px-6 py-6">
-        <Tabs defaultValue="datos">
-          <TabsList>
-            <TabsTrigger value="datos">Datos</TabsTrigger>
-            <TabsTrigger value="versiones">Versiones</TabsTrigger>
-            <TabsTrigger value="log">Log</TabsTrigger>
-            <TabsTrigger value="notas">Notas</TabsTrigger>
-          </TabsList>
-          <TabsContent value="datos" className="pt-4"><DealMemoForm dm={dm} onSaved={onChange} /></TabsContent>
-          <TabsContent value="versiones" className="pt-4"><DealMemoVersions dm={dm} onChange={onChange} /></TabsContent>
-          <TabsContent value="log" className="pt-4"><DealMemoLog dealMemoId={dm.id} /></TabsContent>
-          <TabsContent value="notas" className="pt-4"><DealMemoNotas dm={dm} /></TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-}
 
 function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void }) {
   const qc = useQueryClient();
