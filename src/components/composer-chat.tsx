@@ -293,7 +293,11 @@ function MessageList({
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const qc = useQueryClient();
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = bottomRef.current;
+    if (!el) return;
+    // Scroll only within the chat container, never the page.
+    const scroller = el.closest('[data-chat-scroll]') as HTMLElement | null;
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
   }, [messages.length]);
 
   const onDelete = async (m: Message) => {
@@ -307,7 +311,7 @@ function MessageList({
   };
 
   return (
-    <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+    <div data-chat-scroll className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
       {messages.length === 0 ? (
         <p className="text-center text-sm text-muted-foreground">No hay mensajes en este canal todavía.</p>
       ) : (
