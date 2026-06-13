@@ -258,9 +258,11 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     obra: dm.obra,
     descripcion_uso: dm.descripcion_uso ?? "",
     cliente_id: dm.cliente_id ?? "",
+    cliente_kind: (dm.cliente_kind ?? "") as "" | "composer" | "company",
     contraparte_id: dm.contraparte_id ?? "",
+    contraparte_kind: (dm.contraparte_kind ?? "") as "" | "composer" | "company",
     destinatario_final_email: dm.destinatario_final_email,
-    importe_propuesto: dm.importe_propuesto ?? "",
+    importe_propuesto: dm.importe_propuesto == null ? "" : String(dm.importe_propuesto),
     moneda: dm.moneda ?? "EUR",
     plantilla_id: dm.plantilla_id ?? "",
     validador_interno_id: dm.validador_interno_id ?? "",
@@ -274,15 +276,45 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
     queryKey: ["dm-plantillas-min"],
     queryFn: async () => (await supabase.from("dm_plantillas").select("id, nombre, activa")).data ?? [],
   });
-  const contactosQ = useQuery({
-    queryKey: ["dm-contactos-min"],
-    queryFn: async () => (await supabase.from("dm_contactos").select("id, nombre, tipo, empresa, email")).data ?? [],
+  const crmEntitiesQ = useQuery({
+    queryKey: ["dm-crm-entities"],
+    queryFn: async () => {
+      const [composers, companies] = await Promise.all([
+        supabase.from("composers").select("id, full_name").order("full_name"),
+        supabase.from("production_companies").select("id, name").order("name"),
+      ]);
+      const items: { kind: "composer" | "company"; id: string; label: string; group: string }[] = [];
+      (composers.data ?? []).forEach((c) => items.push({ kind: "composer", id: c.id, label: c.full_name, group: "Roster" }));
+      (companies.data ?? []).forEach((c) => items.push({ kind: "company", id: c.id, label: c.name, group: "Productoras" }));
+      return items;
+    },
   });
-
-  const byTipo = (t: string) => (contactosQ.data ?? []).filter((c) => c.tipo === t);
+  const validadoresQ = useQuery({
+    queryKey: ["dm-validadores-people"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("person_ic_functions")
+        .select("person_id, people:person_id(id, full_name, email)")
+        .eq("function", "validacion_contratos_deal_memos");
+      const seen = new Set<string>();
+      const out: { id: string; full_name: string; email: string | null }[] = [];
+      for (const row of (data ?? []) as any[]) {
+        const p = row.people;
+        if (p && !seen.has(p.id)) {
+          seen.add(p.id);
+          out.push(p);
+        }
+      }
+      out.sort((a, b) => a.full_name.localeCompare(b.full_name));
+      return out;
+    },
+  });
 
   async function save() {
     setSaving(true);
+    const importeNum = form.importe_propuesto === ""
+      ? null
+      : Number(String(form.importe_propuesto).replace(/\./g, "").replace(",", "."));
     const { error } = await supabase
       .from("deal_memos")
       .update({
@@ -290,9 +322,11 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
         obra: form.obra,
         descripcion_uso: form.descripcion_uso || null,
         cliente_id: form.cliente_id || null,
+        cliente_kind: form.cliente_kind || null,
         contraparte_id: form.contraparte_id || null,
+        contraparte_kind: form.contraparte_kind || null,
         destinatario_final_email: form.destinatario_final_email,
-        importe_propuesto: form.importe_propuesto === "" ? null : Number(form.importe_propuesto),
+        importe_propuesto: importeNum,
         moneda: form.moneda,
         plantilla_id: form.plantilla_id || null,
         validador_interno_id: form.validador_interno_id || null,
@@ -323,16 +357,43 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
 
       <FormSection title="Partes">
         <Field label="Cliente">
-          <ContactoSelect value={form.cliente_id} onChange={(v) => setForm({ ...form, cliente_id: v })} contactos={byTipo("cliente")} disabled={!editable} />
+          <CrmEntitySelect
+            value={form.cliente_id ? `${form.cliente_kind}:${form.cliente_id}` : ""}
+            onChange={(combo) => {
+              const [kind, id] = combo.split(":") as ["composer" | "company", string];
+              setForm({ ...form, cliente_kind: kind, cliente_id: id });
+            }}
+            items={crmEntitiesQ.data ?? []}
+            disabled={!editable}
+          />
         </Field>
         <Field label="Contraparte">
-          <ContactoSelect value={form.contraparte_id} onChange={(v) => setForm({ ...form, contraparte_id: v })} contactos={byTipo("contraparte")} disabled={!editable} />
+          <CrmEntitySelect
+            value={form.contraparte_id ? `${form.contraparte_kind}:${form.contraparte_id}` : ""}
+            onChange={(combo) => {
+              const [kind, id] = combo.split(":") as ["composer" | "company", string];
+              setForm({ ...form, contraparte_kind: kind, contraparte_id: id });
+            }}
+            items={crmEntitiesQ.data ?? []}
+            disabled={!editable}
+          />
         </Field>
         <Field label="Destinatario final (email)"><Input type="email" value={form.destinatario_final_email} onChange={(e) => setForm({ ...form, destinatario_final_email: e.target.value })} disabled={!editable} /></Field>
       </FormSection>
 
       <FormSection title="Económico">
-        <Field label="Importe propuesto"><Input type="number" step="0.01" value={form.importe_propuesto} onChange={(e) => setForm({ ...form, importe_propuesto: e.target.value })} disabled={!editable} /></Field>
+        <Field label="Importe propuesto">
+          <ImporteInput
+            value={form.importe_propuesto}
+            onChange={(v) => setForm({ ...form, importe_propuesto: v })}
+            disabled={!editable}
+          />
+          {form.importe_propuesto !== "" && (
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {formatMoneyEs(Number(String(form.importe_propuesto).replace(/\./g, "").replace(",", ".")), form.moneda)}
+            </p>
+          )}
+        </Field>
         <Field label="Moneda">
           <Select value={form.moneda} onValueChange={(v) => setForm({ ...form, moneda: v })} disabled={!editable}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -355,10 +416,10 @@ function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) {
           </Select>
         </Field>
         <Field label="Validador interno">
-          <ContactoSelect value={form.validador_interno_id} onChange={(v) => setForm({ ...form, validador_interno_id: v })} contactos={byTipo("validador")} disabled={!editable} />
+          <PersonSelect value={form.validador_interno_id} onChange={(v) => setForm({ ...form, validador_interno_id: v })} people={validadoresQ.data ?? []} disabled={!editable} />
         </Field>
         <Field label="Validador final">
-          <ContactoSelect value={form.validador_final_id} onChange={(v) => setForm({ ...form, validador_final_id: v })} contactos={byTipo("validador")} disabled={!editable} />
+          <PersonSelect value={form.validador_final_id} onChange={(v) => setForm({ ...form, validador_final_id: v })} people={validadoresQ.data ?? []} disabled={!editable} />
         </Field>
         <Field label="Plazo de respuesta (días)"><Input type="number" min={1} value={form.plazo_respuesta_dias} onChange={(e) => setForm({ ...form, plazo_respuesta_dias: Number(e.target.value) })} disabled={!editable} /></Field>
       </FormSection>
