@@ -1,11 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { KanbanSquare, List, LayoutTemplate, Users, Settings } from "lucide-react";
+import { KanbanSquare, List, LayoutTemplate, Settings } from "lucide-react";
 
 const items = [
   { to: "/deal-memos",              label: "Dashboard",  icon: KanbanSquare, exact: true },
   { to: "/deal-memos/lista",        label: "Lista",      icon: List,         exact: false },
   { to: "/deal-memos/plantillas",   label: "Plantillas", icon: LayoutTemplate, exact: false },
-  { to: "/deal-memos/contactos",    label: "Contactos",  icon: Users,        exact: false },
   { to: "/deal-memos/configuracion", label: "Configuración", icon: Settings, exact: false },
 ] as const;
 
