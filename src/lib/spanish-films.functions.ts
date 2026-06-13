@@ -233,3 +233,22 @@ export const updateSpanishFilm = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+/** Elimina una película del catálogo. */
+export const deleteSpanishFilm = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await adminCheck(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Desvincula producciones que apunten a esta ficha para no romper FKs.
+    await supabaseAdmin
+      .from("productions")
+      .update({ spanish_film_id: null })
+      .eq("spanish_film_id", data.id);
+    const { error } = await supabaseAdmin.from("spanish_films").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
