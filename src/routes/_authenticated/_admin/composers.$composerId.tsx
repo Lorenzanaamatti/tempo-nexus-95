@@ -475,6 +475,10 @@ function Inner({
             </Badge>
           </div>
         </div>
+        <div className="mt-5">
+          <div className="smallcaps mb-2 text-[10px] text-muted-foreground">Redes sociales y portales</div>
+          <SocialLinksBadges value={(c as { social_links?: SocialLinks | null }).social_links ?? {}} />
+        </div>
       </header>
 
       {/* KPIs */}
