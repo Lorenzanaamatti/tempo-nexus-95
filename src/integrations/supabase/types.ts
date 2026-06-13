@@ -1535,7 +1535,9 @@ export type Database = {
       deal_memos: {
         Row: {
           cliente_id: string | null
+          cliente_kind: string | null
           contraparte_id: string | null
+          contraparte_kind: string | null
           created_at: string
           descripcion_uso: string | null
           destinatario_final_email: string
@@ -1559,7 +1561,9 @@ export type Database = {
         }
         Insert: {
           cliente_id?: string | null
+          cliente_kind?: string | null
           contraparte_id?: string | null
+          contraparte_kind?: string | null
           created_at?: string
           descripcion_uso?: string | null
           destinatario_final_email: string
@@ -1583,7 +1587,9 @@ export type Database = {
         }
         Update: {
           cliente_id?: string | null
+          cliente_kind?: string | null
           contraparte_id?: string | null
+          contraparte_kind?: string | null
           created_at?: string
           descripcion_uso?: string | null
           destinatario_final_email?: string
@@ -1607,20 +1613,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "deal_memos_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "dm_contactos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deal_memos_contraparte_id_fkey"
-            columns: ["contraparte_id"]
-            isOneToOne: false
-            referencedRelation: "dm_contactos"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "deal_memos_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
@@ -1632,20 +1624,6 @@ export type Database = {
             columns: ["plantilla_id"]
             isOneToOne: false
             referencedRelation: "dm_plantillas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deal_memos_validador_final_id_fkey"
-            columns: ["validador_final_id"]
-            isOneToOne: false
-            referencedRelation: "dm_contactos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deal_memos_validador_interno_id_fkey"
-            columns: ["validador_interno_id"]
-            isOneToOne: false
-            referencedRelation: "dm_contactos"
             referencedColumns: ["id"]
           },
         ]
