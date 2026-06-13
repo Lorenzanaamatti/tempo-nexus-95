@@ -692,7 +692,7 @@ function VersionModal({ version, onClose, onSaved, dealMemoId }: { version: any;
         numero_version: nextNumber,
         email_asunto: asunto,
         email_cuerpo: cuerpo,
-        generada_por: "humano",
+        generada_por: "correccion_humana",
         comentarios_revision: `Editado manualmente sobre v${version.numero_version}`,
       });
       if (error) throw error;
