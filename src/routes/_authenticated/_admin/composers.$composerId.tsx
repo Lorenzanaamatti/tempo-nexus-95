@@ -26,7 +26,7 @@ import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { X } from "lucide-react";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
-import { SocialLinksEditor, type SocialLinks } from "@/components/social-links";
+import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 
 const SPECIALIST_TAG_OPTIONS = [
   "Instrumentista",
