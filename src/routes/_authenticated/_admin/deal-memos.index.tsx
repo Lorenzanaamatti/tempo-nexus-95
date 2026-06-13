@@ -31,8 +31,10 @@ type Row = {
   validador_final_id: string | null;
   cliente_id: string | null;
   contraparte_id: string | null;
-  cliente: { nombre: string } | null;
-  contraparte: { nombre: string } | null;
+  cliente_kind: string | null;
+  contraparte_kind: string | null;
+  cliente_nombre?: string | null;
+  contraparte_nombre?: string | null;
 };
 
 function DealMemosKanban() {
@@ -48,24 +50,74 @@ function DealMemosKanban() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deal_memos")
-        .select("id, referencia, obra, estado, importe_propuesto, moneda, updated_at, fecha_limite_respuesta, plantilla_id, validador_final_id, cliente_id, contraparte_id, cliente:cliente_id(nombre), contraparte:contraparte_id(nombre)")
+        .select("id, referencia, obra, estado, importe_propuesto, moneda, updated_at, fecha_limite_respuesta, plantilla_id, validador_final_id, cliente_id, contraparte_id, cliente_kind, contraparte_kind")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as unknown as Row[];
+      const rows = (data ?? []) as unknown as Row[];
+
+      // Resolve nombres de cliente/contraparte (composers o production_companies)
+      const composerIds = new Set<string>();
+      const companyIds = new Set<string>();
+      for (const r of rows) {
+        if (r.cliente_id) (r.cliente_kind === "company" ? companyIds : composerIds).add(r.cliente_id);
+        if (r.contraparte_id) (r.contraparte_kind === "company" ? companyIds : composerIds).add(r.contraparte_id);
+      }
+      const [composers, companies] = await Promise.all([
+        composerIds.size
+          ? supabase.from("composers").select("id, full_name").in("id", Array.from(composerIds)).then((r) => r.data ?? [])
+          : Promise.resolve([] as { id: string; full_name: string }[]),
+        companyIds.size
+          ? supabase.from("production_companies").select("id, name").in("id", Array.from(companyIds)).then((r) => r.data ?? [])
+          : Promise.resolve([] as { id: string; name: string }[]),
+      ]);
+      const cMap = new Map(composers.map((c) => [c.id, c.full_name]));
+      const pMap = new Map(companies.map((c) => [c.id, c.name]));
+      const nameFor = (id: string | null, kind: string | null) => {
+        if (!id) return null;
+        return (kind === "company" ? pMap.get(id) : cMap.get(id)) ?? null;
+      };
+      for (const r of rows) {
+        r.cliente_nombre = nameFor(r.cliente_id, r.cliente_kind);
+        r.contraparte_nombre = nameFor(r.contraparte_id, r.contraparte_kind);
+      }
+      return rows;
     },
   });
 
-  const contactosQ = useQuery({
-    queryKey: ["dm-contactos-min"],
-    queryFn: async () => (await supabase.from("dm_contactos").select("id, nombre, tipo, email")).data ?? [],
+  const clientesQ = useQuery({
+    queryKey: ["dm-clientes-options"],
+    queryFn: async () => {
+      const [composers, companies] = await Promise.all([
+        supabase.from("composers").select("id, full_name").order("full_name").then((r) => r.data ?? []),
+        supabase.from("production_companies").select("id, name").order("name").then((r) => r.data ?? []),
+      ]);
+      return [
+        ...composers.map((c) => ({ id: c.id, nombre: c.full_name })),
+        ...companies.map((c) => ({ id: c.id, nombre: c.name })),
+      ];
+    },
+  });
+  const validadoresQ = useQuery({
+    queryKey: ["dm-validadores-options"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("person_ic_functions")
+        .select("person_id, people:person_id(id, full_name)")
+        .eq("function", "validacion_contratos_deal_memos");
+      const rows = (data ?? []) as unknown as { people: { id: string; full_name: string } | null }[];
+      return rows
+        .map((r) => r.people)
+        .filter((p): p is { id: string; full_name: string } => !!p)
+        .map((p) => ({ id: p.id, nombre: p.full_name }));
+    },
   });
   const plantillasQ = useQuery({
     queryKey: ["dm-plantillas-min"],
     queryFn: async () => (await supabase.from("dm_plantillas").select("id, nombre, activa").eq("activa", true)).data ?? [],
   });
 
-  const clienteOptions = (contactosQ.data ?? []).filter((c) => c.tipo === "cliente");
-  const validadorOptions = (contactosQ.data ?? []).filter((c) => c.tipo === "validador");
+  const clienteOptions = clientesQ.data ?? [];
+  const validadorOptions = validadoresQ.data ?? [];
 
   const filtered = useMemo(() => {
     return (dmQ.data ?? []).filter((r) => {
@@ -90,8 +142,8 @@ function DealMemosKanban() {
         moneda: r.moneda,
         updated_at: r.updated_at,
         fecha_limite_respuesta: r.fecha_limite_respuesta,
-        cliente_nombre: r.cliente?.nombre ?? null,
-        contraparte_nombre: r.contraparte?.nombre ?? null,
+        cliente_nombre: r.cliente_nombre ?? null,
+        contraparte_nombre: r.contraparte_nombre ?? null,
       });
     }
     return map;
