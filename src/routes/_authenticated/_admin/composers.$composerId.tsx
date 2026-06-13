@@ -457,9 +457,11 @@ function Inner({
               placeholder="Nombre legal…"
               onChange={(e) => field("legal_name", e.target.value || null)}
             />
-            <p className="mt-1 text-sm text-muted-foreground">
-              {[c.city, c.country].filter(Boolean).join(" · ") || "Sin localización base"}
-            </p>
+            {[c.city, c.country].filter(Boolean).join(" · ") && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[c.city, c.country].filter(Boolean).join(" · ")}
+              </p>
+            )}
             <div className="mt-3">
               <div className="smallcaps mb-1 text-[10px] text-muted-foreground">Ubicación actual</div>
               <CurrentLocationEditor
