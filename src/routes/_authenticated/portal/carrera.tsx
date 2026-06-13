@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 
 export const Route = createFileRoute("/_authenticated/portal/carrera")({
   component: Carrera,
@@ -16,7 +17,7 @@ function Carrera() {
     queryFn: async () => {
       const { data } = await supabase
         .from("composers")
-        .select("full_name, artistic_name, bio_short, bio_long, career_notes, reel_url, city, country")
+        .select("full_name, artistic_name, bio_short, bio_long, career_notes, reel_url, city, country, social_links")
         .eq("id", composerId!)
         .maybeSingle();
       return data;
@@ -53,6 +54,12 @@ function Carrera() {
       <Block title="Nombre artístico" value={data?.artistic_name || data?.full_name} />
       <Block title="Ubicación" value={[data?.city, data?.country].filter(Boolean).join(" · ")} />
       <Block title="Reel" value={data?.reel_url} link />
+      <section className="rounded-sm border border-border p-4">
+        <p className="smallcaps text-xs text-muted-foreground">Redes y portales</p>
+        <div className="mt-3">
+          <SocialLinksBadges value={(data?.social_links ?? {}) as SocialLinks} />
+        </div>
+      </section>
       <Block title="Biografía breve" value={data?.bio_short} multiline />
       <Block title="Biografía extendida" value={data?.bio_long} multiline />
       <Block title="Plan de carrera vigente" value={data?.career_notes} multiline />
