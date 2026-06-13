@@ -57,11 +57,14 @@ type Film = {
   poster_path: string | null;
   director_ids: string[] | null;
   production_company_ids: string[] | null;
+  composer_person_id: string | null;
+  music_supervisor_person_id: string | null;
 };
 
 type RosterDirector = { id: string; full_name: string };
 type RosterCompany = { id: string; name: string };
 type RosterComposer = { id: string; full_name: string; artistic_name: string | null };
+type RosterPerson = { id: string; full_name: string; role: string };
 
 function normalizeName(s: string | null | undefined): string {
   if (!s) return "";
@@ -101,7 +104,7 @@ function SpanishFilmsPage() {
       let query = supabase
         .from("spanish_films")
         .select(
-          "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids",
+          "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids, composer_person_id, music_supervisor_person_id",
         )
         .order("year", { ascending: false })
         .order("title");
@@ -111,6 +114,19 @@ function SpanishFilmsPage() {
       const { data, error } = await query.limit(500);
       if (error) throw error;
       return (data ?? []) as Film[];
+    },
+  });
+
+  const { data: rosterPeople } = useQuery({
+    queryKey: ["roster-people-composers-supervisors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("people")
+        .select("id, full_name, role")
+        .in("role", ["composer", "supervisor"])
+        .order("full_name");
+      if (error) throw error;
+      return (data ?? []) as RosterPerson[];
     },
   });
 
@@ -387,6 +403,7 @@ function SpanishFilmsPage() {
         film={editing}
         rosterDirectors={rosterDirectors ?? []}
         rosterCompanies={rosterCompanies ?? []}
+        rosterPeople={rosterPeople ?? []}
         onClose={() => setEditing(null)}
         onSave={async (patch) => {
           if (!editing) return;
