@@ -298,25 +298,30 @@ function SpanishFilmsPage() {
                     )}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.directors.length === 0 ? "—" : f.directors.map((name, i) => {
-                      const id = directorByName.get(normalizeName(name));
-                      return (
-                        <span key={i}>
-                          {i > 0 && ", "}
-                          {id ? (
-                            <Link
-                              to="/directors/$directorId"
-                              params={{ directorId: id }}
-                              className="text-primary underline-offset-2 hover:underline"
-                            >
-                              {name}
-                            </Link>
-                          ) : (
-                            name
-                          )}
-                        </span>
-                      );
-                    })}
+                    {f.directors.length === 0 ? (
+                      "—"
+                    ) : (
+                      <ul className="space-y-0.5">
+                        {f.directors.map((name, i) => {
+                          const id = directorByName.get(normalizeName(name));
+                          return (
+                            <li key={i}>
+                              {id ? (
+                                <Link
+                                  to="/directors/$directorId"
+                                  params={{ directorId: id }}
+                                  className="text-primary underline-offset-2 hover:underline"
+                                >
+                                  {name}
+                                </Link>
+                              ) : (
+                                name
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
                     {f.production_companies.length === 0 ? (
