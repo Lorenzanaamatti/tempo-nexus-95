@@ -2760,6 +2760,7 @@ export type Database = {
           production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
           project_type_note: string | null
+          spanish_film_id: string | null
           status: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at: string
@@ -2799,6 +2800,7 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          spanish_film_id?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at?: string
@@ -2838,6 +2840,7 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          spanish_film_id?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title?: string
           updated_at?: string
@@ -2933,6 +2936,13 @@ export type Database = {
             columns: ["production_director_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_spanish_film_id_fkey"
+            columns: ["spanish_film_id"]
+            isOneToOne: false
+            referencedRelation: "spanish_films"
             referencedColumns: ["id"]
           },
         ]
@@ -3431,9 +3441,9 @@ export type Database = {
           review_reason: string | null
           title: string
           title_es: string | null
-          tmdb_id: number
+          tmdb_id: number | null
           updated_at: string
-          year: number
+          year: number | null
         }
         Insert: {
           box_office_eur?: number | null
@@ -3458,9 +3468,9 @@ export type Database = {
           review_reason?: string | null
           title: string
           title_es?: string | null
-          tmdb_id: number
+          tmdb_id?: number | null
           updated_at?: string
-          year: number
+          year?: number | null
         }
         Update: {
           box_office_eur?: number | null
@@ -3485,9 +3495,9 @@ export type Database = {
           review_reason?: string | null
           title?: string
           title_es?: string | null
-          tmdb_id?: number
+          tmdb_id?: number | null
           updated_at?: string
-          year?: number
+          year?: number | null
         }
         Relationships: [
           {
