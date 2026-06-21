@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RelatedWorks } from "@/components/related-works";
+import { PersonPhotoUploader } from "@/components/person-photo-uploader";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/$personId")({
   component: PersonEdit,
@@ -50,6 +51,7 @@ function PersonEdit() {
   const [saving, setSaving] = useState(false);
   const [fnPicker, setFnPicker] = useState<string>("");
   const [isVirtual, setIsVirtual] = useState(false);
+  const [photoPath, setPhotoPath] = useState<string | null>(null);
   const [assistantModel, setAssistantModel] = useState<string>("claude-sonnet-4-5-20250929");
   const [assistantPersona, setAssistantPersona] = useState<string>("");
 
@@ -75,6 +77,7 @@ function PersonEdit() {
         notes: data.notes ?? "",
       });
       setIsVirtual(!!data.is_virtual_assistant);
+      setPhotoPath(((data as any).photo_path as string | null) ?? null);
       setAssistantModel((data as any).assistant_model || "claude-sonnet-4-5-20250929");
       setAssistantPersona((data as any).assistant_persona || "");
     }
@@ -139,6 +142,16 @@ function PersonEdit() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Label>Fotografía</Label>
+          <div className="mt-2">
+            <PersonPhotoUploader
+              personId={personId}
+              photoPath={photoPath}
+              onChange={(p) => setPhotoPath(p)}
+            />
+          </div>
+        </div>
         <div>
           <Label>Nombre completo</Label>
           <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} disabled={!!data.composer_id} />
