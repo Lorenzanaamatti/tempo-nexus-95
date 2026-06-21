@@ -2184,6 +2184,7 @@ export type Database = {
           is_virtual_assistant: boolean
           notes: string | null
           phone: string | null
+          photo_path: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at: string
         }
@@ -2198,6 +2199,7 @@ export type Database = {
           is_virtual_assistant?: boolean
           notes?: string | null
           phone?: string | null
+          photo_path?: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at?: string
         }
@@ -2212,6 +2214,7 @@ export type Database = {
           is_virtual_assistant?: boolean
           notes?: string | null
           phone?: string | null
+          photo_path?: string | null
           role?: Database["public"]["Enums"]["person_role"]
           updated_at?: string
         }
