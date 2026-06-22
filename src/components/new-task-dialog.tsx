@@ -89,13 +89,6 @@ function NewTaskDialog({
     if (!area) { toast.error("Elige un área"); return; }
     setSaving(true);
     const { error } = await (supabase as any).from("actions").insert({
-      // 'subject_type'/'subject_id' son obligatorios en el modelo actual.
-      // Para tareas no ligadas a entidad, usamos un placeholder seguro:
-      // subject_type='person' + subject_id apuntando a la persona responsable
-      // si la hay; si no, dejaremos que el usuario seleccione persona
-      // (siempre habrá assignee).
-      subject_type: "person",
-      subject_id: assignee || null,
       title: title.trim(),
       kind: "tarea",
       area,
