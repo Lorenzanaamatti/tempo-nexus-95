@@ -25,7 +25,6 @@ import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
-import { SidebarMenuAction } from "@/components/ui/sidebar";
 import type { TaskArea } from "@/lib/task-areas";
 
 export function AppSidebar({ role }: { role: AppRole | null }) {
@@ -174,16 +173,6 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
                 )}
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.area && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={pathname.startsWith("/tareas")}>
-                          <Link to="/tareas" className="flex items-center gap-2">
-                            <ListChecks className="h-4 w-4" />
-                            {!collapsed && <span>Mis tareas</span>}
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild isActive={item.active}>
