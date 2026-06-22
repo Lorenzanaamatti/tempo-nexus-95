@@ -4,7 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays, Users, ListChecks } from "lucide-react";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 
@@ -72,6 +72,14 @@ function Shell() {
                 >
                   <Users className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Equipo IC</span>
+                </Link>
+                <Link
+                  to="/tareas"
+                  className="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs smallcaps text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                  activeProps={{ className: "flex items-center gap-1.5 rounded-sm bg-muted px-2 py-1 text-xs smallcaps text-foreground" }}
+                >
+                  <ListChecks className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Tareas</span>
                 </Link>
               </nav>
             )}
