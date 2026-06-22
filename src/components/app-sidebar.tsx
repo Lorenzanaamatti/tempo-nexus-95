@@ -3,7 +3,7 @@ import {
   User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic,
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
-  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database,
+  Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database, Plus,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,8 @@ import { useAuth } from "@/lib/auth-context";
 import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useNewTaskDialog } from "@/components/new-task-dialog";
+import type { TaskArea } from "@/lib/task-areas";
 
 export function AppSidebar({ role }: { role: AppRole | null }) {
   const { state } = useSidebar();
@@ -31,6 +33,7 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const search = useRouterState({ select: (r) => r.location.search as { role?: string } });
   const { user, signOut } = useAuth();
+  const { open: openNewTask } = useNewTaskDialog();
 
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
@@ -120,13 +123,13 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { title: "Personal · mis tareas", to: "/calendar", search: { view: "personal" }, icon: User,    active: onCal && calView === "personal" },
   ];
 
-  const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
-    { label: "Roster",        icon: LibraryBig,  items: rosterItems },
+  const adminGroups: { label: string; icon: typeof Music; items: NavItem[]; area?: TaskArea }[] = [
+    { label: "Roster",        icon: LibraryBig,  items: rosterItems,        area: "roster" },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
-    { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
-    { label: "Económico",     icon: Wallet,      items: economicoItems },
-    { label: "Legal",         icon: Scale,       items: legalItems },
-    { label: "Marketing",     icon: Megaphone,   items: marketingItems },
+    { label: "Oportunidades", icon: Target,      items: opportunitiesItems, area: "oportunidades" },
+    { label: "Económico",     icon: Wallet,      items: economicoItems,     area: "economico" },
+    { label: "Legal",         icon: Scale,       items: legalItems,         area: "legal" },
+    { label: "Marketing",     icon: Megaphone,   items: marketingItems,     area: "marketing" },
     { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
   ];
 
@@ -154,7 +157,18 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
                 {!collapsed && (
                   <SidebarGroupLabel className="smallcaps flex items-center gap-1.5">
                     <group.icon className="h-3 w-3" />
-                    {group.label}
+                    <span className="flex-1">{group.label}</span>
+                    {group.area && (
+                      <button
+                        type="button"
+                        onClick={() => openNewTask({ area: group.area })}
+                        className="rounded-sm p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                        title={`Nueva tarea en ${group.label}`}
+                        aria-label={`Nueva tarea en ${group.label}`}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    )}
                   </SidebarGroupLabel>
                 )}
                 <SidebarGroupContent>
