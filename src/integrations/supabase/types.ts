@@ -16,45 +16,57 @@ export type Database = {
     Tables: {
       actions: {
         Row: {
+          area: Database["public"]["Enums"]["action_area"] | null
           assignee_person_id: string | null
           created_at: string
           done: boolean
           done_at: string | null
           due_date: string | null
+          entry_date: string
           id: string
           kind: string
           notes: string | null
           position: number
+          requester_user_id: string | null
+          subarea: string | null
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
           title: string
           updated_at: string
         }
         Insert: {
+          area?: Database["public"]["Enums"]["action_area"] | null
           assignee_person_id?: string | null
           created_at?: string
           done?: boolean
           done_at?: string | null
           due_date?: string | null
+          entry_date?: string
           id?: string
           kind?: string
           notes?: string | null
           position?: number
+          requester_user_id?: string | null
+          subarea?: string | null
           subject_id: string
           subject_type: Database["public"]["Enums"]["calendar_subject_type"]
           title: string
           updated_at?: string
         }
         Update: {
+          area?: Database["public"]["Enums"]["action_area"] | null
           assignee_person_id?: string | null
           created_at?: string
           done?: boolean
           done_at?: string | null
           due_date?: string | null
+          entry_date?: string
           id?: string
           kind?: string
           notes?: string | null
           position?: number
+          requester_user_id?: string | null
+          subarea?: string | null
           subject_id?: string
           subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
           title?: string
@@ -2187,6 +2199,7 @@ export type Database = {
           photo_path: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           assistant_model?: string
@@ -2202,6 +2215,7 @@ export type Database = {
           photo_path?: string | null
           role: Database["public"]["Enums"]["person_role"]
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           assistant_model?: string
@@ -2217,6 +2231,7 @@ export type Database = {
           photo_path?: string | null
           role?: Database["public"]["Enums"]["person_role"]
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -3814,6 +3829,15 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      action_area:
+        | "roster"
+        | "oportunidades"
+        | "economico"
+        | "legal"
+        | "marketing"
+        | "general"
+        | "produccion"
+        | "comunicacion"
       agent_action_status: "pending" | "approved" | "rejected" | "failed"
       app_role: "admin" | "composer" | "team"
       availability_kind:
@@ -4232,6 +4256,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_area: [
+        "roster",
+        "oportunidades",
+        "economico",
+        "legal",
+        "marketing",
+        "general",
+        "produccion",
+        "comunicacion",
+      ],
       agent_action_status: ["pending", "approved", "rejected", "failed"],
       app_role: ["admin", "composer", "team"],
       availability_kind: [

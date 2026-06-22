@@ -1,70 +1,68 @@
 
-# Agentes virtuales con acciones verificadas
+# Sistema de tareas (extendiendo `actions`)
 
-## Cómo va a funcionar (para ti)
+## 1. Backend — migración única
 
-Hoy AIDA solo escribe texto. Después de este cambio:
+Extender `public.actions` con 3 columnas nuevas:
+- `area` enum: `roster | oportunidades | economico | legal | marketing | general | produccion | comunicacion` (nullable — las acciones viejas se quedan en null)
+- `subarea` text (libre, ej. "Redes Sociales", "Contratos", "Caja")
+- `entry_date` date (default `current_date`)
+- `requester_user_id` uuid (default `auth.uid()` vía trigger BEFORE INSERT; nunca editable desde UI)
 
-1. Le pides algo en el chat: *"AIDA, prepara un deal memo para Roque Baños sobre la película X, 25.000€, entrega 30 nov"*.
-2. AIDA entiende la petición, **rellena un borrador real** dentro de la app y te muestra en el chat: *"He preparado el deal memo DM-2026-042. Tu verificador (tú o quien hayas asignado) lo verá en 'Acciones pendientes' para aprobar o rechazar."*
-3. El verificador entra a una nueva sección **"Acciones de agentes"**, ve el borrador, lo edita si quiere, y pulsa **Aprobar** o **Rechazar**.
-4. Solo al aprobar, el deal memo queda creado de verdad en la app. Si se rechaza, queda archivado con el motivo.
+`title` pasa a ser **descripción** (ya lo es). `due_date`, `assignee_person_id`, `subject_type`/`subject_id` ya existen.
 
-Nada se ejecuta sin pasar por el verificador. Si un agente no tiene verificadores asignados, no podrá proponer acciones (solo charlar).
+Sin RLS nueva: hereda la actual.
 
-## Qué podrá hacer cada agente (propuesta inicial — la editas tú)
+## 2. Componente global `NewTaskDialog`
 
-Cada agente verá solo las herramientas que le asignes. Propuesta de partida basada en sus personas actuales:
+Un único modal compartido, abierto desde:
+- Botón **＋ NUEVA TAREA** en cada item del sidebar (Roster, Oportunidades, Económico, Legal, Marketing, General, Producción, Comunicación) → preabre con `area` precargada
+- Botón en el header (sin área precargada)
 
-| Agente | Herramientas que tendrá |
-|---|---|
-| **AIDA** (legal) | Crear borrador de deal memo · Crear borrador de contrato · Consultar deal memos/contratos abiertos · Añadir nota a ficha de compositor |
-| **AITANA** (sugerido: finanzas) | Consultar presupuesto vs real · Listar facturas pendientes · Proponer registro de gasto · Resumen económico de una producción |
-| **AINARA** (sugerido: A&R / roster) | Consultar disponibilidad de compositores · Proponer evento en calendario · Añadir nota a ficha · Buscar películas ES afines |
-| **AITOR** (sugerido: producción) | Consultar fases de producción · Proponer evento en calendario · Listar entregas pendientes · Añadir nota a producción |
+Campos del modal:
+- Descripción (textarea)
+- Área (select, 8 opciones) + Subárea (texto libre con sugerencias)
+- Responsable (select Equipo IC)
+- Fecha de entrega (date)
+- Vínculo opcional a entidad (selector tipo + búsqueda: roster→composer, oportunidades→opportunity, económico→production, legal→contract, marketing→campaign, comunicación→media_outlet, producción→production, general→ninguno)
+- Fecha de entrada y solicitante: ocultos, automáticos
 
-Te dejaré una pantalla donde marcas con checkboxes qué herramientas tiene cada agente. Cambiar el set es instantáneo.
+## 3. Pestaña "TAREAS" en `/me`
 
-## Lo que verás nuevo en la app
+Nueva tab dentro de `/me`:
+- **Asignadas a mí** (filtro `assignee_person_id` = persona del usuario actual)
+- **Creadas por mí** (filtro `requester_user_id` = auth.uid())
+- Filtros: estado (pendiente/hecho), área, fecha
+- Acciones: marcar hecho, abrir entidad vinculada
 
-1. **En la ficha de cada agente virtual** (Personas → AIDA): un bloque nuevo **"Herramientas disponibles"** con checkboxes (Crear deal memo, Crear contrato, Proponer evento, etc.).
-2. **En el chat con el agente**: cuando proponga una acción, verás una tarjeta dentro del chat con los datos del borrador y un enlace *"Ver en Acciones pendientes"*.
-3. **Nueva sección en el menú: "Acciones de agentes"** (solo BIG C y TEAM). Lista de propuestas con estado (pendiente / aprobada / rechazada / ejecutada), agente que la propuso, verificador asignado, y botones Aprobar / Rechazar / Editar.
-4. **En tu perfil (`/me`)**: contador *"X acciones pendientes de tu aprobación"*.
+Cross-walk usuario ↔ persona: `profiles.id` → `composers.owner_user_id` → `people.composer_id`. Para personal de IC sin composer, añadiré `people.user_id uuid` (FK a auth.users) en la misma migración.
 
-## Salvaguardas
+## 4. Buzón de notificación (header, derecha)
 
-- Un agente solo puede usar una herramienta si está marcada en su ficha.
-- Toda acción propuesta requiere al menos un verificador asignado al agente. Si no, el chat responde *"Necesito un verificador asignado antes de poder proponer esta acción"*.
-- Cada propuesta queda registrada con: agente, prompt original, datos generados, verificador, decisión, timestamp. Auditable.
-- Las herramientas de **lectura** (consultar deal memos, presupuesto, etc.) no requieren aprobación — son solo para que el agente tenga contexto al responderte.
-- Las herramientas de **escritura** (crear deal memo, evento, nota…) siempre pasan por el verificador.
-- Respeta los niveles BIG C / TEAM / ROSTER: AITANA no podrá leer finanzas si la pide alguien sin permiso.
+Componente `TaskInboxBell`:
+- `useQuery` con `refetchInterval: 60_000` → cuenta tareas asignadas a mí con `created_at > last_seen` Y `done = false`
+- Badge rojo con número
+- Popover: últimas 5 tareas nuevas + link "Ver todas" → `/me?tab=tareas`
+- `last_seen` se guarda en `localStorage` por usuario (clave `tasks-last-seen-{userId}`)
 
----
+## 5. Sidebar — botones NUEVA TAREA
 
-## Detalle técnico (para referencia, no es necesario que lo leas)
+En `app-sidebar.tsx`, cada `SidebarMenuItem` de las 8 áreas añade un `SidebarMenuAction` (botón "+") que abre `NewTaskDialog` con `area` precargada. Sin romper la navegación principal.
 
-### Backend
-- Nueva tabla `agent_actions` (id, agent_person_id, requested_by_user, tool_name, payload jsonb, status, verifier_person_id, decided_by, decided_at, decision_notes, executed_at, resulting_entity_id). Con RLS por rol.
-- Nueva tabla `agent_tools` (agent_person_id, tool_name, enabled). Define qué herramientas tiene cada agente.
-- Catálogo de tools en `src/lib/agent-tools.ts`: cada tool tiene `name`, `description`, `inputSchema` (Zod), `kind: "read" | "write"`, y `execute(payload)` (solo para read; las write se ejecutan tras aprobación).
-- `chatWithAssistant` se amplía: lee las tools habilitadas del agente, las pasa a Claude con `tools: [...]`, hace el bucle de `tool_use` → resultado → respuesta. Las write tools, en vez de ejecutar, insertan una fila en `agent_actions` (status=pendiente) y devuelven al modelo *"Acción propuesta DM-…, queda pendiente de aprobación"*.
-- Server fn `approveAgentAction(id)` / `rejectAgentAction(id, notes)`: valida que el usuario es verificador del agente, ejecuta el insert real en la tabla destino, marca `executed_at`.
+## Riesgos identificados (para tu conocimiento)
 
-### Frontend
-- `src/routes/_authenticated/_admin/agent-actions.tsx`: cola de aprobaciones.
-- Editor de tools en la ficha de cada agente (debajo de "Persona / System prompt").
-- En `AssistantChat`, render de cards de tool_use/tool_result usando `message.parts` para mostrar los borradores que propone el agente.
+1. **`people.user_id` nuevo** — algunos usuarios del IC aún no tienen `person` asociada. Para ellos el filtro "asignadas a mí" devolverá 0 hasta enlazarlos. Añadiré una herramienta mínima en `/admin/users` para asociar persona ↔ usuario.
+2. **Acciones viejas con area=null** — Aparecerán en listados sin filtro de área. Es OK; el usuario puede asignarles área editando.
+3. **Subárea texto libre** — Vanessa puede escribir "Redes Sociales", "redes sociales", "RRSS". Mitigación: sugerencias autocomplete desde las subáreas ya usadas (`SELECT DISTINCT subarea FROM actions WHERE area = $1`).
+4. **Polling 60s** — el usuario verá nuevas tareas con hasta 1 min de retraso. Aceptable según tu decisión.
+5. **`requester_user_id` vs `assignee_person_id` asimetría** — Solicitante apunta a `auth.users`, responsable a `people`. Es lo correcto (no todo asignable es usuario del sistema), pero requiere dos joins distintos al renderizar nombres.
+6. **El modal global necesita estado compartido** — uso un context provider `TaskDialogProvider` montado en `_authenticated.tsx`.
 
-### Orden de implementación
-1. Tabla `agent_actions` + `agent_tools` + RLS + GRANTs (1 migración).
-2. Catálogo inicial de 4 herramientas read + 4 write (deal memo, contrato, evento, nota).
-3. Loop de tool calling en `chatWithAssistant`.
-4. Editor de tools por agente.
-5. Pantalla de acciones pendientes + flujo aprobar/rechazar/ejecutar.
-6. Badge de "pendientes" en `/me` y en sidebar.
+## Orden de implementación
 
----
-
-¿Apruebas este plan? Si quieres ajustar el reparto de herramientas por agente (sobre todo AINARA/AITANA/AITOR que no me has confirmado su rol), dímelo antes y lo incorporo.
+1. Migración (columnas + enum + trigger requester + `people.user_id`)
+2. `TaskDialogProvider` + `NewTaskDialog`
+3. Botones "+" en sidebar
+4. Pestaña `/me` → TAREAS
+5. `TaskInboxBell` en header
+6. Sugerencias de subárea
