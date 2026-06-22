@@ -29,8 +29,10 @@ export type Database = {
           position: number
           requester_user_id: string | null
           subarea: string | null
-          subject_id: string
-          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          subject_id: string | null
+          subject_type:
+            | Database["public"]["Enums"]["calendar_subject_type"]
+            | null
           title: string
           updated_at: string
         }
@@ -48,8 +50,10 @@ export type Database = {
           position?: number
           requester_user_id?: string | null
           subarea?: string | null
-          subject_id: string
-          subject_type: Database["public"]["Enums"]["calendar_subject_type"]
+          subject_id?: string | null
+          subject_type?:
+            | Database["public"]["Enums"]["calendar_subject_type"]
+            | null
           title: string
           updated_at?: string
         }
@@ -67,8 +71,10 @@ export type Database = {
           position?: number
           requester_user_id?: string | null
           subarea?: string | null
-          subject_id?: string
-          subject_type?: Database["public"]["Enums"]["calendar_subject_type"]
+          subject_id?: string | null
+          subject_type?:
+            | Database["public"]["Enums"]["calendar_subject_type"]
+            | null
           title?: string
           updated_at?: string
         }
