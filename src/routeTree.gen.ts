@@ -30,6 +30,7 @@ import { Route as AuthenticatedPortalChatRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
+import { Route as AuthenticatedAdminTareasRouteImport } from './routes/_authenticated/_admin/tareas'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
 import { Route as AuthenticatedAdminIcRouteImport } from './routes/_authenticated/_admin/ic'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
@@ -185,6 +186,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminTareasRoute =
+  AuthenticatedAdminTareasRouteImport.update({
+    id: '/tareas',
+    path: '/tareas',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRosterRoute =
   AuthenticatedAdminRosterRouteImport.update({
     id: '/roster',
@@ -453,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/tareas': typeof AuthenticatedAdminTareasRoute
   '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -514,6 +522,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
   '/roster': typeof AuthenticatedAdminRosterRoute
+  '/tareas': typeof AuthenticatedAdminTareasRoute
   '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -580,6 +589,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/_admin/ic': typeof AuthenticatedAdminIcRoute
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
+  '/_authenticated/_admin/tareas': typeof AuthenticatedAdminTareasRoute
   '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
@@ -645,6 +655,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/tareas'
     | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
@@ -706,6 +717,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/ic'
     | '/roster'
+    | '/tareas'
     | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
@@ -771,6 +783,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/finance'
     | '/_authenticated/_admin/ic'
     | '/_authenticated/_admin/roster'
+    | '/_authenticated/_admin/tareas'
     | '/_authenticated/_admin/users'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
@@ -972,6 +985,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/tareas': {
+      id: '/_authenticated/_admin/tareas'
+      path: '/tareas'
+      fullPath: '/tareas'
+      preLoaderRoute: typeof AuthenticatedAdminTareasRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/roster': {
@@ -1310,6 +1330,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIcRoute: typeof AuthenticatedAdminIcRoute
   AuthenticatedAdminRosterRoute: typeof AuthenticatedAdminRosterRoute
+  AuthenticatedAdminTareasRoute: typeof AuthenticatedAdminTareasRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminComposersComposerIdRoute: typeof AuthenticatedAdminComposersComposerIdRoute
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
@@ -1351,6 +1372,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIcRoute: AuthenticatedAdminIcRoute,
   AuthenticatedAdminRosterRoute: AuthenticatedAdminRosterRoute,
+  AuthenticatedAdminTareasRoute: AuthenticatedAdminTareasRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminComposersComposerIdRoute:
     AuthenticatedAdminComposersComposerIdRoute,

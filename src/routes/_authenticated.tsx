@@ -5,6 +5,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { CalendarDays, Users } from "lucide-react";
+import { TaskDialogProvider } from "@/components/new-task-dialog";
+import { TaskInboxBell } from "@/components/task-inbox-bell";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
@@ -46,6 +48,7 @@ function Shell() {
 
   return (
     <SidebarProvider>
+      <TaskDialogProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar role={role} />
         <div className="flex flex-1 flex-col">
@@ -75,12 +78,14 @@ function Shell() {
             {!roleLoading && role && (
               <span className="ml-auto smallcaps text-muted-foreground">{role === "admin" ? "Equipo IC" : "Compositor"}</span>
             )}
+            {role === "admin" && <TaskInboxBell />}
           </header>
           <main className="flex-1">
             <Outlet />
           </main>
         </div>
       </div>
+      </TaskDialogProvider>
     </SidebarProvider>
   );
 }
