@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,8 +52,9 @@ function NewTaskDialog({
   const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Reset when opening with new initialArea
-  useState(() => setArea(initialArea ?? ""));
+  useEffect(() => {
+    if (isOpen) setArea(initialArea ?? "");
+  }, [isOpen, initialArea]);
 
   const peopleQ = useQuery({
     queryKey: ["people-all-for-tasks"],
