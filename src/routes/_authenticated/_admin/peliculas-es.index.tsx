@@ -828,8 +828,8 @@ function exportFields(): ExportField<Film>[] {
   return [
     { key: "year", label: "Año", get: (r) => r.year },
     { key: "title", label: "Título", get: (r) => r.title },
-    { key: "directors", label: "Director(es)", get: (r) => r.directors },
-    { key: "production_companies", label: "Productoras", get: (r) => r.production_companies },
+    { key: "directors", label: "Director", expandArray: true, get: (r) => r.directors },
+    { key: "production_companies", label: "Productora", expandArray: true, get: (r) => r.production_companies },
     { key: "composer", label: "Compositor BSO", get: (r) => r.composer },
     { key: "music_supervisor", label: "Supervisor musical", get: (r) => r.music_supervisor },
     { key: "platform", label: "Plataforma", get: (r) => r.platform },
