@@ -18,6 +18,14 @@ export type ExportField<T> = {
   label: string;
   default?: boolean;
   get: (row: T) => unknown;
+  /**
+   * Si el valor es un array y `expandArray` es true, en lugar de unir los
+   * elementos en una celda con ", " se genera una columna por elemento
+   * (etiqueta "Label 1", "Label 2", …) hasta el máximo encontrado en los
+   * datos. Útil para listas con nombres que ya contienen comas o puntos
+   * (p. ej. "Warner Bros.", "Productora, S.L.").
+   */
+  expandArray?: boolean;
 };
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[T ].*)?$/;
@@ -81,11 +89,42 @@ export function ExportButton<T>({
     try {
       const rows = await fetchAll();
       const cols = fields.filter((f) => selected[f.key]);
-      const aoa: unknown[][] = [cols.map((c) => c.label)];
+      // Pre-calculate max array length for expandable columns.
+      const expansion = new Map<string, number>();
+      for (const c of cols) {
+        if (!c.expandArray) continue;
+        let max = 0;
+        for (const r of rows) {
+          const v = c.get(r);
+          if (Array.isArray(v) && v.length > max) max = v.length;
+        }
+        expansion.set(c.key, Math.max(max, 1));
+      }
+      const header: string[] = [];
+      for (const c of cols) {
+        const n = expansion.get(c.key);
+        if (n && n > 1) {
+          for (let i = 0; i < n; i++) header.push(`${c.label} ${i + 1}`);
+        } else {
+          header.push(c.label);
+        }
+      }
+      const aoa: unknown[][] = [header];
       for (const r of rows) {
-        aoa.push(
-          cols.map((c) => formatCellValue(c.get(r))),
-        );
+        const row: unknown[] = [];
+        for (const c of cols) {
+          const n = expansion.get(c.key);
+          const v = c.get(r);
+          if (n && n > 1) {
+            const arr = Array.isArray(v) ? v : v == null ? [] : [v];
+            for (let i = 0; i < n; i++) {
+              row.push(arr[i] == null ? "" : formatCellValue(arr[i]));
+            }
+          } else {
+            row.push(formatCellValue(v));
+          }
+        }
+        aoa.push(row);
       }
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const wb = XLSX.utils.book_new();
