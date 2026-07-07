@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandLogo } from "@/components/brand-logo";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
@@ -45,8 +46,8 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="font-display text-4xl">INTERESANTE COMPAÑIA</h1>
+        <div className="flex flex-col items-center text-center">
+          <BrandLogo className="h-20 w-20 object-contain" />
           <p className="mt-2 smallcaps text-muted-foreground">Herramienta de gestión integral</p>
           <p className="mt-3 text-sm text-muted-foreground">Acceso restringido al equipo y a los compositores representados.</p>
         </div>

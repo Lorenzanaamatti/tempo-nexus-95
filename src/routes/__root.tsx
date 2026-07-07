@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import favicon from "@/assets/ic-logo.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider } from "@/lib/auth-context";
@@ -97,6 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", href: favicon.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
