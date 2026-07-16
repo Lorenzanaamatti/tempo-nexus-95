@@ -1,68 +1,48 @@
+# Plan: Política de usuarios (control de acceso)
 
-# Sistema de tareas (extendiendo `actions`)
+## Objetivo
+Crear una documentación interna clara que defina quién puede acceder a la app, bajo qué condiciones y qué puede hacer. La política se basa en la implementación actual y se completa con reglas operativas razonables para el equipo de Interesante Compañía.
 
-## 1. Backend — migración única
+## Entregables
 
-Extender `public.actions` con 3 columnas nuevas:
-- `area` enum: `roster | oportunidades | economico | legal | marketing | general | produccion | comunicacion` (nullable — las acciones viejas se quedan en null)
-- `subarea` text (libre, ej. "Redes Sociales", "Contratos", "Caja")
-- `entry_date` date (default `current_date`)
-- `requester_user_id` uuid (default `auth.uid()` vía trigger BEFORE INSERT; nunca editable desde UI)
+### 1. Documento interno `docs/POLITICA_USUARIOS.md`
+Estructura propuesta:
 
-`title` pasa a ser **descripción** (ya lo es). `due_date`, `assignee_person_id`, `subject_type`/`subject_id` ya existen.
+- **Alcance**: a quién aplica (empleados, colaboradores externos, roster).
+- **Registro y aprobación**:
+  - El registro con email/password o Google está abierto, pero ninguna cuenta obtiene acceso hasta que un BIG C la apruebe.
+  - Estado inicial de toda cuenta: `pending`.
+  - Estados posibles: `pending`, `active`, `rejected`.
+- **Roles y permisos**:
+  - **BIG C (`admin`)**: acceso total, incluido el módulo económico y la gestión de usuarios (`/users`).
+  - **TEAM (`team`)**: acceso a todo el back-office excepto el módulo económico y la gestión de usuarios.
+  - **ROSTER (`composer`)**: acceso únicamente a su portal personal (`/me`).
+- **Flujo de aprobación**:
+  - Un BIG C revisa las solicitudes pendientes en `/users`.
+  - Al aprobar se asigna un rol; al rechazar se marca como `rejected`.
+  - Un usuario no puede quitarse a sí mismo el rol BIG C.
+- **Seguridad de acceso**:
+  - Contraseñas seguras y verificación contra fugas (HIBP).
+  - Sesión gestionada por Lovable Cloud; cierre de sesión obligatorio al terminar en dispositivos compartidos.
+- **Baja / offboarding**:
+  - Cuando un usuario deja de pertenecer al equipo, un BIG C revoca el acceso cambiando su estado a `rejected`.
+  - Recomendación: documentar quién del equipo realiza la baja y en qué plazo.
+- **Acceso a datos de otros usuarios**:
+  - Cada usuario ve solo lo que su rol le permite.
+  - Los datos personales del roster solo son editables por el propio usuario o por BIG C según corresponda.
 
-Sin RLS nueva: hereda la actual.
+### 2. Referencias en el código
+- Añadir un comentario en `src/lib/use-role.ts` y `src/lib/users-admin.functions.ts` que apunte a `docs/POLITICA_USUARIOS.md`.
+- Revisar que los textos de la UI (`/pending`, `/users`, barra lateral) usen los nombres de roles y estados definidos en la política.
 
-## 2. Componente global `NewTaskDialog`
+### 3. Opcional: activar HIBP
+Si no está activo, configurar `password_hibp_enabled: true` para evitar contraseñas filtradas.
 
-Un único modal compartido, abierto desde:
-- Botón **＋ NUEVA TAREA** en cada item del sidebar (Roster, Oportunidades, Económico, Legal, Marketing, General, Producción, Comunicación) → preabre con `area` precargada
-- Botón en el header (sin área precargada)
+## Notas técnicas
+- No se crean rutas públicas ni se modifica la base de datos: es documentación interna.
+- El documento se escribe en español y se guarda en `docs/`.
 
-Campos del modal:
-- Descripción (textarea)
-- Área (select, 8 opciones) + Subárea (texto libre con sugerencias)
-- Responsable (select Equipo IC)
-- Fecha de entrega (date)
-- Vínculo opcional a entidad (selector tipo + búsqueda: roster→composer, oportunidades→opportunity, económico→production, legal→contract, marketing→campaign, comunicación→media_outlet, producción→production, general→ninguno)
-- Fecha de entrada y solicitante: ocultos, automáticos
-
-## 3. Pestaña "TAREAS" en `/me`
-
-Nueva tab dentro de `/me`:
-- **Asignadas a mí** (filtro `assignee_person_id` = persona del usuario actual)
-- **Creadas por mí** (filtro `requester_user_id` = auth.uid())
-- Filtros: estado (pendiente/hecho), área, fecha
-- Acciones: marcar hecho, abrir entidad vinculada
-
-Cross-walk usuario ↔ persona: `profiles.id` → `composers.owner_user_id` → `people.composer_id`. Para personal de IC sin composer, añadiré `people.user_id uuid` (FK a auth.users) en la misma migración.
-
-## 4. Buzón de notificación (header, derecha)
-
-Componente `TaskInboxBell`:
-- `useQuery` con `refetchInterval: 60_000` → cuenta tareas asignadas a mí con `created_at > last_seen` Y `done = false`
-- Badge rojo con número
-- Popover: últimas 5 tareas nuevas + link "Ver todas" → `/me?tab=tareas`
-- `last_seen` se guarda en `localStorage` por usuario (clave `tasks-last-seen-{userId}`)
-
-## 5. Sidebar — botones NUEVA TAREA
-
-En `app-sidebar.tsx`, cada `SidebarMenuItem` de las 8 áreas añade un `SidebarMenuAction` (botón "+") que abre `NewTaskDialog` con `area` precargada. Sin romper la navegación principal.
-
-## Riesgos identificados (para tu conocimiento)
-
-1. **`people.user_id` nuevo** — algunos usuarios del IC aún no tienen `person` asociada. Para ellos el filtro "asignadas a mí" devolverá 0 hasta enlazarlos. Añadiré una herramienta mínima en `/admin/users` para asociar persona ↔ usuario.
-2. **Acciones viejas con area=null** — Aparecerán en listados sin filtro de área. Es OK; el usuario puede asignarles área editando.
-3. **Subárea texto libre** — Vanessa puede escribir "Redes Sociales", "redes sociales", "RRSS". Mitigación: sugerencias autocomplete desde las subáreas ya usadas (`SELECT DISTINCT subarea FROM actions WHERE area = $1`).
-4. **Polling 60s** — el usuario verá nuevas tareas con hasta 1 min de retraso. Aceptable según tu decisión.
-5. **`requester_user_id` vs `assignee_person_id` asimetría** — Solicitante apunta a `auth.users`, responsable a `people`. Es lo correcto (no todo asignable es usuario del sistema), pero requiere dos joins distintos al renderizar nombres.
-6. **El modal global necesita estado compartido** — uso un context provider `TaskDialogProvider` montado en `_authenticated.tsx`.
-
-## Orden de implementación
-
-1. Migración (columnas + enum + trigger requester + `people.user_id`)
-2. `TaskDialogProvider` + `NewTaskDialog`
-3. Botones "+" en sidebar
-4. Pestaña `/me` → TAREAS
-5. `TaskInboxBell` en header
-6. Sugerencias de subárea
+## Criterio de aceptación
+- Existe `docs/POLITICA_USUARIOS.md` con todas las secciones descritas.
+- Los archivos de roles y gestión de usuarios contienen una referencia al documento.
+- La app sigue compilando sin errores.
