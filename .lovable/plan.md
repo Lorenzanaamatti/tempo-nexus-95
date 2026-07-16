@@ -1,48 +1,34 @@
-# Plan: Política de usuarios (control de acceso)
+# Dar permisos completos (BIG C / admin) a una persona
 
-## Objetivo
-Crear una documentación interna clara que defina quién puede acceder a la app, bajo qué condiciones y qué puede hacer. La política se basa en la implementación actual y se completa con reglas operativas razonables para el equipo de Interesante Compañía.
+No hace falta tocar código. La app ya tiene una pantalla de gestión de usuarios que permite asignar el rol `admin` (BIG C = permisos totales: edición, modificación, económico, aprobación, etc.).
 
-## Entregables
+## Baby steps
 
-### 1. Documento interno `docs/POLITICA_USUARIOS.md`
-Estructura propuesta:
+### Opción A — La persona ya se ha registrado en la app
 
-- **Alcance**: a quién aplica (empleados, colaboradores externos, roster).
-- **Registro y aprobación**:
-  - El registro con email/password o Google está abierto, pero ninguna cuenta obtiene acceso hasta que un BIG C la apruebe.
-  - Estado inicial de toda cuenta: `pending`.
-  - Estados posibles: `pending`, `active`, `rejected`.
-- **Roles y permisos**:
-  - **BIG C (`admin`)**: acceso total, incluido el módulo económico y la gestión de usuarios (`/users`).
-  - **TEAM (`team`)**: acceso a todo el back-office excepto el módulo económico y la gestión de usuarios.
-  - **ROSTER (`composer`)**: acceso únicamente a su portal personal (`/me`).
-- **Flujo de aprobación**:
-  - Un BIG C revisa las solicitudes pendientes en `/users`.
-  - Al aprobar se asigna un rol; al rechazar se marca como `rejected`.
-  - Un usuario no puede quitarse a sí mismo el rol BIG C.
-- **Seguridad de acceso**:
-  - Contraseñas seguras y verificación contra fugas (HIBP).
-  - Sesión gestionada por Lovable Cloud; cierre de sesión obligatorio al terminar en dispositivos compartidos.
-- **Baja / offboarding**:
-  - Cuando un usuario deja de pertenecer al equipo, un BIG C revoca el acceso cambiando su estado a `rejected`.
-  - Recomendación: documentar quién del equipo realiza la baja y en qué plazo.
-- **Acceso a datos de otros usuarios**:
-  - Cada usuario ve solo lo que su rol le permite.
-  - Los datos personales del roster solo son editables por el propio usuario o por BIG C según corresponda.
+1. Pídele que entre a la app y haga **Sign up / Sign in** con su email (Google o email+contraseña). Al registrarse quedará en estado `pending`.
+2. Entra tú (como BIG C actual) y ve a **Usuarios** en el menú lateral (ruta `/users`, solo visible para admins).
+3. Busca su email en la lista.
+4. En su fila:
+   - Cambia el **Estado** a `active` (aprobar).
+   - Cambia el **Rol** a **BIG C** (admin).
+5. Guarda. Pídele que recargue la app: ya tendrá acceso completo.
 
-### 2. Referencias en el código
-- Añadir un comentario en `src/lib/use-role.ts` y `src/lib/users-admin.functions.ts` que apunte a `docs/POLITICA_USUARIOS.md`.
-- Revisar que los textos de la UI (`/pending`, `/users`, barra lateral) usen los nombres de roles y estados definidos en la política.
+### Opción B — Aún no se ha registrado
 
-### 3. Opcional: activar HIBP
-Si no está activo, configurar `password_hibp_enabled: true` para evitar contraseñas filtradas.
+1. Envíale el enlace de la app y que se registre con su email.
+2. Sigue la Opción A desde el paso 2.
 
-## Notas técnicas
-- No se crean rutas públicas ni se modifica la base de datos: es documentación interna.
-- El documento se escribe en español y se guarda en `docs/`.
+## Notas
 
-## Criterio de aceptación
-- Existe `docs/POLITICA_USUARIOS.md` con todas las secciones descritas.
-- Los archivos de roles y gestión de usuarios contienen una referencia al documento.
-- La app sigue compilando sin errores.
+- El rol **BIG C** (`admin`) da permisos totales: ver/editar todo, incluidos datos económicos, aprobar usuarios y asignar roles a otros.
+- No puedes quitarte a ti mismo el rol admin (protección incorporada) — pide a otro BIG C que lo haga si hiciera falta.
+- Queda registrado en la tabla `user_roles`; si en el futuro quieres revocar, vuelve a la misma pantalla y cambia el rol.
+
+## Detalle técnico (referencia)
+
+- Pantalla: `src/routes/_authenticated/_admin/users.tsx`
+- Server function que aplica el cambio: `setUserRoleAndStatus` en `src/lib/users-admin.functions.ts` (requiere ser admin).
+- Roles definidos: `admin` (BIG C), `team` (TEAM), `composer` (ROSTER) — ver `docs/POLITICA_USUARIOS.md`.
+
+¿Quieres que además te deje preparado un atajo para promover directamente por email desde la base de datos (por si la persona no aparece o para el primer BIG C adicional)?
