@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export type EntitySubjectType =
   | "person" | "production" | "composer" | "opportunity" | "contract"
   | "production_company" | "platform" | "festival" | "award" | "grant"
-  | "campaign" | "media_outlet" | "media_coverage" | "public_appearance";
+  | "campaign" | "media_outlet" | "media_coverage" | "public_appearance"
+  | "target_account";
 
 const ACTION_KINDS = [
   { value: "tarea", label: "Tarea" },
@@ -28,11 +29,13 @@ export function EntityActionsEditor({
   subjectId,
   title = "Acciones y seguimiento",
   showAssignee = true,
+  defaultAssigneePersonId = null,
 }: {
   subjectType: EntitySubjectType;
   subjectId: string;
   title?: string;
   showAssignee?: boolean;
+  defaultAssigneePersonId?: string | null;
 }) {
   const qc = useQueryClient();
   const queryKey = ["actions", subjectType, subjectId];
@@ -82,7 +85,15 @@ export function EntityActionsEditor({
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newKind, setNewKind] = useState("tarea");
-  const [newAssignee, setNewAssignee] = useState<string>("");
+  const [newAssignee, setNewAssignee] = useState<string>(defaultAssigneePersonId ?? "");
+
+  // Keep the default in sync when the parent's responsible changes (e.g. after load).
+  // Only auto-fill while the user hasn't picked one explicitly.
+  const [assigneeTouched, setAssigneeTouched] = useState(false);
+  if (!assigneeTouched && defaultAssigneePersonId && newAssignee === "" && defaultAssigneePersonId !== newAssignee) {
+    // side-effect free: schedule setState via microtask
+    queueMicrotask(() => setNewAssignee(defaultAssigneePersonId));
+  }
 
   async function addAction() {
     if (!newTitle.trim()) return;
@@ -95,7 +106,9 @@ export function EntityActionsEditor({
       assignee_person_id: newAssignee || null,
     });
     if (error) return toast.error(error.message);
-    setNewTitle(""); setNewDate(""); setNewKind("tarea"); setNewAssignee("");
+    setNewTitle(""); setNewDate(""); setNewKind("tarea");
+    setNewAssignee(defaultAssigneePersonId ?? "");
+    setAssigneeTouched(false);
     qc.invalidateQueries({ queryKey });
   }
 
