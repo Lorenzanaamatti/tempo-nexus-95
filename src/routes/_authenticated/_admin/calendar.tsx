@@ -226,6 +226,10 @@ export function CalendarBoard({
     queryKey: ["calendar-contracts-min"],
     queryFn: async () => (await supabase.from("contracts").select("id, title, counterparty")).data ?? [],
   });
+  const targetAccountsQ = useQuery({
+    queryKey: ["calendar-target-accounts-min"],
+    queryFn: async () => (await supabase.from("target_accounts").select("id, name")).data ?? [],
+  });
   const actionsQ = useQuery({
     queryKey: ["calendar-actions-min"],
     queryFn: async () => (await supabase.from("actions").select("id")).data ?? [],
@@ -253,6 +257,7 @@ export function CalendarBoard({
     const productionsMap = new Map<string, any>((productionsQ.data ?? []).map((p: any) => [p.id, p]));
     const opportunitiesMap = new Map<string, any>((opportunitiesQ.data ?? []).map((o: any) => [o.id, o]));
     const contractsMap = new Map<string, any>((contractsQ.data ?? []).map((c: any) => [c.id, c]));
+    const targetAccountsMap = new Map<string, any>((targetAccountsQ.data ?? []).map((t: any) => [t.id, t]));
     const actionsMap = new Map<string, any>((actionsQ.data ?? []).map((a: any) => [a.id, a]));
     const oppActionsMap = new Map<string, any>((oppActionsQ.data ?? []).map((a: any) => [a.id, a]));
     const phasesMap = new Map<string, any>((phasesQ.data ?? []).map((p: any) => [p.id, p]));
@@ -275,6 +280,7 @@ export function CalendarBoard({
       if (e.subject_type === "contract" && !contractsMap.has(e.subject_id)) continue;
       if (e.subject_type === "composer" && !composersMap.has(e.subject_id)) continue;
       if (e.subject_type === "person" && !peopleMap.has(e.subject_id)) continue;
+      if (e.subject_type === "target_account" && !targetAccountsMap.has(e.subject_id)) continue;
       if (e.assignee_person_id && !peopleMap.has(e.assignee_person_id)) continue;
       if (e.source_action_id && !actionsMap.has(e.source_action_id)) continue;
       if (e.source_opp_action_id && !oppActionsMap.has(e.source_opp_action_id)) continue;
@@ -390,6 +396,13 @@ export function CalendarBoard({
           sublabel = c.counterparty ?? undefined;
           toPath = "/contracts/$contractId";
           params = { contractId: c.id };
+        }
+      } else if (subject_type === "target_account") {
+        const t = targetAccountsMap.get(subject_id);
+        if (t) {
+          label = t.name;
+          toPath = "/marketing/target-accounts/$accountId";
+          params = { accountId: t.id };
         }
       } else {
         const link = SUBJECT_LINK[subject_type];
