@@ -447,9 +447,9 @@ export function CalendarBoard({
       };
     });
     return { rows: out, flatEvents };
-    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, actionsQ.data, oppActionsQ.data, phasesQ.data, sprintsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
+    }, [eventsQ.data, composerAvailQ.data, peopleQ.data, composersQ.data, productionsQ.data, opportunitiesQ.data, contractsQ.data, targetAccountsQ.data, actionsQ.data, oppActionsQ.data, phasesQ.data, sprintsQ.data, myPersonQ.data, activeCategories, hiddenSubjects, onlyMine, subjectTypes]);
 
-  const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || actionsQ.isLoading || oppActionsQ.isLoading || phasesQ.isLoading || sprintsQ.isLoading;
+  const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || targetAccountsQ.isLoading || actionsQ.isLoading || oppActionsQ.isLoading || phasesQ.isLoading || sprintsQ.isLoading;
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
