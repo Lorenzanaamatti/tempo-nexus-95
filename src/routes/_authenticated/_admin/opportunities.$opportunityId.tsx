@@ -350,7 +350,12 @@ function OpportunityDetail() {
       </section>
 
       <section className="mt-10">
-        <EntityActionsEditor subjectType="opportunity" subjectId={opportunityId} title="Próximas acciones" />
+        <EntityActionsEditor
+          subjectType="opportunity"
+          subjectId={opportunityId}
+          title="Próximas acciones"
+          defaultAssigneePersonId={form.responsible_person_id || null}
+        />
       </section>
 
       <section className="mt-10">

@@ -3879,6 +3879,7 @@ export type Database = {
         | "media_outlet"
         | "media_coverage"
         | "public_appearance"
+        | "target_account"
       case_study_visibility: "interna" | "externa"
       chat_channel_kind:
         | "general"
@@ -4309,6 +4310,7 @@ export const Constants = {
         "media_outlet",
         "media_coverage",
         "public_appearance",
+        "target_account",
       ],
       case_study_visibility: ["interna", "externa"],
       chat_channel_kind: [

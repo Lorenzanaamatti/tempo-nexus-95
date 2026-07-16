@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import {
   TARGET_ACCOUNT_STATUSES,
   TARGET_ACCOUNT_STATUS_LABEL,
@@ -299,6 +300,15 @@ function TargetAccountDetail() {
           {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Guardar"}
         </Button>
       </div>
+
+      <section className="mt-10">
+        <EntityActionsEditor
+          subjectType="target_account"
+          subjectId={form.id}
+          title="Próximas acciones"
+          defaultAssigneePersonId={form.responsible_person_id || null}
+        />
+      </section>
     </div>
   );
 }

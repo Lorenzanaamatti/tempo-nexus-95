@@ -1,0 +1,1 @@
+ALTER TYPE public.calendar_subject_type ADD VALUE IF NOT EXISTS 'target_account';
