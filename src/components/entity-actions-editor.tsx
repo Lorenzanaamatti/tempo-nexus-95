@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,14 +86,12 @@ export function EntityActionsEditor({
   const [newDate, setNewDate] = useState("");
   const [newKind, setNewKind] = useState("tarea");
   const [newAssignee, setNewAssignee] = useState<string>(defaultAssigneePersonId ?? "");
-
-  // Keep the default in sync when the parent's responsible changes (e.g. after load).
-  // Only auto-fill while the user hasn't picked one explicitly.
   const [assigneeTouched, setAssigneeTouched] = useState(false);
-  if (!assigneeTouched && defaultAssigneePersonId && newAssignee === "" && defaultAssigneePersonId !== newAssignee) {
-    // side-effect free: schedule setState via microtask
-    queueMicrotask(() => setNewAssignee(defaultAssigneePersonId));
-  }
+  useEffect(() => {
+    if (!assigneeTouched && defaultAssigneePersonId && !newAssignee) {
+      setNewAssignee(defaultAssigneePersonId);
+    }
+  }, [defaultAssigneePersonId, assigneeTouched, newAssignee]);
 
   async function addAction() {
     if (!newTitle.trim()) return;
@@ -159,7 +157,7 @@ export function EntityActionsEditor({
         {showAssignee && (
           <div className="sm:col-span-4">
             <Label className="text-xs">Responsable (Equipo IC)</Label>
-            <Select value={newAssignee || undefined} onValueChange={setNewAssignee}>
+            <Select value={newAssignee || undefined} onValueChange={(v) => { setNewAssignee(v); setAssigneeTouched(true); }}>
               <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
               <SelectContent>
                 {(peopleQ.data ?? []).map((p: any) => (
