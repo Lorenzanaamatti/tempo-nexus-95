@@ -455,6 +455,8 @@ export function CalendarBoard({
         subjectGroup: meta?.group ?? f.subject_type,
         to: meta?.to,
         params: meta?.params,
+        sourceKind: f.ev.sourceKind ?? null,
+        sourceActionId: f.ev.sourceActionId ?? null,
       };
     });
     return { rows: out, flatEvents };
