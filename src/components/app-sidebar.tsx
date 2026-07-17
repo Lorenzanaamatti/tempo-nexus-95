@@ -86,7 +86,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
     { title: "Proveedores", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
-    { title: "Películas ES", to: "/peliculas-es", icon: Database, active: pathname.startsWith("/peliculas-es") },
+    { title: "CRM Películas ES", to: "/peliculas-es", icon: Database, active: pathname.startsWith("/peliculas-es") },
   ];
 
   // 3. OPORTUNIDADES
