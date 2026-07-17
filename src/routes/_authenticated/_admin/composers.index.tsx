@@ -9,6 +9,14 @@ import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 
+const SPECIALIST_HASHTAGS = ["Técnico", "Producción", "Cantante", "Instrumentista"] as const;
+const SPECIALIST_HASHTAG_KEYWORDS: Record<(typeof SPECIALIST_HASHTAGS)[number], string[]> = {
+  Técnico: ["técnico", "técnica", "técnicos", "técnicas", "ingeniero", "ingeniera", "ingenieros", "editor", "editora", "editores", "asistente", "asistentes", "copista", "copistas", "orquestador", "orquestadora", "orquestadores", "arreglista", "arreglistas"],
+  Producción: ["producción", "productor", "productora", "productores"],
+  Cantante: ["cantante", "cantantes", "vocalista", "vocalistas"],
+  Instrumentista: ["instrumentista", "instrumentistas"],
+};
+
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
 const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
@@ -32,7 +40,7 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
   composer:   { title: "Compositores",         singular: "compositor",         intro: "Nuestro equipo de compositores y compositoras INTERESANTES para cine, televisión, publicidad, videojuegos, teatro, danza y whatnot." },
   artist:     { title: "Artistas",             singular: "artista",            intro: "Artistas representadas por INTERESANTE COMPAÑÍA para su colaboración en proyectos audiovisuales." },
   supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Este es nuestro equipo de supervisoras musicales (no curadores musicales)." },
-  specialist: { title: "Especialistas",        singular: "especialista",       intro: "Especialistas que colaboran con la compañía." },
+  specialist: { title: "Especialistas",        singular: "especialista",       intro: "Las personas representadas bajo este epígrafe tienen profesiones variadas: perfiles técnicos, producción, cantantes, instrumentistas, ingenieros, etc." },
   curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
@@ -49,12 +57,13 @@ function ComposersIndex() {
   const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
   const [q, setQ] = useState("");
+  const [specialistHashtag, setSpecialistHashtag] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
       let query = supabase
         .from("composers")
-        .select("id, full_name, city, country, availability, tags, photo_path, roster_role, tier")
+        .select("id, full_name, city, country, availability, tags, specialist_tags, specialist_subtype, photo_path, roster_role, tier")
         .eq("roster_role", role)
         .order("full_name", { ascending: true });
       if (q.trim()) {
@@ -70,13 +79,23 @@ function ComposersIndex() {
     },
   });
 
+  const filtered = (data ?? []).filter((c: any) => {
+    if (role !== "specialist" || !specialistHashtag) return true;
+    const sub = (c.specialist_subtype ?? "").toLowerCase();
+    const tags = (c.specialist_tags ?? []).map((t: string) => t.toLowerCase());
+    const allTags = (c.tags ?? []).map((t: string) => t.toLowerCase());
+    const pool = [sub, ...tags, ...allTags];
+    const keywords = SPECIALIST_HASHTAG_KEYWORDS[specialistHashtag as (typeof SPECIALIST_HASHTAGS)[number]] ?? [specialistHashtag.toLowerCase()];
+    return keywords.some((kw) => pool.some((t) => t.includes(kw)));
+  });
+
   const grouped = (() => {
     const surname = (name: string | null | undefined) => {
       const parts = (name ?? "").trim().split(/\s+/);
       return (parts[parts.length - 1] ?? "").toLocaleLowerCase("es");
     };
-    const map = new Map<Tier, typeof data>();
-    for (const c of data ?? []) {
+    const map = new Map<Tier, typeof filtered>();
+    for (const c of filtered) {
       const t = (TIER_ORDER.includes(c.tier as Tier) ? (c.tier as Tier) : "desarrollo") as Tier;
       if (!map.has(t)) map.set(t, [] as never);
       (map.get(t) as any[]).push(c);
@@ -97,6 +116,28 @@ function ComposersIndex() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl">{meta.title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
+          {role === "specialist" && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Filtrar por:</span>
+              {SPECIALIST_HASHTAGS.map((tag) => {
+                const active = specialistHashtag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSpecialistHashtag(active ? null : tag)}
+                    className={`rounded-full border px-3 py-1 text-xs font-mono transition ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary/60 hover:text-primary"
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <Input
@@ -128,7 +169,7 @@ function ComposersIndex() {
 
       {isLoading ? (
         <p className="font-display text-muted-foreground">Cargando archivo…</p>
-      ) : !data?.length ? (
+      ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -140,7 +181,7 @@ function ComposersIndex() {
         </div>
       ) : role !== "composer" ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[...(data ?? [])]
+          {[...filtered]
             .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
             .map((c: any) => (
               <Link
@@ -165,7 +206,7 @@ function ComposersIndex() {
                     <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
                     <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
                     <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
-                      {(c.tags ?? []).slice(0, 4).map((t: string) => (
+                      {(role === "specialist" ? (c.specialist_tags ?? c.tags ?? []) : (c.tags ?? [])).slice(0, 4).map((t: string) => (
                         <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
                       ))}
                     </div>
