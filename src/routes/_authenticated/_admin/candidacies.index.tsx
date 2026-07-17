@@ -29,6 +29,21 @@ const STATUS_TONE: Record<Status, string> = {
   respondida: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
 };
 
+const RESPONSE_LABEL = {
+  sin_responder: "Sin responder",
+  en_espera: "En espera",
+  respondida_si: "Respondida · sí",
+  respondida_no: "Respondida · no",
+} as const;
+type ResponseStatus = keyof typeof RESPONSE_LABEL;
+
+const RESPONSE_TONE: Record<ResponseStatus, string> = {
+  sin_responder: "bg-muted text-muted-foreground",
+  en_espera: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  respondida_si: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  respondida_no: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+};
+
 // Map legacy DB values to new UI keys
 function normalizeStatus(s: string | null | undefined): Status {
   if (s === "revisando") return "en_revision";
@@ -214,6 +229,9 @@ function CandidaciesIndex() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${STATUS_TONE[st]}`}>
                       {STATUS_LABEL[st]}
+                    </span>
+                    <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${RESPONSE_TONE[(c.response_status ?? "sin_responder") as ResponseStatus]}`}>
+                      {RESPONSE_LABEL[(c.response_status ?? "sin_responder") as ResponseStatus]}
                     </span>
                     <Select value={st} onValueChange={(v) => updateStatus(c.id, v as Status)}>
                       <SelectTrigger className="h-8 w-36 rounded-sm text-xs"><SelectValue /></SelectTrigger>
