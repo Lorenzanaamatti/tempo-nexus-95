@@ -9,14 +9,6 @@ import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 
-const SPECIALIST_HASHTAGS = ["Técnico", "Producción", "Cantante", "Instrumentista"] as const;
-const SPECIALIST_HASHTAG_KEYWORDS: Record<(typeof SPECIALIST_HASHTAGS)[number], string[]> = {
-  Técnico: ["técnico", "técnica", "técnicos", "técnicas", "ingeniero", "ingeniera", "ingenieros", "editor", "editora", "editores", "asistente", "asistentes", "copista", "copistas", "orquestador", "orquestadora", "orquestadores", "arreglista", "arreglistas"],
-  Producción: ["producción", "productor", "productora", "productores"],
-  Cantante: ["cantante", "cantantes", "vocalista", "vocalistas"],
-  Instrumentista: ["instrumentista", "instrumentistas"],
-};
-
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
 const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
@@ -57,7 +49,8 @@ function ComposersIndex() {
   const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
   const [q, setQ] = useState("");
-  const [specialistHashtag, setSpecialistHashtag] = useState<string | null>(null);
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [groupByTag, setGroupByTag] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
@@ -79,15 +72,52 @@ function ComposersIndex() {
     },
   });
 
+  const allSpecialistTagsWithCount = (() => {
+    if (role !== "specialist") return [] as Array<{ tag: string; count: number }>;
+    const counts = new Map<string, number>();
+    for (const c of (data ?? []) as any[]) {
+      const set = new Set<string>();
+      for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+      for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+      for (const t of set) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, "es"));
+  })();
+
   const filtered = (data ?? []).filter((c: any) => {
-    if (role !== "specialist" || !specialistHashtag) return true;
-    const sub = (c.specialist_subtype ?? "").toLowerCase();
-    const tags = (c.specialist_tags ?? []).map((t: string) => t.toLowerCase());
-    const allTags = (c.tags ?? []).map((t: string) => t.toLowerCase());
-    const pool = [sub, ...tags, ...allTags];
-    const keywords = SPECIALIST_HASHTAG_KEYWORDS[specialistHashtag as (typeof SPECIALIST_HASHTAGS)[number]] ?? [specialistHashtag.toLowerCase()];
-    return keywords.some((kw) => pool.some((t) => t.includes(kw)));
+    if (role !== "specialist" || !tagFilter) return true;
+    const pool = new Set<string>();
+    for (const t of (c.tags ?? []) as string[]) if (t?.trim()) pool.add(t.trim());
+    for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) pool.add(t.trim());
+    return pool.has(tagFilter);
   });
+
+  const specialistTagGroups = (() => {
+    if (role !== "specialist" || !groupByTag) return [] as Array<{ tag: string; items: any[] }>;
+    const map = new Map<string, any[]>();
+    for (const c of filtered as any[]) {
+      const set = new Set<string>();
+      for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+      for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+      if (!set.size) {
+        if (!map.has("Sin etiquetas")) map.set("Sin etiquetas", []);
+        map.get("Sin etiquetas")!.push(c);
+        continue;
+      }
+      for (const t of set) {
+        if (!map.has(t)) map.set(t, []);
+        map.get(t)!.push(c);
+      }
+    }
+    return [...map.entries()]
+      .map(([tag, items]) => ({
+        tag,
+        items: items.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es")),
+      }))
+      .sort((a, b) => b.items.length - a.items.length || a.tag.localeCompare(b.tag, "es"));
+  })();
 
   const grouped = (() => {
     const surname = (name: string | null | undefined) => {
@@ -117,25 +147,49 @@ function ComposersIndex() {
           <h1 className="mt-1 font-display text-5xl">{meta.title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
           {role === "specialist" && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Filtrar por:</span>
-              {SPECIALIST_HASHTAGS.map((tag) => {
-                const active = specialistHashtag === tag;
-                return (
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">Filtrar por tag:</span>
+                {allSpecialistTagsWithCount.length === 0 ? (
+                  <span className="text-xs italic text-muted-foreground">Aún no hay tags libres asignados.</span>
+                ) : (
+                  allSpecialistTagsWithCount.map(({ tag, count }) => {
+                    const active = tagFilter === tag;
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setTagFilter(active ? null : tag)}
+                        className={`rounded-full border px-3 py-1 text-xs font-mono transition ${
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-foreground hover:border-primary/60 hover:text-primary"
+                        }`}
+                      >
+                        #{tag} <span className="opacity-70">({count})</span>
+                      </button>
+                    );
+                  })
+                )}
+                {tagFilter && (
                   <button
-                    key={tag}
                     type="button"
-                    onClick={() => setSpecialistHashtag(active ? null : tag)}
-                    className={`rounded-full border px-3 py-1 text-xs font-mono transition ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-foreground hover:border-primary/60 hover:text-primary"
-                    }`}
+                    onClick={() => setTagFilter(null)}
+                    className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
                   >
-                    #{tag}
+                    Limpiar
                   </button>
-                );
-              })}
+                )}
+              </div>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={groupByTag}
+                  onChange={(e) => setGroupByTag(e.target.checked)}
+                  className="h-3.5 w-3.5"
+                />
+                Ver agrupado por tag
+              </label>
             </div>
           )}
         </div>
@@ -180,44 +234,33 @@ function ComposersIndex() {
           </Button>
         </div>
       ) : role !== "composer" ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[...filtered]
-            .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
-            .map((c: any) => (
-              <Link
-                key={c.id}
-                to="/composers/$composerId"
-                params={{ composerId: c.id }}
-                className="group block h-full"
-              >
-                <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition group-hover:border-primary/60">
-                  <ComposerThumb
-                    path={c.photo_path as string | null}
-                    alt={c.full_name}
-                    className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
-                    imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
-                    fallback={
-                      <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
-                        {c.full_name?.[0] ?? "·"}
-                      </div>
-                    }
-                  />
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
-                    <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
-                    <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
-                      {(role === "specialist" ? (c.specialist_tags ?? c.tags ?? []) : (c.tags ?? [])).slice(0, 4).map((t: string) => (
-                        <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
-                      ))}
-                    </div>
-                    <p className="mt-auto pt-4 smallcaps text-muted-foreground">
-                      {c.availability === "available" ? "Disponible" : c.availability === "partial" ? "Parcial" : "No disponible"}
-                    </p>
+        role === "specialist" && groupByTag ? (
+          <div className="space-y-12">
+            {specialistTagGroups.map(({ tag, items }) => (
+              <section key={tag}>
+                <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-3">
+                  <div className="flex items-baseline gap-3">
+                    <h2 className="font-display text-3xl">#{tag}</h2>
+                    <span className="smallcaps text-muted-foreground">{items.length}</span>
                   </div>
-                </article>
-              </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((c: any) => (
+                    <SpecialistCard key={`${tag}-${c.id}`} c={c} role={role} />
+                  ))}
+                </div>
+              </section>
             ))}
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...filtered]
+              .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
+              .map((c: any) => (
+                <SpecialistCard key={c.id} c={c} role={role} />
+              ))}
+          </div>
+        )
       ) : (
         <div className="space-y-12">
           {grouped.map(({ tier, items }) => (
@@ -275,6 +318,64 @@ function ComposersIndex() {
         </div>
       )}
     </div>
+  );
+}
+
+function SpecialistCard({ c, role }: { c: any; role: RosterRole }) {
+  const tags: string[] = (() => {
+    const set = new Set<string>();
+    for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    if (role === "specialist") {
+      for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    }
+    return [...set];
+  })();
+  return (
+    <Link
+      to="/composers/$composerId"
+      params={{ composerId: c.id }}
+      className="group block h-full"
+    >
+      <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition group-hover:border-primary/60">
+        <ComposerThumb
+          path={c.photo_path as string | null}
+          alt={c.full_name}
+          className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
+          imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          fallback={
+            <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
+              {c.full_name?.[0] ?? "·"}
+            </div>
+          }
+        />
+        <div className="flex flex-1 flex-col p-5">
+          {role === "specialist" && tags.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {tags.slice(0, 6).map((t) => (
+                <span
+                  key={t}
+                  className="rounded-sm bg-primary/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-primary"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
+          <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
+          <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+          {role !== "specialist" && (
+            <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
+              {tags.slice(0, 4).map((t) => (
+                <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
+              ))}
+            </div>
+          )}
+          <p className="mt-auto pt-4 smallcaps text-muted-foreground">
+            {c.availability === "available" ? "Disponible" : c.availability === "partial" ? "Parcial" : "No disponible"}
+          </p>
+        </div>
+      </article>
+    </Link>
   );
 }
 
