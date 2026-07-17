@@ -866,31 +866,35 @@ function Inner({
         />
       </Section>
 
-      {/* Estilos / Géneros / Idiomas */}
-      <Section title="Estilos musicales">
-        <MultiChipSelect
-          options={styleOpts}
-          selected={styleIds}
-          onToggle={toggleStyle}
-          getKey={(o) => o.id!}
-        />
-      </Section>
-      <Section title="Géneros audiovisuales">
-        <MultiChipSelect
-          options={genreOpts}
-          selected={genreIds}
-          onToggle={toggleGenre}
-          getKey={(o) => o.id!}
-        />
-      </Section>
-      <Section title="Idiomas">
-        <MultiChipSelect
-          options={langOpts}
-          selected={langCodes}
-          onToggle={toggleLang}
-          getKey={(o) => o.code!}
-        />
-      </Section>
+      {/* Estilos / Géneros / Idiomas — solo para compositores */}
+      {((c as { roster_role?: string }).roster_role ?? "composer") === "composer" && (
+        <>
+          <Section title="Estilos musicales">
+            <MultiChipSelect
+              options={styleOpts}
+              selected={styleIds}
+              onToggle={toggleStyle}
+              getKey={(o) => o.id!}
+            />
+          </Section>
+          <Section title="Géneros audiovisuales">
+            <MultiChipSelect
+              options={genreOpts}
+              selected={genreIds}
+              onToggle={toggleGenre}
+              getKey={(o) => o.id!}
+            />
+          </Section>
+          <Section title="Idiomas">
+            <MultiChipSelect
+              options={langOpts}
+              selected={langCodes}
+              onToggle={toggleLang}
+              getKey={(o) => o.code!}
+            />
+          </Section>
+        </>
+      )}
 
       {/* Tags */}
       <Section title="Tags libres">
