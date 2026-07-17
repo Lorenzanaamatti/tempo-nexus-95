@@ -136,7 +136,7 @@ export function CalendarBoard({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [view, setView] = useState<CalendarView>("month");
-  const [layout, setLayout] = useState<Layout>("gantt");
+  const [layout, setLayout] = useState<Layout>(initialOnlyMine ? "kanban" : "gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
   const [onlyMine, setOnlyMine] = useState(initialOnlyMine);
   const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(() => {
@@ -166,17 +166,59 @@ export function CalendarBoard({
   const startIso = range.start.toISOString().slice(0, 10);
   const endIso = range.end.toISOString().slice(0, 10);
 
-  // Match current user to a `people` row (by email) for "Mis tareas".
+  // Match current user to a `people` row: user_id link first, then email.
   const myPersonQ = useQuery({
-    queryKey: ["calendar-my-person", user?.email],
-    enabled: !!user?.email,
+    queryKey: ["calendar-my-person", user?.id, user?.email],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const byId = await supabase
+        .from("people")
+        .select("id, full_name")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (byId.data) return byId.data;
+      if (user?.email) {
+        const byEmail = await supabase
+          .from("people")
+          .select("id, full_name")
+          .ilike("email", user.email)
+          .maybeSingle();
+        return byEmail.data ?? null;
+      }
+      return null;
+    },
+  });
+
+  // Candidates to self-link when the current user has no `people` row yet.
+  const unlinkedPeopleQ = useQuery({
+    queryKey: ["calendar-unlinked-people"],
+    enabled: !!user?.id && !myPersonQ.data && initialOnlyMine,
     queryFn: async () => {
       const { data } = await supabase
         .from("people")
-        .select("id, full_name")
-        .ilike("email", user!.email!)
-        .maybeSingle();
-      return data;
+        .select("id, full_name, role")
+        .is("user_id", null)
+        .order("full_name");
+      return data ?? [];
+    },
+  });
+
+  const linkMeMut = useMutation({
+    mutationFn: async (personId: string) => {
+      const { error } = await supabase
+        .from("people")
+        .update({ user_id: user!.id })
+        .eq("id", personId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar-my-person"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-unlinked-people"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-people-min"] });
+      toast.success("Vinculado a tu usuario");
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : "No se pudo vincular");
     },
   });
 
@@ -236,7 +278,7 @@ export function CalendarBoard({
   });
   const actionsQ = useQuery({
     queryKey: ["calendar-actions-min"],
-    queryFn: async () => (await supabase.from("actions").select("id")).data ?? [],
+    queryFn: async () => (await supabase.from("actions").select("id, area, subarea, notes")).data ?? [],
   });
   const oppActionsQ = useQuery({
     queryKey: ["calendar-opportunity-actions-min"],
@@ -443,13 +485,14 @@ export function CalendarBoard({
 
     const flatEvents: FlatCalendarEvent[] = flat.map((f) => {
       const meta = subjectMeta.get(`${f.subject_type}::${f.subject_id}`);
+      const action = f.ev.sourceActionId ? actionsMap.get(f.ev.sourceActionId) : null;
       return {
         id: f.ev.id,
         start: f.ev.start,
         end: f.ev.end,
         kind: f.ev.kind,
         title: f.ev.title,
-        note: f.ev.note,
+        note: f.ev.note ?? action?.notes ?? null,
         category: f.category,
         subjectLabel: meta?.label ?? f.subject_id.slice(0, 8),
         subjectGroup: meta?.group ?? f.subject_type,
@@ -457,6 +500,8 @@ export function CalendarBoard({
         params: meta?.params,
         sourceKind: f.ev.sourceKind ?? null,
         sourceActionId: f.ev.sourceActionId ?? null,
+        area: action?.area ?? null,
+        subarea: action?.subarea ?? null,
       };
     });
     return { rows: out, flatEvents };
@@ -609,14 +654,50 @@ export function CalendarBoard({
           type="button"
           onClick={() => setOnlyMine((m) => !m)}
           disabled={!myPersonQ.data}
-          title={myPersonQ.data ? `Solo tareas asignadas a ${myPersonQ.data.full_name}` : "No hay persona asociada a tu usuario"}
-          className={`ml-2 inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs transition ${
-            onlyMine ? "border-foreground bg-foreground text-background" : "border-border opacity-70 hover:opacity-100"
-          } disabled:opacity-30`}
+          title={myPersonQ.data ? `Solo tareas asignadas a ${myPersonQ.data.full_name}` : "Vincula tu usuario abajo para activarlo"}
+          style={{
+            backgroundColor: onlyMine ? "#FF073A" : "transparent",
+            borderColor: "#FF073A",
+            color: onlyMine ? "#fff" : "#FF073A",
+            boxShadow: onlyMine ? "0 0 12px rgba(255, 7, 58, 0.55)" : undefined,
+          }}
+          className="ml-2 inline-flex items-center gap-1.5 rounded-sm border-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider transition disabled:opacity-40"
         >
           <User2 className="h-3 w-3" /> Mis tareas
         </button>
       </div>
+
+      {initialOnlyMine && !myPersonQ.data && (
+        <div
+          className="mb-4 flex flex-wrap items-center gap-2 rounded-sm border-2 px-3 py-2 text-xs"
+          style={{ borderColor: "#FF073A", backgroundColor: "rgba(255, 7, 58, 0.06)" }}
+        >
+          <span style={{ color: "#FF073A" }} className="font-semibold uppercase tracking-wider">
+            Soy…
+          </span>
+          <span className="text-muted-foreground">
+            Tu usuario aún no está vinculado a ninguna persona del equipo. Elige quién eres:
+          </span>
+          <select
+            defaultValue=""
+            disabled={linkMeMut.isPending}
+            onChange={(e) => {
+              const id = e.target.value;
+              if (id) linkMeMut.mutate(id);
+            }}
+            className="rounded-sm border border-border bg-background px-2 py-1 text-xs"
+          >
+            <option value="" disabled>
+              Selecciona una persona…
+            </option>
+            {(unlinkedPeopleQ.data ?? []).map((p: any) => (
+              <option key={p.id} value={p.id}>
+                {p.full_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Source family filters — secondary axis */}
       <SubjectFilters
