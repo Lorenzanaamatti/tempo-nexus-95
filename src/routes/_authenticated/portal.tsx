@@ -87,8 +87,8 @@ function PortalLayout() {
       <header className="sticky top-0 z-20 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-bg)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
           <Link to="/portal" className="flex items-center gap-4">
-            <BrandLogo variant="noir" className="h-16 w-auto object-contain" />
-            <div className="leading-tight">
+            <BrandLogo className="h-10 w-auto object-contain" />
+            <div className="leading-tight border-l border-[color:var(--portal-border)] pl-4">
               <p className="smallcaps text-[10px] text-[color:var(--portal-muted)]">Portal del representado</p>
               <p className="font-display text-base text-[color:var(--portal-fg)]">{name}</p>
             </div>
