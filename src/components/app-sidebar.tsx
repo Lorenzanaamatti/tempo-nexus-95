@@ -219,7 +219,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
           </>
         ) : (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="smallcaps">Mi portal</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="font-display text-sm font-semibold uppercase tracking-[0.12em]">Mi portal</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {[
