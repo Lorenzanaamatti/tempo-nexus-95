@@ -1905,6 +1905,38 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_deck_files: {
+        Row: {
+          created_at: string
+          deck_id: string
+          file_name: string | null
+          id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          deck_id: string
+          file_name?: string | null
+          id?: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          deck_id?: string
+          file_name?: string | null
+          id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_deck_files_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_decks: {
         Row: {
           audience: string | null
