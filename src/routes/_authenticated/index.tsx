@@ -80,7 +80,7 @@ const GROUPS: Group[] = [
     items: [
       { title: "Decks de venta", to: "/marketing/decks", icon: Presentation },
       { title: "Clipping", to: "/marketing/clippings", icon: Newspaper },
-      { title: "Libro de estilo", to: "/marketing/brand", icon: Palette },
+      { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette },
       { title: "Casos de éxito", to: "/marketing/case-studies", icon: Trophy },
       { title: "Plantillas", to: "/marketing/templates", icon: Mail },
       { title: "Press kits", to: "/marketing/press-kits", icon: FolderOpen },
