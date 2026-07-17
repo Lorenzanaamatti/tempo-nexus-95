@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, FileText, ExternalLink, Trash2, Upload, Download } from "lucide-react";
+import { Plus, FileText, ExternalLink, Trash2, Upload, Download, X } from "lucide-react";
 import {
   DECK_PURPOSES,
   DECK_PURPOSE_LABEL,
@@ -40,6 +40,14 @@ type Deck = {
   notes: string | null;
   tags: string[];
   updated_at: string;
+};
+
+type DeckFile = {
+  id: string;
+  deck_id: string;
+  storage_path: string;
+  file_name: string | null;
+  created_at: string;
 };
 
 function DecksIndex() {
