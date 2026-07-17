@@ -162,10 +162,10 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
           {collapsed ? (
             // Collapsed rail: show a compact "int." mark cropped from the wordmark.
             <div className="h-9 w-9 overflow-hidden">
-              <BrandLogo className="h-9 w-auto max-w-none object-cover object-left" />
+              <BrandLogo variant="clear" className="h-9 w-auto max-w-none object-cover object-left" />
             </div>
           ) : (
-            <BrandLogo className="h-8 w-auto object-contain" />
+            <BrandLogo variant="clear" className="h-8 w-auto object-contain" />
           )}
         </Link>
       </SidebarHeader>
