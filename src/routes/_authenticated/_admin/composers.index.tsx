@@ -10,6 +10,12 @@ import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 
 const SPECIALIST_HASHTAGS = ["Técnico", "Producción", "Cantante", "Instrumentista"] as const;
+const SPECIALIST_HASHTAG_KEYWORDS: Record<(typeof SPECIALIST_HASHTAGS)[number], string[]> = {
+  Técnico: ["técnico", "técnica", "técnicos", "técnicas", "ingeniero", "ingeniera", "ingenieros", "editor", "editora", "editores", "asistente", "asistentes", "copista", "copistas", "orquestador", "orquestadora", "orquestadores", "arreglista", "arreglistas"],
+  Producción: ["producción", "productor", "productora", "productores"],
+  Cantante: ["cantante", "cantantes", "vocalista", "vocalistas"],
+  Instrumentista: ["instrumentista", "instrumentistas"],
+};
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
