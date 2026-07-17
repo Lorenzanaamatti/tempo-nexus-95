@@ -51,7 +51,7 @@ function RosterAll() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl">Directorio completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Todas las personas representadas, agrupadas por categoría. {total} ficha{total === 1 ? "" : "s"} en total.
+            Todas las personas representadas, agrupadas por categoría.
           </p>
         </div>
         <Input
