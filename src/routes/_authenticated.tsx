@@ -80,7 +80,7 @@ function Shell() {
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
-            <span className="smallcaps text-muted-foreground">Interesante Compañía</span>
+            <BrandLogo variant="auto" className="h-4 w-auto" />
             {role === "admin" && (
               <nav className="ml-4 flex items-center gap-1">
                 <Link
