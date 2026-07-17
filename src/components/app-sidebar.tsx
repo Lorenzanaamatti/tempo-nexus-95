@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   User, LogOut, CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic,
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
-  Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
+  Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart, Inbox,
   Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database, Plus,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -92,6 +92,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   // 3. OPORTUNIDADES
   const opportunitiesItems: NavItem[] = [
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
+    { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
   ];
 
   // 4. ECONÓMICO
