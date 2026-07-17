@@ -198,9 +198,9 @@ function FilesList({ files, onChanged }: { files: AllFile[]; onChanged: () => vo
             <FileThumb file={f} />
           </div>
           <button type="button" onClick={() => openFile(f.storage_path)} className="min-w-0 flex-1 text-left">
-            <div className="truncate text-sm">{f.filename ?? f.storage_path.split("/").pop()}</div>
+            <div className="truncate text-sm">{f.asset_title ?? "—"}</div>
             <div className="truncate text-xs text-muted-foreground">
-              {f.asset_title ?? "—"}{f.asset_kind ? ` · ${f.asset_kind}` : ""}
+              {f.filename ?? f.storage_path.split("/").pop()}{f.asset_kind ? ` · ${f.asset_kind}` : ""}
             </div>
           </button>
           <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
