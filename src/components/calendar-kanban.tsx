@@ -15,7 +15,13 @@ const COLUMNS: { key: string; label: string; accent: string }[] = [
   { key: "personal", label: "Personal", accent: "border-emerald-500/50" },
 ];
 
-export function CalendarKanban({ events }: { events: FlatCalendarEvent[] }) {
+export function CalendarKanban({
+  events,
+  onMoveTask,
+}: {
+  events: FlatCalendarEvent[];
+  onMoveTask?: (actionId: string, newDateIso: string) => void;
+}) {
   const byCol = useMemo(() => {
     const map = new Map<string, FlatCalendarEvent[]>();
     for (const col of COLUMNS) map.set(col.key, []);
@@ -50,10 +56,23 @@ export function CalendarKanban({ events }: { events: FlatCalendarEvent[] }) {
                         <span className={`inline-block rounded-sm border px-1.5 py-[1px] text-[9px] uppercase tracking-wider ${cls}`}>
                           {label}
                         </span>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {format(e.start, "dd MMM", { locale: es })}
-                          {e.start.toDateString() !== e.end.toDateString() && ` → ${format(e.end, "dd MMM", { locale: es })}`}
-                        </span>
+                        {onMoveTask && e.sourceKind === "action" && e.sourceActionId ? (
+                          <input
+                            type="date"
+                            value={format(e.start, "yyyy-MM-dd")}
+                            onChange={(ev) => {
+                              const v = ev.target.value;
+                              if (v) onMoveTask(e.sourceActionId!, v);
+                            }}
+                            className="rounded-sm border border-border bg-background px-1 py-[1px] text-[10px] text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                            title="Cambiar fecha de entrega"
+                          />
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                            {format(e.start, "dd MMM", { locale: es })}
+                            {e.start.toDateString() !== e.end.toDateString() && ` → ${format(e.end, "dd MMM", { locale: es })}`}
+                          </span>
+                        )}
                       </div>
                       <div className="mt-1.5">
                         {e.to ? (

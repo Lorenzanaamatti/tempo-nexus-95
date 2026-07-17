@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -8,9 +8,12 @@ import { ChevronLeft, ChevronRight, User2, GanttChartSquare, CalendarDays, Kanba
 import { TimelineCalendar } from "@/components/timeline-calendar";
 import { CalendarMonthGrid, type FlatCalendarEvent } from "@/components/calendar-month-grid";
 import { CalendarKanban } from "@/components/calendar-kanban";
+import { BrandLogo } from "@/components/brand-logo";
+import { toast } from "sonner";
+import { format as formatDate } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   computeRange,
-  rangeLabel,
   stepAnchor,
   VIEW_LABELS,
   type CalendarView,
@@ -119,7 +122,7 @@ export function CalendarBoard({
   initialOnlyMine = false,
   subjectTypes,
   title = "Calendario general",
-  eyebrow = "Interesante Compañía",
+  eyebrow,
   description,
 }: {
   lockedCategory?: Category;
@@ -127,10 +130,11 @@ export function CalendarBoard({
   initialOnlyMine?: boolean;
   subjectTypes?: string[];
   title?: string;
-  eyebrow?: string;
+  eyebrow?: React.ReactNode;
   description?: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [view, setView] = useState<CalendarView>("month");
   const [layout, setLayout] = useState<Layout>("gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
@@ -316,6 +320,8 @@ export function CalendarBoard({
         kind: e.kind,
         title: e.title ?? undefined,
         note: e.note,
+        sourceKind: e.source_kind ?? null,
+        sourceActionId: e.source_action_id ?? null,
       });
       flat.push({
         subject_type: e.subject_type,
@@ -328,6 +334,8 @@ export function CalendarBoard({
           kind: e.kind,
           title: e.title ?? undefined,
           note: e.note,
+          sourceKind: e.source_kind ?? null,
+          sourceActionId: e.source_action_id ?? null,
         },
       });
     }
@@ -447,6 +455,8 @@ export function CalendarBoard({
         subjectGroup: meta?.group ?? f.subject_type,
         to: meta?.to,
         params: meta?.params,
+        sourceKind: f.ev.sourceKind ?? null,
+        sourceActionId: f.ev.sourceActionId ?? null,
       };
     });
     return { rows: out, flatEvents };
@@ -454,11 +464,56 @@ export function CalendarBoard({
 
   const loading = eventsQ.isLoading || composerAvailQ.isLoading || peopleQ.isLoading || composersQ.isLoading || productionsQ.isLoading || opportunitiesQ.isLoading || contractsQ.isLoading || targetAccountsQ.isLoading || actionsQ.isLoading || oppActionsQ.isLoading || phasesQ.isLoading || sprintsQ.isLoading;
 
+  const moveTaskMut = useMutation({
+    mutationFn: async ({ actionId, newDate }: { actionId: string; newDate: string }) => {
+      const { error } = await supabase.from("actions").update({ due_date: newDate }).eq("id", actionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar-events-all"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["task-inbox"] });
+      toast.success("Fecha de entrega actualizada");
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : "No se pudo mover la tarea";
+      toast.error(msg);
+    },
+  });
+  const onMoveTask = (actionId: string, newDateIso: string) => {
+    moveTaskMut.mutate({ actionId, newDate: newDateIso });
+  };
+
+  const now = new Date();
+  const todayInRange = now >= range.start && now < range.end;
+  const arrowLabels: Record<CalendarView, { prev: string; next: string }> = {
+    day: { prev: "Día anterior", next: "Día siguiente" },
+    week: { prev: "Semana anterior", next: "Semana siguiente" },
+    month: { prev: "Mes anterior", next: "Mes siguiente" },
+    quarter: { prev: "Trimestre anterior", next: "Trimestre siguiente" },
+    semester: { prev: "Semestre anterior", next: "Semestre siguiente" },
+    year: { prev: "Año anterior", next: "Año siguiente" },
+    "2y": { prev: "2 años atrás", next: "2 años adelante" },
+    "3y": { prev: "3 años atrás", next: "3 años adelante" },
+  };
+  const friendlyRangeLabel = (() => {
+    const s = range.start;
+    const e = new Date(range.end.getTime() - 1);
+    if (effectiveView === "day") return formatDate(s, "d 'de' MMMM 'de' yyyy", { locale: es });
+    if (effectiveView === "week")
+      return `${formatDate(s, "d MMM", { locale: es })} – ${formatDate(e, "d MMM yyyy", { locale: es })}`;
+    if (effectiveView === "month") return formatDate(s, "MMMM yyyy", { locale: es });
+    if (effectiveView === "year") return formatDate(s, "yyyy", { locale: es });
+    return `${formatDate(s, "MMM yyyy", { locale: es })} – ${formatDate(e, "MMM yyyy", { locale: es })}`;
+  })();
+
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
-          <p className="smallcaps text-muted-foreground">{eyebrow}</p>
+          <div className="mb-1">
+            {eyebrow ?? <BrandLogo variant="auto" className="h-5 w-auto" />}
+          </div>
           <h1 className="mt-1 font-display text-5xl">{title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             {description ?? (
@@ -470,16 +525,36 @@ export function CalendarBoard({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, -1))}>
+          <Button
+            variant="outline"
+            size="icon"
+            title={arrowLabels[effectiveView].prev}
+            aria-label={arrowLabels[effectiveView].prev}
+            onClick={() => setAnchor(stepAnchor(effectiveView, anchor, -1))}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>Hoy</Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor(stepAnchor(effectiveView, anchor, 1))}>
+          <Button
+            variant="outline"
+            size="icon"
+            title={arrowLabels[effectiveView].next}
+            aria-label={arrowLabels[effectiveView].next}
+            onClick={() => setAnchor(stepAnchor(effectiveView, anchor, 1))}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <span className="ml-3 font-display text-xl capitalize min-w-[14ch]">
-            {rangeLabel(effectiveView, range.start, range.end)}
+            {friendlyRangeLabel}
           </span>
+          {!todayInRange && (
+            <button
+              type="button"
+              onClick={() => setAnchor(new Date())}
+              className="ml-2 rounded-sm border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              Volver a hoy
+            </button>
+          )}
         </div>
       </div>
 
@@ -562,11 +637,11 @@ export function CalendarBoard({
       {loading ? (
         <p className="font-display text-muted-foreground">Cargando calendario…</p>
       ) : layout === "calendar" ? (
-        <CalendarMonthGrid anchor={anchor} events={flatEvents} />
+        <CalendarMonthGrid anchor={anchor} events={flatEvents} onMoveTask={onMoveTask} />
       ) : layout === "kanban" ? (
-        <CalendarKanban events={flatEvents} />
+        <CalendarKanban events={flatEvents} onMoveTask={onMoveTask} />
       ) : (
-        <TimelineCalendar rows={rows} start={range.start} end={range.end} ticks={range.ticks} />
+        <TimelineCalendar rows={rows} start={range.start} end={range.end} ticks={range.ticks} onMoveTask={onMoveTask} />
       )}
     </div>
   );

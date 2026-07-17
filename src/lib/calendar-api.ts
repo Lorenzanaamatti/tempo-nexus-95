@@ -136,6 +136,8 @@ export type TimelineEvent = {
   kind: AnyKind;
   title?: string;
   note?: string | null;
+  sourceKind?: string | null;
+  sourceActionId?: string | null;
 };
 
 export type TimelineRow = {

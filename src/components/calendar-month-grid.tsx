@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { addDays, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "@tanstack/react-router";
@@ -19,14 +19,18 @@ export type FlatCalendarEvent = {
   subjectGroup: string;
   to?: string;
   params?: Record<string, string>;
+  sourceKind?: string | null;
+  sourceActionId?: string | null;
 };
 
 export function CalendarMonthGrid({
   anchor,
   events,
+  onMoveTask,
 }: {
   anchor: Date;
   events: FlatCalendarEvent[];
+  onMoveTask?: (actionId: string, newDateIso: string) => void;
 }) {
   const monthStart = startOfMonth(anchor);
   const monthEnd = endOfMonth(anchor);
@@ -42,6 +46,8 @@ export function CalendarMonthGrid({
     [gridStart.getTime()],
   );
 
+  const [dragOverIso, setDragOverIso] = useState<string | null>(null);
+
   return (
     <div className="rounded-sm border border-border bg-card overflow-hidden">
       <div className="grid grid-cols-7 border-b border-border bg-muted/40">
@@ -56,12 +62,30 @@ export function CalendarMonthGrid({
           const dayEvents = events.filter((e) => day >= startOfDay(e.start) && day <= startOfDay(e.end));
           const inMonth = isSameMonth(day, monthStart);
           const isToday = isSameDay(day, new Date());
+          const dayIso = format(day, "yyyy-MM-dd");
+          const isDropTarget = dragOverIso === dayIso;
           return (
             <div
               key={day.toISOString()}
               className={`relative border-r border-b border-border/60 last:border-r-0 p-1.5 flex flex-col gap-1 ${
                 inMonth ? "bg-card" : "bg-muted/20 text-muted-foreground"
-              }`}
+              } ${isDropTarget ? "ring-2 ring-foreground/40 bg-foreground/[0.03]" : ""}`}
+              onDragOver={(e) => {
+                if (!onMoveTask) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (dragOverIso !== dayIso) setDragOverIso(dayIso);
+              }}
+              onDragLeave={() => {
+                if (dragOverIso === dayIso) setDragOverIso(null);
+              }}
+              onDrop={(e) => {
+                if (!onMoveTask) return;
+                e.preventDefault();
+                const actionId = e.dataTransfer.getData("text/x-action-id");
+                setDragOverIso(null);
+                if (actionId) onMoveTask(actionId, dayIso);
+              }}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -79,6 +103,7 @@ export function CalendarMonthGrid({
                 {dayEvents.slice(0, 3).map((e) => {
                   const cls = KIND_BAR_ALL[e.kind] ?? "bg-muted border-border text-foreground";
                   const label = e.title ?? ALL_LABELS[e.kind] ?? e.kind;
+                  const draggable = !!onMoveTask && e.sourceKind === "action" && !!e.sourceActionId;
                   const inner = (
                     <span className="truncate">
                       <span className="opacity-70 mr-1">{e.subjectLabel}</span>
@@ -89,7 +114,13 @@ export function CalendarMonthGrid({
                     <div
                       key={e.id}
                       title={`${e.subjectLabel} · ${label}\n${e.start.toLocaleDateString("es-ES")} → ${e.end.toLocaleDateString("es-ES")}${e.note ? "\n" + e.note : ""}`}
-                      className={`rounded-sm border px-1.5 py-[2px] text-[10px] leading-tight flex items-center ${cls}`}
+                      className={`rounded-sm border px-1.5 py-[2px] text-[10px] leading-tight flex items-center ${cls} ${draggable ? "cursor-grab active:cursor-grabbing" : ""}`}
+                      draggable={draggable}
+                      onDragStart={(ev) => {
+                        if (!draggable) return;
+                        ev.dataTransfer.effectAllowed = "move";
+                        ev.dataTransfer.setData("text/x-action-id", e.sourceActionId!);
+                      }}
                     >
                       {e.to ? (
                         <Link to={e.to} params={e.params as never} className="block w-full truncate hover:underline">

@@ -8,6 +8,7 @@ import { CalendarDays, Users, ListChecks } from "lucide-react";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView } from "@/lib/session-view";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
@@ -80,7 +81,7 @@ function Shell() {
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
-            <span className="smallcaps text-muted-foreground">Interesante Compañía</span>
+            <BrandLogo variant="auto" className="h-4 w-auto" />
             {role === "admin" && (
               <nav className="ml-4 flex items-center gap-1">
                 <Link
