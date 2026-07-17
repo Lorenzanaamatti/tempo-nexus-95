@@ -367,10 +367,20 @@ function SpanishFilmsPage() {
             </thead>
             <tbody>
               {data.map((f) => (
-                <tr key={f.id} className="border-b border-border/50 hover:bg-muted/20">
+                <tr
+                  key={f.id}
+                  onClick={() => setEditing(f)}
+                  className="cursor-pointer border-b border-border/50 hover:bg-muted/20"
+                >
                   <td className="px-3 py-2 font-mono text-xs">{f.year}</td>
                   <td className="px-3 py-2">
-                    <div className="font-medium">{f.title_es || f.title}</div>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setEditing(f); }}
+                      className="text-left font-medium text-primary underline-offset-2 hover:underline"
+                    >
+                      {f.title_es || f.title}
+                    </button>
                     {f.needs_review && (
                       <div className="mt-0.5 flex items-center gap-1 text-xs text-amber-600">
                         <AlertTriangle className="h-3 w-3" />
@@ -450,8 +460,12 @@ function SpanishFilmsPage() {
                     </Badge>
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(f)}>
-                      Editar
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); setEditing(f); }}
+                    >
+                      Abrir ficha
                     </Button>
                   </td>
                 </tr>
