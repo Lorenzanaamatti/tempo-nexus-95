@@ -1,4 +1,5 @@
-import wordmark from "@/assets/ic-wordmark.png.asset.json";
+import wordmarkLight from "@/assets/ic-wordmark.png.asset.json";
+import wordmarkDark from "@/assets/ic-wordmark-dark.png.asset.json";
 
 type Variant = "noir" | "clear" | "auto";
 
@@ -18,11 +19,20 @@ export function BrandLogo({
   alt?: string;
 }) {
   void variant;
+  const base = className ?? "";
   return (
-    <img
-      src={wordmark.url}
-      alt={alt}
-      className={`${className ?? ""} dark:invert`.trim()}
-    />
+    <>
+      <img
+        src={wordmarkLight.url}
+        alt={alt}
+        className={`${base} block dark:hidden`.trim()}
+      />
+      <img
+        src={wordmarkDark.url}
+        alt=""
+        aria-hidden="true"
+        className={`${base} hidden dark:block`.trim()}
+      />
+    </>
   );
 }
