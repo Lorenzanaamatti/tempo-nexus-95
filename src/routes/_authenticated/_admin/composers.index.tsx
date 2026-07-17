@@ -199,7 +199,7 @@ function ComposersIndex() {
                     <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
                     <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
                     <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
-                      {(c.tags ?? []).slice(0, 4).map((t: string) => (
+                      {(role === "specialist" ? (c.specialist_tags ?? c.tags ?? []) : (c.tags ?? [])).slice(0, 4).map((t: string) => (
                         <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
                       ))}
                     </div>
