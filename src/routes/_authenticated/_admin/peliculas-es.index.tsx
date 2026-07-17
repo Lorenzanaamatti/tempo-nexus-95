@@ -25,6 +25,15 @@ import {
 } from "@/components/ui/select";
 import { Download, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import {
   importSpanishFilmsByYear,
