@@ -182,11 +182,11 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                       <button
                         type="button"
                         onClick={() => openNewTask({ area: group.area })}
-                        className="rounded-sm p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                        className="rounded-sm p-1 text-primary transition hover:bg-primary/10"
                         title={`Nueva tarea en ${group.label}`}
                         aria-label={`Nueva tarea en ${group.label}`}
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-5 w-5" />
                       </button>
                     )}
                   </SidebarGroupLabel>
