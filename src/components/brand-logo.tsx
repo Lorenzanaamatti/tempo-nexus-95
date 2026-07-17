@@ -5,9 +5,7 @@ type Variant = "noir" | "clear" | "auto";
 
 /**
  * Interesante Compañía · logotipo oficial (wordmark).
- * En dark mode se invierte por CSS para mantener el contraste; el punto
- * naranja se conserva porque `invert` no altera la neutralidad del rojo puro
- * de forma perceptualmente disruptiva en este mark.
+ * "noir" para fondos claros, "clear" para fondos oscuros, "auto" sigue el tema.
  */
 export function BrandLogo({
   variant = "auto",
@@ -18,8 +16,16 @@ export function BrandLogo({
   className?: string;
   alt?: string;
 }) {
-  void variant;
   const base = className ?? "";
+
+  if (variant === "clear") {
+    return <img src={wordmarkDark.url} alt={alt} className={base} />;
+  }
+
+  if (variant === "noir") {
+    return <img src={wordmarkLight.url} alt={alt} className={base} />;
+  }
+
   return (
     <>
       <img
