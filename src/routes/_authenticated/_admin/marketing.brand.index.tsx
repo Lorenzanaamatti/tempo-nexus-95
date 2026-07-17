@@ -5,30 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Upload, Download, GripVertical } from "lucide-react";
+import { Plus, Trash2, Upload, Download, FileIcon } from "lucide-react";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/brand/")({
   component: BrandIndex,
 });
 
-type Section = { id: string; section: string; body_md: string | null; position: number; version: string | null };
 type Asset = { id: string; title: string; kind: string | null; storage_path: string | null; external_url: string | null; notes: string | null; position: number };
 type AssetFile = { id: string; asset_id: string; storage_path: string; filename: string | null; notes: string | null; position: number; created_at: string };
 
 function BrandIndex() {
   const qc = useQueryClient();
-
-  const sectionsQ = useQuery({
-    queryKey: ["brand-guidelines"],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any).from("brand_guidelines").select("*").order("position");
-      if (error) throw error;
-      return (data ?? []) as Section[];
-    },
-  });
 
   const assetsQ = useQuery({
     queryKey: ["brand-assets"],
@@ -38,15 +27,6 @@ function BrandIndex() {
       return (data ?? []) as Asset[];
     },
   });
-
-  async function addSection() {
-    const name = prompt("Título de la sección (p. ej. Logo, Tipografía, Tono de voz):");
-    if (!name?.trim()) return;
-    const max = (sectionsQ.data ?? []).reduce((m, s) => Math.max(m, s.position), -1);
-    const { error } = await (supabase as any).from("brand_guidelines").insert({ section: name.trim(), position: max + 1 });
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["brand-guidelines"] });
-  }
 
   async function addAsset() {
     const title = prompt("Nombre del recurso (p. ej. Logo SVG, Manual completo):");
@@ -67,22 +47,6 @@ function BrandIndex() {
         </p>
       </div>
 
-      <section className="mb-12">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl">Secciones</h2>
-          <Button size="sm" onClick={addSection}><Plus className="mr-1 h-4 w-4" /> Nueva sección</Button>
-        </div>
-        {!sectionsQ.data?.length ? (
-          <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            Aún no hay secciones del libro de estilo. Empieza por "Logo", "Color", "Tipografía", "Tono de voz"…
-          </p>
-        ) : (
-          <ul className="space-y-4">
-            {sectionsQ.data.map((s) => <SectionRow key={s.id} item={s} />)}
-          </ul>
-        )}
-      </section>
-
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-2xl">Recursos descargables</h2>
@@ -102,47 +66,26 @@ function BrandIndex() {
   );
 }
 
-function SectionRow({ item }: { item: Section }) {
-  const qc = useQueryClient();
-  const [s, setS] = useState(item);
-  const [saving, setSaving] = useState(false);
-  useEffect(() => setS(item), [item]);
+function isImagePath(p: string) {
+  return /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)$/i.test(p);
+}
 
-  async function save() {
-    setSaving(true);
-    const { error } = await (supabase as any).from("brand_guidelines").update({
-      section: s.section, body_md: s.body_md, version: s.version,
-    }).eq("id", s.id);
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Sección guardada");
-    qc.invalidateQueries({ queryKey: ["brand-guidelines"] });
+function FileThumb({ file }: { file: AssetFile }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const isImg = isImagePath(file.filename ?? file.storage_path);
+  useEffect(() => {
+    let cancelled = false;
+    if (!isImg) return;
+    signMarketingAsset(file.storage_path).then((u) => { if (!cancelled) setUrl(u); });
+    return () => { cancelled = true; };
+  }, [file.storage_path, isImg]);
+  if (isImg && url) {
+    return <img src={url} alt={file.filename ?? ""} className="h-full w-full object-cover" loading="lazy" />;
   }
-  async function remove() {
-    if (!confirm("¿Eliminar esta sección?")) return;
-    const { error } = await (supabase as any).from("brand_guidelines").delete().eq("id", s.id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["brand-guidelines"] });
-  }
-
   return (
-    <li className="glass-panel rounded-sm border border-border p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-        <Input value={s.section} onChange={(e) => setS({ ...s, section: e.target.value })} className="font-display text-lg" />
-        <Input value={s.version ?? ""} onChange={(e) => setS({ ...s, version: e.target.value || null })} placeholder="v" className="w-20" />
-      </div>
-      <Textarea
-        rows={5}
-        value={s.body_md ?? ""}
-        onChange={(e) => setS({ ...s, body_md: e.target.value || null })}
-        placeholder="Contenido en markdown: principios, normas, ejemplos correctos e incorrectos…"
-      />
-      <div className="mt-3 flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive"><Trash2 className="mr-1 h-3 w-3" /> Eliminar</Button>
-        <Button size="sm" onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
-      </div>
-    </li>
+    <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+      <FileIcon className="h-6 w-6" />
+    </div>
   );
 }
 
@@ -223,12 +166,28 @@ function AssetRow({ item }: { item: Asset }) {
       <Input value={a.external_url ?? ""} onChange={(e) => setA({ ...a, external_url: e.target.value || null })} placeholder="URL externa (opcional)" className="mb-2 text-sm" />
       <Textarea rows={2} value={a.notes ?? ""} onChange={(e) => setA({ ...a, notes: e.target.value || null })} placeholder="Notas de uso" />
       {(filesQ.data?.length ?? 0) > 0 && (
-        <ul className="mt-3 divide-y divide-border rounded-sm border border-border">
+        <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {filesQ.data!.map((f) => (
-            <li key={f.id} className="flex items-center gap-2 px-2 py-1.5 text-xs">
-              <span className="flex-1 truncate" title={f.filename ?? f.storage_path}>{f.filename ?? f.storage_path.split("/").pop()}</span>
-              <Button size="sm" variant="ghost" onClick={() => downloadFile(f.storage_path)}><Download className="h-3 w-3" /></Button>
-              <Button size="sm" variant="ghost" onClick={() => removeFile(f)} className="text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
+            <li key={f.id} className="group relative overflow-hidden rounded-sm border border-border">
+              <button
+                type="button"
+                onClick={() => downloadFile(f.storage_path)}
+                className="block aspect-square w-full"
+                title={f.filename ?? f.storage_path}
+              >
+                <FileThumb file={f} />
+              </button>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-background/80 px-1 py-0.5 text-[10px]">
+                {f.filename ?? f.storage_path.split("/").pop()}
+              </div>
+              <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => downloadFile(f.storage_path)}>
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button size="icon" variant="secondary" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => removeFile(f)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
