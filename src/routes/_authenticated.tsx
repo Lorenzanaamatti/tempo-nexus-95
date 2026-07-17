@@ -8,6 +8,7 @@ import { CalendarDays, Users, ListChecks } from "lucide-react";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView } from "@/lib/session-view";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
