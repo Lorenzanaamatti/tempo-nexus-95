@@ -29,7 +29,7 @@ const TIER_HINT: Record<Tier, string> = {
   desarrollo: "Sin tier asignado todavía.",
 };
 const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: string }> = {
-  composer:   { title: "Compositores",         singular: "compositor",         intro: "Catálogo interno del equipo de Interesante Compañía." },
+  composer:   { title: "Compositores",         singular: "compositor",         intro: "Nuestro equipo de compositores y compositoras INTERESANTES para cine, televisión, publicidad, videojuegos, teatro, danza y whatnot." },
   artist:     { title: "Artistas",             singular: "artista",            intro: "Artistas representados por Interesante Compañía." },
   supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Supervisores musicales del roster." },
   specialist: { title: "Especialistas",        singular: "especialista",       intro: "Especialistas que colaboran con la compañía." },
