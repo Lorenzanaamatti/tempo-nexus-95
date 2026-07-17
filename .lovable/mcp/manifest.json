@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ervxcvembhbpydgugety.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "interesante-compania-mcp",
+      "version": "0.1.0",
+      "title": "Interesante Compañía"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Quién soy",
+        "description": "Devuelve el id, email y rol (BIG C / TEAM / ROSTER) del usuario autenticado que llama al servidor MCP.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_roster",
+        "title": "Buscar en el roster",
+        "description": "Busca personas del roster (compositores, artistas, supervisores, especialistas) por nombre. Devuelve id, nombre, rol y email.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nombre o parte del nombre a buscar."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_deal_memos",
+        "title": "Listar deal memos recientes",
+        "description": "Devuelve los deal memos más recientes (referencia, obra, importe propuesto, estado). Respeta los permisos del usuario autenticado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "estado": {
+              "type": "string",
+              "description": "Filtrar por estado, ej: borrador, enviado, firmado."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_calendar_events",
+        "title": "Listar eventos de calendario",
+        "description": "Devuelve eventos de calendario dentro de un rango de fechas. Respeta los permisos del usuario autenticado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "description": "Fecha inicio YYYY-MM-DD."
+            },
+            "to": {
+              "type": "string",
+              "description": "Fecha fin YYYY-MM-DD."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
