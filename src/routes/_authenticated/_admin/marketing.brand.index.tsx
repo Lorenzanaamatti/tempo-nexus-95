@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2, Upload, Download, FileIcon } from "lucide-react";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
+import { LayoutGrid, List as ListIcon, FolderOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/brand/")({
   component: BrandIndex,
@@ -15,9 +17,13 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/brand/")(
 
 type Asset = { id: string; title: string; kind: string | null; storage_path: string | null; external_url: string | null; notes: string | null; position: number };
 type AssetFile = { id: string; asset_id: string; storage_path: string; filename: string | null; notes: string | null; position: number; created_at: string };
+type AllFile = AssetFile & { asset_title?: string | null; asset_kind?: string | null };
+type ViewMode = "collections" | "grid" | "list";
 
 function BrandIndex() {
   const qc = useQueryClient();
+  const [view, setView] = useState<ViewMode>("collections");
+  const [query, setQuery] = useState("");
 
   const assetsQ = useQuery({
     queryKey: ["brand-assets"],
@@ -26,6 +32,33 @@ function BrandIndex() {
       if (error) throw error;
       return (data ?? []) as Asset[];
     },
+  });
+
+  const allFilesQ = useQuery({
+    queryKey: ["brand-asset-files-all"],
+    enabled: view !== "collections",
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("brand_asset_files")
+        .select("*, brand_assets!inner(title, kind)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return ((data ?? []) as any[]).map((r) => ({
+        ...r,
+        asset_title: r.brand_assets?.title ?? null,
+        asset_kind: r.brand_assets?.kind ?? null,
+      })) as AllFile[];
+    },
+  });
+
+  const filteredFiles = (allFilesQ.data ?? []).filter((f) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (
+      (f.filename ?? "").toLowerCase().includes(q) ||
+      (f.asset_title ?? "").toLowerCase().includes(q) ||
+      (f.asset_kind ?? "").toLowerCase().includes(q)
+    );
   });
 
   async function addAsset() {
@@ -50,9 +83,28 @@ function BrandIndex() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-2xl">Recursos descargables</h2>
-          <Button size="sm" onClick={addAsset}><Plus className="mr-1 h-4 w-4" /> Nuevo recurso</Button>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex overflow-hidden rounded-sm border border-border">
+              <ViewBtn active={view === "collections"} onClick={() => setView("collections")} icon={<FolderOpen className="h-3.5 w-3.5" />} label="Colecciones" />
+              <ViewBtn active={view === "grid"} onClick={() => setView("grid")} icon={<LayoutGrid className="h-3.5 w-3.5" />} label="Cuadrícula" />
+              <ViewBtn active={view === "list"} onClick={() => setView("list")} icon={<ListIcon className="h-3.5 w-3.5" />} label="Lista" />
+            </div>
+            <Button size="sm" onClick={addAsset}><Plus className="mr-1 h-4 w-4" /> Nuevo recurso</Button>
+          </div>
         </div>
-        {!assetsQ.data?.length ? (
+        {view !== "collections" && (
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar archivo, colección o tipo…"
+              className="h-8 max-w-sm text-sm"
+            />
+            <span className="text-xs text-muted-foreground">{filteredFiles.length} archivo(s)</span>
+          </div>
+        )}
+        {view === "collections" ? (
+          !assetsQ.data?.length ? (
           <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Sube logos, paletas, tipografías y el manual completo para que el equipo y los partners los descarguen.
           </p>
@@ -60,9 +112,109 @@ function BrandIndex() {
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {assetsQ.data.map((a) => <AssetRow key={a.id} item={a} />)}
           </ul>
+          )
+        ) : view === "grid" ? (
+          <FilesGrid files={filteredFiles} onChanged={() => qc.invalidateQueries({ queryKey: ["brand-asset-files-all"] })} />
+        ) : (
+          <FilesList files={filteredFiles} onChanged={() => qc.invalidateQueries({ queryKey: ["brand-asset-files-all"] })} />
         )}
       </section>
     </div>
+  );
+}
+
+function ViewBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1 px-2.5 py-1 text-xs transition-colors",
+        active ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+async function openFile(path: string) {
+  const url = await signMarketingAsset(path);
+  if (url) window.open(url, "_blank");
+}
+
+async function deleteFileRow(f: AllFile) {
+  if (!confirm(`¿Eliminar "${f.filename ?? "archivo"}"?`)) return false;
+  await deleteMarketingAsset(f.storage_path).catch(() => {});
+  const { error } = await (supabase as any).from("brand_asset_files").delete().eq("id", f.id);
+  if (error) { toast.error(error.message); return false; }
+  return true;
+}
+
+function FilesGrid({ files, onChanged }: { files: AllFile[]; onChanged: () => void }) {
+  if (!files.length) {
+    return <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No hay archivos.</p>;
+  }
+  return (
+    <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+      {files.map((f) => (
+        <li key={f.id} className="group relative overflow-hidden rounded-sm border border-border bg-card/50">
+          <button
+            type="button"
+            onClick={() => openFile(f.storage_path)}
+            className="block aspect-square w-full"
+            title={`${f.asset_title ?? ""} · ${f.filename ?? ""}`}
+          >
+            <FileThumb file={f} />
+          </button>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-background/85 px-1 py-0.5">
+            <div className="truncate text-[10px]">{f.filename ?? f.storage_path.split("/").pop()}</div>
+            {f.asset_title && <div className="truncate text-[9px] text-muted-foreground">{f.asset_title}</div>}
+          </div>
+          <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => openFile(f.storage_path)}>
+              <Download className="h-3 w-3" />
+            </Button>
+            <Button size="icon" variant="secondary" className="h-6 w-6 text-destructive hover:text-destructive" onClick={async () => { if (await deleteFileRow(f)) onChanged(); }}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function FilesList({ files, onChanged }: { files: AllFile[]; onChanged: () => void }) {
+  if (!files.length) {
+    return <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No hay archivos.</p>;
+  }
+  return (
+    <ul className="divide-y divide-border rounded-sm border border-border">
+      {files.map((f) => (
+        <li key={f.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-sm border border-border">
+            <FileThumb file={f} />
+          </div>
+          <button type="button" onClick={() => openFile(f.storage_path)} className="min-w-0 flex-1 text-left">
+            <div className="truncate text-sm">{f.filename ?? f.storage_path.split("/").pop()}</div>
+            <div className="truncate text-xs text-muted-foreground">
+              {f.asset_title ?? "—"}{f.asset_kind ? ` · ${f.asset_kind}` : ""}
+            </div>
+          </button>
+          <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
+            {new Date(f.created_at).toLocaleDateString()}
+          </span>
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openFile(f.storage_path)}>
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={async () => { if (await deleteFileRow(f)) onChanged(); }}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
