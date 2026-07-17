@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/brand/")(
 
 type Section = { id: string; section: string; body_md: string | null; position: number; version: string | null };
 type Asset = { id: string; title: string; kind: string | null; storage_path: string | null; external_url: string | null; notes: string | null; position: number };
+type AssetFile = { id: string; asset_id: string; storage_path: string; filename: string | null; notes: string | null; position: number; created_at: string };
 
 function BrandIndex() {
   const qc = useQueryClient();
@@ -60,7 +61,7 @@ function BrandIndex() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-8 border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Marketing y Ventas</p>
-        <h1 className="mt-1 font-display text-5xl">Libro de estilo</h1>
+        <h1 className="mt-1 font-display text-5xl">Identidad corporativa</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Identidad visual, tono de voz y recursos descargables de Interesante Compañía. La fuente única de verdad para cualquier comunicación.
         </p>
