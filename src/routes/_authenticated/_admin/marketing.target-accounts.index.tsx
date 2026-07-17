@@ -22,6 +22,12 @@ import {
   TARGET_ACCOUNT_PRIORITY_TONE,
   type TargetAccountStatus,
   type TargetAccountPriority,
+  TARGET_ACCOUNT_TYPES,
+  TARGET_ACCOUNT_TYPE_LABEL,
+  TARGET_ACCOUNT_TYPE_TONE,
+  TARGET_ACCOUNT_ROSTER_KIND_LABEL,
+  type TargetAccountType,
+  type TargetAccountRosterKind,
 } from "@/lib/target-accounts-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/target-accounts/")({
@@ -34,6 +40,7 @@ function TargetAccountsIndex() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -43,7 +50,7 @@ function TargetAccountsIndex() {
       const { data, error } = await (supabase as any)
         .from("target_accounts")
         .select(
-          "id, name, status, priority, next_step, next_step_date, last_contact_date, decks_sent, sector, website, production_company:production_companies(name), responsible:people!target_accounts_responsible_person_id_fkey(full_name)",
+          "id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, production_company:production_companies(name), responsible:people!target_accounts_responsible_person_id_fkey(full_name)",
         )
         .order("priority", { ascending: true })
         .order("next_step_date", { ascending: true, nullsFirst: false });
@@ -51,7 +58,7 @@ function TargetAccountsIndex() {
         // FK alias may not exist; fall back to a simpler select
         const fb = await (supabase as any)
           .from("target_accounts")
-          .select("id, name, status, priority, next_step, next_step_date, last_contact_date, decks_sent, sector, website, responsible_person_id, production_company_id")
+          .select("id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, responsible_person_id, production_company_id")
           .order("priority", { ascending: true });
         if (fb.error) throw fb.error;
         return fb.data ?? [];
@@ -60,18 +67,47 @@ function TargetAccountsIndex() {
     },
   });
 
-  const filtered = useMemo(() => {
+  const searched = useMemo(() => {
     const list = (data ?? []) as any[];
+    if (!q.trim()) return list;
+    const needle = q.trim().toLowerCase();
     return list.filter((a) => {
+      const hay = [a.name, a.sector, a.next_step, a.production_company?.name, a.other_label]
+        .filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [data, q]);
+
+  const typeCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const t of TARGET_ACCOUNT_TYPES) map.set(t, 0);
+    for (const a of searched) {
+      // count over search + status filter (so counts reflect current view minus the type facet)
+      if (statusFilter !== "all" && a.status !== statusFilter) continue;
+      const t = (a.account_type ?? "productora") as string;
+      map.set(t, (map.get(t) ?? 0) + 1);
+    }
+    return map;
+  }, [searched, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    const map = new Map<TargetAccountStatus, number>();
+    for (const s of TARGET_ACCOUNT_STATUSES) map.set(s, 0);
+    for (const a of searched) {
+      if (typeFilter !== "all" && (a.account_type ?? "productora") !== typeFilter) continue;
+      const s = a.status as TargetAccountStatus;
+      if (map.has(s)) map.set(s, (map.get(s) ?? 0) + 1);
+    }
+    return map;
+  }, [searched, typeFilter]);
+
+  const filtered = useMemo(() => {
+    return searched.filter((a) => {
       if (statusFilter !== "all" && a.status !== statusFilter) return false;
-      if (q.trim()) {
-        const needle = q.trim().toLowerCase();
-        const hay = [a.name, a.sector, a.next_step, a.production_company?.name].filter(Boolean).join(" ").toLowerCase();
-        if (!hay.includes(needle)) return false;
-      }
+      if (typeFilter !== "all" && (a.account_type ?? "productora") !== typeFilter) return false;
       return true;
     });
-  }, [data, q, statusFilter]);
+  }, [searched, statusFilter, typeFilter]);
 
   const buckets = useMemo(() => {
     const map = new Map<TargetAccountStatus, any[]>();
@@ -129,6 +165,17 @@ function TargetAccountsIndex() {
             placeholder="Buscar por nombre, sector, próximo paso…"
             className="w-72 rounded-sm"
           />
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-44 rounded-sm">
+              <SelectValue placeholder="Tipología" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las tipologías</SelectItem>
+              {TARGET_ACCOUNT_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>{TARGET_ACCOUNT_TYPE_LABEL[t]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-52 rounded-sm">
               <SelectValue placeholder="Estado" />
@@ -141,6 +188,48 @@ function TargetAccountsIndex() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="smallcaps mr-1 text-xs text-muted-foreground">Tipología</span>
+        <button
+          type="button"
+          onClick={() => setTypeFilter("all")}
+          className={`rounded-sm border px-2.5 py-1 text-xs transition ${typeFilter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border bg-card/40 hover:border-primary/60"}`}
+        >
+          Todas <span className="ml-1 text-muted-foreground">{searched.length}</span>
+        </button>
+        {TARGET_ACCOUNT_TYPES.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTypeFilter(typeFilter === t ? "all" : t)}
+            className={`rounded-sm border px-2.5 py-1 text-xs transition ${typeFilter === t ? "border-primary bg-primary/10 text-primary" : `${TARGET_ACCOUNT_TYPE_TONE[t]} hover:border-primary/60`}`}
+          >
+            {TARGET_ACCOUNT_TYPE_LABEL[t]} <span className="ml-1 opacity-70">{typeCounts.get(t) ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <span className="smallcaps mr-1 text-xs text-muted-foreground">Estado</span>
+        <button
+          type="button"
+          onClick={() => setStatusFilter("all")}
+          className={`rounded-sm border px-2.5 py-1 text-xs transition ${statusFilter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border bg-card/40 hover:border-primary/60"}`}
+        >
+          Todos <span className="ml-1 text-muted-foreground">{searched.length}</span>
+        </button>
+        {TARGET_ACCOUNT_STATUSES.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(statusFilter === s ? "all" : s)}
+            className={`rounded-sm border px-2.5 py-1 text-xs transition ${statusFilter === s ? "border-primary bg-primary/10 text-primary" : `${TARGET_ACCOUNT_STATUS_TONE[s]} hover:border-primary/60`}`}
+          >
+            {TARGET_ACCOUNT_STATUS_LABEL[s]} <span className="ml-1 opacity-70">{statusCounts.get(s) ?? 0}</span>
+          </button>
+        ))}
       </div>
 
       {isLoading ? (
@@ -181,6 +270,17 @@ function TargetAccountsIndex() {
                             </div>
                             <Badge variant="outline" className={`shrink-0 rounded-sm text-[10px] ${TARGET_ACCOUNT_PRIORITY_TONE[a.priority as TargetAccountPriority]}`}>
                               {TARGET_ACCOUNT_PRIORITY_LABEL[a.priority as TargetAccountPriority]}
+                            </Badge>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            <Badge variant="outline" className={`rounded-sm text-[10px] ${TARGET_ACCOUNT_TYPE_TONE[(a.account_type ?? "productora") as TargetAccountType]}`}>
+                              {TARGET_ACCOUNT_TYPE_LABEL[(a.account_type ?? "productora") as TargetAccountType]}
+                              {a.account_type === "roster" && a.roster_kind && (
+                                <span className="ml-1 opacity-80">· {TARGET_ACCOUNT_ROSTER_KIND_LABEL[a.roster_kind as TargetAccountRosterKind]}</span>
+                              )}
+                              {a.account_type === "otros" && a.other_label && (
+                                <span className="ml-1 opacity-80">· {a.other_label}</span>
+                              )}
                             </Badge>
                           </div>
                           {a.next_step && (

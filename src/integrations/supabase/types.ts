@@ -3633,6 +3633,7 @@ export type Database = {
       }
       target_accounts: {
         Row: {
+          account_type: string
           created_at: string
           decks_sent: number
           id: string
@@ -3641,15 +3642,18 @@ export type Database = {
           next_step: string | null
           next_step_date: string | null
           notes: string | null
+          other_label: string | null
           priority: Database["public"]["Enums"]["target_account_priority"]
           production_company_id: string | null
           responsible_person_id: string | null
+          roster_kind: string | null
           sector: string | null
           status: Database["public"]["Enums"]["target_account_status"]
           updated_at: string
           website: string | null
         }
         Insert: {
+          account_type?: string
           created_at?: string
           decks_sent?: number
           id?: string
@@ -3658,15 +3662,18 @@ export type Database = {
           next_step?: string | null
           next_step_date?: string | null
           notes?: string | null
+          other_label?: string | null
           priority?: Database["public"]["Enums"]["target_account_priority"]
           production_company_id?: string | null
           responsible_person_id?: string | null
+          roster_kind?: string | null
           sector?: string | null
           status?: Database["public"]["Enums"]["target_account_status"]
           updated_at?: string
           website?: string | null
         }
         Update: {
+          account_type?: string
           created_at?: string
           decks_sent?: number
           id?: string
@@ -3675,9 +3682,11 @@ export type Database = {
           next_step?: string | null
           next_step_date?: string | null
           notes?: string | null
+          other_label?: string | null
           priority?: Database["public"]["Enums"]["target_account_priority"]
           production_company_id?: string | null
           responsible_person_id?: string | null
+          roster_kind?: string | null
           sector?: string | null
           status?: Database["public"]["Enums"]["target_account_status"]
           updated_at?: string
