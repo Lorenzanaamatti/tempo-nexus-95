@@ -87,8 +87,8 @@ function ComposersIndex() {
       const parts = (name ?? "").trim().split(/\s+/);
       return (parts[parts.length - 1] ?? "").toLocaleLowerCase("es");
     };
-    const map = new Map<Tier, typeof data>();
-    for (const c of data ?? []) {
+    const map = new Map<Tier, typeof filtered>();
+    for (const c of filtered) {
       const t = (TIER_ORDER.includes(c.tier as Tier) ? (c.tier as Tier) : "desarrollo") as Tier;
       if (!map.has(t)) map.set(t, [] as never);
       (map.get(t) as any[]).push(c);
