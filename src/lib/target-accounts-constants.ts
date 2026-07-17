@@ -44,3 +44,40 @@ export const TARGET_ACCOUNT_PRIORITY_TONE: Record<TargetAccountPriority, string>
   media: "bg-secondary text-secondary-foreground border-border",
   baja: "bg-muted text-muted-foreground border-border",
 };
+
+export const TARGET_ACCOUNT_TYPES = [
+  "roster",
+  "productora",
+  "plataforma",
+  "otros",
+] as const;
+export type TargetAccountType = (typeof TARGET_ACCOUNT_TYPES)[number];
+
+export const TARGET_ACCOUNT_TYPE_LABEL: Record<TargetAccountType, string> = {
+  roster: "Roster",
+  productora: "Productora",
+  plataforma: "Plataforma",
+  otros: "Otros",
+};
+
+export const TARGET_ACCOUNT_TYPE_TONE: Record<TargetAccountType, string> = {
+  roster: "bg-primary/15 text-primary border-primary/40",
+  productora: "bg-secondary text-secondary-foreground border-border",
+  plataforma: "bg-accent text-accent-foreground border-border",
+  otros: "bg-muted text-muted-foreground border-border",
+};
+
+export const TARGET_ACCOUNT_ROSTER_KINDS = [
+  "composer",
+  "artista",
+  "productor_musical",
+  "otros",
+] as const;
+export type TargetAccountRosterKind = (typeof TARGET_ACCOUNT_ROSTER_KINDS)[number];
+
+export const TARGET_ACCOUNT_ROSTER_KIND_LABEL: Record<TargetAccountRosterKind, string> = {
+  composer: "Compositor/a",
+  artista: "Artista",
+  productor_musical: "Productor/a musical",
+  otros: "Otros",
+};
