@@ -109,6 +109,28 @@ function ComposersIndex() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl">{meta.title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
+          {role === "specialist" && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Filtrar por:</span>
+              {SPECIALIST_HASHTAGS.map((tag) => {
+                const active = specialistHashtag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSpecialistHashtag(active ? null : tag)}
+                    className={`rounded-full border px-3 py-1 text-xs font-mono transition ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary/60 hover:text-primary"
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <Input
