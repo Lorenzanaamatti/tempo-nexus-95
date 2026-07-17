@@ -225,7 +225,7 @@ async function addToRoster(
 function CrmAddMenu({
   actions,
 }: {
-  actions: Array<{ label: string; onSelect: () => void | Promise<void> }>;
+  actions: Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
 }) {
   return (
     <DropdownMenu>
@@ -1002,7 +1002,7 @@ function EntityListEditor({
   crmActionsFor?: (
     item: { name: string; id: string | null },
     setId: (id: string | null) => void,
-  ) => Array<{ label: string; onSelect: () => void | Promise<void> }>;
+  ) => Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
 }) {
   function normalize(s: string) {
     return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
