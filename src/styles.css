@@ -71,7 +71,7 @@
   --card-foreground: oklch(0.20 0.012 60);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.20 0.012 60);
-  --primary: oklch(0.42 0.13 22);
+  --primary: oklch(0.643 0.243 30.5);
   --primary-foreground: oklch(0.985 0.004 75);
   --secondary: oklch(0.94 0.005 70);
   --secondary-foreground: oklch(0.22 0.010 60);
@@ -79,7 +79,7 @@
   /* WCAG AA: contrast ratio ≥ 4.5 on paper bg (0.985) y ≥ 4.5 sobre muted (0.94). */
   --muted-foreground: oklch(0.38 0.012 60);
   --accent: oklch(0.945 0.020 30);
-  --accent-foreground: oklch(0.38 0.13 22);
+  --accent-foreground: oklch(0.643 0.243 30.5);
   --destructive: oklch(0.52 0.18 25);
   --destructive-foreground: oklch(0.985 0.004 75);
   --success: oklch(0.52 0.10 155);
@@ -88,8 +88,8 @@
   --warning-foreground: oklch(0.20 0.012 60);
   --border: oklch(0.88 0.006 70);
   --input: oklch(0.90 0.005 70);
-  --ring: oklch(0.42 0.13 22);
-  --chart-1: oklch(0.42 0.13 22);
+  --ring: oklch(0.643 0.243 30.5);
+  --chart-1: oklch(0.643 0.243 30.5);
   --chart-2: oklch(0.55 0.07 200);
   --chart-3: oklch(0.68 0.10 75);
   --chart-4: oklch(0.50 0.06 145);
@@ -102,7 +102,7 @@
   --sidebar-accent: oklch(0.26 0.012 60);
   --sidebar-accent-foreground: oklch(0.97 0.005 75);
   --sidebar-border: oklch(0.28 0.010 60);
-  --sidebar-ring: oklch(0.62 0.14 25);
+  --sidebar-ring: oklch(0.643 0.243 30.5);
   /* Coral accent (used by portal noir surfaces and selective brand moments) */
   --accent-coral: oklch(0.68 0.18 30);
   --accent-coral-soft: oklch(0.72 0.14 30);
