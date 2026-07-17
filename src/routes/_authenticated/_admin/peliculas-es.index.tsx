@@ -891,12 +891,17 @@ function EntityListEditor({
   onChange,
   roster,
   placeholder,
+  crmActionsFor,
 }: {
   title: string;
   items: Array<{ name: string; id: string | null }>;
   onChange: (next: Array<{ name: string; id: string | null }>) => void;
   roster: Array<{ id: string; label: string }>;
   placeholder: string;
+  crmActionsFor?: (
+    item: { name: string; id: string | null },
+    setId: (id: string | null) => void,
+  ) => Array<{ label: string; onSelect: () => void | Promise<void> }>;
 }) {
   function normalize(s: string) {
     return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -974,6 +979,15 @@ function EntityListEditor({
                   >
                     ✕
                   </Button>
+                  {crmActionsFor && it.name.trim() && (
+                    <CrmAddMenu
+                      actions={crmActionsFor(it, (id) => {
+                        const next = [...items];
+                        next[idx] = { ...next[idx], id };
+                        onChange(next);
+                      })}
+                    />
+                  )}
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-xs">
                   {it.id ? (
