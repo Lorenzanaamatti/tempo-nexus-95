@@ -63,7 +63,7 @@ function ComposersIndex() {
     queryFn: async () => {
       let query = supabase
         .from("composers")
-        .select("id, full_name, city, country, availability, tags, photo_path, roster_role, tier")
+        .select("id, full_name, city, country, availability, tags, specialist_tags, specialist_subtype, photo_path, roster_role, tier")
         .eq("roster_role", role)
         .order("full_name", { ascending: true });
       if (q.trim()) {
