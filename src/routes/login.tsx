@@ -9,29 +9,39 @@ import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+function safeNext(n: unknown): string {
+  return typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? n : "/";
+}
+
+export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({ next: typeof s.next === "string" ? s.next : undefined }),
+  component: LoginPage,
+});
 
 function LoginPage() {
   const { user } = useAuth();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) window.location.replace("/");
-  }, [user]);
+    if (user) window.location.replace(target);
+  }, [user, target]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const emailRedirectTo = window.location.origin + target;
     const { error } =
       mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: window.location.origin },
+            options: { emailRedirectTo },
           });
     setLoading(false);
     if (error) toast.error(error.message);
@@ -39,7 +49,9 @@ function LoginPage() {
   };
 
   const onGoogle = async () => {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const r = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + target,
+    });
     if (r.error) toast.error("No se pudo iniciar sesión con Google");
   };
 
