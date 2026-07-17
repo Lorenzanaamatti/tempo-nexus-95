@@ -321,6 +321,64 @@ function ComposersIndex() {
   );
 }
 
+function SpecialistCard({ c, role }: { c: any; role: RosterRole }) {
+  const tags: string[] = (() => {
+    const set = new Set<string>();
+    for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    if (role === "specialist") {
+      for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    }
+    return [...set];
+  })();
+  return (
+    <Link
+      to="/composers/$composerId"
+      params={{ composerId: c.id }}
+      className="group block h-full"
+    >
+      <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition group-hover:border-primary/60">
+        <ComposerThumb
+          path={c.photo_path as string | null}
+          alt={c.full_name}
+          className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
+          imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          fallback={
+            <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
+              {c.full_name?.[0] ?? "·"}
+            </div>
+          }
+        />
+        <div className="flex flex-1 flex-col p-5">
+          {role === "specialist" && tags.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {tags.slice(0, 6).map((t) => (
+                <span
+                  key={t}
+                  className="rounded-sm bg-primary/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-primary"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
+          <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
+          <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+          {role !== "specialist" && (
+            <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
+              {tags.slice(0, 4).map((t) => (
+                <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
+              ))}
+            </div>
+          )}
+          <p className="mt-auto pt-4 smallcaps text-muted-foreground">
+            {c.availability === "available" ? "Disponible" : c.availability === "partial" ? "Parcial" : "No disponible"}
+          </p>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
 function composerExportFields(): ExportField<any>[] {
   return [
     { key: "full_name", label: "Nombre completo", get: (r) => r.full_name },
