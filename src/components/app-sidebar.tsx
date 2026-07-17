@@ -158,16 +158,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-5">
-        <Link to="/" className="flex items-center gap-3">
-          <BrandLogo
-            variant="noir"
-            className={collapsed ? "h-10 w-10 object-contain" : "h-14 w-14 object-contain"}
-          />
-          {!collapsed && (
-            <div className="flex flex-col leading-tight">
-              <span className="font-display text-xl text-sidebar-foreground">Interesante</span>
-              <span className="smallcaps text-sidebar-foreground/60">Compañía</span>
+        <Link to="/" className="flex items-center justify-center" aria-label="Interesante Compañía">
+          {collapsed ? (
+            // Collapsed rail: show a compact "int." mark cropped from the wordmark.
+            <div className="h-9 w-9 overflow-hidden">
+              <BrandLogo className="h-9 w-auto max-w-none object-cover object-left" />
             </div>
+          ) : (
+            <BrandLogo className="h-8 w-auto object-contain" />
           )}
         </Link>
       </SidebarHeader>
