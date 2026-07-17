@@ -25,6 +25,15 @@ import {
 } from "@/components/ui/select";
 import { Download, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import {
   importSpanishFilmsByYear,
@@ -71,6 +80,177 @@ type RosterPerson = { id: string; full_name: string; role: string };
 function normalizeName(s: string | null | undefined): string {
   if (!s) return "";
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function slugify(s: string) {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || `roster-${Date.now()}`;
+}
+
+async function addToTargetAccounts(params: {
+  name: string;
+  account_type: "roster" | "productora" | "plataforma" | "otros";
+  roster_kind?: "composer" | "artista" | "productor_musical" | "otros" | null;
+  production_company_id?: string | null;
+}) {
+  const name = params.name.trim();
+  if (!name) return toast.error("Nombre vacío");
+  const { data: existing } = await supabase
+    .from("target_accounts")
+    .select("id")
+    .ilike("name", name)
+    .eq("account_type", params.account_type)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${name}" ya está en Cuentas Objetivo`);
+    return;
+  }
+  const { error } = await supabase.from("target_accounts").insert({
+    name,
+    account_type: params.account_type,
+    roster_kind: params.roster_kind ?? null,
+    production_company_id: params.production_company_id ?? null,
+  } as any);
+  if (error) return toast.error(error.message);
+  toast.success(`Añadido a Cuentas Objetivo: ${name}`);
+}
+
+async function addDirectorToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("directors")
+    .select("id")
+    .ilike("full_name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Directores`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("directors")
+    .insert({ full_name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Directores CRM: ${n}`);
+  return data.id;
+}
+
+async function addCompanyToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("production_companies")
+    .select("id")
+    .ilike("name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Productoras`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("production_companies")
+    .insert({ name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Productoras CRM: ${n}`);
+  return data.id;
+}
+
+async function addPlatformToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("platforms")
+    .select("id")
+    .ilike("name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Plataformas`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("platforms")
+    .insert({ name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Plataformas CRM: ${n}`);
+  return data.id;
+}
+
+async function addToRoster(
+  name: string,
+  roster_role: "composer" | "supervisor",
+) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("composers")
+    .select("id")
+    .ilike("full_name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Roster`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("composers")
+    .insert({ full_name: n, slug: slugify(n), roster_role } as any)
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Añadido al Roster: ${n}`);
+  return data.id;
+}
+
+function CrmAddMenu({
+  actions,
+}: {
+  actions: Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-8 px-2"
+          title="Añadir a CRM / Cuentas Objetivo"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel>Añadir a…</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {actions.map((a, i) => (
+          <DropdownMenuItem key={i} onSelect={() => void a.onSelect()}>
+            {a.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 function renderComposerLink(name: string | null, byName: Map<string, string>) {
@@ -582,6 +762,20 @@ function EditDialog({
             onChange={setDirectors}
             roster={rosterDirectors.map((d) => ({ id: d.id, label: d.full_name }))}
             placeholder="Nombre del director"
+            crmActionsFor={(it, setId) => [
+              {
+                label: it.id ? "Ya en Directores CRM" : "→ Crear en Directores CRM",
+                onSelect: async () => {
+                  const id = await addDirectorToCrm(it.name);
+                  if (id) setId(id);
+                },
+              },
+              {
+                label: "→ Añadir a Cuentas Objetivo (otros)",
+                onSelect: () =>
+                  addToTargetAccounts({ name: it.name, account_type: "otros" }),
+              },
+            ]}
           />
           <EntityListEditor
             title="Productoras"
@@ -589,10 +783,51 @@ function EditDialog({
             onChange={setCompanies}
             roster={rosterCompanies.map((c) => ({ id: c.id, label: c.name }))}
             placeholder="Nombre de la productora"
+            crmActionsFor={(it, setId) => [
+              {
+                label: it.id ? "Ya en Productoras CRM" : "→ Crear en Productoras CRM",
+                onSelect: async () => {
+                  const id = await addCompanyToCrm(it.name);
+                  if (id) setId(id);
+                },
+              },
+              {
+                label: "→ Añadir a Cuentas Objetivo (productora)",
+                onSelect: () =>
+                  addToTargetAccounts({
+                    name: it.name,
+                    account_type: "productora",
+                    production_company_id: it.id,
+                  }),
+              },
+            ]}
           />
           <div className="space-y-1.5">
             <Label>Compositor BSO</Label>
-            <Input value={composer} onChange={(e) => setComposer(e.target.value)} />
+            <div className="flex items-center gap-2">
+              <Input value={composer} onChange={(e) => setComposer(e.target.value)} className="flex-1" />
+              {composer.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: composerPersonId ? "Ya en Roster" : "→ Añadir al Roster (composer)",
+                      onSelect: async () => {
+                        await addToRoster(composer, "composer");
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (roster · composer)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: composer,
+                          account_type: "roster",
+                          roster_kind: "composer",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
             <Select
               value={composerPersonId ?? "none"}
               onValueChange={(v) => {
@@ -621,7 +856,30 @@ function EditDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Supervisor musical</Label>
-            <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} />
+            <div className="flex items-center gap-2">
+              <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} className="flex-1" />
+              {supervisor.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: supervisorPersonId ? "Ya en Roster" : "→ Añadir al Roster (supervisor)",
+                      onSelect: async () => {
+                        await addToRoster(supervisor, "supervisor");
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (roster · otros)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: supervisor,
+                          account_type: "roster",
+                          roster_kind: "otros",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
             <Select
               value={supervisorPersonId ?? "none"}
               onValueChange={(v) => {
@@ -650,11 +908,34 @@ function EditDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Plataforma</Label>
-            <Input
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-              placeholder="Netflix, Filmin, Movistar+, Cine…"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value)}
+                placeholder="Netflix, Filmin, Movistar+, Cine…"
+                className="flex-1"
+              />
+              {platform.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: "→ Crear en Plataformas CRM",
+                      onSelect: async () => {
+                        await addPlatformToCrm(platform);
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (plataforma)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: platform,
+                          account_type: "plataforma",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
           </div>
           <label className="flex items-center gap-2 text-sm">
             <Switch checked={needsReview} onCheckedChange={setNeedsReview} />
@@ -711,12 +992,17 @@ function EntityListEditor({
   onChange,
   roster,
   placeholder,
+  crmActionsFor,
 }: {
   title: string;
   items: Array<{ name: string; id: string | null }>;
   onChange: (next: Array<{ name: string; id: string | null }>) => void;
   roster: Array<{ id: string; label: string }>;
   placeholder: string;
+  crmActionsFor?: (
+    item: { name: string; id: string | null },
+    setId: (id: string | null) => void,
+  ) => Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
 }) {
   function normalize(s: string) {
     return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -794,6 +1080,15 @@ function EntityListEditor({
                   >
                     ✕
                   </Button>
+                  {crmActionsFor && it.name.trim() && (
+                    <CrmAddMenu
+                      actions={crmActionsFor(it, (id) => {
+                        const next = [...items];
+                        next[idx] = { ...next[idx], id };
+                        onChange(next);
+                      })}
+                    />
+                  )}
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-xs">
                   {it.id ? (
