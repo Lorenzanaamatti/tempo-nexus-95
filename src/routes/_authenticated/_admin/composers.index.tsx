@@ -51,6 +51,7 @@ function ComposersIndex() {
   const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
   const [q, setQ] = useState("");
+  const [specialistHashtag, setSpecialistHashtag] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
