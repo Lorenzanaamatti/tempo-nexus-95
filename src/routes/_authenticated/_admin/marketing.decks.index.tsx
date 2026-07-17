@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, FileText, ExternalLink, Trash2, Upload, Download } from "lucide-react";
+import { Plus, FileText, ExternalLink, Trash2, Upload, Download, X } from "lucide-react";
 import {
   DECK_PURPOSES,
   DECK_PURPOSE_LABEL,
@@ -40,6 +40,14 @@ type Deck = {
   notes: string | null;
   tags: string[];
   updated_at: string;
+};
+
+type DeckFile = {
+  id: string;
+  deck_id: string;
+  storage_path: string;
+  file_name: string | null;
+  created_at: string;
 };
 
 function DecksIndex() {
@@ -176,6 +184,20 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
 
   useEffect(() => { setForm(deck); }, [deck]);
 
+  const { data: files } = useQuery({
+    queryKey: ["marketing-deck-files", deck?.id],
+    enabled: !!deck?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("marketing_deck_files")
+        .select("*")
+        .eq("deck_id", deck!.id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as DeckFile[];
+    },
+  });
+
   if (!deck || !form) {
     return (
       <Sheet open={false} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -226,12 +248,14 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
   async function onFile(file: File) {
     setUploading(true);
     try {
-      if (form?.storage_path) await deleteMarketingAsset(form.storage_path).catch(() => {});
       const path = await uploadMarketingAsset("decks", file);
-      const { error } = await (supabase as any).from("marketing_decks").update({ storage_path: path }).eq("id", form!.id);
+      const { error } = await (supabase as any)
+        .from("marketing_deck_files")
+        .insert({ deck_id: form!.id, storage_path: path, file_name: file.name });
       if (error) throw error;
-      update("storage_path", path);
-      toast.success("Archivo subido");
+      qc.invalidateQueries({ queryKey: ["marketing-deck-files", form!.id] });
+      qc.invalidateQueries({ queryKey: ["marketing-decks"] });
+      toast.success("Archivo añadido");
     } catch (e: any) {
       toast.error(e.message ?? "Error subiendo archivo");
     } finally {
@@ -239,10 +263,25 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
     }
   }
 
-  async function openFile() {
-    if (!form?.storage_path) return;
-    const url = await signMarketingAsset(form.storage_path);
+  async function onFiles(fileList: FileList) {
+    for (const f of Array.from(fileList)) {
+      // eslint-disable-next-line no-await-in-loop
+      await onFile(f);
+    }
+  }
+
+  async function openFile(path: string) {
+    const url = await signMarketingAsset(path);
     if (url) window.open(url, "_blank");
+  }
+
+  async function removeFile(f: DeckFile) {
+    if (!confirm(`¿Eliminar "${f.file_name ?? "archivo"}"?`)) return;
+    await deleteMarketingAsset(f.storage_path).catch(() => {});
+    const { error } = await (supabase as any).from("marketing_deck_files").delete().eq("id", f.id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["marketing-deck-files", form!.id] });
+    toast.success("Archivo eliminado");
   }
 
   return (
@@ -281,18 +320,33 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
           </Field>
 
           <div className="rounded-sm border border-border p-3">
-            <Label className="smallcaps mb-2 block text-xs text-muted-foreground">Archivo del deck</Label>
-            {form.storage_path ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="outline" onClick={openFile}><Download className="mr-1 h-3 w-3" /> Descargar / ver</Button>
-                <span className="truncate text-xs text-muted-foreground">{form.storage_path.split("/").slice(-1)[0]}</span>
-              </div>
+            <Label className="smallcaps mb-2 block text-xs text-muted-foreground">Archivos del deck</Label>
+            {(files?.length ?? 0) === 0 && !form.storage_path ? (
+              <p className="text-xs text-muted-foreground">Aún no hay archivos subidos.</p>
             ) : (
-              <p className="text-xs text-muted-foreground">Aún no hay archivo subido.</p>
+              <ul className="space-y-1">
+                {(files ?? []).map((f) => (
+                  <li key={f.id} className="flex items-center justify-between gap-2 rounded-sm border border-border/60 px-2 py-1 text-xs">
+                    <button onClick={() => openFile(f.storage_path)} className="flex min-w-0 items-center gap-1.5 text-left text-foreground hover:text-primary">
+                      <Download className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{f.file_name ?? f.storage_path.split("/").slice(-1)[0]}</span>
+                    </button>
+                    <button onClick={() => removeFile(f)} className="text-muted-foreground hover:text-destructive" aria-label="Eliminar archivo">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
             <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-primary hover:underline">
-              <Upload className="h-3 w-3" /> {form.storage_path ? "Reemplazar" : "Subir archivo"}
-              <input type="file" className="hidden" disabled={uploading} onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
+              <Upload className="h-3 w-3" /> Añadir archivos
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => { const fl = e.target.files; if (fl && fl.length) onFiles(fl); e.currentTarget.value = ""; }}
+              />
             </label>
             {uploading && <p className="mt-1 text-xs text-muted-foreground">Subiendo…</p>}
           </div>
