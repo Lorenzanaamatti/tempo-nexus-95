@@ -762,6 +762,20 @@ function EditDialog({
             onChange={setDirectors}
             roster={rosterDirectors.map((d) => ({ id: d.id, label: d.full_name }))}
             placeholder="Nombre del director"
+            crmActionsFor={(it, setId) => [
+              {
+                label: it.id ? "Ya en Directores CRM" : "→ Crear en Directores CRM",
+                onSelect: async () => {
+                  const id = await addDirectorToCrm(it.name);
+                  if (id) setId(id);
+                },
+              },
+              {
+                label: "→ Añadir a Cuentas Objetivo (otros)",
+                onSelect: () =>
+                  addToTargetAccounts({ name: it.name, account_type: "otros" }),
+              },
+            ]}
           />
           <EntityListEditor
             title="Productoras"
@@ -769,10 +783,51 @@ function EditDialog({
             onChange={setCompanies}
             roster={rosterCompanies.map((c) => ({ id: c.id, label: c.name }))}
             placeholder="Nombre de la productora"
+            crmActionsFor={(it, setId) => [
+              {
+                label: it.id ? "Ya en Productoras CRM" : "→ Crear en Productoras CRM",
+                onSelect: async () => {
+                  const id = await addCompanyToCrm(it.name);
+                  if (id) setId(id);
+                },
+              },
+              {
+                label: "→ Añadir a Cuentas Objetivo (productora)",
+                onSelect: () =>
+                  addToTargetAccounts({
+                    name: it.name,
+                    account_type: "productora",
+                    production_company_id: it.id,
+                  }),
+              },
+            ]}
           />
           <div className="space-y-1.5">
             <Label>Compositor BSO</Label>
-            <Input value={composer} onChange={(e) => setComposer(e.target.value)} />
+            <div className="flex items-center gap-2">
+              <Input value={composer} onChange={(e) => setComposer(e.target.value)} className="flex-1" />
+              {composer.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: composerPersonId ? "Ya en Roster" : "→ Añadir al Roster (composer)",
+                      onSelect: async () => {
+                        await addToRoster(composer, "composer");
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (roster · composer)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: composer,
+                          account_type: "roster",
+                          roster_kind: "composer",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
             <Select
               value={composerPersonId ?? "none"}
               onValueChange={(v) => {
@@ -801,7 +856,30 @@ function EditDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Supervisor musical</Label>
-            <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} />
+            <div className="flex items-center gap-2">
+              <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} className="flex-1" />
+              {supervisor.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: supervisorPersonId ? "Ya en Roster" : "→ Añadir al Roster (supervisor)",
+                      onSelect: async () => {
+                        await addToRoster(supervisor, "supervisor");
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (roster · otros)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: supervisor,
+                          account_type: "roster",
+                          roster_kind: "otros",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
             <Select
               value={supervisorPersonId ?? "none"}
               onValueChange={(v) => {
@@ -830,11 +908,34 @@ function EditDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Plataforma</Label>
-            <Input
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-              placeholder="Netflix, Filmin, Movistar+, Cine…"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value)}
+                placeholder="Netflix, Filmin, Movistar+, Cine…"
+                className="flex-1"
+              />
+              {platform.trim() && (
+                <CrmAddMenu
+                  actions={[
+                    {
+                      label: "→ Crear en Plataformas CRM",
+                      onSelect: async () => {
+                        await addPlatformToCrm(platform);
+                      },
+                    },
+                    {
+                      label: "→ Añadir a Cuentas Objetivo (plataforma)",
+                      onSelect: () =>
+                        addToTargetAccounts({
+                          name: platform,
+                          account_type: "plataforma",
+                        }),
+                    },
+                  ]}
+                />
+              )}
+            </div>
           </div>
           <label className="flex items-center gap-2 text-sm">
             <Switch checked={needsReview} onCheckedChange={setNeedsReview} />
