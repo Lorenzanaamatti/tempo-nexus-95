@@ -31,7 +31,7 @@ const TIER_HINT: Record<Tier, string> = {
 const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: string }> = {
   composer:   { title: "Compositores",         singular: "compositor",         intro: "Nuestro equipo de compositores y compositoras INTERESANTES para cine, televisión, publicidad, videojuegos, teatro, danza y whatnot." },
   artist:     { title: "Artistas",             singular: "artista",            intro: "Artistas representadas por INTERESANTE COMPAÑÍA para su colaboración en proyectos audiovisuales." },
-  supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Supervisores musicales del roster." },
+  supervisor: { title: "Supervisores musicales", singular: "supervisor musical", intro: "Este es nuestro equipo de supervisoras musicales (no curadores musicales)." },
   specialist: { title: "Especialistas",        singular: "especialista",       intro: "Especialistas que colaboran con la compañía." },
   curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
 };
