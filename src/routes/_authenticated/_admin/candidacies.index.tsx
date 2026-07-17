@@ -64,6 +64,9 @@ function CandidaciesIndex() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "kanban">("list");
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
 
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -163,6 +166,20 @@ function CandidaciesIndex() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex overflow-hidden rounded-sm border border-border">
+            <button
+              onClick={() => setView("list")}
+              className={`px-3 py-1.5 text-xs smallcaps ${view === "list" ? "bg-foreground text-background" : "hover:bg-muted"}`}
+            >
+              Lista
+            </button>
+            <button
+              onClick={() => setView("kanban")}
+              className={`px-3 py-1.5 text-xs smallcaps ${view === "kanban" ? "bg-foreground text-background" : "hover:bg-muted"}`}
+            >
+              Kanban
+            </button>
+          </div>
           <Select value={sourceFilter} onValueChange={setSourceFilter}>
             <SelectTrigger className="w-56 rounded-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -208,6 +225,69 @@ function CandidaciesIndex() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
+      ) : view === "kanban" ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {(Object.keys(STATUS_LABEL) as Status[]).map((col) => {
+            const items = filtered.filter((c: any) => normalizeStatus(c.status) === col);
+            return (
+              <div
+                key={col}
+                onDragOver={(e) => { e.preventDefault(); setDragOverCol(col); }}
+                onDragLeave={() => setDragOverCol((v) => (v === col ? null : v))}
+                onDrop={() => {
+                  if (dragId) {
+                    const current = (data ?? []).find((x: any) => x.id === dragId);
+                    if (current && normalizeStatus(current.status) !== col) {
+                      updateStatus(dragId, col);
+                    }
+                  }
+                  setDragId(null);
+                  setDragOverCol(null);
+                }}
+                className={`rounded-sm border p-3 transition-colors ${dragOverCol === col ? "border-primary bg-primary/5" : "border-border bg-muted/20"}`}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${STATUS_TONE[col]}`}>
+                    {STATUS_LABEL[col]}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{items.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {items.map((c: any) => (
+                    <div
+                      key={c.id}
+                      draggable
+                      onDragStart={() => setDragId(c.id)}
+                      onDragEnd={() => { setDragId(null); setDragOverCol(null); }}
+                      onClick={() => setOpenId(c.id)}
+                      className={`cursor-grab rounded-sm border border-border bg-background p-3 shadow-sm active:cursor-grabbing ${dragId === c.id ? "opacity-50" : ""}`}
+                    >
+                      <p className="font-display text-sm">{c.full_name}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {c.received_at ? formatDateEs(c.received_at) : ""}
+                        {" · "}{SOURCE_LABEL[(c.source ?? "recibida") as Source]}
+                      </p>
+                      {c.job_post_title && (
+                        <p className="mt-1 text-[11px] text-muted-foreground truncate">{c.job_post_title}</p>
+                      )}
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span className={`rounded-sm px-1.5 py-0.5 text-[10px] smallcaps ${RESPONSE_TONE[(c.response_status ?? "sin_responder") as ResponseStatus]}`}>
+                          {RESPONSE_LABEL[(c.response_status ?? "sin_responder") as ResponseStatus]}
+                        </span>
+                        {c.reviewer?.full_name && (
+                          <span className="text-[10px] text-muted-foreground">· {c.reviewer.full_name}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {items.length === 0 && (
+                    <p className="py-6 text-center text-xs text-muted-foreground">Arrastra aquí</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : !filtered.length ? (
         <p className="text-sm text-muted-foreground">Sin candidaturas.</p>
       ) : (
