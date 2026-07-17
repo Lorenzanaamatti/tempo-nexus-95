@@ -73,6 +73,15 @@ function ComposersIndex() {
     },
   });
 
+  const filtered = (data ?? []).filter((c: any) => {
+    if (role !== "specialist" || !specialistHashtag) return true;
+    const sub = (c.specialist_subtype ?? "").toLowerCase();
+    const tags = (c.specialist_tags ?? []).map((t: string) => t.toLowerCase());
+    const allTags = (c.tags ?? []).map((t: string) => t.toLowerCase());
+    const needle = specialistHashtag.toLowerCase();
+    return sub.includes(needle) || tags.includes(needle) || allTags.includes(needle);
+  });
+
   const grouped = (() => {
     const surname = (name: string | null | undefined) => {
       const parts = (name ?? "").trim().split(/\s+/);
