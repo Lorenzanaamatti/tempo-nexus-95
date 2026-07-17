@@ -25,6 +25,12 @@ import {
   TARGET_ACCOUNT_PRIORITY_LABEL,
   type TargetAccountStatus,
   type TargetAccountPriority,
+  TARGET_ACCOUNT_TYPES,
+  TARGET_ACCOUNT_TYPE_LABEL,
+  TARGET_ACCOUNT_ROSTER_KINDS,
+  TARGET_ACCOUNT_ROSTER_KIND_LABEL,
+  type TargetAccountType,
+  type TargetAccountRosterKind,
 } from "@/lib/target-accounts-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/target-accounts/$accountId")({
@@ -45,6 +51,9 @@ type Account = {
   sector: string | null;
   website: string | null;
   notes: string | null;
+  account_type: TargetAccountType;
+  roster_kind: TargetAccountRosterKind | null;
+  other_label: string | null;
 };
 
 function TargetAccountDetail() {
@@ -90,6 +99,29 @@ function TargetAccountDetail() {
     },
   });
 
+  // Categorías reutilizables para "Otros" (>= 2 usos)
+  const otherLabelsQ = useQuery({
+    queryKey: ["target-accounts-other-labels"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("target_accounts")
+        .select("other_label")
+        .eq("account_type", "otros")
+        .not("other_label", "is", null);
+      if (error) throw error;
+      const counts = new Map<string, number>();
+      for (const row of (data ?? []) as { other_label: string | null }[]) {
+        const key = (row.other_label ?? "").trim();
+        if (!key) continue;
+        counts.set(key.toLowerCase(), (counts.get(key.toLowerCase()) ?? 0) + 1);
+      }
+      return Array.from(counts.entries())
+        .filter(([, n]) => n >= 2)
+        .map(([label]) => label)
+        .sort();
+    },
+  });
+
   const [form, setForm] = useState<Account | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -125,6 +157,9 @@ function TargetAccountDetail() {
         sector: form.sector,
         website: form.website,
         notes: form.notes,
+        account_type: form.account_type,
+        roster_kind: form.account_type === "roster" ? form.roster_kind : null,
+        other_label: form.account_type === "otros" ? (form.other_label?.trim() || null) : null,
       })
       .eq("id", form.id);
     setSaving(false);
@@ -214,6 +249,47 @@ function TargetAccountDetail() {
         <Field label="Nombre">
           <Input value={form.name} onChange={(e) => update("name", e.target.value)} />
         </Field>
+        <Field label="Tipología">
+          <Select value={form.account_type} onValueChange={(v) => update("account_type", v as TargetAccountType)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {TARGET_ACCOUNT_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>{TARGET_ACCOUNT_TYPE_LABEL[t]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        {form.account_type === "roster" && (
+          <Field label="Tipo de roster">
+            <Select
+              value={form.roster_kind ?? "none"}
+              onValueChange={(v) => update("roster_kind", v === "none" ? null : (v as TargetAccountRosterKind))}
+            >
+              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Sin especificar —</SelectItem>
+                {TARGET_ACCOUNT_ROSTER_KINDS.map((k) => (
+                  <SelectItem key={k} value={k}>{TARGET_ACCOUNT_ROSTER_KIND_LABEL[k]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+        {form.account_type === "otros" && (
+          <Field label="Categoría (Otros)">
+            <Input
+              list="target-account-other-labels"
+              value={form.other_label ?? ""}
+              onChange={(e) => update("other_label", e.target.value || null)}
+              placeholder="Escribe una categoría (se reutiliza al repetirse 2+ veces)"
+            />
+            <datalist id="target-account-other-labels">
+              {(otherLabelsQ.data ?? []).map((l) => (
+                <option key={l} value={l} />
+              ))}
+            </datalist>
+          </Field>
+        )}
         <Field label="Empresa asociada (productora)">
           <Select
             value={form.production_company_id ?? "none"}
