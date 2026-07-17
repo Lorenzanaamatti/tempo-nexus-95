@@ -1,5 +1,5 @@
-import { Fragment, useMemo } from "react";
-import { differenceInDays, isWithinInterval } from "date-fns";
+import { Fragment, useMemo, useRef, useState } from "react";
+import { addDays, differenceInDays, format, isWithinInterval } from "date-fns";
 import { Link } from "@tanstack/react-router";
 import { AVAILABILITY_LABELS } from "@/components/availability-editor";
 import type { TimelineRow } from "@/lib/calendar-api";
@@ -12,11 +12,13 @@ export function TimelineCalendar({
   start,
   end,
   ticks,
+  onMoveTask,
 }: {
   rows: TimelineRow[];
   start: Date;
   end: Date;
   ticks: { date: Date; label: string; major?: boolean }[];
+  onMoveTask?: (actionId: string, newDateIso: string) => void;
 }) {
   const totalDays = Math.max(1, differenceInDays(end, start));
 
@@ -32,6 +34,44 @@ export function TimelineCalendar({
   function offsetPct(d: Date) {
     const days = differenceInDays(d, start);
     return Math.max(0, Math.min(100, (days / totalDays) * 100));
+  }
+
+  const laneRef = useRef<HTMLDivElement | null>(null);
+  const [dragState, setDragState] = useState<{ id: string; deltaPct: number } | null>(null);
+
+  function startDrag(
+    ev: React.PointerEvent<HTMLDivElement>,
+    actionId: string,
+    eventStart: Date,
+    laneEl: HTMLDivElement,
+  ) {
+    if (!onMoveTask) return;
+    const rect = laneEl.getBoundingClientRect();
+    const startX = ev.clientX;
+    const originalPct = offsetPct(eventStart);
+    (ev.target as HTMLElement).setPointerCapture(ev.pointerId);
+    laneRef.current = laneEl;
+
+    const onMove = (e: PointerEvent) => {
+      const dx = e.clientX - startX;
+      const deltaPct = (dx / rect.width) * 100;
+      setDragState({ id: actionId, deltaPct });
+    };
+    const onUp = (e: PointerEvent) => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      const dx = e.clientX - startX;
+      const dayDelta = Math.round((dx / rect.width) * totalDays);
+      setDragState(null);
+      if (dayDelta !== 0) {
+        const newDate = addDays(eventStart, dayDelta);
+        onMoveTask(actionId, format(newDate, "yyyy-MM-dd"));
+      }
+      // silence unused warning
+      void originalPct;
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
   }
 
   return (
@@ -103,7 +143,17 @@ export function TimelineCalendar({
                       style={{ left: `${offsetPct(t.date)}%` }}
                     />
                   ))}
-                  {row.events
+                  <LaneEvents
+                    laneKey={row.id}
+                    row={row}
+                    start={start}
+                    end={end}
+                    offsetPct={offsetPct}
+                    onDragStart={startDrag}
+                    onMoveTask={onMoveTask}
+                    dragState={dragState}
+                  />
+                  {false && row.events
                     .filter((e) => e.end >= start && e.start <= end)
                     .map((e) => {
                       const clampedStart = e.start < start ? start : e.start;
@@ -130,6 +180,66 @@ export function TimelineCalendar({
           </Fragment>
         ))
       )}
+    </div>
+  );
+}
+
+function LaneEvents({
+  row,
+  start,
+  end,
+  offsetPct,
+  onDragStart,
+  onMoveTask,
+  dragState,
+}: {
+  laneKey: string;
+  row: TimelineRow;
+  start: Date;
+  end: Date;
+  offsetPct: (d: Date) => number;
+  onDragStart: (
+    ev: React.PointerEvent<HTMLDivElement>,
+    actionId: string,
+    eventStart: Date,
+    laneEl: HTMLDivElement,
+  ) => void;
+  onMoveTask?: (actionId: string, newDateIso: string) => void;
+  dragState: { id: string; deltaPct: number } | null;
+}) {
+  const laneRef = useRef<HTMLDivElement | null>(null);
+  return (
+    <div ref={laneRef} className="absolute inset-0">
+      {row.events
+        .filter((e) => e.end >= start && e.start <= end)
+        .map((e) => {
+          const clampedStart = e.start < start ? start : e.start;
+          const clampedEnd = e.end > end ? end : e.end;
+          const left = offsetPct(clampedStart);
+          const right = offsetPct(clampedEnd);
+          const width = Math.max(0.6, right - left);
+          const rowEvent = e as typeof e & { sourceKind?: string | null; sourceActionId?: string | null };
+          const draggable = !!onMoveTask && rowEvent.sourceKind === "action" && !!rowEvent.sourceActionId;
+          const isDragging = dragState?.id === rowEvent.sourceActionId;
+          const dx = isDragging ? dragState!.deltaPct : 0;
+          return (
+            <div
+              key={e.id}
+              title={`${e.title ?? ALL_LABELS[e.kind] ?? e.kind} · ${e.start.toLocaleDateString("es-ES")} → ${e.end.toLocaleDateString("es-ES")}${e.note ? "\n" + e.note : ""}`}
+              className={`absolute top-1.5 bottom-1.5 overflow-hidden rounded-sm border px-1.5 text-[10px] leading-[9px] flex items-center ${KIND_BAR_ALL[e.kind] ?? "bg-muted border-border text-foreground"} ${draggable ? "cursor-grab active:cursor-grabbing select-none" : ""} ${isDragging ? "opacity-70 shadow-md" : ""}`}
+              style={{ left: `calc(${left}% + ${dx}%)`, width: `${width}%`, touchAction: draggable ? "none" : undefined }}
+              onPointerDown={(ev) => {
+                if (!draggable) return;
+                ev.preventDefault();
+                if (laneRef.current) onDragStart(ev, rowEvent.sourceActionId!, e.start, laneRef.current);
+              }}
+            >
+              <span className="truncate">
+                {e.title ?? ALL_LABELS[e.kind] ?? e.kind}
+              </span>
+            </div>
+          );
+        })}
     </div>
   );
 }
