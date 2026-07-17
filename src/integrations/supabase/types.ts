@@ -286,36 +286,6 @@ export type Database = {
         }
         Relationships: []
       }
-      brand_guidelines: {
-        Row: {
-          body_md: string | null
-          created_at: string
-          id: string
-          position: number
-          section: string
-          updated_at: string
-          version: string | null
-        }
-        Insert: {
-          body_md?: string | null
-          created_at?: string
-          id?: string
-          position?: number
-          section: string
-          updated_at?: string
-          version?: string | null
-        }
-        Update: {
-          body_md?: string | null
-          created_at?: string
-          id?: string
-          position?: number
-          section?: string
-          updated_at?: string
-          version?: string | null
-        }
-        Relationships: []
-      }
       calendar_events: {
         Row: {
           assignee_person_id: string | null
