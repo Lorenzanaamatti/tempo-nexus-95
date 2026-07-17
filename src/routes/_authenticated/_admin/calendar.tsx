@@ -122,7 +122,7 @@ export function CalendarBoard({
   initialOnlyMine = false,
   subjectTypes,
   title = "Calendario general",
-  eyebrow = "Interesante Compañía",
+  eyebrow,
   description,
 }: {
   lockedCategory?: Category;
@@ -130,10 +130,11 @@ export function CalendarBoard({
   initialOnlyMine?: boolean;
   subjectTypes?: string[];
   title?: string;
-  eyebrow?: string;
+  eyebrow?: React.ReactNode;
   description?: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [view, setView] = useState<CalendarView>("month");
   const [layout, setLayout] = useState<Layout>("gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
