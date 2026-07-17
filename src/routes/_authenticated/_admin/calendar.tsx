@@ -300,6 +300,9 @@ export function CalendarBoard({
       // Hide events for explicitly-hidden person/composer subjects.
       if ((e.subject_type === "person" || e.subject_type === "composer") &&
           hiddenSubjects.has(`${e.subject_type}::${e.subject_id}`)) continue;
+      // Also hide events assigned to a hidden person, regardless of subject type
+      // (e.g. target_account / opportunity tasks assigned to a teammate you filtered out).
+      if (e.assignee_person_id && hiddenSubjects.has(`person::${e.assignee_person_id}`)) continue;
       if (onlyMine) {
         if (!myPersonId) continue;
         const assignedToMe = e.assignee_person_id === myPersonId;
