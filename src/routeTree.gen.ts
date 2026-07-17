@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AprobarTokenRouteImport } from './routes/aprobar.$token'
+import { Route as AuthenticatedVistaRouteImport } from './routes/_authenticated/vista'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedPendingRouteImport } from './routes/_authenticated/pending'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -92,6 +93,11 @@ const AprobarTokenRoute = AprobarTokenRouteImport.update({
   id: '/aprobar/$token',
   path: '/aprobar/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVistaRoute = AuthenticatedVistaRouteImport.update({
+  id: '/vista',
+  path: '/vista',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   id: '/portal',
@@ -451,6 +457,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof AuthenticatedMeRoute
   '/pending': typeof AuthenticatedPendingRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -514,6 +521,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/pending': typeof AuthenticatedPendingRoute
+  '/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -579,6 +587,7 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/pending': typeof AuthenticatedPendingRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
+  '/_authenticated/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/_admin/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
@@ -646,6 +655,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/pending'
     | '/portal'
+    | '/vista'
     | '/aprobar/$token'
     | '/agent-actions'
     | '/billing'
@@ -709,6 +719,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/pending'
+    | '/vista'
     | '/aprobar/$token'
     | '/agent-actions'
     | '/billing'
@@ -773,6 +784,7 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/pending'
     | '/_authenticated/portal'
+    | '/_authenticated/vista'
     | '/aprobar/$token'
     | '/_authenticated/'
     | '/_authenticated/_admin/agent-actions'
@@ -867,6 +879,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/aprobar/$token'
       preLoaderRoute: typeof AprobarTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/vista': {
+      id: '/_authenticated/vista'
+      path: '/vista'
+      fullPath: '/vista'
+      preLoaderRoute: typeof AuthenticatedVistaRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/portal': {
       id: '/_authenticated/portal'
@@ -1464,6 +1483,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedPendingRoute: typeof AuthenticatedPendingRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
+  AuthenticatedVistaRoute: typeof AuthenticatedVistaRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -1473,6 +1493,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedPendingRoute: AuthenticatedPendingRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
+  AuthenticatedVistaRoute: AuthenticatedVistaRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
