@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -8,9 +8,12 @@ import { ChevronLeft, ChevronRight, User2, GanttChartSquare, CalendarDays, Kanba
 import { TimelineCalendar } from "@/components/timeline-calendar";
 import { CalendarMonthGrid, type FlatCalendarEvent } from "@/components/calendar-month-grid";
 import { CalendarKanban } from "@/components/calendar-kanban";
+import { BrandLogo } from "@/components/brand-logo";
+import { toast } from "sonner";
+import { format as formatDate } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   computeRange,
-  rangeLabel,
   stepAnchor,
   VIEW_LABELS,
   type CalendarView,
