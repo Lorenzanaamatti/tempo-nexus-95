@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/brand/")(
 
 type Section = { id: string; section: string; body_md: string | null; position: number; version: string | null };
 type Asset = { id: string; title: string; kind: string | null; storage_path: string | null; external_url: string | null; notes: string | null; position: number };
+type AssetFile = { id: string; asset_id: string; storage_path: string; filename: string | null; notes: string | null; position: number; created_at: string };
 
 function BrandIndex() {
   const qc = useQueryClient();
@@ -60,7 +61,7 @@ function BrandIndex() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-8 border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Marketing y Ventas</p>
-        <h1 className="mt-1 font-display text-5xl">Libro de estilo</h1>
+        <h1 className="mt-1 font-display text-5xl">Identidad corporativa</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Identidad visual, tono de voz y recursos descargables de Interesante Compañía. La fuente única de verdad para cualquier comunicación.
         </p>
@@ -151,6 +152,20 @@ function AssetRow({ item }: { item: Asset }) {
   const [uploading, setUploading] = useState(false);
   useEffect(() => setA(item), [item]);
 
+  const filesQ = useQuery({
+    queryKey: ["brand-asset-files", item.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("brand_asset_files")
+        .select("*")
+        .eq("asset_id", item.id)
+        .order("position")
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as AssetFile[];
+    },
+  });
+
   async function save() {
     const { error } = await (supabase as any).from("brand_assets").update({
       title: a.title, kind: a.kind, external_url: a.external_url, notes: a.notes,
@@ -161,27 +176,44 @@ function AssetRow({ item }: { item: Asset }) {
   }
   async function remove() {
     if (!confirm("¿Eliminar este recurso?")) return;
+    for (const f of filesQ.data ?? []) {
+      await deleteMarketingAsset(f.storage_path).catch(() => {});
+    }
     if (a.storage_path) await deleteMarketingAsset(a.storage_path).catch(() => {});
     const { error } = await (supabase as any).from("brand_assets").delete().eq("id", a.id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["brand-assets"] });
   }
-  async function onFile(file: File) {
+  async function onFiles(files: FileList) {
     setUploading(true);
     try {
-      if (a.storage_path) await deleteMarketingAsset(a.storage_path).catch(() => {});
-      const path = await uploadMarketingAsset("brand", file);
-      const { error } = await (supabase as any).from("brand_assets").update({ storage_path: path }).eq("id", a.id);
-      if (error) throw error;
-      setA({ ...a, storage_path: path });
-      toast.success("Subido");
+      const base = (filesQ.data ?? []).length;
+      const rows: Array<Partial<AssetFile>> = [];
+      let i = 0;
+      for (const file of Array.from(files)) {
+        const path = await uploadMarketingAsset("brand", file);
+        rows.push({ asset_id: a.id, storage_path: path, filename: file.name, position: base + i });
+        i++;
+      }
+      if (rows.length) {
+        const { error } = await (supabase as any).from("brand_asset_files").insert(rows);
+        if (error) throw error;
+      }
+      toast.success(rows.length > 1 ? `${rows.length} archivos subidos` : "Archivo subido");
+      qc.invalidateQueries({ queryKey: ["brand-asset-files", a.id] });
     } catch (e: any) { toast.error(e.message ?? "Error"); }
     finally { setUploading(false); }
   }
-  async function download() {
-    if (!a.storage_path) return;
-    const url = await signMarketingAsset(a.storage_path);
+  async function downloadFile(path: string) {
+    const url = await signMarketingAsset(path);
     if (url) window.open(url, "_blank");
+  }
+  async function removeFile(f: AssetFile) {
+    if (!confirm("¿Eliminar este archivo?")) return;
+    await deleteMarketingAsset(f.storage_path).catch(() => {});
+    const { error } = await (supabase as any).from("brand_asset_files").delete().eq("id", f.id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["brand-asset-files", a.id] });
   }
 
   return (
@@ -190,11 +222,27 @@ function AssetRow({ item }: { item: Asset }) {
       <Input value={a.kind ?? ""} onChange={(e) => setA({ ...a, kind: e.target.value || null })} placeholder="Tipo (logo, tipografía, color…)" className="mb-2 text-sm" />
       <Input value={a.external_url ?? ""} onChange={(e) => setA({ ...a, external_url: e.target.value || null })} placeholder="URL externa (opcional)" className="mb-2 text-sm" />
       <Textarea rows={2} value={a.notes ?? ""} onChange={(e) => setA({ ...a, notes: e.target.value || null })} placeholder="Notas de uso" />
+      {(filesQ.data?.length ?? 0) > 0 && (
+        <ul className="mt-3 divide-y divide-border rounded-sm border border-border">
+          {filesQ.data!.map((f) => (
+            <li key={f.id} className="flex items-center gap-2 px-2 py-1.5 text-xs">
+              <span className="flex-1 truncate" title={f.filename ?? f.storage_path}>{f.filename ?? f.storage_path.split("/").pop()}</span>
+              <Button size="sm" variant="ghost" onClick={() => downloadFile(f.storage_path)}><Download className="h-3 w-3" /></Button>
+              <Button size="sm" variant="ghost" onClick={() => removeFile(f)} className="text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        {a.storage_path && <Button size="sm" variant="outline" onClick={download}><Download className="mr-1 h-3 w-3" /> Descargar</Button>}
         <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-primary hover:underline">
-          <Upload className="h-3 w-3" /> {a.storage_path ? "Reemplazar" : "Subir archivo"}
-          <input type="file" className="hidden" disabled={uploading} onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
+          <Upload className="h-3 w-3" /> {uploading ? "Subiendo…" : "Añadir archivos"}
+          <input
+            type="file"
+            multiple
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => { const fs = e.target.files; if (fs && fs.length) { onFiles(fs); e.target.value = ""; } }}
+          />
         </label>
         <Button size="sm" className="ml-auto" onClick={save}>Guardar</Button>
         <Button size="sm" variant="ghost" onClick={remove} className="text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
