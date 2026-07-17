@@ -162,7 +162,7 @@ function ComposersIndex() {
 
       {isLoading ? (
         <p className="font-display text-muted-foreground">Cargando archivo…</p>
-      ) : !data?.length ? (
+      ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -174,7 +174,7 @@ function ComposersIndex() {
         </div>
       ) : role !== "composer" ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[...(data ?? [])]
+          {[...filtered]
             .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
             .map((c: any) => (
               <Link
