@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useCurrentRole } from "@/lib/use-role";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   LibraryBig, Music, Mic2, Headphones, Sparkles, ListMusic, Building2,
   Handshake, Crosshair, Tv, Clapperboard, Briefcase, Database,
@@ -128,6 +129,7 @@ function Index() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
       <header className="mb-10 border-b border-border pb-6">
+        <BrandLogo variant="auto" className="mb-6 h-14 w-auto" />
         <p className="smallcaps text-muted-foreground">Bienvenida</p>
         <h1 className="mt-1 font-display text-5xl">Interesante Compañía</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
