@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useCurrentRole } from "@/lib/use-role";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   LibraryBig, Music, Mic2, Headphones, Sparkles, ListMusic, Building2,
   Handshake, Crosshair, Tv, Clapperboard, Briefcase, Database,
