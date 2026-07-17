@@ -26,14 +26,24 @@ import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import type { TaskArea } from "@/lib/task-areas";
+import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
+import { RefreshCw, Home as HomeIcon } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
-export function AppSidebar({ role }: { role: AppRole | null }) {
+export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessionView?: SessionView | null }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const search = useRouterState({ select: (r) => r.location.search as { role?: string } });
   const { user, signOut } = useAuth();
   const { open: openNewTask } = useNewTaskDialog();
+  const nav = useNavigate();
+
+  // For non-admin roles, the session view is irrelevant (they get their own tree).
+  // For admin, default to "bigc" (full) if nothing has been chosen.
+  const effectiveView: SessionView = role === "admin" ? sessionView ?? "bigc" : "bigc";
+  const isRosterView = role === "admin" && effectiveView === "roster";
+  const isTeamView = role === "admin" && effectiveView === "team";
 
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
@@ -133,6 +143,18 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
     { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
   ];
 
+  // In TEAM view, hide the pure-admin surfaces: Económico dashboard, agentes IA,
+  // "Usuarios y permisos" no aparece aquí (vive en /users). Deja el resto operativo.
+  const teamGroups = adminGroups
+    .filter((g) => g.label !== "Económico")
+    .map((g) =>
+      g.label === "Legal"
+        ? { ...g, items: g.items.filter((i) => i.to !== "/agent-actions") }
+        : g,
+    );
+
+  const visibleAdminGroups = isTeamView ? teamGroups : adminGroups;
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-5">
@@ -150,9 +172,9 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {role === "admin" ? (
+        {role === "admin" && !isRosterView ? (
           <>
-            {adminGroups.map((group) => (
+            {visibleAdminGroups.map((group) => (
               <SidebarGroup key={group.label}>
                 {!collapsed && (
                   <SidebarGroupLabel className="smallcaps flex items-center gap-1.5">
@@ -233,6 +255,34 @@ export function AppSidebar({ role }: { role: AppRole | null }) {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
+          {role === "admin" && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => {
+                  setSessionView(null);
+                  nav({ to: "/vista" });
+                }}
+                title="Cambiar vista de sesión"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {!collapsed && (
+                  <span className="truncate text-xs">
+                    Vista · {SESSION_VIEW_LABEL[effectiveView]}
+                  </span>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          {isRosterView && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link to="/portal" className="flex items-center gap-2">
+                  <HomeIcon className="h-4 w-4" />
+                  {!collapsed && <span className="truncate text-xs">Ir al portal</span>}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <div className={collapsed ? "flex justify-center py-1" : "flex items-center justify-between gap-2 px-2 py-1"}>
               {!collapsed && (
