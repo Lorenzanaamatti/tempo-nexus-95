@@ -44,6 +44,7 @@ import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
 import { Route as AuthenticatedAdminAgentActionsRouteImport } from './routes/_authenticated/_admin/agent-actions'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedAdminProvidersIndexRouteImport } from './routes/_authenticated/_admin/providers.index'
 import { Route as AuthenticatedAdminProductionsIndexRouteImport } from './routes/_authenticated/_admin/productions.index'
 import { Route as AuthenticatedAdminProductionCompaniesIndexRouteImport } from './routes/_authenticated/_admin/production-companies.index'
@@ -273,6 +274,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminProvidersIndexRoute =
   AuthenticatedAdminProvidersIndexRouteImport.update({
     id: '/providers/',
@@ -496,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -565,6 +572,7 @@ export interface FileRoutesByTo {
   '/pending': typeof AuthenticatedPendingRoute
   '/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
   '/billing': typeof AuthenticatedAdminBillingRoute
@@ -637,6 +645,7 @@ export interface FileRoutesById {
   '/_authenticated/vista': typeof AuthenticatedVistaRoute
   '/aprobar/$token': typeof AprobarTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/_admin/agent-actions': typeof AuthenticatedAdminAgentActionsRoute
   '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -709,6 +718,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/vista'
     | '/aprobar/$token'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/agent-actions'
     | '/billing'
@@ -778,6 +788,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/vista'
     | '/aprobar/$token'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/agent-actions'
     | '/billing'
@@ -849,6 +860,7 @@ export interface FileRouteTypes {
     | '/_authenticated/vista'
     | '/aprobar/$token'
     | '/_authenticated/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/_admin/agent-actions'
     | '/_authenticated/_admin/billing'
@@ -915,6 +927,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AprobarTokenRoute: typeof AprobarTokenRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
@@ -1163,6 +1176,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/invoke-tool/$tool'
       fullPath: '/.mcp/invoke-tool/$tool'
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_admin/providers/': {
@@ -1615,6 +1635,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AprobarTokenRoute: AprobarTokenRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
