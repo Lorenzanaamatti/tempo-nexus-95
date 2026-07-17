@@ -51,6 +51,7 @@ import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.index'
 import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
+import { Route as AuthenticatedAdminCandidaciesIndexRouteImport } from './routes/_authenticated/_admin/candidacies.index'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
@@ -311,6 +312,12 @@ const AuthenticatedAdminComposersIndexRoute =
     path: '/composers/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCandidaciesIndexRoute =
+  AuthenticatedAdminCandidaciesIndexRouteImport.update({
+    id: '/candidacies/',
+    path: '/candidacies/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminProductionsProductionIdRoute =
   AuthenticatedAdminProductionsProductionIdRouteImport.update({
     id: '/productions/$productionId',
@@ -492,6 +499,7 @@ export interface FileRoutesByFullPath {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
+  '/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
@@ -555,6 +563,7 @@ export interface FileRoutesByTo {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
+  '/candidacies': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts': typeof AuthenticatedAdminContractsIndexRoute
   '/deal-memos': typeof AuthenticatedAdminDealMemosIndexRoute
@@ -623,6 +632,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
+  '/_authenticated/_admin/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/_authenticated/_admin/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
@@ -690,6 +700,7 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
+    | '/candidacies/'
     | '/composers/'
     | '/contracts/'
     | '/deal-memos/'
@@ -753,6 +764,7 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
+    | '/candidacies'
     | '/composers'
     | '/contracts'
     | '/deal-memos'
@@ -820,6 +832,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
+    | '/_authenticated/_admin/candidacies/'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/contracts/'
     | '/_authenticated/_admin/deal-memos/'
@@ -1146,6 +1159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/candidacies/': {
+      id: '/_authenticated/_admin/candidacies/'
+      path: '/candidacies'
+      fullPath: '/candidacies/'
+      preLoaderRoute: typeof AuthenticatedAdminCandidaciesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/productions/$productionId': {
       id: '/_authenticated/_admin/productions/$productionId'
       path: '/productions/$productionId'
@@ -1360,6 +1380,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
+  AuthenticatedAdminCandidaciesIndexRoute: typeof AuthenticatedAdminCandidaciesIndexRoute
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
@@ -1409,6 +1430,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProductionCompaniesCompanyIdRoute,
   AuthenticatedAdminProductionsProductionIdRoute:
     AuthenticatedAdminProductionsProductionIdRoute,
+  AuthenticatedAdminCandidaciesIndexRoute:
+    AuthenticatedAdminCandidaciesIndexRoute,
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,

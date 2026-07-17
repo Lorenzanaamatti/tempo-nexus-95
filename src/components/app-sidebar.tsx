@@ -92,6 +92,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   // 3. OPORTUNIDADES
   const opportunitiesItems: NavItem[] = [
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
+    { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
   ];
 
   // 4. ECONÓMICO

@@ -367,6 +367,82 @@ export type Database = {
         }
         Relationships: []
       }
+      candidacies: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          job_post_title: string | null
+          links: Json
+          message: string | null
+          notes: string | null
+          phone: string | null
+          promoted_composer_id: string | null
+          received_at: string
+          reviewer_id: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          job_post_title?: string | null
+          links?: Json
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          promoted_composer_id?: string | null
+          received_at?: string
+          reviewer_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          job_post_title?: string | null
+          links?: Json
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          promoted_composer_id?: string | null
+          received_at?: string
+          reviewer_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidacies_promoted_composer_id_fkey"
+            columns: ["promoted_composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidacies_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidacies_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       case_studies: {
         Row: {
           client: string | null
