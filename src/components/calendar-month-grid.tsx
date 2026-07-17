@@ -21,6 +21,8 @@ export type FlatCalendarEvent = {
   params?: Record<string, string>;
   sourceKind?: string | null;
   sourceActionId?: string | null;
+  area?: string | null;
+  subarea?: string | null;
 };
 
 export function CalendarMonthGrid({
