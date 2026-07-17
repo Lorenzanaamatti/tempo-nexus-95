@@ -43,6 +43,8 @@ function TargetAccountsIndex() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TargetAccountStatus | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["target-accounts"],
@@ -132,6 +134,28 @@ function TargetAccountsIndex() {
     }
     setNewName("");
     toast.success("Cuenta añadida");
+    qc.invalidateQueries({ queryKey: ["target-accounts"] });
+  }
+
+  async function moveAccount(accountId: string, newStatus: TargetAccountStatus) {
+    const current = (data ?? []) as any[];
+    const acc = current.find((a) => a.id === accountId);
+    if (!acc || acc.status === newStatus) return;
+    // optimistic update
+    qc.setQueryData(["target-accounts"], (old: any) => {
+      const list = (old ?? []) as any[];
+      return list.map((a) => (a.id === accountId ? { ...a, status: newStatus } : a));
+    });
+    const { error } = await (supabase as any)
+      .from("target_accounts")
+      .update({ status: newStatus })
+      .eq("id", accountId);
+    if (error) {
+      toast.error(error.message);
+      qc.invalidateQueries({ queryKey: ["target-accounts"] });
+      return;
+    }
+    toast.success(`Movida a "${TARGET_ACCOUNT_STATUS_LABEL[newStatus]}"`);
     qc.invalidateQueries({ queryKey: ["target-accounts"] });
   }
 
@@ -245,21 +269,43 @@ function TargetAccountsIndex() {
             const list = buckets.get(s) ?? [];
             if (!list.length && statusFilter !== "all" && statusFilter !== s) return null;
             return (
-              <section key={s} className="glass-panel rounded-sm p-4">
+              <section
+                key={s}
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setDragOverStatus(s); }}
+                onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOverStatus(null); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = e.dataTransfer.getData("text/plain");
+                  setDragOverStatus(null);
+                  setDraggingId(null);
+                  if (id) moveAccount(id, s);
+                }}
+                className={`glass-panel rounded-sm p-4 transition ${dragOverStatus === s ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
+              >
                 <header className="mb-3 flex items-baseline justify-between border-b border-border pb-2">
                   <h2 className="font-display text-xl">{TARGET_ACCOUNT_STATUS_LABEL[s]}</h2>
                   <span className="smallcaps text-muted-foreground">{list.length}</span>
                 </header>
                 {!list.length ? (
-                  <p className="text-xs text-muted-foreground">Sin cuentas en este estado.</p>
+                  <p className="text-xs text-muted-foreground">Sin cuentas en este estado. Arrastra una tarjeta aquí.</p>
                 ) : (
                   <ul className="space-y-2">
                     {list.map((a) => (
-                      <li key={a.id}>
+                      <li
+                        key={a.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", a.id);
+                          e.dataTransfer.effectAllowed = "move";
+                          setDraggingId(a.id);
+                        }}
+                        onDragEnd={() => { setDraggingId(null); setDragOverStatus(null); }}
+                        className={draggingId === a.id ? "opacity-40" : ""}
+                      >
                         <Link
                           to="/marketing/target-accounts/$accountId"
                           params={{ accountId: a.id }}
-                          className="block rounded-sm border border-border bg-card/50 p-3 transition hover:border-primary/60"
+                          className="block cursor-grab rounded-sm border border-border bg-card/50 p-3 transition hover:border-primary/60 active:cursor-grabbing"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
