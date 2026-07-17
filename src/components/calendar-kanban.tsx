@@ -84,6 +84,20 @@ export function CalendarKanban({
                         )}
                         <div className="text-[10px] text-muted-foreground">{e.subjectGroup}</div>
                       </div>
+                      {(e.area || e.subarea) && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {e.area && (
+                            <span className="inline-block rounded-sm border border-border px-1.5 py-[1px] text-[9px] uppercase tracking-wider text-muted-foreground">
+                              {e.area}
+                            </span>
+                          )}
+                          {e.subarea && (
+                            <span className="inline-block rounded-sm border border-border px-1.5 py-[1px] text-[9px] text-muted-foreground">
+                              {e.subarea}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {e.note && (
                         <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">{e.note}</p>
                       )}
