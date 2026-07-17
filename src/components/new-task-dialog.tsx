@@ -62,6 +62,7 @@ function NewTaskDialog({
       const { data, error } = await supabase
         .from("people")
         .select("id, full_name, role")
+        .eq("role", "ic_team")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
