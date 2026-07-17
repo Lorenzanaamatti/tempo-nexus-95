@@ -380,6 +380,8 @@ export type Database = {
           phone: string | null
           promoted_composer_id: string | null
           received_at: string
+          response_at: string | null
+          response_status: string
           reviewer_id: string | null
           source: string
           status: string
@@ -397,6 +399,8 @@ export type Database = {
           phone?: string | null
           promoted_composer_id?: string | null
           received_at?: string
+          response_at?: string | null
+          response_status?: string
           reviewer_id?: string | null
           source?: string
           status?: string
@@ -414,6 +418,8 @@ export type Database = {
           phone?: string | null
           promoted_composer_id?: string | null
           received_at?: string
+          response_at?: string | null
+          response_status?: string
           reviewer_id?: string | null
           source?: string
           status?: string

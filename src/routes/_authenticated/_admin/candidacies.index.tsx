@@ -29,6 +29,21 @@ const STATUS_TONE: Record<Status, string> = {
   respondida: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
 };
 
+const RESPONSE_LABEL = {
+  sin_responder: "Sin responder",
+  en_espera: "En espera",
+  respondida_si: "Respondida · sí",
+  respondida_no: "Respondida · no",
+} as const;
+type ResponseStatus = keyof typeof RESPONSE_LABEL;
+
+const RESPONSE_TONE: Record<ResponseStatus, string> = {
+  sin_responder: "bg-muted text-muted-foreground",
+  en_espera: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  respondida_si: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  respondida_no: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+};
+
 // Map legacy DB values to new UI keys
 function normalizeStatus(s: string | null | undefined): Status {
   if (s === "revisando") return "en_revision";
@@ -215,6 +230,9 @@ function CandidaciesIndex() {
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${STATUS_TONE[st]}`}>
                       {STATUS_LABEL[st]}
                     </span>
+                    <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${RESPONSE_TONE[(c.response_status ?? "sin_responder") as ResponseStatus]}`}>
+                      {RESPONSE_LABEL[(c.response_status ?? "sin_responder") as ResponseStatus]}
+                    </span>
                     <Select value={st} onValueChange={(v) => updateStatus(c.id, v as Status)}>
                       <SelectTrigger className="h-8 w-36 rounded-sm text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -279,6 +297,7 @@ function CandidacyDetailSheet({
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   const { data: c } = useQuery({
     queryKey: ["candidacy", candidacyId],
@@ -416,6 +435,30 @@ function CandidacyDetailSheet({
                 </Select>
               </div>
               <div className="col-span-2">
+                <Label className="smallcaps text-muted-foreground">Estado de la respuesta</Label>
+                <Select
+                  value={(c.response_status ?? "sin_responder") as ResponseStatus}
+                  onValueChange={async (v) => {
+                    const patch: any = { response_status: v };
+                    if (v !== "sin_responder" && !c.response_at) patch.response_at = new Date().toISOString();
+                    if (v === "sin_responder") patch.response_at = null;
+                    await (supabase as any).from("candidacies").update(patch).eq("id", c.id);
+                    qc.invalidateQueries({ queryKey: ["candidacies"] });
+                    qc.invalidateQueries({ queryKey: ["candidacy", c.id] });
+                  }}
+                >
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(RESPONSE_LABEL) as ResponseStatus[]).map((s) => (
+                      <SelectItem key={s} value={s}>{RESPONSE_LABEL[s]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {c.response_at && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">Última actualización: {formatDateEs(c.response_at)}</p>
+                )}
+              </div>
+              <div className="col-span-2">
                 <Label className="smallcaps text-muted-foreground">Teléfono</Label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" />
               </div>
@@ -453,6 +496,25 @@ function CandidacyDetailSheet({
                     {uploading ? "Subiendo…" : "Subir archivos"}
                   </Button>
                 </div>
+              </div>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  upload(e.dataTransfer.files);
+                }}
+                onClick={() => fileRef.current?.click()}
+                className={`mb-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-sm border-2 border-dashed px-4 py-8 text-center transition-colors ${
+                  dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/60 hover:bg-muted/40"
+                }`}
+              >
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <p className="text-sm">
+                  {uploading ? "Subiendo…" : "Arrastra archivos aquí"}
+                </p>
+                <p className="text-[11px] text-muted-foreground">o haz clic para seleccionarlos</p>
               </div>
               {(!files || files.length === 0) ? (
                 <p className="text-xs text-muted-foreground">Sin documentos aún.</p>
