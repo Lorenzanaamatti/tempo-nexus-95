@@ -82,6 +82,177 @@ function normalizeName(s: string | null | undefined): string {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
+function slugify(s: string) {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || `roster-${Date.now()}`;
+}
+
+async function addToTargetAccounts(params: {
+  name: string;
+  account_type: "roster" | "productora" | "plataforma" | "otros";
+  roster_kind?: "composer" | "artista" | "productor_musical" | "otros" | null;
+  production_company_id?: string | null;
+}) {
+  const name = params.name.trim();
+  if (!name) return toast.error("Nombre vacío");
+  const { data: existing } = await supabase
+    .from("target_accounts")
+    .select("id")
+    .ilike("name", name)
+    .eq("account_type", params.account_type)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${name}" ya está en Cuentas Objetivo`);
+    return;
+  }
+  const { error } = await supabase.from("target_accounts").insert({
+    name,
+    account_type: params.account_type,
+    roster_kind: params.roster_kind ?? null,
+    production_company_id: params.production_company_id ?? null,
+  } as any);
+  if (error) return toast.error(error.message);
+  toast.success(`Añadido a Cuentas Objetivo: ${name}`);
+}
+
+async function addDirectorToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("directors")
+    .select("id")
+    .ilike("full_name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Directores`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("directors")
+    .insert({ full_name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Directores CRM: ${n}`);
+  return data.id;
+}
+
+async function addCompanyToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("production_companies")
+    .select("id")
+    .ilike("name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Productoras`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("production_companies")
+    .insert({ name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Productoras CRM: ${n}`);
+  return data.id;
+}
+
+async function addPlatformToCrm(name: string) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("platforms")
+    .select("id")
+    .ilike("name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Plataformas`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("platforms")
+    .insert({ name: n })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Creado en Plataformas CRM: ${n}`);
+  return data.id;
+}
+
+async function addToRoster(
+  name: string,
+  roster_role: "composer" | "supervisor",
+) {
+  const n = name.trim();
+  if (!n) return null;
+  const { data: existing } = await supabase
+    .from("composers")
+    .select("id")
+    .ilike("full_name", n)
+    .maybeSingle();
+  if (existing) {
+    toast.info(`"${n}" ya existe en Roster`);
+    return existing.id;
+  }
+  const { data, error } = await supabase
+    .from("composers")
+    .insert({ full_name: n, slug: slugify(n), roster_role } as any)
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`Añadido al Roster: ${n}`);
+  return data.id;
+}
+
+function CrmAddMenu({
+  actions,
+}: {
+  actions: Array<{ label: string; onSelect: () => void | Promise<void> }>;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-8 px-2"
+          title="Añadir a CRM / Cuentas Objetivo"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel>Añadir a…</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {actions.map((a, i) => (
+          <DropdownMenuItem key={i} onSelect={() => void a.onSelect()}>
+            {a.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function renderComposerLink(name: string | null, byName: Map<string, string>) {
   if (!name) return <span className="text-muted-foreground">—</span>;
   const id = byName.get(normalizeName(name));
