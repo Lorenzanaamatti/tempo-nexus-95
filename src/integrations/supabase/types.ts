@@ -215,6 +215,44 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_asset_files: {
+        Row: {
+          asset_id: string
+          created_at: string
+          filename: string | null
+          id: string
+          notes: string | null
+          position: number
+          storage_path: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          filename?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          storage_path: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          filename?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_asset_files_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "brand_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_assets: {
         Row: {
           created_at: string
