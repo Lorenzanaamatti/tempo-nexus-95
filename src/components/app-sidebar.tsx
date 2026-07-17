@@ -175,7 +175,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
             {visibleAdminGroups.map((group) => (
               <SidebarGroup key={group.label}>
                 {!collapsed && (
-                  <SidebarGroupLabel className="smallcaps flex items-center gap-1.5">
+                  <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]">
                     <group.icon className="h-3 w-3" />
                     <span className="flex-1">{group.label}</span>
                     {group.area && (
