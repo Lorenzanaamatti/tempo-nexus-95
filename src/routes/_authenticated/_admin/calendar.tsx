@@ -320,6 +320,8 @@ export function CalendarBoard({
         kind: e.kind,
         title: e.title ?? undefined,
         note: e.note,
+        sourceKind: e.source_kind ?? null,
+        sourceActionId: e.source_action_id ?? null,
       });
       flat.push({
         subject_type: e.subject_type,
@@ -332,6 +334,8 @@ export function CalendarBoard({
           kind: e.kind,
           title: e.title ?? undefined,
           note: e.note,
+          sourceKind: e.source_kind ?? null,
+          sourceActionId: e.source_action_id ?? null,
         },
       });
     }
