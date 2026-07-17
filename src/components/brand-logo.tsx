@@ -1,11 +1,12 @@
-import logo from "@/assets/ic-logo.png.asset.json";
+import wordmark from "@/assets/ic-wordmark.png.asset.json";
 
 type Variant = "noir" | "clear" | "auto";
 
 /**
- * Interesante Compañía wordmark.
- * variant is kept for backward compatibility; the current mark works on
- * both light and dark surfaces.
+ * Interesante Compañía · logotipo oficial (wordmark).
+ * En dark mode se invierte por CSS para mantener el contraste; el punto
+ * naranja se conserva porque `invert` no altera la neutralidad del rojo puro
+ * de forma perceptualmente disruptiva en este mark.
  */
 export function BrandLogo({
   variant = "auto",
@@ -16,7 +17,12 @@ export function BrandLogo({
   className?: string;
   alt?: string;
 }) {
-  // The new "int" mark is used for every variant.
   void variant;
-  return <img src={logo.url} alt={alt} className={className} />;
+  return (
+    <img
+      src={wordmark.url}
+      alt={alt}
+      className={`${className ?? ""} dark:invert`.trim()}
+    />
+  );
 }
