@@ -84,8 +84,9 @@ function ComposersIndex() {
     const sub = (c.specialist_subtype ?? "").toLowerCase();
     const tags = (c.specialist_tags ?? []).map((t: string) => t.toLowerCase());
     const allTags = (c.tags ?? []).map((t: string) => t.toLowerCase());
-    const needle = specialistHashtag.toLowerCase();
-    return sub.includes(needle) || tags.includes(needle) || allTags.includes(needle);
+    const pool = [sub, ...tags, ...allTags];
+    const keywords = SPECIALIST_HASHTAG_KEYWORDS[specialistHashtag as (typeof SPECIALIST_HASHTAGS)[number]] ?? [specialistHashtag.toLowerCase()];
+    return keywords.some((kw) => pool.some((t) => t.includes(kw)));
   });
 
   const grouped = (() => {
