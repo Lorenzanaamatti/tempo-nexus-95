@@ -367,11 +367,7 @@ function SpanishFilmsPage() {
             </thead>
             <tbody>
               {data.map((f) => (
-                <tr
-                  key={f.id}
-                  onClick={() => setEditing(f)}
-                  className="cursor-pointer border-b border-border/50 hover:bg-muted/20"
-                >
+                <tr key={f.id} className="border-b border-border/50 hover:bg-muted/20">
                   <td className="px-3 py-2 font-mono text-xs">{f.year}</td>
                   <td className="px-3 py-2">
                     <button
@@ -460,11 +456,7 @@ function SpanishFilmsPage() {
                     </Badge>
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => { e.stopPropagation(); setEditing(f); }}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setEditing(f)}>
                       Abrir ficha
                     </Button>
                   </td>
