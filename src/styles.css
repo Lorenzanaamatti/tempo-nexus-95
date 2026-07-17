@@ -97,15 +97,15 @@
   /* Ink sidebar — deep charcoal with warm undertone */
   --sidebar: oklch(0.20 0.012 60);
   --sidebar-foreground: oklch(0.86 0.008 70);
-  --sidebar-primary: oklch(0.62 0.14 25);
+  --sidebar-primary: oklch(0.643 0.243 30.5);
   --sidebar-primary-foreground: oklch(0.985 0.004 75);
   --sidebar-accent: oklch(0.26 0.012 60);
   --sidebar-accent-foreground: oklch(0.97 0.005 75);
   --sidebar-border: oklch(0.28 0.010 60);
   --sidebar-ring: oklch(0.643 0.243 30.5);
   /* Coral accent (used by portal noir surfaces and selective brand moments) */
-  --accent-coral: oklch(0.68 0.18 30);
-  --accent-coral-soft: oklch(0.72 0.14 30);
+  --accent-coral: oklch(0.643 0.243 30.5);
+  --accent-coral-soft: oklch(0.70 0.20 30.5);
   /* Portal tokens — light by default (paper editorial). Dark overrides in .dark */
   --portal-bg: oklch(0.985 0.003 75);
   --portal-fg: oklch(0.18 0.008 60);
