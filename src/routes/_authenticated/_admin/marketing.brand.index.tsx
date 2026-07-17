@@ -66,21 +66,31 @@ function BrandIndex() {
   );
 }
 
-function isImagePath(p: string) {
-  return /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)$/i.test(p);
-}
+const NON_IMAGE_EXT = /\.(pdf|zip|rar|7z|tar|gz|docx?|xlsx?|pptx?|txt|csv|json|xml|mp3|wav|mp4|mov|webm|ttf|otf|woff2?)$/i;
 
 function FileThumb({ file }: { file: AssetFile }) {
   const [url, setUrl] = useState<string | null>(null);
-  const isImg = isImagePath(file.filename ?? file.storage_path);
+  const [failed, setFailed] = useState(false);
+  const name = file.filename ?? file.storage_path;
+  const definitelyNotImage = NON_IMAGE_EXT.test(name);
   useEffect(() => {
     let cancelled = false;
-    if (!isImg) return;
+    if (definitelyNotImage) return;
     signMarketingAsset(file.storage_path).then((u) => { if (!cancelled) setUrl(u); });
     return () => { cancelled = true; };
-  }, [file.storage_path, isImg]);
-  if (isImg && url) {
-    return <img src={url} alt={file.filename ?? ""} className="h-full w-full object-cover" loading="lazy" />;
+  }, [file.storage_path, definitelyNotImage]);
+  if (!definitelyNotImage && url && !failed) {
+    return (
+      <div className="h-full w-full bg-[repeating-conic-gradient(hsl(var(--muted))_0%_25%,transparent_0%_50%)] bg-[length:16px_16px]">
+        <img
+          src={url}
+          alt={file.filename ?? ""}
+          className="h-full w-full object-contain"
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      </div>
+    );
   }
   return (
     <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
