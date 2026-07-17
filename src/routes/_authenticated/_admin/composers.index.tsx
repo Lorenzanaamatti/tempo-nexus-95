@@ -9,6 +9,8 @@ import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 
+const SPECIALIST_HASHTAGS = ["Técnico", "Producción", "Cantante", "Instrumentista"] as const;
+
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
 const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
