@@ -13,7 +13,8 @@ import {
   type SocialLinks,
 } from "@/components/social-links";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
-import { Building2, Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone } from "lucide-react";
+import { Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated/_admin/ic")({
   component: ICCompanyPage,
@@ -73,9 +74,9 @@ function ICCompanyPage() {
         <p className="smallcaps text-muted-foreground">Roster · Interesante Filmografía</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-5xl flex items-center gap-3">
-              <Building2 className="h-9 w-9 text-primary" />
-              {ic.artistic_name || ic.full_name}
+            <h1 className="font-display text-5xl flex items-center gap-4">
+              <BrandLogo className="h-12 w-auto" />
+              <span className="sr-only">{ic.artistic_name || ic.full_name}</span>
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Ficha corporativa de Interesante Compañía. Acumula la filmografía combinada del roster, KPIs anuales,
