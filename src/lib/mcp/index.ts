@@ -3,6 +3,10 @@ import whoamiTool from "./tools/whoami";
 import searchRosterTool from "./tools/search-roster";
 import listDealMemosTool from "./tools/list-deal-memos";
 import listCalendarEventsTool from "./tools/list-calendar-events";
+import searchTeamMembersTool from "./tools/search-team-members";
+import createTaskTool from "./tools/create-task";
+import createTargetAccountTool from "./tools/create-target-account";
+import updateTargetAccountTool from "./tools/update-target-account";
 
 // Direct Supabase issuer is required (the .lovable.cloud proxy is rejected as RFC 8414 issuer mismatch).
 // The project ref is inlined at build time via VITE_SUPABASE_PROJECT_ID.
@@ -18,5 +22,14 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [whoamiTool, searchRosterTool, listDealMemosTool, listCalendarEventsTool],
+  tools: [
+    whoamiTool,
+    searchRosterTool,
+    listDealMemosTool,
+    listCalendarEventsTool,
+    searchTeamMembersTool,
+    createTaskTool,
+    createTargetAccountTool,
+    updateTargetAccountTool,
+  ],
 });
