@@ -24,7 +24,6 @@ export default defineTool({
     notes: z.string().optional(),
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
-  needsApproval: true,
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "No autenticado" }], isError: true };
     const { id, ...rest } = input;

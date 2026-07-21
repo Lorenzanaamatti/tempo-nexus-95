@@ -29,7 +29,6 @@ export default defineTool({
     notes: z.string().optional(),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  needsApproval: true,
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "No autenticado" }], isError: true };
     const { createClient } = await import("@supabase/supabase-js");

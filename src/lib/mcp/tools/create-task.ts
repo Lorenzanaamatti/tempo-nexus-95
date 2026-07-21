@@ -20,7 +20,6 @@ export default defineTool({
     kind: z.string().optional().describe("Tipo de acción (por defecto 'tarea')."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  needsApproval: true,
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "No autenticado" }], isError: true };
     const { createClient } = await import("@supabase/supabase-js");
