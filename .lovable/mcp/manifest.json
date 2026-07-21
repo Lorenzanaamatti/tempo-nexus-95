@@ -127,6 +127,280 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "search_team_members",
+        "title": "Buscar miembros del equipo IC",
+        "description": "Busca personas del equipo interno (people) por nombre para obtener su UUID (útil como assignee_person_id o responsible_person_id).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Nombre o parte del nombre."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_task",
+        "title": "Crear tarea",
+        "description": "Crea una tarea en el CRM (tabla actions). Se sincroniza automáticamente en el calendario. Requiere permisos de admin (BIG C).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Título de la tarea."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Notas o descripción."
+            },
+            "due_date": {
+              "type": "string",
+              "description": "Fecha de vencimiento YYYY-MM-DD."
+            },
+            "assignee_person_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID de la persona del equipo IC asignada."
+            },
+            "area": {
+              "type": "string",
+              "description": "Área funcional (opcional)."
+            },
+            "subject_type": {
+              "type": "string",
+              "enum": [
+                "target_account",
+                "opportunity",
+                "candidacy",
+                "composer",
+                "production",
+                "spanish_film",
+                "person"
+              ],
+              "description": "Tipo de entidad vinculada."
+            },
+            "subject_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID de la entidad vinculada."
+            },
+            "kind": {
+              "type": "string",
+              "description": "Tipo de acción (por defecto 'tarea')."
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_target_account",
+        "title": "Crear cuenta objetivo",
+        "description": "Crea una nueva cuenta objetivo (cliente potencial) en el CRM. Requiere permisos de admin (BIG C).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Nombre de la cuenta."
+            },
+            "account_type": {
+              "type": "string",
+              "enum": [
+                "roster",
+                "productora",
+                "plataforma",
+                "otros"
+              ],
+              "description": "Tipo de cuenta. Por defecto 'productora'."
+            },
+            "roster_kind": {
+              "type": "string",
+              "enum": [
+                "composer",
+                "artista",
+                "productor_musical",
+                "otros"
+              ],
+              "description": "Subtipo cuando account_type = 'roster'."
+            },
+            "other_label": {
+              "type": "string",
+              "description": "Etiqueta libre cuando account_type = 'otros'."
+            },
+            "sector": {
+              "type": "string"
+            },
+            "website": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "alta",
+                "media",
+                "baja"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "sin_contacto",
+                "contactado",
+                "en_conversacion",
+                "propuesta_enviada",
+                "ganada",
+                "descartada"
+              ]
+            },
+            "responsible_person_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "next_step": {
+              "type": "string"
+            },
+            "next_step_date": {
+              "type": "string",
+              "description": "YYYY-MM-DD."
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_target_account",
+        "title": "Actualizar cuenta objetivo",
+        "description": "Modifica campos de una cuenta objetivo existente por id. Solo actualiza los campos enviados. Requiere permisos de admin (BIG C).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID de la cuenta objetivo."
+            },
+            "name": {
+              "type": "string"
+            },
+            "account_type": {
+              "type": "string",
+              "enum": [
+                "roster",
+                "productora",
+                "plataforma",
+                "otros"
+              ]
+            },
+            "roster_kind": {
+              "type": "string",
+              "enum": [
+                "composer",
+                "artista",
+                "productor_musical",
+                "otros"
+              ]
+            },
+            "other_label": {
+              "type": "string"
+            },
+            "sector": {
+              "type": "string"
+            },
+            "website": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "alta",
+                "media",
+                "baja"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "sin_contacto",
+                "contactado",
+                "en_conversacion",
+                "propuesta_enviada",
+                "ganada",
+                "descartada"
+              ]
+            },
+            "responsible_person_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "next_step": {
+              "type": "string"
+            },
+            "next_step_date": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }
