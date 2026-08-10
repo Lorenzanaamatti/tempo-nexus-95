@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/portal/kpis")({
 });
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
+  formatEUR0(n || 0);
 
 function Kpis() {
   const { composerId } = usePortalComposer();
