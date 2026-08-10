@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
+import { formatEUR0 } from "@/lib/money";
 import {
   FolderKanban,
   Inbox,

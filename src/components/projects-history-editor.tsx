@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
+import { formatEUR0 } from "@/lib/money";
 
 type Project = {
   id: string;
