@@ -39,7 +39,7 @@ const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
-  validateSearch: (s: Record<string, unknown>): { role: RosterRole } => {
+  validateSearch: (s: { role?: unknown }): { role: RosterRole } => {
     const v = typeof s.role === "string" ? s.role : "composer";
     return { role: (ALL_ROLES.includes(v as RosterRole) ? v : "composer") as RosterRole };
   },
