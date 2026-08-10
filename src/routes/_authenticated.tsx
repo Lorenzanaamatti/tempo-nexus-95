@@ -86,6 +86,7 @@ function Shell() {
               <nav className="ml-4 flex items-center gap-1">
                 <Link
                   to="/calendar"
+                  search={{ view: "global" }}
                   className="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs smallcaps text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   activeProps={{ className: "flex items-center gap-1.5 rounded-sm bg-muted px-2 py-1 text-xs smallcaps text-foreground" }}
                 >
