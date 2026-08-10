@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { formatMoneyEs } from "@/lib/money";
 
 type GenInput = {
   dealMemoId: string;
@@ -30,14 +31,6 @@ function extractJson(text: string): { email_asunto: string; email_cuerpo: string
   }
   return { email_asunto: parsed.email_asunto, email_cuerpo: parsed.email_cuerpo };
 }
-
-const formatMoneyEs = (amount: number | string | null | undefined, moneda = "EUR") => {
-  if (amount === null || amount === undefined || amount === "") return "(sin especificar)";
-  const n = typeof amount === "string" ? Number(amount) : amount;
-  if (!Number.isFinite(n)) return "(sin especificar)";
-  const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  return `${new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ${symbol}`;
-};
 
 export const generateDealMemoVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -103,7 +96,7 @@ ${plantilla.email_firma}`;
 - Referencia: ${dm.referencia}
 - Obra: ${dm.obra}
 - Descripción de uso: ${dm.descripcion_uso ?? "(sin especificar)"}
-- Importe propuesto: ${formatMoneyEs(dm.importe_propuesto, dm.moneda ?? "EUR")}
+- Importe propuesto: ${formatMoneyEs(dm.importe_propuesto, dm.moneda ?? "EUR", { emptyLabel: "(sin especificar)", alwaysDecimals: true })}
 - Destinatario: ${dm.destinatario_final_email}
 - Notas internas: ${dm.notas_internas ?? "(ninguna)"}
 ${contactsCtx ? `\n# Contactos\n${contactsCtx}` : ""}
