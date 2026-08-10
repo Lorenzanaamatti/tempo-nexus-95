@@ -114,7 +114,7 @@ function SectionHeader({ icon: Icon, title, hint }: { icon: any; title: string; 
 }
 
 function fmtEur(n: number) {
-  return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  return formatEUR0(n);
 }
 
 function ICKpisSection() {

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
+import { formatEUR0 } from "@/lib/money";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
   component: Kpis,

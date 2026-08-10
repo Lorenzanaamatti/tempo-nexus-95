@@ -26,7 +26,7 @@ type Project = {
   position: number;
 };
 
-const EUR = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const EUR = { format: (n: number) => formatEUR0(n) };
 
 function sum(rows: Project[], key: keyof Project) {
   return rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
