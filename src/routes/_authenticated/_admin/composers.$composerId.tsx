@@ -236,7 +236,7 @@ function ComposerEditPage() {
       initial={composerQ.data as any}
       catalogs={catalogsQ.data!}
       initialRelations={relationsQ.data!}
-      onDeleted={() => navigate({ to: "/composers" })}
+      onDeleted={() => navigate({ to: "/composers", search: { role: "composer" } })}
     />
   );
 }
@@ -430,7 +430,7 @@ function Inner({
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <p className="smallcaps text-muted-foreground">
-          <Link to="/composers" className="hover:text-foreground">Roster</Link> · Ficha
+          <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha
         </p>
         <div className="flex gap-2">
           <Button asChild size="sm" variant="outline">
