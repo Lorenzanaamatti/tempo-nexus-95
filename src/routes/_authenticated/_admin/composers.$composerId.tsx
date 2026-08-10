@@ -487,8 +487,8 @@ function Inner({
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KPI label="Proyectos activos" value={String(activeProductions.length)} />
         <KPI label="Proyectos totales" value={String(projects.length)} />
-        <KPI label="Facturación histórica" value={`${totalRevenue.toLocaleString("es-ES")} €`} />
-        <KPI label="Margen neto" value={`${totalMargin.toLocaleString("es-ES")} €`} />
+        <KPI label="Facturación histórica" value={formatEUR0(totalRevenue)} />
+        <KPI label="Margen neto" value={formatEUR0(totalMargin)} />
       </section>
 
       {/* Representación */}
@@ -583,7 +583,7 @@ function Inner({
                   </div>
                 </div>
                 {p.fee_amount != null && (
-                  <div className="text-sm text-muted-foreground">{Number(p.fee_amount).toLocaleString("es-ES")} €</div>
+                  <div className="text-sm text-muted-foreground">{formatEUR0(Number(p.fee_amount))}</div>
                 )}
               </li>
             ))}
@@ -609,7 +609,7 @@ function Inner({
                   {c.note && <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>}
                 </div>
                 {c.opportunity?.estimated_value != null && (
-                  <div className="text-sm text-muted-foreground whitespace-nowrap">{Number(c.opportunity.estimated_value).toLocaleString("es-ES")} €</div>
+                  <div className="text-sm text-muted-foreground whitespace-nowrap">{formatEUR0(Number(c.opportunity.estimated_value))}</div>
                 )}
               </li>
             ))}
@@ -1100,23 +1100,23 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-sm border border-primary/30 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">Bruto (lo que factura el representado)</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{totals.trabajo.previsto.toLocaleString("es-ES")} €</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {totals.trabajo.fact.toLocaleString("es-ES")} € · Cobrado {totals.trabajo.cob.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(totals.trabajo.previsto)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(totals.trabajo.fact)} · Cobrado {formatEUR0(totals.trabajo.cob)}</div>
         </div>
         <div className="rounded-sm border border-amber-500/40 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">− Comisión IC</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">−{totals.comision.previsto.toLocaleString("es-ES")} €</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturada {totals.comision.fact.toLocaleString("es-ES")} € · Cobrada {totals.comision.cob.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">−{formatEUR0(totals.comision.previsto)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturada {formatEUR0(totals.comision.fact)} · Cobrada {formatEUR0(totals.comision.cob)}</div>
         </div>
         <div className="rounded-sm border border-emerald-500/40 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">Neto representado</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{neto.previsto.toLocaleString("es-ES")} €</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {neto.fact.toLocaleString("es-ES")} € · Cobrado {neto.cob.toLocaleString("es-ES")} €</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(neto.previsto)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(neto.fact)} · Cobrado {formatEUR0(neto.cob)}</div>
         </div>
       </div>
       {totals.trabajo.venc > 0 && (
         <p className="text-xs text-amber-600 dark:text-amber-400">
-          Vencido sin facturar (trabajo): {totals.trabajo.venc.toLocaleString("es-ES")} €
+          Vencido sin facturar (trabajo): {formatEUR0(totals.trabajo.venc)}
         </p>
       )}
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -1144,7 +1144,7 @@ function ComposerBilling({ productions, composerId }: { productions: any[]; comp
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">#{s.sprint_number}{s.label ? ` · ${s.label}` : ""}</td>
                   <td className="px-3 py-2 text-xs">{s.kind === "comision" ? "Comisión IC" : s.kind === "trabajo" ? "Trabajo" : s.kind}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{Number(s.amount ?? 0).toLocaleString("es-ES")} €</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR0(Number(s.amount ?? 0))}</td>
                   <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(s.due_date)}</td>
                   <td className="px-3 py-2 text-xs">{s.status}</td>
                   <td className="px-3 py-2 text-xs">
@@ -1176,7 +1176,7 @@ function ProductionFeeSummary({ productions }: { productions: any[] }) {
     <ul className="space-y-1 text-xs text-muted-foreground">
       {withFee.map((p) => (
         <li key={p.id}>
-          <span className="text-foreground">{p.title}</span> · Fee {Number(p.fee_amount ?? 0).toLocaleString("es-ES")} € · Comisión IC {Number(p.ic_commission ?? 0).toLocaleString("es-ES")} €
+          <span className="text-foreground">{p.title}</span> · Fee {formatEUR0(Number(p.fee_amount ?? 0))} · Comisión IC {formatEUR0(Number(p.ic_commission ?? 0))}
         </li>
       ))}
     </ul>
