@@ -8,12 +8,46 @@ const NUM = new Intl.NumberFormat("de-DE", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const EUR0 = new Intl.NumberFormat("es-ES", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+});
 
 export function formatEUR(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const n = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(n)) return "—";
   return EUR.format(n);
+}
+
+/** Importe en euros sin decimales: "1.234 €". Para KPIs y totales. */
+export function formatEUR0(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "0 €";
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return "0 €";
+  return EUR0.format(n);
+}
+
+/**
+ * Importe con moneda arbitraria (EUR/USD/otras). Único formateador de dinero
+ * multi-divisa de la app: no dupliques esta lógica en otros archivos.
+ */
+export function formatMoneyEs(
+  amount: number | string | null | undefined,
+  moneda = "EUR",
+  options?: { emptyLabel?: string; alwaysDecimals?: boolean },
+): string {
+  const emptyLabel = options?.emptyLabel ?? "—";
+  if (amount === null || amount === undefined || amount === "") return emptyLabel;
+  const n = typeof amount === "string" ? Number(amount) : amount;
+  if (!Number.isFinite(n)) return emptyLabel;
+  const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
+  const withDecimals = options?.alwaysDecimals === true || Math.round(n) !== n;
+  return `${new Intl.NumberFormat("es-ES", {
+    minimumFractionDigits: withDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(n)} ${symbol}`;
 }
 
 export function formatNumberEs(value: number | string | null | undefined): string {
