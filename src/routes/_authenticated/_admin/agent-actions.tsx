@@ -145,7 +145,7 @@ function ActionRow({ row, onChange }: { row: Row; onChange: () => void }) {
           )}
         </div>
         <span className="text-[10px] text-muted-foreground">
-          {new Date(row.requested_at).toLocaleString("es-ES")}
+          {formatDateTimeEs(row.requested_at)}
         </span>
       </div>
       {row.summary && <p className="mb-2 text-sm">{row.summary}</p>}

@@ -172,7 +172,7 @@ function SocialIndex() {
                   <p className="mt-2 line-clamp-3 text-xs text-muted-foreground">{p.copy_es ?? ""}</p>
                   <div className="mt-3 flex flex-wrap gap-1 text-[10px] text-muted-foreground">
                     <span>{SOCIAL_FORMAT_LABEL[p.format]}</span>
-                    {p.scheduled_for && <span>· {new Date(p.scheduled_for).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}</span>}
+                    {p.scheduled_for && <span>· {formatDateTimeEs(p.scheduled_for)}</span>}
                   </div>
                 </button>
               ))}
@@ -519,7 +519,7 @@ function SocialCalendar({ posts }: { posts: Post[] }) {
           <ul className="divide-y divide-border rounded-sm border border-border">
             {items.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-                <span className="w-24 font-mono text-xs text-muted-foreground">{new Date(p.scheduled_for!).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                <span className="w-24 font-mono text-xs text-muted-foreground">{formatShortDateTimeEs(p.scheduled_for)}</span>
                 <Badge variant="outline" className="rounded-sm">{SOCIAL_CHANNEL_LABEL[p.channel]}</Badge>
                 <span className="font-display">{p.title || p.copy_es?.slice(0, 60) || "(sin título)"}</span>
                 <Badge className="ml-auto rounded-sm" variant={p.status === "publicado" ? "default" : "secondary"}>{SOCIAL_POST_STATUS_LABEL[p.status]}</Badge>
