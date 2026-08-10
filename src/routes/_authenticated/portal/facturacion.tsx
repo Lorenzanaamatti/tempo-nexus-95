@@ -4,13 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useMemo, useState } from "react";
 import { formatDateEs } from "@/lib/dates";
+import { formatEUR } from "@/lib/money";
 
 export const Route = createFileRoute("/_authenticated/portal/facturacion")({
   component: Facturacion,
 });
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
+const fmt = (n: number) => formatEUR(n || 0);
 
 type Sprint = {
   id: string;

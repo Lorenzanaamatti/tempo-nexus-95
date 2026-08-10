@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
+import { formatEUR0 } from "@/lib/money";
 
 type Project = {
   id: string;
@@ -26,7 +27,7 @@ type Project = {
   position: number;
 };
 
-const EUR = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const EUR = { format: (n: number) => formatEUR0(n) };
 
 function sum(rows: Project[], key: keyof Project) {
   return rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);

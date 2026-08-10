@@ -74,17 +74,9 @@ export const EVENTO_LABEL: Record<DmEventoTipo, string> = {
   cerrado: "Deal memo cerrado",
 };
 
-export function formatMoneyEs(amount: number | string | null | undefined, moneda = "EUR"): string {
-  if (amount === null || amount === undefined || amount === "") return "—";
-  const n = typeof amount === "string" ? Number(amount) : amount;
-  if (!Number.isFinite(n)) return "—";
-  const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  const hasDecimals = Math.round(n) !== n;
-  return `${new Intl.NumberFormat("es-ES", {
-    minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(n)} ${symbol}`;
-}
+// Formateador único en src/lib/money.ts. Se reexporta aquí por compatibilidad
+// con los imports existentes de deal memos.
+export { formatMoneyEs } from "./money";
 
 /**
  * Calcula la siguiente referencia correlativa anual (DM-IC-YYYY-NNN).

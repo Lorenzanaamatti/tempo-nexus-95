@@ -24,7 +24,7 @@ import {
 } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/_admin/calendar")({
-  validateSearch: (s: Record<string, unknown>) => ({ view: (s.view as string) ?? "global" }),
+  validateSearch: (s: { view?: unknown }) => ({ view: (s.view as string) ?? "global" }),
   component: GlobalCalendar,
 });
 

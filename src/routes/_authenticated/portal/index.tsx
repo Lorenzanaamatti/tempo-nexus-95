@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
+import { formatEUR0 } from "@/lib/money";
 import {
   FolderKanban,
   Inbox,
@@ -102,8 +103,7 @@ function PortalHome() {
 
   const composer = data?.composer;
   const name = composer?.artistic_name || composer?.full_name || "Bienvenido/a";
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  const fmt = (n: number) => formatEUR0(n);
 
   return (
     <div className="space-y-12">

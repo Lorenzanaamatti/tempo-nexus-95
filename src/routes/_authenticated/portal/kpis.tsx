@@ -2,13 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
+import { formatEUR0 } from "@/lib/money";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
   component: Kpis,
 });
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
+  formatEUR0(n || 0);
 
 function Kpis() {
   const { composerId } = usePortalComposer();

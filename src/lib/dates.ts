@@ -17,3 +17,22 @@ export function formatDateEs(value: string | Date | null | undefined): string {
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 }
+
+/**
+ * Fecha + hora para UI: "12/03/2026, 09:30". Único formateador de fecha-hora
+ * de la app: no uses `toLocaleString` suelto en componentes.
+ */
+export function formatDateTimeEs(value: string | Date | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" });
+}
+
+/** Fecha corta con hora: "12 mar, 09:30". Para listados compactos. */
+export function formatShortDateTimeEs(value: string | Date | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDateTimeEs } from "@/lib/dates";
 import { approveAgentAction, rejectAgentAction } from "@/lib/assistants.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -145,7 +146,7 @@ function ActionRow({ row, onChange }: { row: Row; onChange: () => void }) {
           )}
         </div>
         <span className="text-[10px] text-muted-foreground">
-          {new Date(row.requested_at).toLocaleString("es-ES")}
+          {formatDateTimeEs(row.requested_at)}
         </span>
       </div>
       {row.summary && <p className="mb-2 text-sm">{row.summary}</p>}
