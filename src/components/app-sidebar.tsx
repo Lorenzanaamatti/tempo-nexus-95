@@ -58,6 +58,20 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     },
   });
 
+  // Solicitudes de alta pendientes de aprobación (solo BIG C).
+  const { data: pendingUsers } = useQuery({
+    queryKey: ["pending-users-count"],
+    enabled: role === "admin",
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+  });
+
   const composerActive = pathname.startsWith("/composers");
   const composersRole = composerActive ? (search?.role ?? "composer") : null;
 
