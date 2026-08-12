@@ -58,6 +58,20 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     },
   });
 
+  // Solicitudes de alta pendientes de aprobación (solo BIG C).
+  const { data: pendingUsers } = useQuery({
+    queryKey: ["pending-users-count"],
+    enabled: role === "admin",
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+  });
+
   const composerActive = pathname.startsWith("/composers");
   const composersRole = composerActive ? (search?.role ?? "composer") : null;
 
@@ -254,6 +268,25 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
+          {role === "admin" && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/users")}>
+                <Link to="/users" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {!collapsed && (
+                    <span className="flex flex-1 items-center justify-between gap-2 truncate text-xs">
+                      <span>Usuarios y permisos</span>
+                      {(pendingUsers ?? 0) > 0 && (
+                        <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                          {pendingUsers}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           {role === "admin" && (
             <SidebarMenuItem>
               <SidebarMenuButton
