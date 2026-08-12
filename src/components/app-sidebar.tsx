@@ -270,6 +270,25 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
         <SidebarMenu>
           {role === "admin" && (
             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/users")}>
+                <Link to="/users" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {!collapsed && (
+                    <span className="flex flex-1 items-center justify-between gap-2 truncate text-xs">
+                      <span>Usuarios y permisos</span>
+                      {(pendingUsers ?? 0) > 0 && (
+                        <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                          {pendingUsers}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          {role === "admin" && (
+            <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => {
                   setSessionView(null);
