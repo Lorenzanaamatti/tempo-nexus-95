@@ -1,41 +1,49 @@
-# Herramientas MCP de escritura para Claude
+# Propuestas de optimización (solo análisis, sin cambios)
 
-Añadir 3 nuevas herramientas al servidor MCP para que Claude (u otros clientes conectados) pueda transformar una orden en acciones concretas. Todas las escrituras se realizan como el usuario autenticado, respetando RLS (solo BIG C / admin puede escribir en estas tablas), y cada una lleva `needsApproval: true` para que el cliente MCP muestre confirmación antes de ejecutar.
+Lista priorizada de mejoras detectadas al revisar la app. Nada se implementa hasta que elijas.
 
-## Nuevas herramientas
+## A. Rendimiento percibido (impacto alto, riesgo bajo)
 
-### 1. `create_task` — Crear una tarea
-Inserta en `public.actions`.
-- **Input**: `title` (obligatorio), `notes?`, `due_date?` (YYYY-MM-DD), `assignee_person_id?` (uuid de la persona del equipo IC), `area?`, `subject_type?` + `subject_id?` (para vincular a una cuenta objetivo, oportunidad, película, etc.), `kind?` (por defecto `tarea`).
-- El trigger existente `trg_sync_action_calendar` la publica automáticamente en el calendario.
-- Devuelve el registro creado.
+1. **Caché de datos mal configurada.** El cliente de datos se crea sin tiempos de caché: cada vez que vuelves a una pantalla se recarga todo desde cero. Fijar 30-60 s de "frescura" y desactivar la recarga al enfocar la ventana elimina la mayoría de parpadeos y llamadas repetidas.
+2. **Favicon de 785 KB.** Se descarga en cada visita. Debería pesar <20 KB (versión 64x64 optimizada).
+3. **Librería de Excel cargada siempre.** La exportación a hoja de cálculo (~400 KB) entra en el paquete inicial aunque no exportes nada. Cargarla solo al pulsar "Exportar".
+4. **Consultas que piden todas las columnas.** Pantallas como compositores, redes sociales, deal memos y marketing traen columnas que no muestran (textos largos, notas). Pedir solo lo que se pinta acelera listados grandes.
+5. **Sin paginación real** en listados que crecerán (CRM Películas ES, Identidad corporativa, Candidaturas, Roster). Conviene paginar o cargar por scroll a partir de ~100 fichas.
+6. **Sondeos cada 30 s** en barra lateral y campana de avisos. Se pueden unificar en una sola consulta de contadores o pasar a tiempo real.
 
-### 2. `create_target_account` — Crear una nueva cuenta objetivo (cliente)
-Inserta en `public.target_accounts`.
-- **Input**: `name` (obligatorio), `account_type` (`roster` | `productora` | `plataforma` | `otros`, por defecto `productora`), `roster_kind?`, `other_label?`, `sector?`, `website?`, `priority?` (`alta`|`media`|`baja`), `status?`, `responsible_person_id?`, `next_step?`, `next_step_date?`, `notes?`.
-- Devuelve el registro creado.
+## B. Mantenibilidad del código
 
-### 3. `update_target_account` — Modificar una cuenta objetivo existente
-Update parcial sobre `public.target_accounts` por `id`.
-- **Input**: `id` (obligatorio) + cualquier subconjunto de: `name`, `status`, `priority`, `responsible_person_id`, `next_step`, `next_step_date`, `notes`, `website`, `sector`, `account_type`, `roster_kind`, `other_label`.
-- Solo actualiza los campos que Claude envía.
-- Devuelve el registro actualizado.
+7. **Pantallas gigantes.** Ficha de compositor (1.200 líneas), CRM Películas (1.140), Calendario (850), Deal memo (840). Dividirlas en pestañas/bloques reduce errores y tiempos de carga por ruta.
+8. **Tipos de base de datos desactualizados.** Hay ~150 puntos donde el código "apaga" el tipado para poder consultar tablas nuevas. Regenerar los tipos devuelve autocompletado y detección de errores antes de publicar.
+9. **Subida de archivos duplicada 6 veces** (fotos, vídeos, candidaturas, marketing, plantillas). Un único componente de subida con arrastrar-y-soltar unificaría comportamiento y mensajes de error.
+10. **Editores de fichas repetidos.** Filmografía, premios, demos, fases, contrapartes… comparten estructura; ya existe un editor genérico (`RelationListEditor`) infrautilizado.
+11. **Fase 3 pendiente de la simplificación anterior:** unificar las herramientas del chat interno y las de los agentes externos en un único catálogo.
 
-### Herramienta auxiliar (lectura) para desambiguar
-- `search_team_members`: busca personas del equipo IC por nombre para obtener el `assignee_person_id` / `responsible_person_id` correcto antes de crear tareas o cuentas. Sin ella, Claude tendría que adivinar el uuid.
+## C. Experiencia de uso
 
-## Detalles técnicos
+12. **Estados de carga inconsistentes:** unas pantallas muestran esqueleto, otras se quedan en blanco. Unificar carga, vacío y error.
+13. **Búsqueda global ausente.** Un buscador único (roster, cuentas, películas, deal memos) ahorraría muchos clics en el árbol.
+14. **Filtros que no se recuerdan** al volver atrás en Roster, Cuentas objetivo y Candidaturas.
+15. **Ediciones sin confirmación visual** en varios formularios (se guarda al salir del campo sin aviso claro).
+16. **Uso en móvil:** las vistas Kanban y calendario no están adaptadas a pantalla pequeña.
 
-- Archivos nuevos en `src/lib/mcp/tools/`: `create-task.ts`, `create-target-account.ts`, `update-target-account.ts`, `search-team-members.ts`.
-- Registrar los 4 en `src/lib/mcp/index.ts` (`tools: [...]`).
-- Cada handler sigue el patrón existente: cliente Supabase con `Authorization: Bearer ${ctx.getToken()}` para que RLS aplique como el usuario que llama. Si el usuario no es admin, la escritura falla por política — comportamiento correcto.
-- `annotations`:
-  - Creaciones: `readOnlyHint: false`, `destructiveHint: false`, `idempotentHint: false`.
-  - Update: `readOnlyHint: false`, `destructiveHint: true` (modifica datos existentes).
-- `needsApproval: true` en las 3 de escritura → Claude pedirá confirmación al usuario antes de ejecutar.
-- Validación con Zod, sin `.min/.max` en enums complejos; los enums cortos (`account_type`, `priority`, `status`) se declaran como `z.enum([...])`.
-- Ejecutar `app_mcp_server--extract_mcp_manifest` al final para regenerar el manifest.
+## D. Datos y seguridad
 
-## Fuera de alcance
-- Borrado de registros (más peligroso; se puede añadir después si lo pides).
-- Escritura sobre oportunidades, deal memos o candidaturas (se puede añadir en una segunda tanda).
+17. **Índices de base de datos**: revisar los campos por los que se filtra y ordena a diario (responsable, estado, fechas) para que los listados no se degraden al crecer.
+18. **Duplicados de personas y empresas**: no hay control de nombres repetidos al crear desde CRM Películas; conviene detección de duplicados al escribir.
+19. **Auditoría de cambios**: hoy no queda registro de quién modificó qué en fichas críticas (deal memos, contratos).
+
+## Orden recomendado
+
+Bloque 1 (rápido, se nota enseguida): 1, 2, 3, 4, 12.
+Bloque 2 (escalabilidad): 5, 6, 17, 8.
+Bloque 3 (limpieza): 7, 9, 10, 11.
+Bloque 4 (producto): 13, 14, 15, 16, 18, 19.
+
+## Detalle técnico
+
+- QueryClient en `src/router.tsx` sin `defaultOptions` → añadir `staleTime`, `gcTime`, `refetchOnWindowFocus: false`.
+- `src/components/export-button.tsx` importa `xlsx` estáticamente → `await import("xlsx")` dentro del handler.
+- `select("*")` en 20 archivos; `supabase as any` en ~40 archivos → regenerar `src/integrations/supabase/types.ts`.
+- Subidas: `photo-uploader`, `video-gallery`, `person-photo-uploader`, `marketing-upload`, candidaturas y plantillas DM → un `FileDropzone` + hook `useStorageUpload`.
+- Rutas admin: 45 archivos en `_admin`; los mayores se benefician de división en subcomponentes por pestaña.
