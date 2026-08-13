@@ -10,8 +10,6 @@ import {
   Megaphone, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, Share2,
   CalendarDays, UserCog,
 } from "lucide-react";
-import { TodayPanel } from "@/components/today-panel";
-import { isPathEnabled, useEnabledModules } from "@/lib/modules";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Index,
@@ -105,7 +103,6 @@ const GROUPS: Group[] = [
 
 function Index() {
   const { role, status, isStaff, isBigC, loading } = useCurrentRole();
-  const enabledModules = useEnabledModules();
   useEffect(() => {
     if (loading) return;
     if (status === "pending" || status === "rejected") {
@@ -123,14 +120,11 @@ function Index() {
     );
   }
 
-  const visibleGroups = GROUPS.filter((g) => isBigC || g.label !== "Económico")
-    .map((g) =>
-      g.label === "Legal" && isBigC
-        ? { ...g, items: [...g.items, { title: "Usuarios y permisos", to: "/users", icon: UserCog }] as typeof g.items }
-        : g,
-    )
-    .map((g) => ({ ...g, items: g.items.filter((i) => isPathEnabled(i.to, enabledModules)) }))
-    .filter((g) => g.items.length > 0);
+  const visibleGroups = GROUPS.filter((g) => isBigC || g.label !== "Económico").map((g) =>
+    g.label === "Legal" && isBigC
+      ? { ...g, items: [...g.items, { title: "Usuarios y permisos", to: "/users", icon: UserCog }] as typeof g.items }
+      : g,
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
@@ -141,8 +135,6 @@ function Index() {
           Elige un área para navegar por el archivo. Tienes el árbol completo siempre disponible en la barra lateral.
         </p>
       </header>
-
-      <TodayPanel isBigC={isBigC} />
 
       <div className="space-y-10">
         {visibleGroups.map((group) => (

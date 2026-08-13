@@ -27,8 +27,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import type { TaskArea } from "@/lib/task-areas";
 import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
-import { RefreshCw, Home as HomeIcon, SlidersHorizontal } from "lucide-react";
-import { isPathEnabled, useEnabledModules } from "@/lib/modules";
+import { RefreshCw, Home as HomeIcon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessionView?: SessionView | null }) {
@@ -39,7 +38,6 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const { user, signOut } = useAuth();
   const { open: openNewTask } = useNewTaskDialog();
   const nav = useNavigate();
-  const enabledModules = useEnabledModules();
 
   // For non-admin roles, the session view is irrelevant (they get their own tree).
   // For admin, default to "bigc" (full) if nothing has been chosen.
@@ -170,9 +168,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
         : g,
     );
 
-  const visibleAdminGroups = (isTeamView ? teamGroups : adminGroups)
-    .map((g) => ({ ...g, items: g.items.filter((i) => isPathEnabled(i.to, enabledModules)) }))
-    .filter((g) => g.items.length > 0);
+  const visibleAdminGroups = isTeamView ? teamGroups : adminGroups;
 
   return (
     <Sidebar collapsible="icon">
@@ -287,16 +283,6 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                       )}
                     </span>
                   )}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-          {role === "admin" && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/modulos")}>
-                <Link to="/modulos" className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  {!collapsed && <span className="truncate text-xs">Módulos activos</span>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
