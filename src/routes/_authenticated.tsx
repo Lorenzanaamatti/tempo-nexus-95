@@ -9,6 +9,7 @@ import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView } from "@/lib/session-view";
 import { BrandLogo } from "@/components/brand-logo";
+import { GlobalSearch, GlobalSearchTrigger, useGlobalSearch } from "@/components/global-search";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
@@ -19,6 +20,7 @@ function Shell() {
   const { role, loading: roleLoading, isBigC } = useCurrentRole();
   const sessionView = useSessionView();
   const [ready, setReady] = useState(false);
+  const globalSearch = useGlobalSearch();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isPortal = pathname.startsWith("/portal");
   const isVistaPicker = pathname === "/vista";
@@ -82,6 +84,7 @@ function Shell() {
           <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
             <BrandLogo variant="auto" className="h-4 w-auto" />
+            {(role === "admin" || role === "team") && <GlobalSearchTrigger onClick={() => globalSearch.setOpen(true)} />}
             {role === "admin" && (
               <nav className="ml-4 flex items-center gap-1">
                 <Link
@@ -119,6 +122,9 @@ function Shell() {
           <main className="flex-1">
             <Outlet />
           </main>
+          {(role === "admin" || role === "team") && (
+            <GlobalSearch open={globalSearch.open} onOpenChange={globalSearch.setOpen} />
+          )}
         </div>
       </div>
       </TaskDialogProvider>
