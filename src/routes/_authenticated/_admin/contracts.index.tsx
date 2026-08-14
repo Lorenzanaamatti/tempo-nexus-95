@@ -1,3 +1,4 @@
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -75,6 +76,8 @@ function ContractsIndex() {
     });
     return sorted;
   }, [data, q, statusFilter, langFilter, typeFilter, sortKey, sortDir]);
+
+  const pg = usePagination(filtered, 50);
 
   function toggleSort(k: SortKey) {
     if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -198,7 +201,7 @@ function ContractsIndex() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map((c: any) => (
+              {pg.pageItems.map((c: any) => (
                 <tr key={c.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
                     <Link to="/contracts/$contractId" params={{ contractId: c.id }} className="font-display hover:underline">{c.title}</Link>
@@ -225,6 +228,15 @@ function ContractsIndex() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={pg.page}
+        pageCount={pg.pageCount}
+        pageSize={pg.pageSize}
+        total={pg.total}
+        onPageChange={pg.setPage}
+        onPageSizeChange={pg.setPageSize}
+        label="contratos"
+      />
     </div>
   );
 }

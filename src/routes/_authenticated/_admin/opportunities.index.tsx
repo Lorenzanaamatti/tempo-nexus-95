@@ -1,3 +1,4 @@
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -86,6 +87,8 @@ function OpportunitiesIndex() {
     if (kindFilter !== "all" && (o.kind ?? "pitch") !== kindFilter) return false;
     return true;
   });
+
+  const pg = usePagination(filtered, 50);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -208,7 +211,7 @@ function OpportunitiesIndex() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map((o: any) => (
+              {pg.pageItems.map((o: any) => (
                 <tr key={o.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
@@ -246,6 +249,15 @@ function OpportunitiesIndex() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={pg.page}
+        pageCount={pg.pageCount}
+        pageSize={pg.pageSize}
+        total={pg.total}
+        onPageChange={pg.setPage}
+        onPageSizeChange={pg.setPageSize}
+        label="oportunidades"
+      />
     </div>
   );
 }

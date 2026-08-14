@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/")({
   component: ProductionsIndex,
@@ -50,6 +51,8 @@ function ProductionsIndex() {
     qc.invalidateQueries({ queryKey: ["productions"] });
   }
 
+  const pg = usePagination(data as any[] | undefined, 50);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
@@ -83,8 +86,9 @@ function ProductionsIndex() {
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin producciones.</p>
       ) : (
+        <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {data.map((p: any) => (
+          {pg.pageItems.map((p: any) => (
             <Link
               key={p.id}
               to="/productions/$productionId"
@@ -101,6 +105,16 @@ function ProductionsIndex() {
             </Link>
           ))}
         </div>
+        <PaginationBar
+          page={pg.page}
+          pageCount={pg.pageCount}
+          pageSize={pg.pageSize}
+          total={pg.total}
+          onPageChange={pg.setPage}
+          onPageSizeChange={pg.setPageSize}
+          label="producciones"
+        />
+        </>
       )}
     </div>
   );
