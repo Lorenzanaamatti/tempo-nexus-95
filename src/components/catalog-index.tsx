@@ -49,7 +49,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
     { key: "created_at", label: "fecha de alta" },
   ];
 
-  const pg = useServerPagination<string>({ list: "catalogo", sortKey: props.nameColumn, pageSize: 50 });
+  const pg = useServerPagination<string>({ list: props.queryKey, sortKey: props.nameColumn, pageSize: 50 });
 
   const { data: result, isLoading } = useQuery({
     queryKey: [props.queryKey, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
