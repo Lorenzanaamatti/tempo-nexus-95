@@ -43,7 +43,7 @@ export function GlobalSearch() {
         supabase.from("production_companies").select("id, name, city").ilike("name", like).limit(6),
         supabase.from("spanish_films").select("id, title, year").ilike("title", like).limit(6),
         supabase.from("target_accounts").select("id, name, status").ilike("name", like).limit(6),
-        supabase.from("opportunities").select("id, title, status").ilike("title", like).limit(6),
+        supabase.from("opportunities").select("id, title, statuses").ilike("title", like).limit(6),
         supabase.from("deal_memos").select("id, referencia, obra").or(`obra.ilike.${like},referencia.ilike.${like}`).limit(6),
       ]);
       const hits: Hit[] = [];
@@ -58,7 +58,7 @@ export function GlobalSearch() {
       for (const a of accounts.data ?? [])
         hits.push({ id: `ta${a.id}`, label: a.name, sub: a.status, group: "Cuentas objetivo", go: () => navigate({ to: "/marketing/target-accounts/$accountId", params: { accountId: a.id } }) });
       for (const o of opportunities.data ?? [])
-        hits.push({ id: `o${o.id}`, label: o.title, sub: o.status, group: "Oportunidades", go: () => navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: o.id } }) });
+        hits.push({ id: `o${o.id}`, label: o.title, sub: o.statuses?.[0] ?? null, group: "Oportunidades", go: () => navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: o.id } }) });
       for (const d of dealMemos.data ?? [])
         hits.push({ id: `dm${d.id}`, label: d.obra, sub: d.referencia, group: "Deal memos", go: () => navigate({ to: "/deal-memos/$dealMemoId", params: { dealMemoId: d.id } }) });
       return hits;
