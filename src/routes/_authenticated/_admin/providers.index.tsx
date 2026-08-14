@@ -75,7 +75,7 @@ function ProvidersPage() {
   const dataQ = useQuery({
     queryKey: ["providers", q, kindFilter, scopeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      let query = supabase.from("providers").select("*", { count: "exact" });
+      let query = (supabase as any).from("providers").select("*", { count: "exact" });
       if (kindFilter !== "all") query = query.eq("kind", kindFilter);
       if (scopeFilter === "ic") query = query.is("composer_id", null);
       if (scopeFilter === "composer") query = query.not("composer_id", "is", null);
@@ -147,7 +147,7 @@ function ProvidersPage() {
           filename="proveedores"
           sheetName="Proveedores"
           fetchAll={async () => {
-            const { data, error } = await supabase.from("providers").select("*").order("name");
+            const { data, error } = await (supabase as any).from("providers").select("*").order("name");
             if (error) throw error;
             return data ?? [];
           }}
@@ -270,8 +270,8 @@ function ProviderDialog({
       notes: form.notes || null,
     };
     const op = provider?.id
-      ? supabase.from("providers").update(payload).eq("id", provider.id)
-      : supabase.from("providers").insert(payload);
+      ? (supabase as any).from("providers").update(payload).eq("id", provider.id)
+      : (supabase as any).from("providers").insert(payload);
     const { error } = await op;
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -281,7 +281,7 @@ function ProviderDialog({
 
   async function remove() {
     if (!provider?.id || !confirm("¿Eliminar proveedor?")) return;
-    const { error } = await supabase.from("providers").delete().eq("id", provider.id);
+    const { error } = await (supabase as any).from("providers").delete().eq("id", provider.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminado");
     onSaved();

@@ -19,14 +19,14 @@ export function TaskInboxBell() {
     queryKey: ["my-person-id", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data: byUser } = await supabase
+      const { data: byUser } = await (supabase as any)
         .from("people").select("id").eq("user_id", user!.id).maybeSingle();
       if (byUser?.id) return byUser.id as string;
       // fallback via composer
       const { data: prof } = await supabase
         .from("profiles").select("composer_id").eq("id", user!.id).maybeSingle();
       if (!prof?.composer_id) return null;
-      const { data: byComp } = await supabase
+      const { data: byComp } = await (supabase as any)
         .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
       return (byComp?.id as string) ?? null;
     },
@@ -43,7 +43,7 @@ export function TaskInboxBell() {
     enabled: !!personId,
     refetchInterval: 120_000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("actions")
         .select("id, title, area, subarea, created_at, due_date")
         .eq("assignee_person_id", personId)

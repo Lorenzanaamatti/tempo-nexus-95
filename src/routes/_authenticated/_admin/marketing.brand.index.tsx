@@ -28,7 +28,7 @@ function BrandIndex() {
   const assetsQ = useQuery({
     queryKey: ["brand-assets"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("brand_assets").select("*").order("position");
+      const { data, error } = await (supabase as any).from("brand_assets").select("*").order("position");
       if (error) throw error;
       return (data ?? []) as Asset[];
     },
@@ -38,7 +38,7 @@ function BrandIndex() {
     queryKey: ["brand-asset-files-all"],
     enabled: view !== "collections",
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("brand_asset_files")
         .select("*, brand_assets!inner(title, kind)")
         .order("created_at", { ascending: false });
@@ -65,7 +65,7 @@ function BrandIndex() {
     const title = prompt("Nombre del recurso (p. ej. Logo SVG, Manual completo):");
     if (!title?.trim()) return;
     const max = (assetsQ.data ?? []).reduce((m, a) => Math.max(m, a.position), -1);
-    const { error } = await supabase.from("brand_assets").insert({ title: title.trim(), position: max + 1 });
+    const { error } = await (supabase as any).from("brand_assets").insert({ title: title.trim(), position: max + 1 });
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["brand-assets"] });
   }
@@ -147,7 +147,7 @@ async function openFile(path: string) {
 async function deleteFileRow(f: AllFile) {
   if (!confirm(`¿Eliminar "${f.filename ?? "archivo"}"?`)) return false;
   await deleteMarketingAsset(f.storage_path).catch(() => {});
-  const { error } = await supabase.from("brand_asset_files").delete().eq("id", f.id);
+  const { error } = await (supabase as any).from("brand_asset_files").delete().eq("id", f.id);
   if (error) { toast.error(error.message); return false; }
   return true;
 }
@@ -260,7 +260,7 @@ function AssetRow({ item }: { item: Asset }) {
   const filesQ = useQuery({
     queryKey: ["brand-asset-files", item.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("brand_asset_files")
         .select("*")
         .eq("asset_id", item.id)
@@ -272,7 +272,7 @@ function AssetRow({ item }: { item: Asset }) {
   });
 
   async function save() {
-    const { error } = await supabase.from("brand_assets").update({
+    const { error } = await (supabase as any).from("brand_assets").update({
       title: a.title, kind: a.kind, external_url: a.external_url, notes: a.notes,
     }).eq("id", a.id);
     if (error) return toast.error(error.message);
@@ -285,7 +285,7 @@ function AssetRow({ item }: { item: Asset }) {
       await deleteMarketingAsset(f.storage_path).catch(() => {});
     }
     if (a.storage_path) await deleteMarketingAsset(a.storage_path).catch(() => {});
-    const { error } = await supabase.from("brand_assets").delete().eq("id", a.id);
+    const { error } = await (supabase as any).from("brand_assets").delete().eq("id", a.id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["brand-assets"] });
   }
@@ -301,7 +301,7 @@ function AssetRow({ item }: { item: Asset }) {
         i++;
       }
       if (rows.length) {
-        const { error } = await supabase.from("brand_asset_files").insert(rows);
+        const { error } = await (supabase as any).from("brand_asset_files").insert(rows);
         if (error) throw error;
       }
       toast.success(rows.length > 1 ? `${rows.length} archivos subidos` : "Archivo subido");
@@ -316,7 +316,7 @@ function AssetRow({ item }: { item: Asset }) {
   async function removeFile(f: AssetFile) {
     if (!confirm("¿Eliminar este archivo?")) return;
     await deleteMarketingAsset(f.storage_path).catch(() => {});
-    const { error } = await supabase.from("brand_asset_files").delete().eq("id", f.id);
+    const { error } = await (supabase as any).from("brand_asset_files").delete().eq("id", f.id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["brand-asset-files", a.id] });
   }

@@ -16,7 +16,7 @@ function Contratos() {
     enabled: !!composerId,
     queryFn: async () => {
       const [{ data: contracts }, { data: docs }] = await Promise.all([
-        supabase
+        (supabase as any)
           .from("contracts")
           .select("id, title, contract_type, sign_status, signed_date, end_date, notice_date, language, counterparty, partner_company:production_companies(name), url, storage_path, notes")
           .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
