@@ -1,17 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AGENT_TOOLS, type AgentToolDef } from "@/lib/agent-tools";
+import { TOOL_AREA_LABEL, toolsForSurface } from "@/lib/tool-catalog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-
-const AREA_LABEL: Record<AgentToolDef["area"], string> = {
-  legal: "Legal",
-  calendario: "Calendario",
-  roster: "Roster",
-  produccion: "Producción",
-  finanzas: "Finanzas",
-};
 
 export function AgentToolsEditor({ personId }: { personId: string }) {
   const [enabled, setEnabled] = useState<Set<string>>(new Set());
@@ -66,7 +59,7 @@ export function AgentToolsEditor({ personId }: { personId: string }) {
       {Object.entries(groups).map(([area, items]) => (
         <div key={area}>
           <div className="smallcaps mb-2 text-[10px] text-muted-foreground">
-            {AREA_LABEL[area as AgentToolDef["area"]] ?? area}
+            {TOOL_AREA_LABEL[area as AgentToolDef["area"]] ?? area}
           </div>
           <ul className="space-y-2">
             {items.map((t) => (
@@ -92,6 +85,25 @@ export function AgentToolsEditor({ personId }: { personId: string }) {
           </ul>
         </div>
       ))}
+
+      <div className="rounded-sm border border-dashed border-border p-3">
+        <div className="smallcaps mb-2 text-[10px] text-muted-foreground">
+          Agentes externos (MCP)
+        </div>
+        <p className="mb-2 text-[11px] text-muted-foreground">
+          Estas herramientas se ofrecen a agentes conectados desde fuera (Claude y similares) con
+          la cuenta del propio usuario; no se activan aquí.
+        </p>
+        <ul className="flex flex-wrap gap-1.5">
+          {toolsForSurface("mcp").map((t) => (
+            <li key={t.name}>
+              <Badge variant="secondary" className="rounded-sm text-[9px]" title={t.description}>
+                {t.label}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
