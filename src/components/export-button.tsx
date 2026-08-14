@@ -86,6 +86,7 @@ export function ExportButton<T>({
     if (!anySelected) return toast.error("Selecciona al menos un campo");
     setBusy(true);
     try {
+      const XLSX = await import("xlsx");
       const rows = await fetchAll();
       const cols = fields.filter((f) => selected[f.key]);
       // Pre-calculate max array length for expandable columns.

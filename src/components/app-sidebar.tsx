@@ -48,7 +48,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
     enabled: role === "admin",
-    refetchInterval: 30000,
+    refetchInterval: 120000,
     queryFn: async () => {
       const { count } = await (supabase as any)
         .from("agent_actions")
@@ -62,7 +62,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const { data: pendingUsers } = useQuery({
     queryKey: ["pending-users-count"],
     enabled: role === "admin",
-    refetchInterval: 30000,
+    refetchInterval: 120000,
     queryFn: async () => {
       const { count } = await (supabase as any)
         .from("profiles")

@@ -60,7 +60,7 @@ function PortalLayout() {
   const { data: unread = 0 } = useQuery({
     queryKey: ["portal-unread", composerId, user?.id],
     enabled: !!composerId && !!user,
-    refetchInterval: 30_000,
+    refetchInterval: 120_000,
     queryFn: async () => {
       const { data: read } = await supabase
         .from("chat_message_reads")
