@@ -37,6 +37,11 @@ export type CatalogIndexProps = {
   renderExtra?: (row: any, update: (patch: Record<string, unknown>) => void) => ReactNode;
   /** Campos ordenables adicionales (además del nombre). */
   sortOptions?: { key: string; label: string }[];
+  /**
+   * Columnas que necesita el listado. Por defecto pide todas ("*"); indica solo
+   * las visibles para aligerar la consulta en catálogos con textos largos.
+   */
+  listColumns?: string;
 };
 
 export function CatalogIndex(props: CatalogIndexProps) {
@@ -54,7 +59,9 @@ export function CatalogIndex(props: CatalogIndexProps) {
   const { data: result, isLoading } = useQuery({
     queryKey: [props.queryKey, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      const { data, error, count } = await pg.applyTo(db.from(props.table).select("*", { count: "exact" }));
+      const { data, error, count } = await pg.applyTo(
+        db.from(props.table).select(props.listColumns ?? "*", { count: "exact" }),
+      );
       if (error) throw error;
       return { rows: (data ?? []) as any[], count: count ?? 0 };
     },

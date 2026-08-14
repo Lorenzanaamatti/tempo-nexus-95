@@ -33,6 +33,12 @@ Lista priorizada de mejoras detectadas al revisar la app. Nada se implementa has
 18. **Duplicados de personas y empresas**: no hay control de nombres repetidos al crear desde CRM Películas; conviene detección de duplicados al escribir.
 19. **Auditoría de cambios**: hoy no queda registro de quién modificó qué en fichas críticas (deal memos, contratos).
 
+## Estado
+
+- Bloque 1: hecho (caché, favicon, Excel bajo demanda, sondeos).
+- Bloque 2: hecho (paginación y orden en servidor con métricas de latencia, índices de base de datos, columnas reducidas en catálogos).
+- Bloque 3: en curso — subidas de archivos unificadas (`FileDropzone` + `src/lib/storage-upload.ts`).
+
 ## Orden recomendado
 
 Bloque 1 (rápido, se nota enseguida): 1, 2, 3, 4, 12.

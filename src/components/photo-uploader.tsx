@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { uploadComposerPhoto, useComposerPhotoUrl } from "@/lib/composers-api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { FileDropzone } from "@/components/file-dropzone";
 
 export function PhotoUploader({
   composerId,
@@ -13,8 +14,8 @@ export function PhotoUploader({
   photoPath: string | null;
   onChange: (path: string | null) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
   const url = useComposerPhotoUrl(photoPath).data ?? null;
 
   async function handleFile(file: File) {
@@ -27,6 +28,7 @@ export function PhotoUploader({
         .eq("id", composerId);
       if (error) throw error;
       onChange(path);
+      qc.invalidateQueries({ queryKey: ["composer-photo-signed"] });
       toast.success("Foto actualizada");
     } catch (e: any) {
       toast.error(e.message ?? "No se pudo subir la foto");
@@ -46,29 +48,15 @@ export function PhotoUploader({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) handleFile(f);
-            e.target.value = "";
-          }}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onClick={() => inputRef.current?.click()}
-        >
-          {busy ? "Subiendo…" : url ? "Cambiar foto" : "Subir foto"}
-        </Button>
-        <p className="text-xs text-muted-foreground">JPG/PNG, recomendamos 800×800</p>
-      </div>
+      <FileDropzone
+        accept="image/*"
+        multiple={false}
+        busy={busy}
+        className="px-6 py-4"
+        label={url ? "Arrastra o haz clic para cambiar la foto" : "Arrastra o haz clic para subir la foto"}
+        hint="JPG/PNG, recomendamos 800×800"
+        onFiles={(files) => handleFile(files[0])}
+      />
     </div>
   );
 }

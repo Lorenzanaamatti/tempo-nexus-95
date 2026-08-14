@@ -1,23 +1,15 @@
-import { useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { FileDropzone } from "@/components/file-dropzone";
+import { removeFromBucket, uploadToBucket, useSignedUrl } from "@/lib/storage-upload";
+
+const BUCKET = "people-photos";
 
 export function usePersonPhotoUrl(path?: string | null) {
-  return useQuery({
-    queryKey: ["person-photo-signed", path],
-    enabled: !!path,
-    staleTime: 1000 * 60 * 50,
-    queryFn: async () => {
-      if (!path) return null;
-      const { data, error } = await supabase.storage
-        .from("people-photos")
-        .createSignedUrl(path, 60 * 60);
-      if (error) throw error;
-      return data.signedUrl;
-    },
-  });
+  return useSignedUrl(BUCKET, path);
 }
 
 export function PersonPhotoUploader({
@@ -29,7 +21,6 @@ export function PersonPhotoUploader({
   photoPath: string | null;
   onChange: (path: string | null) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const url = usePersonPhotoUrl(photoPath).data ?? null;
@@ -37,19 +28,14 @@ export function PersonPhotoUploader({
   async function handleFile(file: File) {
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${personId}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage
-        .from("people-photos")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (up.error) throw up.error;
+      const path = await uploadToBucket(BUCKET, personId, file, { upsert: true, keepName: false });
       const { error } = await supabase
         .from("people")
         .update({ photo_path: path } as any)
         .eq("id", personId);
       if (error) throw error;
       onChange(path);
-      qc.invalidateQueries({ queryKey: ["person-photo-signed"] });
+      qc.invalidateQueries({ queryKey: ["signed-url", BUCKET] });
       toast.success("Foto actualizada");
     } catch (e: any) {
       toast.error(e.message ?? "No se pudo subir la foto");
@@ -62,7 +48,7 @@ export function PersonPhotoUploader({
     if (!photoPath) return;
     setBusy(true);
     try {
-      await supabase.storage.from("people-photos").remove([photoPath]);
+      await removeFromBucket(BUCKET, photoPath);
       const { error } = await supabase
         .from("people")
         .update({ photo_path: null } as any)
@@ -89,28 +75,20 @@ export function PersonPhotoUploader({
         )}
       </div>
       <div className="flex flex-col gap-2">
-        <input
-          ref={inputRef}
-          type="file"
+        <FileDropzone
           accept="image/*"
-          hidden
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) handleFile(f);
-            e.target.value = "";
-          }}
+          multiple={false}
+          busy={busy}
+          className="px-6 py-4"
+          label={photoPath ? "Arrastra o haz clic para cambiar la foto" : "Arrastra o haz clic para subir la foto"}
+          hint="JPG/PNG, recomendamos 800×800"
+          onFiles={(files) => handleFile(files[0])}
         />
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-            {busy ? "Subiendo…" : photoPath ? "Cambiar foto" : "Subir foto"}
+        {photoPath && (
+          <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={removePhoto} className="self-start">
+            Quitar foto
           </Button>
-          {photoPath && (
-            <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={removePhoto}>
-              Quitar
-            </Button>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground">JPG/PNG, recomendamos 800×800</p>
+        )}
       </div>
     </div>
   );

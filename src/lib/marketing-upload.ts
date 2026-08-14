@@ -1,31 +1,20 @@
-import { supabase } from "@/integrations/supabase/client";
+import { removeFromBucket, signBucketPath, uploadToBucket } from "@/lib/storage-upload";
 
 /**
- * Uploads a file to the private `marketing-assets` bucket and returns the storage path.
- * Folder = logical category (decks, clippings, brand, case-studies, press-kits…).
+ * Marketing usa el bucket privado `marketing-assets`.
+ * La lógica común vive en `@/lib/storage-upload`; aquí solo se fija el bucket.
  */
-export async function uploadMarketingAsset(folder: string, file: File): Promise<string> {
-  const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
-  const safe = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
-  const path = `${folder}/${crypto.randomUUID()}-${safe}`;
-  const { error } = await supabase.storage.from("marketing-assets").upload(path, file, {
-    contentType: file.type || undefined,
-    upsert: false,
-  });
-  if (error) throw error;
-  return path;
+const BUCKET = "marketing-assets";
+
+/** Sube un archivo a la carpeta lógica (decks, clippings, brand, case-studies, press-kits…). */
+export function uploadMarketingAsset(folder: string, file: File): Promise<string> {
+  return uploadToBucket(BUCKET, folder, file);
 }
 
-export async function signMarketingAsset(path: string, expiresIn = 60 * 60): Promise<string | null> {
-  if (!path) return null;
-  const { data, error } = await supabase.storage
-    .from("marketing-assets")
-    .createSignedUrl(path, expiresIn);
-  if (error) return null;
-  return data?.signedUrl ?? null;
+export function signMarketingAsset(path: string, expiresIn = 60 * 60): Promise<string | null> {
+  return signBucketPath(BUCKET, path, expiresIn);
 }
 
-export async function deleteMarketingAsset(path: string): Promise<void> {
-  if (!path) return;
-  await supabase.storage.from("marketing-assets").remove([path]);
+export function deleteMarketingAsset(path: string): Promise<void> {
+  return removeFromBucket(BUCKET, path);
 }
