@@ -270,6 +270,7 @@ function renderComposerLink(name: string | null, byName: Map<string, string>) {
 }
 
 function SpanishFilmsPage() {
+  type FilmSortKey = "year" | "title" | "original_title" | "composer" | "music_supervisor" | "platform" | "completeness";
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
   const updateFn = useServerFn(updateSpanishFilm);
