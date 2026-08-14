@@ -1,7 +1,7 @@
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,17 @@ type Provider = {
   notes: string | null;
 };
 
+type ProviderSortKey = "name" | "kind" | "contact_name" | "city" | "country" | "created_at";
+
+const PROVIDER_SORT_OPTIONS: { key: ProviderSortKey; label: string }[] = [
+  { key: "name", label: "nombre" },
+  { key: "kind", label: "categoría" },
+  { key: "contact_name", label: "contacto" },
+  { key: "city", label: "ciudad" },
+  { key: "country", label: "país" },
+  { key: "created_at", label: "fecha de alta" },
+];
+
 function ProvidersPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -63,11 +74,34 @@ function ProvidersPage() {
   const [scopeFilter, setScopeFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Partial<Provider> | null>(null);
 
-  const dataQ = useQuery({
-    queryKey: ["providers"],
-    queryFn: async () =>
-      ((await (supabase as any).from("providers").select("*").order("name")).data ?? []) as Provider[],
+  const pg = useServerPagination<ProviderSortKey>({
+    sortKey: "name",
+    pageSize: 50,
+    deps: [q, kindFilter, scopeFilter],
   });
+
+  const dataQ = useQuery({
+    queryKey: ["providers", q, kindFilter, scopeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryFn: async () => {
+      let query = (supabase as any).from("providers").select("*", { count: "exact" });
+      if (kindFilter !== "all") query = query.eq("kind", kindFilter);
+      if (scopeFilter === "ic") query = query.is("composer_id", null);
+      if (scopeFilter === "composer") query = query.not("composer_id", "is", null);
+      const needle = q.trim();
+      if (needle) {
+        query = query.or(
+          ["name", "contact_name", "email", "city"].map((c) => `${c}.ilike.%${needle}%`).join(","),
+        );
+      }
+      const { data, error, count } = await pg.applyTo(query);
+      if (error) throw error;
+      return { rows: (data ?? []) as Provider[], count: count ?? 0 };
+    },
+    placeholderData: (prev) => prev,
+  });
+
+  const rows = dataQ.data?.rows ?? [];
+  const total = dataQ.data?.count ?? 0;
 
   const composersQ = useQuery({
     queryKey: ["composers-min"],
@@ -76,19 +110,6 @@ function ProvidersPage() {
   });
   const composerName = (id: string | null) =>
     !id ? "IC (compartido)" : composersQ.data?.find((c) => c.id === id)?.artistic_name || composersQ.data?.find((c) => c.id === id)?.full_name || "—";
-
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return (dataQ.data ?? []).filter((p) => {
-      if (kindFilter !== "all" && p.kind !== kindFilter) return false;
-      if (scopeFilter === "ic" && p.composer_id !== null) return false;
-      if (scopeFilter === "composer" && p.composer_id === null) return false;
-      if (!term) return true;
-      return (p.name + " " + (p.contact_name ?? "") + " " + (p.email ?? "") + " " + (p.city ?? "")).toLowerCase().includes(term);
-    });
-  }, [dataQ.data, q, kindFilter, scopeFilter]);
-
-  const pg = usePagination(filtered, 50);
 
   return (
     <div className="mx-auto max-w-[1300px] px-6 py-6">
@@ -123,6 +144,13 @@ function ProvidersPage() {
         <Button onClick={() => setEditing({ kind: "estudio_grabacion", shared_with_ic: true, composer_id: null })}>
           <Plus className="mr-1 h-4 w-4" />Nuevo proveedor
         </Button>
+        <SortControl
+          options={PROVIDER_SORT_OPTIONS}
+          sortKey={pg.sortKey}
+          sortDir={pg.sortDir}
+          onSortKeyChange={pg.setSortKey}
+          onSortDirChange={pg.setSortDir}
+        />
         <ExportButton
           entityLabel="Proveedores"
           filename="proveedores"
