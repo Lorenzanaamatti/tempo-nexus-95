@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { FileDropzone } from "@/components/file-dropzone";
+import { removeFromBucket } from "@/lib/storage-upload";
 
 const MAX_PHOTOS = 12;
 
@@ -73,7 +75,7 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
     if (!confirm("¿Eliminar esta fotografía?")) return;
     const { error } = await supabase.from("composer_photos").delete().eq("id", p.id);
     if (error) return toast.error(error.message);
-    await supabase.storage.from("composer-photos").remove([p.storage_path]);
+    await removeFromBucket("composer-photos", p.storage_path);
     await reload();
   }
 
@@ -97,21 +99,14 @@ export function PhotoGallery({ composerId }: { composerId: string }) {
             />
           ))}
           {empty > 0 && (
-            <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-foreground">
-              <Plus className="h-5 w-5" />
-              {uploading ? "Subiendo…" : `Añadir foto (${empty} libres)`}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={uploading}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void onUpload(f);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+            <FileDropzone
+              accept="image/*"
+              multiple={false}
+              busy={uploading}
+              className="aspect-[4/3]"
+              label={`Añadir foto (${empty} libres)`}
+              onFiles={(files) => files[0] && onUpload(files[0])}
+            />
           )}
         </div>
       )}
