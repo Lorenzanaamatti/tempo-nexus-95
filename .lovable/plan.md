@@ -37,7 +37,7 @@ Lista priorizada de mejoras detectadas al revisar la app. Nada se implementa has
 
 - Bloque 1: hecho (caché, favicon, Excel bajo demanda, sondeos).
 - Bloque 2: hecho (paginación y orden en servidor con métricas de latencia, índices de base de datos, columnas reducidas en catálogos).
-- Bloque 3: en curso — subidas de archivos unificadas (`FileDropzone` + `src/lib/storage-upload.ts`).
+- Bloque 3: en curso — subidas de archivos unificadas en toda la app (`FileDropzone` + `src/lib/storage-upload.ts`): fotos de personas y compositores, vídeos, marketing, candidaturas y plantillas de deal memo. Pendiente: dividir pantallas grandes, regenerar tipos, reutilizar el editor genérico de fichas y unificar el catálogo de herramientas chat/agentes.
 
 ## Orden recomendado
 

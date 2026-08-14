@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Check, Loader2 } from "lucide-react";
+import { Trash2, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SaveButton } from "@/components/save-button";
 import { FileDropzone } from "@/components/file-dropzone";
