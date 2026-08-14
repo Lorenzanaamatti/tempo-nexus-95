@@ -1,4 +1,4 @@
-import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
+import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -144,13 +144,6 @@ function ProvidersPage() {
         <Button onClick={() => setEditing({ kind: "estudio_grabacion", shared_with_ic: true, composer_id: null })}>
           <Plus className="mr-1 h-4 w-4" />Nuevo proveedor
         </Button>
-        <SortControl
-          options={PROVIDER_SORT_OPTIONS}
-          sortKey={pg.sortKey}
-          sortDir={pg.sortDir}
-          onSortKeyChange={pg.setSortKey}
-          onSortDirChange={pg.setSortDir}
-        />
         <ExportButton
           entityLabel="Proveedores"
           filename="proveedores"
@@ -179,7 +172,7 @@ function ProvidersPage() {
         />
       </div>
 
-      {dataQ.isLoading ? <Skeleton className="h-[300px]" /> : filtered.length === 0 ? (
+      {dataQ.isLoading ? <Skeleton className="h-[300px]" /> : rows.length === 0 ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
           <Briefcase className="mx-auto mb-2 h-8 w-8 opacity-40" />Sin proveedores
         </div>
@@ -188,16 +181,16 @@ function ProvidersPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Categoría</th>
-                <th className="px-3 py-2">Contacto</th>
+                <Th k="name">Nombre</Th>
+                <Th k="kind">Categoría</Th>
+                <Th k="contact_name">Contacto</Th>
                 <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">Ciudad</th>
+                <Th k="city">Ciudad</Th>
                 <th className="px-3 py-2">Ámbito</th>
               </tr>
             </thead>
             <tbody>
-              {pg.pageItems.map((p) => (
+              {rows.map((p) => (
                 <tr key={p.id} className="cursor-pointer border-t border-border hover:bg-muted/30" onClick={() => setEditing(p)}>
                   <td className="px-3 py-2 font-medium">{p.name}</td>
                   <td className="px-3 py-2 text-muted-foreground">{KIND_LABEL[p.kind] ?? p.kind}</td>
@@ -213,9 +206,9 @@ function ProvidersPage() {
       )}
       <PaginationBar
         page={pg.page}
-        pageCount={pg.pageCount}
+        pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}
-        total={pg.total}
+        total={total}
         onPageChange={pg.setPage}
         onPageSizeChange={pg.setPageSize}
         label="proveedores"
