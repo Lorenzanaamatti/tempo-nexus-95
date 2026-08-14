@@ -175,8 +175,8 @@ function ProvidersPage() {
           <Briefcase className="mx-auto mb-2 h-8 w-8 opacity-40" />Sin proveedores
         </div>
       ) : (
-        <div className="overflow-hidden rounded-sm border border-border">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-sm border border-border">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
               <tr>
                 <Th k="name">Nombre</Th>
