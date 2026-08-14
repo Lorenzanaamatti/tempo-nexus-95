@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SaveButton } from "@/components/save-button";
+import { FileDropzone } from "@/components/file-dropzone";
+import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
 
 const MAX_VIDEOS = 12;
 const BUCKET = "composer-assets";
@@ -23,11 +25,7 @@ type Video = {
   position: number;
 };
 
-async function signedUrl(path: string | null) {
-  if (!path) return null;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600);
-  return data?.signedUrl ?? null;
-}
+const signedUrl = (path: string | null) => signBucketPath(BUCKET, path);
 
 export function VideoGallery({ composerId }: { composerId: string }) {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -55,10 +53,7 @@ export function VideoGallery({ composerId }: { composerId: string }) {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "mp4";
-      const path = `${composerId}/videos/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
-      if (up.error) throw up.error;
+      const path = await uploadToBucket(BUCKET, `${composerId}/videos`, file, { upsert: true, keepName: false });
       const { error } = await supabase.from("composer_videos").insert({
         composer_id: composerId,
         storage_path: path,
@@ -96,7 +91,7 @@ export function VideoGallery({ composerId }: { composerId: string }) {
     if (!confirm("¿Eliminar este vídeo?")) return;
     const { error } = await supabase.from("composer_videos").delete().eq("id", v.id);
     if (error) return toast.error(error.message);
-    if (v.storage_path) await supabase.storage.from(BUCKET).remove([v.storage_path]);
+    await removeFromBucket(BUCKET, v.storage_path);
     await reload();
   }
 
@@ -116,21 +111,14 @@ export function VideoGallery({ composerId }: { composerId: string }) {
           ))}
           {empty > 0 && (
             <div className="flex flex-col gap-2">
-              <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-foreground">
-                <Plus className="h-5 w-5" />
-                {uploading ? "Subiendo…" : `Subir vídeo (${empty} libres)`}
-                <input
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void onUpload(f);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
+              <FileDropzone
+                accept="video/*"
+                multiple={false}
+                busy={uploading}
+                className="aspect-[4/3]"
+                label={`Subir vídeo (${empty} libres)`}
+                onFiles={(files) => files[0] && onUpload(files[0])}
+              />
               <Button type="button" variant="outline" size="sm" onClick={addExternal}>Añadir enlace externo</Button>
             </div>
           )}
