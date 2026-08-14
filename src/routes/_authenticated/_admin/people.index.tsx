@@ -12,6 +12,7 @@ import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/co
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -54,7 +55,7 @@ function PeopleIndex() {
     queryKey: ["people-ic", q, fnFilter, typeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       const rel = fnFilter === "all" ? "person_ic_functions(function)" : "person_ic_functions!inner(function)";
-      let query = (supabase as any)
+      let query = supabase
         .from("people")
         .select(`id, full_name, role, email, phone, is_virtual_assistant, ${rel}`, { count: "exact" })
         .eq("role", "ic_team");
@@ -89,7 +90,7 @@ function PeopleIndex() {
       .single();
     const error = res.error;
     if (!res.error && res.data && newFn !== "none") {
-      await (supabase as any).from("person_ic_functions").insert({
+      await supabase.from("person_ic_functions").insert({
         person_id: res.data.id,
         function: newFn,
       });
@@ -181,7 +182,7 @@ function PeopleIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando…</p>
+        <ListSkeleton rows={8} />
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin personas en el Equipo IC.</p>
       ) : (

@@ -26,6 +26,7 @@ import {
   type SocialAssetKind,
 } from "@/lib/social-constants";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/social/")({
   component: SocialIndex,
@@ -158,7 +159,7 @@ function SocialIndex() {
           </div>
 
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Cargando…</p>
+            <ListSkeleton rows={6} />
           ) : !posts?.length ? (
             <p className="text-sm text-muted-foreground">No hay posts con estos filtros.</p>
           ) : (

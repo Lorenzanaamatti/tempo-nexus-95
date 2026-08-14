@@ -36,7 +36,7 @@ export function RelatedWorks({
       const filmo = await filmoQ;
 
       // 2) Producciones IC
-      let prodQ = (supabase as any)
+      let prodQ = supabase
         .from("productions")
         .select(
           "id, title, year, project_type, composer:composers(id, full_name, artistic_name)",

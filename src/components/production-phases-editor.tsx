@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { savedToast } from "@/lib/saved-feedback";
 
 type Phase = {
   id: string;
@@ -33,7 +34,7 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
   const { data, isLoading } = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("production_phases")
         .select("*")
         .eq("production_id", productionId)
@@ -50,7 +51,7 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
     const n = name.trim();
     if (!n) return;
     const pos = (data?.length ?? 0);
-    const { error } = await (supabase as any).from("production_phases").insert({
+    const { error } = await supabase.from("production_phases").insert({
       production_id: productionId, name: n, position: pos,
     });
     if (error) return toast.error(error.message);
@@ -59,14 +60,15 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
   }
 
   async function update(id: string, patch: Partial<Phase>) {
-    const { error } = await (supabase as any).from("production_phases").update(patch).eq("id", id);
+    const { error } = await supabase.from("production_phases").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
+    savedToast();
     qc.invalidateQueries({ queryKey: key });
   }
 
   async function remove(id: string) {
     if (!confirm("¿Eliminar esta fase?")) return;
-    const { error } = await (supabase as any).from("production_phases").delete().eq("id", id);
+    const { error } = await supabase.from("production_phases").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
   }
@@ -78,8 +80,8 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
     if (idx < 0 || j < 0 || j >= list.length) return;
     const a = list[idx], b = list[j];
     await Promise.all([
-      (supabase as any).from("production_phases").update({ position: b.position }).eq("id", a.id),
-      (supabase as any).from("production_phases").update({ position: a.position }).eq("id", b.id),
+      supabase.from("production_phases").update({ position: b.position }).eq("id", a.id),
+      supabase.from("production_phases").update({ position: a.position }).eq("id", b.id),
     ]);
     qc.invalidateQueries({ queryKey: key });
   }

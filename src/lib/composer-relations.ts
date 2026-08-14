@@ -11,7 +11,7 @@ export async function fetchComposerRelations(composerId: string) {
         supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
         supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
         supabase.from("ic_team").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
-        (supabase as any)
+        supabase
           .from("opportunity_candidates")
           .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
           .eq("composer_id", composerId)
@@ -27,12 +27,12 @@ export async function fetchComposerRelations(composerId: string) {
             .maybeSingle();
           const [direct, viaAssign, viaSupervisor] = await Promise.all([
             supabase.from("productions").select(PROD_SELECT).eq("composer_id", composerId),
-            (supabase as any)
+            supabase
               .from("production_assignments")
               .select(`production:productions(${PROD_SELECT})`)
               .eq("composer_id", composerId),
             personRowProd?.id
-              ? (supabase as any)
+              ? supabase
                   .from("productions")
                   .select(PROD_SELECT)
                   .eq("music_supervisor_person_id", personRowProd.id)

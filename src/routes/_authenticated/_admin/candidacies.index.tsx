@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { Plus, Trash2, ExternalLink, FileText, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { FileDropzone } from "@/components/file-dropzone";
 import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/candidacies/")({
   component: CandidaciesIndex,
@@ -62,11 +64,11 @@ type Source = keyof typeof SOURCE_LABEL;
 
 function CandidaciesIndex() {
   const qc = useQueryClient();
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [q, setQ] = usePersistedState("candidacies.q", "");
+  const [statusFilter, setStatusFilter] = usePersistedState<string>("candidacies.status", "all");
+  const [sourceFilter, setSourceFilter] = usePersistedState<string>("candidacies.source", "all");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "kanban">("list");
+  const [view, setView] = usePersistedState<"list" | "kanban">("candidacies.view", "list");
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
 
@@ -81,7 +83,7 @@ function CandidaciesIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["candidacies"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("candidacies")
         .select("*, reviewer:people(full_name), promoted_composer:composers(full_name, artistic_name)")
         .order("received_at", { ascending: false });
@@ -121,7 +123,7 @@ function CandidaciesIndex() {
       .split(/[\n,]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const { error } = await (supabase as any).from("candidacies").insert({
+    const { error } = await supabase.from("candidacies").insert({
       full_name: newName.trim(),
       email: newEmail.trim() || null,
       source: newSource,
@@ -138,20 +140,20 @@ function CandidaciesIndex() {
   }
 
   async function updateStatus(id: string, status: Status) {
-    const { error } = await (supabase as any).from("candidacies").update({ status }).eq("id", id);
+    const { error } = await supabase.from("candidacies").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["candidacies"] });
   }
 
   async function updateReviewer(id: string, reviewer_id: string | null) {
-    const { error } = await (supabase as any).from("candidacies").update({ reviewer_id }).eq("id", id);
+    const { error } = await supabase.from("candidacies").update({ reviewer_id }).eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["candidacies"] });
   }
 
   async function remove(id: string) {
     if (!confirm("¿Eliminar esta candidatura?")) return;
-    const { error } = await (supabase as any).from("candidacies").delete().eq("id", id);
+    const { error } = await supabase.from("candidacies").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Eliminada");
     qc.invalidateQueries({ queryKey: ["candidacies"] });
@@ -226,7 +228,7 @@ function CandidaciesIndex() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+        <ListSkeleton rows={6} />
       ) : view === "kanban" ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {(Object.keys(STATUS_LABEL) as Status[]).map((col) => {
@@ -383,7 +385,7 @@ function CandidacyDetailSheet({
     queryKey: ["candidacy", candidacyId],
     queryFn: async () => {
       if (!candidacyId) return null;
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("candidacies")
         .select("*")
         .eq("id", candidacyId)
@@ -398,7 +400,7 @@ function CandidacyDetailSheet({
     queryKey: ["candidacy_files", candidacyId],
     queryFn: async () => {
       if (!candidacyId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("candidacy_files")
         .select("*")
         .eq("candidacy_id", candidacyId)
@@ -424,7 +426,7 @@ function CandidacyDetailSheet({
   async function save() {
     if (!c) return;
     const links = linksText.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("candidacies")
       .update({ phone: phone.trim() || null, notes: notes.trim() || null, links })
       .eq("id", c.id);
@@ -441,7 +443,7 @@ function CandidacyDetailSheet({
       for (const f of fs) {
         const path = await uploadToBucket("candidacy-files", c.id, f);
         const { data: userData } = await supabase.auth.getUser();
-        const { error: insErr } = await (supabase as any).from("candidacy_files").insert({
+        const { error: insErr } = await supabase.from("candidacy_files").insert({
           candidacy_id: c.id,
           storage_path: path,
           file_name: f.name,
@@ -469,7 +471,7 @@ function CandidacyDetailSheet({
   async function removeFile(id: string, path: string) {
     if (!confirm("¿Eliminar archivo?")) return;
     await removeFromBucket("candidacy-files", path);
-    const { error } = await (supabase as any).from("candidacy_files").delete().eq("id", id);
+    const { error } = await supabase.from("candidacy_files").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["candidacy_files", c?.id] });
   }
@@ -497,7 +499,7 @@ function CandidacyDetailSheet({
                   value={c.reviewer_id ?? "none"}
                   onValueChange={async (v) => {
                     const val = v === "none" ? null : v;
-                    await (supabase as any).from("candidacies").update({ reviewer_id: val }).eq("id", c.id);
+                    await supabase.from("candidacies").update({ reviewer_id: val }).eq("id", c.id);
                     qc.invalidateQueries({ queryKey: ["candidacies"] });
                     qc.invalidateQueries({ queryKey: ["candidacy", c.id] });
                   }}
@@ -519,7 +521,7 @@ function CandidacyDetailSheet({
                     const patch: any = { response_status: v };
                     if (v !== "sin_responder" && !c.response_at) patch.response_at = new Date().toISOString();
                     if (v === "sin_responder") patch.response_at = null;
-                    await (supabase as any).from("candidacies").update(patch).eq("id", c.id);
+                    await supabase.from("candidacies").update(patch).eq("id", c.id);
                     qc.invalidateQueries({ queryKey: ["candidacies"] });
                     qc.invalidateQueries({ queryKey: ["candidacy", c.id] });
                   }}

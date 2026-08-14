@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { savedToast } from "@/lib/saved-feedback";
 
 type Row = {
   id: string;
@@ -69,6 +70,7 @@ export function PersonVerifiersEditor({ personId }: { personId: string }) {
       .update(patch)
       .eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
   }
 
   async function remove(id: string) {

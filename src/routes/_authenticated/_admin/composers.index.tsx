@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
+import { ListSkeleton } from "@/components/list-states";
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
@@ -48,9 +50,9 @@ export const Route = createFileRoute("/_authenticated/_admin/composers/")({
 function ComposersIndex() {
   const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
-  const [q, setQ] = useState("");
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
-  const [groupByTag, setGroupByTag] = useState(false);
+  const [q, setQ] = usePersistedState("roster.q", "");
+  const [tagFilter, setTagFilter] = usePersistedState<string | null>("roster.tag", null);
+  const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
@@ -222,7 +224,7 @@ function ComposersIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando archivo…</p>
+        <ListSkeleton rows={8} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>

@@ -130,7 +130,7 @@ export function PersonIcFunctionsEditor({ personId }: { personId: string }) {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("person_ic_functions")
         .select("function")
         .eq("person_id", personId);
@@ -155,7 +155,7 @@ export function PersonIcFunctionsEditor({ personId }: { personId: string }) {
     const next = new Set(selected);
     if (next.has(fn)) {
       next.delete(fn);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("person_ic_functions")
         .delete()
         .eq("person_id", personId)
@@ -163,7 +163,7 @@ export function PersonIcFunctionsEditor({ personId }: { personId: string }) {
       if (error) return toast.error(error.message);
     } else {
       next.add(fn);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("person_ic_functions")
         .insert({ person_id: personId, function: fn });
       if (error) return toast.error(error.message);

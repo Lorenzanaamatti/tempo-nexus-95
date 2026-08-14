@@ -134,8 +134,8 @@ function ListaDealMemos() {
           No hay deal memos que coincidan con los filtros.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-sm border border-border">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-sm border border-border">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Ref.</th>

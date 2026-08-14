@@ -16,7 +16,7 @@ function Propuestas() {
     queryKey: ["portal-propuestas", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("opportunity_candidates")
         .select("id, note, opportunity:opportunities(id, title, kind, statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, target_production:productions(title, year), target_production_text)")
         .eq("composer_id", composerId!);

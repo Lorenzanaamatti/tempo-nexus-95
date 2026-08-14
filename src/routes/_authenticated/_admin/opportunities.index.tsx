@@ -12,6 +12,7 @@ import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { ExportButton } from "@/components/export-button";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
   component: OpportunitiesIndex,
@@ -204,7 +205,7 @@ function OpportunitiesIndex() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+        <ListSkeleton rows={6} />
       ) : !rows.length ? (
         <p className="text-sm text-muted-foreground">Sin oportunidades aún.</p>
       ) : (

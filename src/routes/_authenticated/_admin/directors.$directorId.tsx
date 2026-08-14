@@ -31,7 +31,7 @@ function DirectorDetail() {
       return;
     }
     setCreating(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("productions")
       .insert({
         title: newTitle.trim(),
@@ -64,7 +64,7 @@ function DirectorDetail() {
   const historyQ = useQuery({
     queryKey: ["director-history", directorId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("productions")
         .select("id, title, year, project_type, premiere_date, imdb_url, external_composer, partner_company:production_companies(name), platform:platforms(name), composer:composers(full_name, artistic_name)")
         .eq("director_id", directorId)

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Link2, ExternalLink } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { savedToast } from "@/lib/saved-feedback";
 
 type Row = {
   id: string;
@@ -101,6 +102,7 @@ export function FilmographyEditor({
       .update(patch)
       .eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
   }
 
   async function remove(id: string) {

@@ -52,7 +52,7 @@ function Agenda() {
     queryFn: async () => {
       const [{ data: person }, { data: prods }] = await Promise.all([
         supabase.from("people").select("id").eq("composer_id", composerId!).maybeSingle(),
-        (supabase as any).from("productions").select("id").eq("composer_id", composerId!),
+        supabase.from("productions").select("id").eq("composer_id", composerId!),
       ]);
       const subjects: { type: string; id: string }[] = [
         { type: "composer", id: composerId! },

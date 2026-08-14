@@ -9,6 +9,7 @@ import { DealMemoForm } from "@/components/deal-memos/detail/form";
 import { DealMemoVersions } from "@/components/deal-memos/detail/versions";
 import { DealMemoLog } from "@/components/deal-memos/detail/log";
 import { DealMemoNotas } from "@/components/deal-memos/detail/notas";
+import { AuditTrail } from "@/components/audit-trail";
 
 export const Route = createFileRoute("/_authenticated/_admin/deal-memos/$dealMemoId")({
   component: DealMemoDetail,
@@ -44,7 +45,13 @@ function DealMemoDetail() {
           <TabsContent value="documento" className="pt-4"><DealMemoDocument dm={dm} /></TabsContent>
           <TabsContent value="datos" className="pt-4"><DealMemoForm dm={dm} onSaved={onChange} /></TabsContent>
           <TabsContent value="versiones" className="pt-4"><DealMemoVersions dm={dm} onChange={onChange} /></TabsContent>
-          <TabsContent value="log" className="pt-4"><DealMemoLog dealMemoId={dm.id} /></TabsContent>
+          <TabsContent value="log" className="space-y-6 pt-4">
+            <DealMemoLog dealMemoId={dm.id} />
+            <section>
+              <h3 className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Historial de cambios</h3>
+              <AuditTrail table="deal_memos" recordId={dm.id} />
+            </section>
+          </TabsContent>
           <TabsContent value="notas" className="pt-4"><DealMemoNotas dm={dm} /></TabsContent>
         </Tabs>
       </div>

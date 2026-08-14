@@ -38,15 +38,15 @@ function PortalHome() {
           .from("composer_projects")
           .select("id, production, year, price_charged, net_margin")
           .eq("composer_id", composerId!),
-        (supabase as any)
+        supabase
           .from("productions")
           .select("id, status, year, fee_amount, ic_commission_pct")
           .eq("composer_id", composerId!),
-        (supabase as any)
+        supabase
           .from("opportunity_candidates")
           .select("id, opportunity:opportunities(statuses)")
           .eq("composer_id", composerId!),
-        (supabase as any)
+        supabase
           .from("contracts")
           .select("id, sign_status")
           .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`),

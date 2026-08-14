@@ -44,7 +44,7 @@ function TemplatesIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["outreach-templates"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("outreach_templates").select("*").order("kind").order("title");
+      const { data, error } = await supabase.from("outreach_templates").select("*").order("kind").order("title");
       if (error) throw error;
       return (data ?? []) as Template[];
     },
@@ -65,7 +65,7 @@ function TemplatesIndex() {
   async function createTemplate() {
     const title = prompt("Nombre de la plantilla:");
     if (!title?.trim()) return;
-    const { data: created, error } = await (supabase as any).from("outreach_templates").insert({ title: title.trim() }).select("*").single();
+    const { data: created, error } = await supabase.from("outreach_templates").insert({ title: title.trim() }).select("*").single();
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["outreach-templates"] });
     setEditing(created as Template);
@@ -151,7 +151,7 @@ function TemplateSheet({ item, onClose }: { item: Template | null; onClose: () =
 
   async function save() {
     setSaving(true);
-    const { error } = await (supabase as any).from("outreach_templates").update({
+    const { error } = await supabase.from("outreach_templates").update({
       title: f!.title, kind: f!.kind, language: f!.language,
       subject: f!.subject, body_md: f!.body_md, variables: f!.variables ?? [], notes: f!.notes,
     }).eq("id", f!.id);
@@ -164,7 +164,7 @@ function TemplateSheet({ item, onClose }: { item: Template | null; onClose: () =
 
   async function remove() {
     if (!confirm("¿Eliminar esta plantilla?")) return;
-    const { error } = await (supabase as any).from("outreach_templates").delete().eq("id", f!.id);
+    const { error } = await supabase.from("outreach_templates").delete().eq("id", f!.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminada");
     qc.invalidateQueries({ queryKey: ["outreach-templates"] });

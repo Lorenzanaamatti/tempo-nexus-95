@@ -22,6 +22,7 @@ import {
   type MarketingLanguage,
 } from "@/lib/marketing-constants";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/decks/")({
   component: DecksIndex,
@@ -60,7 +61,7 @@ function DecksIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["marketing-decks"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("marketing_decks")
         .select("*")
         .order("updated_at", { ascending: false });
@@ -85,7 +86,7 @@ function DecksIndex() {
   async function createDeck() {
     const title = prompt("Título del nuevo deck:");
     if (!title?.trim()) return;
-    const { data: created, error } = await (supabase as any)
+    const { data: created, error } = await supabase
       .from("marketing_decks")
       .insert({ title: title.trim() })
       .select("*")
@@ -127,7 +128,7 @@ function DecksIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando decks…</p>
+        <ListSkeleton rows={6} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <FileText className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
@@ -188,7 +189,7 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
     queryKey: ["marketing-deck-files", deck?.id],
     enabled: !!deck?.id,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("marketing_deck_files")
         .select("*")
         .eq("deck_id", deck!.id)
@@ -213,7 +214,7 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
   async function save() {
     if (!form) return;
     setSaving(true);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("marketing_decks")
       .update({
         title: form.title,
@@ -238,7 +239,7 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
     if (!form) return;
     if (!confirm("¿Eliminar este deck?")) return;
     if (form.storage_path) await deleteMarketingAsset(form.storage_path).catch(() => {});
-    const { error } = await (supabase as any).from("marketing_decks").delete().eq("id", form.id);
+    const { error } = await supabase.from("marketing_decks").delete().eq("id", form.id);
     if (error) return toast.error(error.message);
     toast.success("Deck eliminado");
     qc.invalidateQueries({ queryKey: ["marketing-decks"] });
@@ -249,7 +250,7 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
     setUploading(true);
     try {
       const path = await uploadMarketingAsset("decks", file);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("marketing_deck_files")
         .insert({ deck_id: form!.id, storage_path: path, file_name: file.name });
       if (error) throw error;
@@ -278,7 +279,7 @@ function DeckSheet({ deck, onClose }: { deck: Deck | null; onClose: () => void }
   async function removeFile(f: DeckFile) {
     if (!confirm(`¿Eliminar "${f.file_name ?? "archivo"}"?`)) return;
     await deleteMarketingAsset(f.storage_path).catch(() => {});
-    const { error } = await (supabase as any).from("marketing_deck_files").delete().eq("id", f.id);
+    const { error } = await supabase.from("marketing_deck_files").delete().eq("id", f.id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["marketing-deck-files", form!.id] });
     toast.success("Archivo eliminado");

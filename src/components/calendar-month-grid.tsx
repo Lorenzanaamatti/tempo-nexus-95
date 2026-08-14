@@ -51,7 +51,8 @@ export function CalendarMonthGrid({
   const [dragOverIso, setDragOverIso] = useState<string | null>(null);
 
   return (
-    <div className="rounded-sm border border-border bg-card overflow-hidden">
+    <div className="rounded-sm border border-border bg-card overflow-x-auto">
+      <div className="min-w-[720px]">
       <div className="grid grid-cols-7 border-b border-border bg-muted/40">
         {weekdayLabels.map((w, i) => (
           <div key={i} className="px-2 py-1.5 smallcaps text-[10px] text-muted-foreground border-r border-border/60 last:border-r-0">
@@ -138,6 +139,7 @@ export function CalendarMonthGrid({
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

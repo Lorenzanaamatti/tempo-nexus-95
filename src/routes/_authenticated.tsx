@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { GlobalSearch } from "@/components/global-search";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { CalendarDays, Users, ListChecks } from "lucide-react";
@@ -114,6 +115,7 @@ function Shell() {
             {!roleLoading && role && (
               <span className="ml-auto smallcaps text-muted-foreground">{role === "admin" ? "Equipo IC" : "Compositor"}</span>
             )}
+            <div className={role && !roleLoading ? "" : "ml-auto"}><GlobalSearch /></div>
             {role === "admin" && <TaskInboxBell />}
           </header>
           <main className="flex-1">

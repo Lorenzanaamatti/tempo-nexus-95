@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { ContractSignerInput } from "@/components/contract-signer-input";
+import { AuditTrail } from "@/components/audit-trail";
 import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
 import {
   CONTRACT_STATUS_LABEL,
@@ -32,7 +33,7 @@ function ContractDetail() {
   const q = useQuery({
     queryKey: ["contract", contractId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("contracts").select("*").eq("id", contractId).single();
+      const { data, error } = await supabase.from("contracts").select("*").eq("id", contractId).single();
       if (error) throw error;
       return data;
     },
@@ -101,7 +102,7 @@ function ContractDetail() {
   async function save() {
     setSaving(true);
     const type = form.contract_type === "__custom__" ? (form.contract_type_custom.trim() || null) : (form.contract_type || null);
-    const { error } = await (supabase as any).from("contracts").update({
+    const { error } = await supabase.from("contracts").update({
       title: form.title,
       contract_type: type,
       signer_name: form.signer_name || null,
@@ -126,7 +127,7 @@ function ContractDetail() {
 
   async function remove() {
     if (!confirm("¿Eliminar este contrato?")) return;
-    const { error } = await (supabase as any).from("contracts").delete().eq("id", contractId);
+    const { error } = await supabase.from("contracts").delete().eq("id", contractId);
     if (error) return toast.error(error.message);
     navigate({ to: "/contracts" });
   }
@@ -252,6 +253,10 @@ function ContractDetail() {
           <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
 
+      </section>
+      <section className="mt-8">
+        <h3 className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Historial de cambios</h3>
+        <AuditTrail table="contracts" recordId={contractId} />
       </section>
       <SaveButton floating onClick={save} saving={saving} />
     </div>

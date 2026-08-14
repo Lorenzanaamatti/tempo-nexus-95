@@ -49,7 +49,7 @@ function PressKitsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["press-kits"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("press_kits").select("*").order("scope").order("title");
+      const { data, error } = await supabase.from("press_kits").select("*").order("scope").order("title");
       if (error) throw error;
       return (data ?? []) as Kit[];
     },
@@ -80,7 +80,7 @@ function PressKitsIndex() {
   async function createKit() {
     const title = prompt("Título del press kit:");
     if (!title?.trim()) return;
-    const { data: created, error } = await (supabase as any).from("press_kits").insert({ title: title.trim() }).select("*").single();
+    const { data: created, error } = await supabase.from("press_kits").insert({ title: title.trim() }).select("*").single();
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["press-kits"] });
     setEditing(created as Kit);
@@ -156,7 +156,7 @@ function KitSheet({ item, composers, onClose }: { item: Kit | null; composers: {
 
   async function save() {
     setSaving(true);
-    const { error } = await (supabase as any).from("press_kits").update({
+    const { error } = await supabase.from("press_kits").update({
       title: f!.title, scope: f!.scope, composer_id: f!.scope === "compositor" ? f!.composer_id : null,
       language: f!.language, version: f!.version, external_url: f!.external_url,
       public_link: f!.public_link, notes: f!.notes, visible_to_composer: f!.visible_to_composer,
@@ -171,7 +171,7 @@ function KitSheet({ item, composers, onClose }: { item: Kit | null; composers: {
   async function remove() {
     if (!confirm("¿Eliminar este press kit?")) return;
     if (f?.storage_path) await deleteMarketingAsset(f.storage_path).catch(() => {});
-    const { error } = await (supabase as any).from("press_kits").delete().eq("id", f!.id);
+    const { error } = await supabase.from("press_kits").delete().eq("id", f!.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminado");
     qc.invalidateQueries({ queryKey: ["press-kits"] });
@@ -183,7 +183,7 @@ function KitSheet({ item, composers, onClose }: { item: Kit | null; composers: {
     try {
       if (f?.storage_path) await deleteMarketingAsset(f.storage_path).catch(() => {});
       const path = await uploadMarketingAsset("press-kits", file);
-      const { error } = await (supabase as any).from("press_kits").update({ storage_path: path }).eq("id", f!.id);
+      const { error } = await supabase.from("press_kits").update({ storage_path: path }).eq("id", f!.id);
       if (error) throw error;
       up("storage_path", path);
       toast.success("Archivo subido");

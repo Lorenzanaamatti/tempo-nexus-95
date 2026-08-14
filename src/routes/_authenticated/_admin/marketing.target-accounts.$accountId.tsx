@@ -64,7 +64,7 @@ function TargetAccountDetail() {
   const { data, isLoading } = useQuery({
     queryKey: ["target-account", accountId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("target_accounts")
         .select("*")
         .eq("id", accountId)
@@ -103,7 +103,7 @@ function TargetAccountDetail() {
   const otherLabelsQ = useQuery({
     queryKey: ["target-accounts-other-labels"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("target_accounts")
         .select("other_label")
         .eq("account_type", "otros")
@@ -142,7 +142,7 @@ function TargetAccountDetail() {
   async function save() {
     if (!form) return;
     setSaving(true);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("target_accounts")
       .update({
         name: form.name,
@@ -175,7 +175,7 @@ function TargetAccountDetail() {
 
   async function remove() {
     if (!confirm("¿Eliminar definitivamente esta cuenta objetivo?")) return;
-    const { error } = await (supabase as any).from("target_accounts").delete().eq("id", accountId);
+    const { error } = await supabase.from("target_accounts").delete().eq("id", accountId);
     if (error) {
       toast.error(error.message);
       return;
@@ -192,7 +192,7 @@ function TargetAccountDetail() {
     if (form.sector) notesParts.push(`Sector: ${form.sector}`);
     notesParts.push(`Origen: cuenta objetivo "${form.name}"`);
     if (form.notes) notesParts.push("", form.notes);
-    const { data: created, error } = await (supabase as any)
+    const { data: created, error } = await supabase
       .from("opportunities")
       .insert({
         title: form.name,

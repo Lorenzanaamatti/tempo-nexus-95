@@ -49,6 +49,50 @@ export function slugify(s: string) {
   );
 }
 
+
+/** Distancia de edición normalizada (0-1) para detectar nombres casi idénticos. */
+function similarity(a: string, b: string): number {
+  if (a === b) return 1;
+  if (!a || !b) return 0;
+  const m = a.length, n = b.length;
+  const prev = new Array(n + 1).fill(0).map((_, j) => j);
+  const cur = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    for (let j = 0; j <= n; j++) prev[j] = cur[j];
+  }
+  return 1 - prev[n] / Math.max(m, n);
+}
+
+/**
+ * Busca fichas con nombre casi idéntico (errores de tecleo, tildes, orden distinto)
+ * para evitar duplicados al crear desde CRM Películas.
+ */
+export async function findNearDuplicate(
+  table: "directors" | "production_companies" | "people" | "target_accounts",
+  column: "full_name" | "name",
+  value: string,
+  threshold = 0.86,
+): Promise<{ id: string; name: string } | null> {
+  const n = normalizeName(value);
+  if (n.length < 3) return null;
+  const token = n.split(" ")[0]!;
+  const { data } = await supabase
+    .from(table)
+    .select(`id, ${column}`)
+    .ilike(column, `%${token}%`)
+    .limit(25);
+  for (const row of (data ?? []) as any[]) {
+    const candidate = normalizeName(row[column]);
+    if (candidate === n) return { id: row.id, name: row[column] };
+    if (similarity(candidate, n) >= threshold) return { id: row.id, name: row[column] };
+  }
+  return null;
+}
+
 export async function addToTargetAccounts(params: {
   name: string;
   account_type: "roster" | "productora" | "plataforma" | "otros";
@@ -65,6 +109,11 @@ export async function addToTargetAccounts(params: {
     .maybeSingle();
   if (existing) {
     toast.info(`"${name}" ya está en Cuentas Objetivo`);
+    return;
+  }
+  const near = await findNearDuplicate("target_accounts", "name", name);
+  if (near) {
+    toast.warning(`Posible duplicado: "${near.name}" ya está en Cuentas Objetivo`);
     return;
   }
   const { error } = await supabase.from("target_accounts").insert({
@@ -89,6 +138,11 @@ export async function addDirectorToCrm(name: string) {
     toast.info(`"${n}" ya existe en Directores`);
     return existing.id;
   }
+  const near = await findNearDuplicate("directors", "full_name", n);
+  if (near) {
+    toast.warning(`Posible duplicado: ya existe "${near.name}" en Directores`);
+    return near.id;
+  }
   const { data, error } = await supabase.from("directors").insert({ full_name: n }).select("id").single();
   if (error) {
     toast.error(error.message);
@@ -109,6 +163,11 @@ export async function addCompanyToCrm(name: string) {
   if (existing) {
     toast.info(`"${n}" ya existe en Productoras`);
     return existing.id;
+  }
+  const near = await findNearDuplicate("production_companies", "name", n);
+  if (near) {
+    toast.warning(`Posible duplicado: ya existe "${near.name}" en Productoras`);
+    return near.id;
   }
   const { data, error } = await supabase.from("production_companies").insert({ name: n }).select("id").single();
   if (error) {
@@ -151,6 +210,10 @@ export async function addToRoster(name: string, roster_role: "composer" | "super
   if (existing) {
     toast.info(`"${n}" ya existe en Roster`);
     return existing.id;
+  }
+  const nearRoster = await findNearDuplicate("people", "full_name", n);
+  if (nearRoster) {
+    toast.warning(`Ojo: ya existe una persona llamada "${nearRoster.name}" en la base`);
   }
   const { data, error } = await supabase
     .from("composers")

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,12 +36,13 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/target-ac
 });
 
 import { formatDateEs as fmtDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/list-states";
 
 function TargetAccountsIndex() {
   const qc = useQueryClient();
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [q, setQ] = usePersistedState("target-accounts.q", "");
+  const [statusFilter, setStatusFilter] = usePersistedState<string>("target-accounts.status", "all");
+  const [typeFilter, setTypeFilter] = usePersistedState<string>("target-accounts.type", "all");
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -49,7 +51,7 @@ function TargetAccountsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["target-accounts"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("target_accounts")
         .select(
           "id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, production_company:production_companies(name), responsible:people!target_accounts_responsible_person_id_fkey(full_name)",
@@ -58,7 +60,7 @@ function TargetAccountsIndex() {
         .order("next_step_date", { ascending: true, nullsFirst: false });
       if (error) {
         // FK alias may not exist; fall back to a simpler select
-        const fb = await (supabase as any)
+        const fb = await supabase
           .from("target_accounts")
           .select("id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, responsible_person_id, production_company_id")
           .order("priority", { ascending: true });
@@ -124,7 +126,7 @@ function TargetAccountsIndex() {
   async function createAccount() {
     if (!newName.trim()) return;
     setCreating(true);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("target_accounts")
       .insert({ name: newName.trim() });
     setCreating(false);
@@ -146,7 +148,7 @@ function TargetAccountsIndex() {
       const list = (old ?? []) as any[];
       return list.map((a) => (a.id === accountId ? { ...a, status: newStatus } : a));
     });
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("target_accounts")
       .update({ status: newStatus })
       .eq("id", accountId);
@@ -257,7 +259,7 @@ function TargetAccountsIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando cuentas…</p>
+        <ListSkeleton rows={6} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay cuentas objetivo.</p>

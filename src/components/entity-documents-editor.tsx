@@ -23,7 +23,7 @@ export function EntityDocumentsEditor({
   const docsQ = useQuery({
     queryKey,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("documents")
         .select("*")
         .eq("subject_type", subjectType)
@@ -42,7 +42,7 @@ export function EntityDocumentsEditor({
 
   async function addDoc() {
     if (!newTitle.trim()) return;
-    const { error } = await (supabase as any).from("documents").insert({
+    const { error } = await supabase.from("documents").insert({
       subject_type: subjectType,
       subject_id: subjectId,
       title: newTitle.trim(),
@@ -58,7 +58,7 @@ export function EntityDocumentsEditor({
 
   async function removeDoc(id: string) {
     if (!confirm("¿Eliminar documento?")) return;
-    const { error } = await (supabase as any).from("documents").delete().eq("id", id);
+    const { error } = await supabase.from("documents").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey });
   }
