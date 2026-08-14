@@ -22,6 +22,7 @@ import {
   type MarketingLanguage,
 } from "@/lib/marketing-constants";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/decks/")({
   component: DecksIndex,
@@ -127,7 +128,7 @@ function DecksIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando decks…</p>
+        <ListSkeleton rows={6} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <FileText className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ComposerThumb } from "@/components/composer-thumb";
 import { Plus } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
+import { ListSkeleton } from "@/components/list-states";
 
 type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
@@ -223,7 +224,7 @@ function ComposersIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando archivo…</p>
+        <ListSkeleton rows={8} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay {meta.title.toLowerCase()} en el archivo.</p>

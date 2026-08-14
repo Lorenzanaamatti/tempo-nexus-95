@@ -14,6 +14,7 @@ import { Plus, Trash2, ExternalLink, FileText, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { FileDropzone } from "@/components/file-dropzone";
 import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/candidacies/")({
   component: CandidaciesIndex,
@@ -227,7 +228,7 @@ function CandidaciesIndex() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+        <ListSkeleton rows={6} />
       ) : view === "kanban" ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {(Object.keys(STATUS_LABEL) as Status[]).map((col) => {

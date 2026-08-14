@@ -36,6 +36,7 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/target-ac
 });
 
 import { formatDateEs as fmtDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/list-states";
 
 function TargetAccountsIndex() {
   const qc = useQueryClient();
@@ -258,7 +259,7 @@ function TargetAccountsIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando cuentas…</p>
+        <ListSkeleton rows={6} variant="cards" />
       ) : !filtered.length ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center">
           <p className="font-display text-2xl">Aún no hay cuentas objetivo.</p>

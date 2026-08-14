@@ -12,6 +12,7 @@ import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/co
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
+import { ListSkeleton } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -181,7 +182,7 @@ function PeopleIndex() {
       </div>
 
       {isLoading ? (
-        <p className="font-display text-muted-foreground">Cargando…</p>
+        <ListSkeleton rows={8} />
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin personas en el Equipo IC.</p>
       ) : (
