@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -62,11 +63,11 @@ type Source = keyof typeof SOURCE_LABEL;
 
 function CandidaciesIndex() {
   const qc = useQueryClient();
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [q, setQ] = usePersistedState("candidacies.q", "");
+  const [statusFilter, setStatusFilter] = usePersistedState<string>("candidacies.status", "all");
+  const [sourceFilter, setSourceFilter] = usePersistedState<string>("candidacies.source", "all");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "kanban">("list");
+  const [view, setView] = usePersistedState<"list" | "kanban">("candidacies.view", "list");
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
 

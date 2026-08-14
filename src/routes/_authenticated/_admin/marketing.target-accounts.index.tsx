@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,9 +39,9 @@ import { formatDateEs as fmtDate } from "@/lib/dates";
 
 function TargetAccountsIndex() {
   const qc = useQueryClient();
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [q, setQ] = usePersistedState("target-accounts.q", "");
+  const [statusFilter, setStatusFilter] = usePersistedState<string>("target-accounts.status", "all");
+  const [typeFilter, setTypeFilter] = usePersistedState<string>("target-accounts.type", "all");
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);

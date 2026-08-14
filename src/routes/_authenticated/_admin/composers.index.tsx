@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -48,9 +49,9 @@ export const Route = createFileRoute("/_authenticated/_admin/composers/")({
 function ComposersIndex() {
   const { role } = Route.useSearch() as { role: RosterRole };
   const meta = ROLE_TITLE[role];
-  const [q, setQ] = useState("");
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
-  const [groupByTag, setGroupByTag] = useState(false);
+  const [q, setQ] = usePersistedState("roster.q", "");
+  const [tagFilter, setTagFilter] = usePersistedState<string | null>("roster.tag", null);
+  const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
