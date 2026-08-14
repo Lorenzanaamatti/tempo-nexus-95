@@ -1,4 +1,4 @@
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import {
   CONTRACT_STATUS_LABEL,
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/_admin/contracts/")({
   component: ContractsIndex,
 });
 
-type SortKey = "contract_type" | "signer_name" | "signed_date" | "end_date" | "notice_date" | "sign_status" | "language";
+type SortKey = "title" | "contract_type" | "signer_name" | "signed_date" | "end_date" | "notice_date" | "sign_status" | "language";
 
 function ContractsIndex() {
   const qc = useQueryClient();
@@ -30,8 +30,12 @@ function ContractsIndex() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [langFilter, setLangFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("signed_date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const pg = useServerPagination<SortKey>({
+    sortKey: "signed_date",
+    sortDir: "desc",
+    pageSize: 50,
+    deps: [q, statusFilter, langFilter, typeFilter],
+  });
 
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState<string>("");
@@ -39,50 +43,38 @@ function ContractsIndex() {
   const [newLang, setNewLang] = useState<ContractLanguage>("es");
   const [creating, setCreating] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["contracts"],
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["contracts", q, statusFilter, langFilter, typeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from("contracts")
-        .select("id, title, contract_type, signer_name, counterparty, signed_date, end_date, notice_date, sign_status, language, url");
+        .select(
+          "id, title, contract_type, signer_name, counterparty, signed_date, end_date, notice_date, sign_status, language, url",
+          { count: "exact" },
+        );
+      const needle = q.trim();
+      if (needle) {
+        query = query.or(
+          ["title", "contract_type", "signer_name", "counterparty"].map((c) => `${c}.ilike.%${needle}%`).join(","),
+        );
+      }
+      if (statusFilter !== "all") query = query.eq("sign_status", statusFilter);
+      if (langFilter !== "all") query = query.eq("language", langFilter);
+      if (typeFilter !== "all") query = query.eq("contract_type", typeFilter);
+      const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
-      return data ?? [];
+      return { rows: (data ?? []) as any[], count: count ?? 0 };
     },
+    placeholderData: (prev) => prev,
   });
 
+  const rows = result?.rows ?? [];
+  const total = result?.count ?? 0;
+
   const types = useMemo(() => {
-    const fromData = (data ?? []).map((c: any) => c.contract_type).filter(Boolean);
+    const fromData = rows.map((c: any) => c.contract_type).filter(Boolean);
     return Array.from(new Set<string>([...CONTRACT_TYPE_SUGGESTIONS, ...fromData])).sort();
-  }, [data]);
-
-  const filtered = useMemo(() => {
-    let rows = (data ?? []) as any[];
-    if (q.trim()) {
-      const needle = q.trim().toLowerCase();
-      rows = rows.filter((r) =>
-        [r.title, r.contract_type, r.signer_name, r.counterparty].some((v: string) => (v || "").toLowerCase().includes(needle)),
-      );
-    }
-    if (statusFilter !== "all") rows = rows.filter((r) => r.sign_status === statusFilter);
-    if (langFilter !== "all") rows = rows.filter((r) => r.language === langFilter);
-    if (typeFilter !== "all") rows = rows.filter((r) => r.contract_type === typeFilter);
-    const sorted = [...rows].sort((a, b) => {
-      const av = a[sortKey] ?? "";
-      const bv = b[sortKey] ?? "";
-      if (av === bv) return 0;
-      if (av === "") return 1;
-      if (bv === "") return -1;
-      return (av > bv ? 1 : -1) * (sortDir === "asc" ? 1 : -1);
-    });
-    return sorted;
-  }, [data, q, statusFilter, langFilter, typeFilter, sortKey, sortDir]);
-
-  const pg = usePagination(filtered, 50);
-
-  function toggleSort(k: SortKey) {
-    if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(k); setSortDir("asc"); }
-  }
+  }, [rows]);
 
   async function create() {
     if (!newTitle.trim()) return;
@@ -100,13 +92,10 @@ function ContractsIndex() {
     qc.invalidateQueries({ queryKey: ["contracts"] });
   }
 
-  const SortTh = ({ k, children, className = "" }: { k: SortKey; children: React.ReactNode; className?: string }) => (
-    <th className={`px-3 py-2 smallcaps text-xs ${className}`}>
-      <button type="button" onClick={() => toggleSort(k)} className="inline-flex items-center gap-1 hover:text-foreground">
-        {children}
-        {sortKey === k && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-      </button>
-    </th>
+  const Th = (props: { k: SortKey; children: React.ReactNode; className?: string }) => (
+    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort} className={props.className}>
+      {props.children}
+    </SortTh>
   );
 
   return (
@@ -182,26 +171,26 @@ function ContractsIndex() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
-      ) : !filtered.length ? (
+      ) : !rows.length ? (
         <p className="text-sm text-muted-foreground">Sin contratos.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left">
               <tr>
-                <th className="px-3 py-2 smallcaps text-xs">Título</th>
-                <SortTh k="contract_type">Tipo</SortTh>
-                <SortTh k="signer_name">Firmante</SortTh>
-                <SortTh k="signed_date">Firma</SortTh>
-                <SortTh k="end_date">Fin</SortTh>
-                <SortTh k="notice_date">Preaviso</SortTh>
-                <SortTh k="sign_status">Estado</SortTh>
-                <SortTh k="language">Idioma</SortTh>
+                <Th k="title">Título</Th>
+                <Th k="contract_type">Tipo</Th>
+                <Th k="signer_name">Firmante</Th>
+                <Th k="signed_date">Firma</Th>
+                <Th k="end_date">Fin</Th>
+                <Th k="notice_date">Preaviso</Th>
+                <Th k="sign_status">Estado</Th>
+                <Th k="language">Idioma</Th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {pg.pageItems.map((c: any) => (
+              {rows.map((c: any) => (
                 <tr key={c.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
                     <Link to="/contracts/$contractId" params={{ contractId: c.id }} className="font-display hover:underline">{c.title}</Link>
@@ -230,9 +219,9 @@ function ContractsIndex() {
       )}
       <PaginationBar
         page={pg.page}
-        pageCount={pg.pageCount}
+        pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}
-        total={pg.total}
+        total={total}
         onPageChange={pg.setPage}
         onPageSizeChange={pg.setPageSize}
         label="contratos"
