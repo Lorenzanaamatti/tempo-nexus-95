@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, ExternalLink, Upload, FileText, Paperclip } from "lucide-react";
+import { Plus, Trash2, ExternalLink, FileText, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { FileDropzone } from "@/components/file-dropzone";
 import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
@@ -377,9 +377,7 @@ function CandidacyDetailSheet({
   team: any[];
 }) {
   const qc = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
 
   const { data: c } = useQuery({
     queryKey: ["candidacy", candidacyId],
