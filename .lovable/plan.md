@@ -37,7 +37,7 @@ Lista priorizada de mejoras detectadas al revisar la app. Nada se implementa has
 
 - Bloque 1: hecho (caché, favicon, Excel bajo demanda, sondeos).
 - Bloque 2: hecho (paginación y orden en servidor con métricas de latencia, índices de base de datos, columnas reducidas en catálogos).
-- Bloque 3: en curso — subidas de archivos unificadas en toda la app (`FileDropzone` + `src/lib/storage-upload.ts`): fotos de personas y compositores, vídeos, marketing, candidaturas y plantillas de deal memo. Catálogo único de herramientas chat + agentes externos hecho (`src/lib/tool-catalog.ts`). Pendiente: dividir pantallas grandes, regenerar tipos y reutilizar el editor genérico de fichas.
+- Bloque 3: en curso — subidas de archivos unificadas en toda la app (`FileDropzone` + `src/lib/storage-upload.ts`): fotos de personas y compositores, vídeos, marketing, candidaturas y plantillas de deal memo. Catálogo único de herramientas chat + agentes externos hecho (`src/lib/tool-catalog.ts`). Ficha de compositor dividida: 1.200 → 875 líneas, con `src/components/composer-detail/*` (primitivas, etiquetas de especialista, facturación) y `src/lib/composer-relations.ts`. Pendiente: dividir CRM Películas, calendario y deal memo, regenerar tipos y reutilizar el editor genérico de fichas.
 
 ## Orden recomendado
 
