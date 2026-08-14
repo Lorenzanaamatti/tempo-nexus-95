@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { savedToast } from "@/lib/saved-feedback";
 
 type Phase = {
   id: string;
@@ -61,6 +62,7 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
   async function update(id: string, patch: Partial<Phase>) {
     const { error } = await supabase.from("production_phases").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
+    savedToast();
     qc.invalidateQueries({ queryKey: key });
   }
 

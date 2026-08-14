@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
+import { savedToast } from "@/lib/saved-feedback";
 
 const STATUS_LABEL = {
   pendiente: "Pendiente",
@@ -66,6 +67,7 @@ export function BillingSprintsEditor({
   async function update(id: string, patch: Record<string, unknown>) {
     const { error } = await (supabase as any).from("production_billing_sprints").update(patch).eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
     qc.invalidateQueries({ queryKey: key });
   }
 

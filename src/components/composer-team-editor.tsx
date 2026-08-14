@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { savedToast } from "@/lib/saved-feedback";
 
 export type TeamRole =
   | "agente" | "manager" | "producer" | "comunicacion" | "facturacion" | "pagos" | "otro";
@@ -86,6 +87,7 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
       .update(patch)
       .eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
   }
 
   async function remove(id: string) {

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
+import { savedToast } from "@/lib/saved-feedback";
   IC_FUNCTION_GROUPS,
   IC_FUNCTION_LABEL,
   type IcTeamFunction,
@@ -73,6 +74,7 @@ export function PersonAssignmentsEditor({ personId }: { personId: string }) {
       .update(patch)
       .eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
   }
 
   async function remove(id: string) {

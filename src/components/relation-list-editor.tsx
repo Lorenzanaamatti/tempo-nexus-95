@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { savedToast } from "@/lib/saved-feedback";
 
 export type FieldDef = {
   key: string;
@@ -54,6 +55,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
     onChange(rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
     const { error } = await (supabase as any).from(table).update(patch).eq("id", id);
     if (error) toast.error(error.message);
+    else savedToast();
   }
 
   async function remove(id: string) {
