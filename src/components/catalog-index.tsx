@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
 
 /**
  * Pantalla genérica de catálogo CRM (directores, productoras, plataformas…).
@@ -35,6 +35,8 @@ export type CatalogIndexProps = {
   renderLink?: (row: any, children: ReactNode) => ReactNode;
   /** Contenido extra editable bajo cada fila (modo edición en línea). */
   renderExtra?: (row: any, update: (patch: Record<string, unknown>) => void) => ReactNode;
+  /** Campos ordenables adicionales (además del nombre). */
+  sortOptions?: { key: string; label: string }[];
 };
 
 export function CatalogIndex(props: CatalogIndexProps) {
@@ -42,14 +44,25 @@ export function CatalogIndex(props: CatalogIndexProps) {
   const [name, setName] = useState("");
   const db = supabase as any;
 
-  const { data, isLoading } = useQuery({
-    queryKey: [props.queryKey],
+  const sortOptions = props.sortOptions ?? [
+    { key: props.nameColumn, label: "nombre" },
+    { key: "created_at", label: "fecha de alta" },
+  ];
+
+  const pg = useServerPagination<string>({ sortKey: props.nameColumn, pageSize: 50 });
+
+  const { data: result, isLoading } = useQuery({
+    queryKey: [props.queryKey, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      const { data, error } = await db.from(props.table).select("*").order(props.nameColumn);
+      const { data, error, count } = await pg.applyTo(db.from(props.table).select("*", { count: "exact" }));
       if (error) throw error;
-      return (data ?? []) as any[];
+      return { rows: (data ?? []) as any[], count: count ?? 0 };
     },
+    placeholderData: (prev: any) => prev,
   });
+
+  const data = result?.rows;
+  const total = result?.count ?? 0;
 
   const invalidate = () => qc.invalidateQueries({ queryKey: [props.queryKey] });
 
@@ -75,7 +88,6 @@ export function CatalogIndex(props: CatalogIndexProps) {
   }
 
   const inline = !!props.renderExtra;
-  const pg = usePagination(data, 50);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -86,6 +98,14 @@ export function CatalogIndex(props: CatalogIndexProps) {
             <h1 className="mt-1 font-display text-5xl">{props.title}</h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">{props.description}</p>
           </div>
+          <div className="flex items-center gap-2">
+          <SortControl
+            options={sortOptions}
+            sortKey={pg.sortKey}
+            sortDir={pg.sortDir}
+            onSortKeyChange={pg.setSortKey}
+            onSortDirChange={pg.setSortDir}
+          />
           <ExportButton
             entityLabel={props.exportLabel}
             filename={props.exportFilename}
@@ -97,6 +117,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
             }}
             fields={props.exportFields}
           />
+          </div>
         </div>
       </div>
 
@@ -119,7 +140,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
       ) : inline ? (
         <>
         <div className="space-y-3">
-          {pg.pageItems.map((row) => (
+          {(data ?? []).map((row) => (
             <div key={row.id} className="rounded-sm border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <Input
@@ -137,12 +158,12 @@ export function CatalogIndex(props: CatalogIndexProps) {
             </div>
           ))}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       ) : (
         <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {pg.pageItems.map((row) => {
+          {(data ?? []).map((row) => {
             const body = (
               <>
                 <div className="font-display text-lg hover:underline">{row[props.nameColumn]}</div>
@@ -159,7 +180,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
             );
           })}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       )}
     </div>
