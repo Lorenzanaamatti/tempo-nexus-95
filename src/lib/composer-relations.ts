@@ -88,4 +88,4 @@ export async function fetchComposerRelations(composerId: string) {
         contracts: contracts.data ?? [],
         spanishFilms,
       };
-    }
+}
