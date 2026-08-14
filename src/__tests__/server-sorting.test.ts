@@ -54,7 +54,7 @@ describe("ordenación y paginación en servidor", () => {
   });
 
   test("toggleSort alterna asc/desc y resetea al cambiar de columna", () => {
-    const { result } = renderHook(() => useServerPagination({ sortKey: "title", list: "test" }));
+    const { result } = renderHook(() => useServerPagination<"title" | "year">({ sortKey: "title", list: "test" }));
     act(() => result.current.toggleSort("title"));
     expect(result.current.sortDir).toBe("desc");
     act(() => result.current.toggleSort("year"));
