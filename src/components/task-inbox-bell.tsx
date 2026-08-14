@@ -41,7 +41,7 @@ export function TaskInboxBell() {
   const inboxQ = useQuery({
     queryKey: ["task-inbox", personId],
     enabled: !!personId,
-    refetchInterval: 60_000,
+    refetchInterval: 120_000,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("actions")
