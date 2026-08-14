@@ -1,9 +1,144 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const PAGE_SIZES = [25, 50, 100, 200];
+
+export type SortDir = "asc" | "desc";
+
+/**
+ * Paginación + ordenación en servidor.
+ * Devuelve el estado y `applyTo(query)`, que añade `.order()` y `.range()`
+ * a una consulta de Supabase. Úsalo con `{ count: "exact" }` en el select
+ * para conocer el total. Único sitio donde vive esta lógica.
+ */
+export function useServerPagination<K extends string>(opts: {
+  sortKey: K;
+  sortDir?: SortDir;
+  pageSize?: number;
+  /** Filtros que, al cambiar, deben devolver a la página 1. */
+  deps?: unknown[];
+}) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSizeState] = useState(opts.pageSize ?? 50);
+  const [sortKey, setSortKey] = useState<K>(opts.sortKey);
+  const [sortDir, setSortDir] = useState<SortDir>(opts.sortDir ?? "asc");
+  const deps = opts.deps ?? [];
+
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, pageSize, sortKey, sortDir]);
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  function toggleSort(k: K) {
+    if (k === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(k);
+      setSortDir("asc");
+    }
+  }
+
+  function applyTo<T>(query: T, key: string = sortKey): T {
+    const q = query as any;
+    return q.order(key, { ascending: sortDir === "asc", nullsFirst: false }).range(from, to) as T;
+  }
+
+  return {
+    page,
+    setPage,
+    pageSize,
+    setPageSize: (n: number) => {
+      setPageSizeState(n);
+      setPage(1);
+    },
+    sortKey,
+    sortDir,
+    setSortKey,
+    setSortDir,
+    toggleSort,
+    from,
+    to,
+    applyTo,
+    pageCountOf: (total: number) => Math.max(1, Math.ceil(total / pageSize)),
+  };
+}
+
+/** Cabecera de tabla ordenable. */
+export function SortTh<K extends string>({
+  k,
+  sortKey,
+  sortDir,
+  onSort,
+  children,
+  className = "",
+}: {
+  k: K;
+  sortKey: K;
+  sortDir: SortDir;
+  onSort: (k: K) => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <th className={`px-3 py-2 smallcaps text-xs ${className}`}>
+      <button type="button" onClick={() => onSort(k)} className="inline-flex items-center gap-1 hover:text-foreground">
+        {children}
+        {sortKey === k ? (
+          sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-30" />
+        )}
+      </button>
+    </th>
+  );
+}
+
+/** Selector de orden para listas que no son tablas. */
+export function SortControl<K extends string>({
+  options,
+  sortKey,
+  sortDir,
+  onSortKeyChange,
+  onSortDirChange,
+  className = "",
+}: {
+  options: { key: K; label: string }[];
+  sortKey: K;
+  sortDir: SortDir;
+  onSortKeyChange: (k: K) => void;
+  onSortDirChange: (d: SortDir) => void;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-center gap-2 ${className}`}>
+      <Select value={sortKey} onValueChange={(v) => onSortKeyChange(v as K)}>
+        <SelectTrigger className="h-9 w-52 rounded-sm text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((o) => (
+            <SelectItem key={o.key} value={o.key}>
+              Ordenar por {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button
+        variant="outline"
+        size="sm"
+        className="rounded-sm"
+        title={sortDir === "asc" ? "Ascendente" : "Descendente"}
+        onClick={() => onSortDirChange(sortDir === "asc" ? "desc" : "asc")}
+      >
+        {sortDir === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+}
 
 /**
  * Paginación cliente: recorta un array ya cargado en memoria.
