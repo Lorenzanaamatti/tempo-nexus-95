@@ -46,7 +46,7 @@ function ContractsIndex() {
   const { data: result, isLoading } = useQuery({
     queryKey: ["contracts", q, statusFilter, langFilter, typeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      let query = (supabase as any)
+      let query = supabase
         .from("contracts")
         .select(
           "id, title, contract_type, signer_name, counterparty, signed_date, end_date, notice_date, sign_status, language, url",
@@ -79,7 +79,7 @@ function ContractsIndex() {
   async function create() {
     if (!newTitle.trim()) return;
     setCreating(true);
-    const { error } = await (supabase as any).from("contracts").insert({
+    const { error } = await supabase.from("contracts").insert({
       title: newTitle.trim(),
       contract_type: newType || null,
       signer_name: newSigner || null,

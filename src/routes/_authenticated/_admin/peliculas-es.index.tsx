@@ -170,7 +170,7 @@ function SpanishFilmsPage() {
   async function runProject() {
     setProjecting(true);
     try {
-      const { data, error } = await (supabase as any).rpc("backfill_spanish_films_to_productions");
+      const { data, error } = await supabase.rpc("backfill_spanish_films_to_productions");
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       toast.success(

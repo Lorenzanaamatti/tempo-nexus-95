@@ -49,7 +49,7 @@ function TargetAccountsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["target-accounts"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("target_accounts")
         .select(
           "id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, production_company:production_companies(name), responsible:people!target_accounts_responsible_person_id_fkey(full_name)",
@@ -58,7 +58,7 @@ function TargetAccountsIndex() {
         .order("next_step_date", { ascending: true, nullsFirst: false });
       if (error) {
         // FK alias may not exist; fall back to a simpler select
-        const fb = await (supabase as any)
+        const fb = await supabase
           .from("target_accounts")
           .select("id, name, status, priority, account_type, roster_kind, other_label, next_step, next_step_date, last_contact_date, decks_sent, sector, website, responsible_person_id, production_company_id")
           .order("priority", { ascending: true });
@@ -124,7 +124,7 @@ function TargetAccountsIndex() {
   async function createAccount() {
     if (!newName.trim()) return;
     setCreating(true);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("target_accounts")
       .insert({ name: newName.trim() });
     setCreating(false);
@@ -146,7 +146,7 @@ function TargetAccountsIndex() {
       const list = (old ?? []) as any[];
       return list.map((a) => (a.id === accountId ? { ...a, status: newStatus } : a));
     });
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("target_accounts")
       .update({ status: newStatus })
       .eq("id", accountId);

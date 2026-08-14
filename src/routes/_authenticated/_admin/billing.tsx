@@ -44,7 +44,7 @@ function BillingPlan() {
   const sprintsQ = useQuery({
     queryKey: ["billing-plan"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("production_billing_sprints")
         .select("id, production_id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url, productions(id, title, composer_id, composers(full_name, artistic_name))")
         .eq("kind", "comision")
@@ -56,7 +56,7 @@ function BillingPlan() {
 
   const updateRef = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<Pick<Row, "holded_invoice_ref" | "holded_url">> }) => {
-      const { error } = await (supabase as any).from("production_billing_sprints").update(patch).eq("id", id);
+      const { error } = await supabase.from("production_billing_sprints").update(patch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

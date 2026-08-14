@@ -34,7 +34,7 @@ export function ContractCounterpartiesEditor({ contractId }: Props) {
   const listQ = useQuery({
     queryKey: ["contract-counterparties", contractId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("contract_counterparties")
         .select("id, partner_company_id, person_id, name, role, position")
         .eq("contract_id", contractId)
@@ -86,7 +86,7 @@ export function ContractCounterpartiesEditor({ contractId }: Props) {
 
   async function addRow(row: Omit<Counterparty, "id">) {
     const pos = (listQ.data ?? []).length;
-    const { error } = await (supabase as any).from("contract_counterparties").insert({
+    const { error } = await supabase.from("contract_counterparties").insert({
       contract_id: contractId,
       partner_company_id: row.partner_company_id,
       person_id: row.person_id,
@@ -100,13 +100,13 @@ export function ContractCounterpartiesEditor({ contractId }: Props) {
   }
 
   async function removeRow(id: string) {
-    const { error } = await (supabase as any).from("contract_counterparties").delete().eq("id", id);
+    const { error } = await supabase.from("contract_counterparties").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["contract-counterparties", contractId] });
   }
 
   async function updateRole(id: string, role: string) {
-    await (supabase as any).from("contract_counterparties").update({ role: role || null }).eq("id", id);
+    await supabase.from("contract_counterparties").update({ role: role || null }).eq("id", id);
     qc.invalidateQueries({ queryKey: ["contract-counterparties", contractId] });
   }
 

@@ -56,7 +56,7 @@ function PersonEdit() {
   const [assistantPersona, setAssistantPersona] = useState<string>("");
 
   async function addIcFunction(fn: IcTeamFunction) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("person_ic_functions")
       .insert({ person_id: personId, function: fn });
     if (error && !`${error.message}`.toLowerCase().includes("duplicate")) {

@@ -18,8 +18,8 @@ function Proyectos() {
     queryFn: async () => {
       const PROD_SELECT = "id, title, kind, status, year, director, production_company, platform, partner, notes, fee_amount, ic_commission_pct, delivery_date, premiere_date, nomination_date, award_date, updated_at";
       const [direct, viaAssign, { data: history }] = await Promise.all([
-        (supabase as any).from("productions").select(PROD_SELECT).eq("composer_id", composerId!),
-        (supabase as any)
+        supabase.from("productions").select(PROD_SELECT).eq("composer_id", composerId!),
+        supabase
           .from("production_assignments")
           .select(`production:productions(${PROD_SELECT})`)
           .eq("composer_id", composerId!),

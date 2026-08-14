@@ -47,7 +47,7 @@ function CaseStudiesIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["case-studies"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("case_studies").select("*").order("year", { ascending: false, nullsFirst: false });
+      const { data, error } = await supabase.from("case_studies").select("*").order("year", { ascending: false, nullsFirst: false });
       if (error) throw error;
       return (data ?? []) as CaseStudy[];
     },
@@ -78,7 +78,7 @@ function CaseStudiesIndex() {
   async function createCase() {
     const title = prompt("Título del caso de éxito:");
     if (!title?.trim()) return;
-    const { data: created, error } = await (supabase as any).from("case_studies").insert({ title: title.trim() }).select("*").single();
+    const { data: created, error } = await supabase.from("case_studies").insert({ title: title.trim() }).select("*").single();
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["case-studies"] });
     setEditing(created as CaseStudy);
@@ -158,7 +158,7 @@ function CaseSheet({ item, composers, onClose }: { item: CaseStudy | null; compo
 
   async function save() {
     setSaving(true);
-    const { error } = await (supabase as any).from("case_studies").update({
+    const { error } = await supabase.from("case_studies").update({
       title: f!.title, client: f!.client, composer_id: f!.composer_id, year: f!.year,
       problem: f!.problem, proposal: f!.proposal, outcome: f!.outcome, metrics: f!.metrics,
       visibility: f!.visibility, external_url: f!.external_url, tags: f!.tags ?? [],
@@ -173,7 +173,7 @@ function CaseSheet({ item, composers, onClose }: { item: CaseStudy | null; compo
   async function remove() {
     if (!confirm("¿Eliminar este caso?")) return;
     if (f?.cover_path) await deleteMarketingAsset(f.cover_path).catch(() => {});
-    const { error } = await (supabase as any).from("case_studies").delete().eq("id", f!.id);
+    const { error } = await supabase.from("case_studies").delete().eq("id", f!.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminado");
     qc.invalidateQueries({ queryKey: ["case-studies"] });
@@ -185,7 +185,7 @@ function CaseSheet({ item, composers, onClose }: { item: CaseStudy | null; compo
     try {
       if (f?.cover_path) await deleteMarketingAsset(f.cover_path).catch(() => {});
       const path = await uploadMarketingAsset("case-studies", file);
-      const { error } = await (supabase as any).from("case_studies").update({ cover_path: path }).eq("id", f!.id);
+      const { error } = await supabase.from("case_studies").update({ cover_path: path }).eq("id", f!.id);
       if (error) throw error;
       up("cover_path", path);
       toast.success("Portada subida");

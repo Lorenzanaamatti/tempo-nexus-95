@@ -27,13 +27,13 @@ function TareasPage() {
     queryKey: ["my-person-id", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data: byUser } = await (supabase as any)
+      const { data: byUser } = await supabase
         .from("people").select("id").eq("user_id", user!.id).maybeSingle();
       if (byUser?.id) return byUser.id as string;
       const { data: prof } = await supabase
         .from("profiles").select("composer_id").eq("id", user!.id).maybeSingle();
       if (!prof?.composer_id) return null;
-      const { data: byComp } = await (supabase as any)
+      const { data: byComp } = await supabase
         .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
       return (byComp?.id as string) ?? null;
     },
@@ -46,13 +46,13 @@ function TareasPage() {
     queryKey: ["tasks", "assigned", personId, areaFilter, statusFilter],
     enabled: !!personId,
     queryFn: async () => {
-      let q = (supabase as any).from("actions").select(baseSelect).eq("assignee_person_id", personId);
+      let q = supabase.from("actions").select(baseSelect).eq("assignee_person_id", personId);
       if (areaFilter !== "all") q = q.eq("area", areaFilter);
       if (statusFilter === "pending") q = q.eq("done", false);
       if (statusFilter === "done") q = q.eq("done", true);
       const { data, error } = await q.order("done").order("due_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
       if (error) {
-        const { data: d2 } = await (supabase as any).from("actions").select("*").eq("assignee_person_id", personId);
+        const { data: d2 } = await supabase.from("actions").select("*").eq("assignee_person_id", personId);
         return d2 ?? [];
       }
       return data ?? [];
@@ -63,7 +63,7 @@ function TareasPage() {
     queryKey: ["tasks", "created", user?.id, areaFilter, statusFilter],
     enabled: !!user?.id,
     queryFn: async () => {
-      let q = (supabase as any).from("actions").select(baseSelect).eq("requester_user_id", user!.id);
+      let q = supabase.from("actions").select(baseSelect).eq("requester_user_id", user!.id);
       if (areaFilter !== "all") q = q.eq("area", areaFilter);
       if (statusFilter === "pending") q = q.eq("done", false);
       if (statusFilter === "done") q = q.eq("done", true);
@@ -74,7 +74,7 @@ function TareasPage() {
   });
 
   async function toggle(id: string, done: boolean) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("actions")
       .update({ done, done_at: done ? new Date().toISOString() : null })
       .eq("id", id);

@@ -43,7 +43,7 @@ export function EntityActionsEditor({
   const actionsQ = useQuery({
     queryKey,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("actions")
         .select("*, assignee:people!actions_assignee_person_id_fkey(id, full_name)")
         .eq("subject_type", subjectType)
@@ -53,7 +53,7 @@ export function EntityActionsEditor({
         .order("created_at", { ascending: false });
       if (error) {
         // fallback without FK alias (FK might not yet be defined)
-        const { data: d2, error: e2 } = await (supabase as any)
+        const { data: d2, error: e2 } = await supabase
           .from("actions")
           .select("*")
           .eq("subject_type", subjectType)
@@ -95,7 +95,7 @@ export function EntityActionsEditor({
 
   async function addAction() {
     if (!newTitle.trim()) return;
-    const { error } = await (supabase as any).from("actions").insert({
+    const { error } = await supabase.from("actions").insert({
       subject_type: subjectType,
       subject_id: subjectId,
       title: newTitle.trim(),
@@ -111,7 +111,7 @@ export function EntityActionsEditor({
   }
 
   async function toggleDone(id: string, done: boolean) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("actions")
       .update({ done, done_at: done ? new Date().toISOString() : null })
       .eq("id", id);
@@ -120,7 +120,7 @@ export function EntityActionsEditor({
   }
 
   async function removeAction(id: string) {
-    const { error } = await (supabase as any).from("actions").delete().eq("id", id);
+    const { error } = await supabase.from("actions").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey });
   }

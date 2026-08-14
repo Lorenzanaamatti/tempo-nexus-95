@@ -115,7 +115,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
   const sprintsQ = useQuery({
     queryKey: ["budget-sprints", composerId ?? null],
     queryFn: async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("production_billing_sprints")
         .select("production_id, kind, amount, status, productions!inner(composer_id)");
       if (composerId) q = q.eq("productions.composer_id", composerId);
@@ -247,13 +247,13 @@ function BusinessPlanPanel() {
   const budgetQ = useQuery({
     queryKey: ["ic-budget", year],
     queryFn: async () =>
-      ((await (supabase as any).from("ic_budget_lines").select("*").eq("year", year)).data ?? []) as any[],
+      ((await supabase.from("ic_budget_lines").select("*").eq("year", year)).data ?? []) as any[],
   });
 
   const sprintsQ = useQuery({
     queryKey: ["ic-budget-actual-commission", year],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("production_billing_sprints")
         .select("amount, status, invoiced_date, paid_date, kind")
         .eq("kind", "comision");
@@ -267,7 +267,7 @@ function BusinessPlanPanel() {
   const expensesQ = useQuery({
     queryKey: ["ic-expenses-year", year],
     queryFn: async () =>
-      ((await (supabase as any).from("ic_expenses").select("amount, category, expense_date").gte("expense_date", `${year}-01-01`).lte("expense_date", `${year}-12-31`)).data ?? []) as any[],
+      ((await supabase.from("ic_expenses").select("amount, category, expense_date").gte("expense_date", `${year}-01-01`).lte("expense_date", `${year}-12-31`)).data ?? []) as any[],
   });
 
   // budget map: cat -> 12 values
@@ -297,9 +297,9 @@ function BusinessPlanPanel() {
   async function setBudgetCell(category: string, month: number, value: number) {
     const existing = (budgetQ.data ?? []).find((l: any) => l.category === category && l.month === month);
     if (existing) {
-      await (supabase as any).from("ic_budget_lines").update({ amount: value }).eq("id", existing.id);
+      await supabase.from("ic_budget_lines").update({ amount: value }).eq("id", existing.id);
     } else {
-      await (supabase as any).from("ic_budget_lines").insert({ year, month, category, amount: value });
+      await supabase.from("ic_budget_lines").insert({ year, month, category, amount: value });
     }
     qc.invalidateQueries({ queryKey: ["ic-budget", year] });
   }
@@ -401,13 +401,13 @@ function IcExpensesPanel() {
   const dataQ = useQuery({
     queryKey: ["ic-expenses"],
     queryFn: async () =>
-      ((await (supabase as any).from("ic_expenses").select("*, providers(name)").order("expense_date", { ascending: false })).data ?? []) as any[],
+      ((await supabase.from("ic_expenses").select("*, providers(name)").order("expense_date", { ascending: false })).data ?? []) as any[],
   });
 
   const providersQ = useQuery({
     queryKey: ["providers-min"],
     queryFn: async () =>
-      ((await (supabase as any).from("providers").select("id, name").order("name")).data ?? []) as any[],
+      ((await supabase.from("providers").select("id, name").order("name")).data ?? []) as any[],
   });
 
   const total = (dataQ.data ?? []).reduce((a: number, e: any) => a + (Number(e.amount) || 0), 0);
@@ -490,8 +490,8 @@ function ExpenseDialog({ expense, providers, onClose, onSaved }: { expense: any;
       notes: form.notes || null,
     };
     const op = expense.id
-      ? (supabase as any).from("ic_expenses").update(payload).eq("id", expense.id)
-      : (supabase as any).from("ic_expenses").insert(payload);
+      ? supabase.from("ic_expenses").update(payload).eq("id", expense.id)
+      : supabase.from("ic_expenses").insert(payload);
     const { error } = await op;
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -501,7 +501,7 @@ function ExpenseDialog({ expense, providers, onClose, onSaved }: { expense: any;
 
   async function remove() {
     if (!expense.id || !confirm("¿Eliminar gasto?")) return;
-    await (supabase as any).from("ic_expenses").delete().eq("id", expense.id);
+    await supabase.from("ic_expenses").delete().eq("id", expense.id);
     onSaved();
   }
 

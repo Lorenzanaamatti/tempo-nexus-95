@@ -124,10 +124,10 @@ function ICKpisSection() {
     queryKey: ["ic-kpis", year],
     queryFn: async () => {
       const [sprints, prods, opps, contracts, roster] = await Promise.all([
-        (supabase as any).from("production_billing_sprints").select("amount, kind, due_date, invoiced_date"),
-        (supabase as any).from("productions").select("id, status, year"),
-        (supabase as any).from("opportunities").select("id, statuses"),
-        (supabase as any).from("contracts").select("id, sign_status, signed_date"),
+        supabase.from("production_billing_sprints").select("amount, kind, due_date, invoiced_date"),
+        supabase.from("productions").select("id, status, year"),
+        supabase.from("opportunities").select("id, statuses"),
+        supabase.from("contracts").select("id, sign_status, signed_date"),
         supabase.from("composers").select("id, representation_status, roster_role"),
       ]);
       const ACTIVE = new Set([
@@ -185,7 +185,7 @@ function ICCombinedFilmographySection({ icId: _icId }: { icId: string }) {
       // Solo producciones del CRM con compositor del roster vinculado.
       // Si además la producción está cruzada con una ficha de Películas ES,
       // se hereda el título en español.
-      const { data: prods } = await (supabase as any)
+      const { data: prods } = await supabase
         .from("productions")
         .select(
           "id, title, year, project_type, composer_id, spanish_film_id, composers!inner(id, full_name, artistic_name, roster_role), spanish_film:spanish_films(title, title_es)",
@@ -332,7 +332,7 @@ function ICTopPartnersSection() {
     queryKey: ["ic-partners"],
     queryFn: async () => {
       const [prods, platforms, companies] = await Promise.all([
-        (supabase as any).from("productions").select("platform_id, partner_company_id"),
+        supabase.from("productions").select("platform_id, partner_company_id"),
         supabase.from("platforms").select("id, name"),
         supabase.from("production_companies").select("id, name"),
       ]);

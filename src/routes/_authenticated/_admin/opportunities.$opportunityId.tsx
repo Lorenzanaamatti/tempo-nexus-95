@@ -27,7 +27,7 @@ function OpportunityDetail() {
   const oppQ = useQuery({
     queryKey: ["opportunity", opportunityId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("opportunities").select("*").eq("id", opportunityId).single();
+      const { data, error } = await supabase.from("opportunities").select("*").eq("id", opportunityId).single();
       if (error) throw error;
       return data;
     },
@@ -36,7 +36,7 @@ function OpportunityDetail() {
   const candidatesQ = useQuery({
     queryKey: ["opportunity-candidates", opportunityId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("opportunity_candidates")
         .select("id, note, composer:composers(id, full_name, artistic_name)")
         .eq("opportunity_id", opportunityId);
@@ -66,7 +66,7 @@ function OpportunityDetail() {
   const productionsQ = useQuery({
     queryKey: ["productions-mini"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("productions").select("id, title, year").order("title");
+      const { data, error } = await supabase.from("productions").select("id, title, year").order("title");
       if (error) throw error;
       return data ?? [];
     },
@@ -123,7 +123,7 @@ function OpportunityDetail() {
 
   async function save() {
     setSaving(true);
-    const { error } = await (supabase as any).from("opportunities").update({
+    const { error } = await supabase.from("opportunities").update({
       title: form.title,
       kind: form.kind,
       target_production_id: form.kind === "pitch" ? (form.target_production_id || null) : null,
@@ -148,7 +148,7 @@ function OpportunityDetail() {
 
   async function remove() {
     if (!confirm("¿Eliminar esta oportunidad?")) return;
-    const { error } = await (supabase as any).from("opportunities").delete().eq("id", opportunityId);
+    const { error } = await supabase.from("opportunities").delete().eq("id", opportunityId);
     if (error) return toast.error(error.message);
     navigate({ to: "/opportunities" });
   }
@@ -164,14 +164,14 @@ function OpportunityDetail() {
   const [newCandidate, setNewCandidate] = useState("");
   async function addCandidate() {
     if (!newCandidate) return;
-    const { error } = await (supabase as any).from("opportunity_candidates").insert({ opportunity_id: opportunityId, composer_id: newCandidate });
+    const { error } = await supabase.from("opportunity_candidates").insert({ opportunity_id: opportunityId, composer_id: newCandidate });
     if (error) return toast.error(error.message);
     setNewCandidate("");
     qc.invalidateQueries({ queryKey: ["opportunity-candidates", opportunityId] });
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
   async function removeCandidate(id: string) {
-    const { error } = await (supabase as any).from("opportunity_candidates").delete().eq("id", id);
+    const { error } = await supabase.from("opportunity_candidates").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["opportunity-candidates", opportunityId] });
     qc.invalidateQueries({ queryKey: ["opportunities"] });

@@ -50,7 +50,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     enabled: role === "admin",
     refetchInterval: 120000,
     queryFn: async () => {
-      const { count } = await (supabase as any)
+      const { count } = await supabase
         .from("agent_actions")
         .select("id", { count: "exact", head: true })
         .eq("status", "pending");
@@ -64,7 +64,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     enabled: role === "admin",
     refetchInterval: 120000,
     queryFn: async () => {
-      const { count } = await (supabase as any)
+      const { count } = await supabase
         .from("profiles")
         .select("id", { count: "exact", head: true })
         .eq("status", "pending");

@@ -18,7 +18,7 @@ function PortalPrensa() {
     queryKey: ["portal-press-kits", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("press_kits")
         .select("id, title, language, version, storage_path, external_url, public_link, notes")
         .eq("composer_id", composerId)
@@ -33,7 +33,7 @@ function PortalPrensa() {
     queryKey: ["portal-clippings", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("press_clippings")
         .select("id, outlet, headline, author, published_date, language, url, screenshot_path, featured")
         .eq("composer_id", composerId)

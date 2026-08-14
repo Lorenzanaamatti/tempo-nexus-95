@@ -50,7 +50,7 @@ function AgentActionsPage() {
   const { data, refetch, isLoading } = useQuery({
     queryKey: ["agent-actions", filter],
     queryFn: async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("agent_actions")
         .select("*, agent:people!agent_actions_agent_person_id_fkey(full_name)")
         .order("requested_at", { ascending: false })

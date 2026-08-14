@@ -50,7 +50,7 @@ function ClippingsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["press-clippings"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("press_clippings")
         .select("*")
         .order("featured", { ascending: false })
@@ -88,7 +88,7 @@ function ClippingsIndex() {
     if (!outlet?.trim()) return;
     const headline = prompt("Titular:");
     if (!headline?.trim()) return;
-    const { data: created, error } = await (supabase as any)
+    const { data: created, error } = await supabase
       .from("press_clippings")
       .insert({ outlet: outlet.trim(), headline: headline.trim() })
       .select("*").single();
@@ -189,7 +189,7 @@ function ClippingSheet({ item, composers, onClose }: { item: Clipping | null; co
   async function save() {
     if (!form) return;
     setSaving(true);
-    const { error } = await (supabase as any).from("press_clippings").update({
+    const { error } = await supabase.from("press_clippings").update({
       outlet: form.outlet, headline: form.headline, author: form.author,
       published_date: form.published_date, language: form.language, url: form.url,
       composer_id: form.composer_id, tags: form.tags ?? [], featured: form.featured, notes: form.notes,
@@ -205,7 +205,7 @@ function ClippingSheet({ item, composers, onClose }: { item: Clipping | null; co
   async function remove() {
     if (!confirm("¿Eliminar esta entrada de clipping?")) return;
     if (form?.screenshot_path) await deleteMarketingAsset(form.screenshot_path).catch(() => {});
-    const { error } = await (supabase as any).from("press_clippings").delete().eq("id", form!.id);
+    const { error } = await supabase.from("press_clippings").delete().eq("id", form!.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminada");
     qc.invalidateQueries({ queryKey: ["press-clippings"] });
@@ -217,7 +217,7 @@ function ClippingSheet({ item, composers, onClose }: { item: Clipping | null; co
     try {
       if (form?.screenshot_path) await deleteMarketingAsset(form.screenshot_path).catch(() => {});
       const path = await uploadMarketingAsset("clippings", file);
-      const { error } = await (supabase as any).from("press_clippings").update({ screenshot_path: path }).eq("id", form!.id);
+      const { error } = await supabase.from("press_clippings").update({ screenshot_path: path }).eq("id", form!.id);
       if (error) throw error;
       update("screenshot_path", path);
       toast.success("Captura subida");

@@ -12,7 +12,7 @@ export function AgentToolsEditor({ personId }: { personId: string }) {
 
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("agent_tools")
         .select("tool_name")
         .eq("agent_person_id", personId)
@@ -28,12 +28,12 @@ export function AgentToolsEditor({ personId }: { personId: string }) {
     else next.delete(name);
     setEnabled(next);
     if (on) {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("agent_tools")
         .upsert({ agent_person_id: personId, tool_name: name, enabled: true });
       if (error) toast.error(error.message);
     } else {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("agent_tools")
         .delete()
         .eq("agent_person_id", personId)

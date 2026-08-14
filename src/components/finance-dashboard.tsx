@@ -42,7 +42,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
   const sprintsQ = useQuery({
     queryKey: ["finance-sprints", composerId ?? null],
     queryFn: async () => {
-      let query = (supabase as any)
+      let query = supabase
         .from("production_billing_sprints")
         .select("id, production_id, kind, amount, due_date, invoiced_date, paid_date, status, productions!inner(title, composer_id)");
       if (composerId) query = query.eq("productions.composer_id", composerId);

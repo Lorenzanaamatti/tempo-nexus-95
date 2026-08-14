@@ -74,7 +74,7 @@ function NewTaskDialog({
     queryKey: ["subarea-suggestions", area],
     enabled: isOpen && !!area,
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("actions")
         .select("subarea")
         .eq("area", area)
@@ -90,7 +90,7 @@ function NewTaskDialog({
     if (!title.trim()) { toast.error("Pon una descripción de la tarea"); return; }
     if (!area) { toast.error("Elige un área"); return; }
     setSaving(true);
-    const { error } = await (supabase as any).from("actions").insert({
+    const { error } = await supabase.from("actions").insert({
       title: title.trim(),
       kind: "tarea",
       area,

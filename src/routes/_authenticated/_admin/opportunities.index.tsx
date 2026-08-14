@@ -41,7 +41,7 @@ function OpportunitiesIndex() {
   const { data: result, isLoading } = useQuery({
     queryKey: ["opportunities", q, statusFilter, kindFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      let query = (supabase as any)
+      let query = supabase
         .from("opportunities")
         .select(
           "id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
@@ -87,7 +87,7 @@ function OpportunitiesIndex() {
   async function create() {
     if (!newTitle.trim()) return;
     setCreating(true);
-    const { error } = await (supabase as any).from("opportunities").insert({
+    const { error } = await supabase.from("opportunities").insert({
       title: newTitle.trim(),
       kind: newKind,
       partner_company_id: newCompany || null,
@@ -140,7 +140,7 @@ function OpportunitiesIndex() {
             filename="oportunidades"
             sheetName="Oportunidades"
             fetchAll={async () => {
-              const { data, error } = await (supabase as any)
+              const { data, error } = await supabase
                 .from("opportunities")
                 .select("*, partner_company:production_companies(name), target_production:productions(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
                 .order("created_at", { ascending: false });

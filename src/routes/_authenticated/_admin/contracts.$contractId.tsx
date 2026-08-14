@@ -32,7 +32,7 @@ function ContractDetail() {
   const q = useQuery({
     queryKey: ["contract", contractId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("contracts").select("*").eq("id", contractId).single();
+      const { data, error } = await supabase.from("contracts").select("*").eq("id", contractId).single();
       if (error) throw error;
       return data;
     },
@@ -101,7 +101,7 @@ function ContractDetail() {
   async function save() {
     setSaving(true);
     const type = form.contract_type === "__custom__" ? (form.contract_type_custom.trim() || null) : (form.contract_type || null);
-    const { error } = await (supabase as any).from("contracts").update({
+    const { error } = await supabase.from("contracts").update({
       title: form.title,
       contract_type: type,
       signer_name: form.signer_name || null,
@@ -126,7 +126,7 @@ function ContractDetail() {
 
   async function remove() {
     if (!confirm("¿Eliminar este contrato?")) return;
-    const { error } = await (supabase as any).from("contracts").delete().eq("id", contractId);
+    const { error } = await supabase.from("contracts").delete().eq("id", contractId);
     if (error) return toast.error(error.message);
     navigate({ to: "/contracts" });
   }

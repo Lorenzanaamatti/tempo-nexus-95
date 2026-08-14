@@ -47,7 +47,7 @@ export type CatalogIndexProps = {
 export function CatalogIndex(props: CatalogIndexProps) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
-  const db = supabase as any;
+  const db = supabase;
 
   const sortOptions = props.sortOptions ?? [
     { key: props.nameColumn, label: "nombre" },

@@ -54,7 +54,7 @@ function PeopleIndex() {
     queryKey: ["people-ic", q, fnFilter, typeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       const rel = fnFilter === "all" ? "person_ic_functions(function)" : "person_ic_functions!inner(function)";
-      let query = (supabase as any)
+      let query = supabase
         .from("people")
         .select(`id, full_name, role, email, phone, is_virtual_assistant, ${rel}`, { count: "exact" })
         .eq("role", "ic_team");
@@ -89,7 +89,7 @@ function PeopleIndex() {
       .single();
     const error = res.error;
     if (!res.error && res.data && newFn !== "none") {
-      await (supabase as any).from("person_ic_functions").insert({
+      await supabase.from("person_ic_functions").insert({
         person_id: res.data.id,
         function: newFn,
       });

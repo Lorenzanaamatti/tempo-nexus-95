@@ -141,7 +141,7 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
     const model = person.assistant_model || "claude-sonnet-4-5-20250929";
 
     // Cargar herramientas habilitadas de este agente.
-    const { data: enabledRows } = await (supabase as any)
+    const { data: enabledRows } = await supabase
       .from("agent_tools")
       .select("tool_name")
       .eq("agent_person_id", data.personId)
@@ -154,7 +154,7 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
     }));
 
     // ¿Tiene verificadores asignados? Necesario para herramientas de escritura.
-    const { count: verifierCount } = await (supabase as any)
+    const { count: verifierCount } = await supabase
       .from("person_verifier_assignments")
       .select("id", { count: "exact", head: true })
       .eq("person_id", data.personId);
@@ -216,7 +216,7 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
             continue;
           }
           const summary = summarizeWritePayload(tu.name, tu.input);
-          const { data: actionRow, error: insErr } = await (supabase as any)
+          const { data: actionRow, error: insErr } = await supabase
             .from("agent_actions")
             .insert({
               agent_person_id: data.personId,
@@ -326,7 +326,7 @@ export const approveAgentAction = createServerFn({ method: "POST" })
   .inputValidator(validateDecision)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: row, error } = await (supabase as any)
+    const { data: row, error } = await supabase
       .from("agent_actions")
       .select("id, tool_name, payload, status")
       .eq("id", data.actionId)
@@ -335,7 +335,7 @@ export const approveAgentAction = createServerFn({ method: "POST" })
     if (row.status !== "pending") throw new Error(`Acción ya ${row.status}`);
     try {
       const { entity_kind, entity_id } = await executeApprovedAction(supabase, row.tool_name, row.payload || {});
-      const { error: upErr } = await (supabase as any)
+      const { error: upErr } = await supabase
         .from("agent_actions")
         .update({
           status: "approved",
@@ -349,7 +349,7 @@ export const approveAgentAction = createServerFn({ method: "POST" })
       if (upErr) throw new Error(upErr.message);
       return { ok: true, entity_kind, entity_id };
     } catch (e) {
-      await (supabase as any)
+      await supabase
         .from("agent_actions")
         .update({
           status: "failed",
@@ -368,7 +368,7 @@ export const rejectAgentAction = createServerFn({ method: "POST" })
   .inputValidator(validateDecision)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("agent_actions")
       .update({
         status: "rejected",
