@@ -211,6 +211,10 @@ export async function addToRoster(name: string, roster_role: "composer" | "super
     toast.info(`"${n}" ya existe en Roster`);
     return existing.id;
   }
+  const nearRoster = await findNearDuplicate("people", "full_name", n);
+  if (nearRoster) {
+    toast.warning(`Ojo: ya existe una persona llamada "${nearRoster.name}" en la base`);
+  }
   const { data, error } = await supabase
     .from("composers")
     .insert({ full_name: n, slug: slugify(n), roster_role } as any)
