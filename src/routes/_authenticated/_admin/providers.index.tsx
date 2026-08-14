@@ -1,3 +1,4 @@
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -87,6 +88,8 @@ function ProvidersPage() {
     });
   }, [dataQ.data, q, kindFilter, scopeFilter]);
 
+  const pg = usePagination(filtered, 50);
+
   return (
     <div className="mx-auto max-w-[1300px] px-6 py-6">
       <header className="mb-4">
@@ -166,7 +169,7 @@ function ProvidersPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
+              {pg.pageItems.map((p) => (
                 <tr key={p.id} className="cursor-pointer border-t border-border hover:bg-muted/30" onClick={() => setEditing(p)}>
                   <td className="px-3 py-2 font-medium">{p.name}</td>
                   <td className="px-3 py-2 text-muted-foreground">{KIND_LABEL[p.kind] ?? p.kind}</td>
@@ -180,6 +183,15 @@ function ProvidersPage() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={pg.page}
+        pageCount={pg.pageCount}
+        pageSize={pg.pageSize}
+        total={pg.total}
+        onPageChange={pg.setPage}
+        onPageSizeChange={pg.setPageSize}
+        label="proveedores"
+      />
 
       <ProviderDialog
         provider={editing}

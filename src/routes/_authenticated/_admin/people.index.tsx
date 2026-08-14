@@ -11,6 +11,7 @@ import { Plus, Sparkles, User } from "lucide-react";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -82,6 +83,8 @@ function PeopleIndex() {
     toast.success("Persona añadida al Equipo IC");
     qc.invalidateQueries({ queryKey: ["people-ic"] });
   }
+
+  const pg = usePagination(data, 50);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -158,8 +161,9 @@ function PeopleIndex() {
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">Sin personas en el Equipo IC.</p>
       ) : (
+        <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {data.map((p) => (
+          {pg.pageItems.map((p) => (
             <Link
               key={p.id}
               to="/people/$personId"
@@ -183,6 +187,8 @@ function PeopleIndex() {
             </Link>
           ))}
         </div>
+        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="personas" />
+        </>
       )}
     </div>
   );

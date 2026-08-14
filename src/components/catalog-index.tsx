@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
+import { PaginationBar, usePagination } from "@/components/pagination-bar";
 
 /**
  * Pantalla genérica de catálogo CRM (directores, productoras, plataformas…).
@@ -74,6 +75,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
   }
 
   const inline = !!props.renderExtra;
+  const pg = usePagination(data, 50);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -115,8 +117,9 @@ export function CatalogIndex(props: CatalogIndexProps) {
       ) : !data?.length ? (
         <p className="text-sm text-muted-foreground">{props.emptyLabel}</p>
       ) : inline ? (
+        <>
         <div className="space-y-3">
-          {data.map((row) => (
+          {pg.pageItems.map((row) => (
             <div key={row.id} className="rounded-sm border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <Input
@@ -134,9 +137,12 @@ export function CatalogIndex(props: CatalogIndexProps) {
             </div>
           ))}
         </div>
+        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        </>
       ) : (
+        <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {data.map((row) => {
+          {pg.pageItems.map((row) => {
             const body = (
               <>
                 <div className="font-display text-lg hover:underline">{row[props.nameColumn]}</div>
@@ -153,6 +159,8 @@ export function CatalogIndex(props: CatalogIndexProps) {
             );
           })}
         </div>
+        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        </>
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PaginationBar } from "@/components/pagination-bar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -284,24 +285,38 @@ function SpanishFilmsPage() {
   const [projecting, setProjecting] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["spanish-films", yearFilter, reviewOnly, q],
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
+  useEffect(() => {
+    setPage(1);
+  }, [yearFilter, reviewOnly, q, pageSize]);
+
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["spanish-films", yearFilter, reviewOnly, q, page, pageSize],
     queryFn: async () => {
       let query = supabase
         .from("spanish_films")
         .select(
           "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids, composer_person_id, music_supervisor_person_id",
+          { count: "exact" },
         )
         .order("year", { ascending: false })
         .order("title");
       if (yearFilter !== "all") query = query.eq("year", Number(yearFilter));
       if (reviewOnly) query = query.eq("needs_review", true);
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
-      const { data, error } = await query.limit(500);
+      const from = (page - 1) * pageSize;
+      const { data, error, count } = await query.range(from, from + pageSize - 1);
       if (error) throw error;
-      return (data ?? []) as Film[];
+      return { rows: (data ?? []) as Film[], count: count ?? 0 };
     },
+    placeholderData: (prev) => prev,
   });
+
+  const data = result?.rows;
+  const totalCount = result?.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const { data: rosterPeople } = useQuery({
     queryKey: ["roster-people-composers-supervisors"],
@@ -515,7 +530,7 @@ function SpanishFilmsPage() {
           <span>Solo necesitan revisión</span>
         </label>
         <span className="ml-auto smallcaps text-muted-foreground">
-          {data?.length ?? 0} películas
+          {totalCount} películas
         </span>
       </div>
 
@@ -646,6 +661,15 @@ function SpanishFilmsPage() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={page}
+        pageCount={pageCount}
+        pageSize={pageSize}
+        total={totalCount}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+        label="películas"
+      />
 
       <EditDialog
         film={editing}
