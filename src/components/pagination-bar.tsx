@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { recordListLatency } from "@/lib/list-metrics";
 
 export const PAGE_SIZES = [25, 50, 100, 200];
 
@@ -19,11 +20,14 @@ export function useServerPagination<K extends string>(opts: {
   pageSize?: number;
   /** Filtros que, al cambiar, deben devolver a la página 1. */
   deps?: unknown[];
+  /** Nombre de la lista para las métricas de latencia. */
+  list?: string;
 }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(opts.pageSize ?? 50);
   const [sortKey, setSortKey] = useState<K>(opts.sortKey);
   const [sortDir, setSortDir] = useState<SortDir>(opts.sortDir ?? "asc");
+  const [lastLatencyMs, setLastLatencyMs] = useState<number | null>(null);
   const deps = opts.deps ?? [];
 
   useEffect(() => {
@@ -44,7 +48,22 @@ export function useServerPagination<K extends string>(opts: {
 
   function applyTo<T>(query: T, key: string = sortKey): T {
     const q = query as any;
-    return q.order(key, { ascending: sortDir === "asc", nullsFirst: false }).range(from, to) as T;
+    const built = q.order(key, { ascending: sortDir === "asc", nullsFirst: false }).range(from, to);
+    // Instrumentación de latencia: se mide cuando la consulta se resuelve.
+    if (typeof built?.then === "function" && !built.__measured) {
+      const originalThen = built.then.bind(built);
+      built.__measured = true;
+      built.then = (onFulfilled: any, onRejected: any) => {
+        const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+        return originalThen((res: any) => {
+          const ms = (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0;
+          recordListLatency({ list: opts.list ?? "lista", ms, at: Date.now(), sortKey: key, sortDir, page });
+          setLastLatencyMs(ms);
+          return res;
+        }).then(onFulfilled, onRejected);
+      };
+    }
+    return built as T;
   }
 
   return {
@@ -63,6 +82,7 @@ export function useServerPagination<K extends string>(opts: {
     from,
     to,
     applyTo,
+    lastLatencyMs,
     pageCountOf: (total: number) => Math.max(1, Math.ceil(total / pageSize)),
   };
 }
@@ -182,6 +202,8 @@ export type PaginationBarProps = {
   onPageSizeChange: (n: number) => void;
   /** Etiqueta en plural, p. ej. "películas". */
   label?: string;
+  /** Latencia de la última consulta (ms) para diagnóstico. */
+  latencyMs?: number | null;
   className?: string;
 };
 
@@ -193,6 +215,7 @@ export function PaginationBar({
   onPageChange,
   onPageSizeChange,
   label = "resultados",
+  latencyMs,
   className,
 }: PaginationBarProps) {
   if (total === 0) return null;
@@ -203,6 +226,11 @@ export function PaginationBar({
     <div className={`mt-4 flex flex-wrap items-center justify-between gap-3 ${className ?? ""}`}>
       <p className="smallcaps text-xs text-muted-foreground">
         {from}–{to} de {total} {label}
+        {typeof latencyMs === "number" && (
+          <span className="ml-2 font-mono opacity-60" title="Latencia de la última consulta">
+            {Math.round(latencyMs)} ms
+          </span>
+        )}
       </p>
       <div className="flex items-center gap-2">
         <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>

@@ -49,7 +49,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
     { key: "created_at", label: "fecha de alta" },
   ];
 
-  const pg = useServerPagination<string>({ sortKey: props.nameColumn, pageSize: 50 });
+  const pg = useServerPagination<string>({ list: props.queryKey, sortKey: props.nameColumn, pageSize: 50 });
 
   const { data: result, isLoading } = useQuery({
     queryKey: [props.queryKey, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
@@ -158,7 +158,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
             </div>
           ))}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        <PaginationBar latencyMs={pg.lastLatencyMs} page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       ) : (
         <>
@@ -180,7 +180,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
             );
           })}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
+        <PaginationBar latencyMs={pg.lastLatencyMs} page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       )}
     </div>

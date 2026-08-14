@@ -30,7 +30,7 @@ function ContractsIndex() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [langFilter, setLangFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const pg = useServerPagination<SortKey>({
+  const pg = useServerPagination<SortKey>({ list: "contratos",
     sortKey: "signed_date",
     sortDir: "desc",
     pageSize: 50,
@@ -218,6 +218,7 @@ function ContractsIndex() {
         </div>
       )}
       <PaginationBar
+          latencyMs={pg.lastLatencyMs}
         page={pg.page}
         pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}

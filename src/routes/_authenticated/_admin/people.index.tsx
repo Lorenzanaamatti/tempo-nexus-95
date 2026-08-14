@@ -44,7 +44,7 @@ function PeopleIndex() {
   const [newFn, setNewFn] = useState<IcTeamFunction | "none">("none");
   const [newVirtual, setNewVirtual] = useState(false);
 
-  const pg = useServerPagination<PeopleSortKey>({
+  const pg = useServerPagination<PeopleSortKey>({ list: "personas",
     sortKey: "full_name",
     pageSize: 50,
     deps: [q, fnFilter, typeFilter],
@@ -211,7 +211,7 @@ function PeopleIndex() {
             </Link>
           ))}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="personas" />
+        <PaginationBar latencyMs={pg.lastLatencyMs} page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="personas" />
         </>
       )}
     </div>
