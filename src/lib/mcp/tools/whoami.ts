@@ -1,10 +1,9 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 
 export default defineTool({
   name: "whoami",
-  title: "Quién soy",
-  description:
-    "Devuelve el id, email y rol (BIG C / TEAM / ROSTER) del usuario autenticado que llama al servidor MCP.",
+  ...mcpToolMeta("whoami"),
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {

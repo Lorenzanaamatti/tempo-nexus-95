@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "list_calendar_events",
-  title: "Listar eventos de calendario",
-  description:
-    "Devuelve eventos de calendario dentro de un rango de fechas. Respeta los permisos del usuario autenticado.",
+  ...mcpToolMeta("list_calendar_events"),
   inputSchema: {
     from: z.string().describe("Fecha inicio YYYY-MM-DD."),
     to: z.string().describe("Fecha fin YYYY-MM-DD."),

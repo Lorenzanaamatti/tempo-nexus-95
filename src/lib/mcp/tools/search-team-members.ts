@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "search_team_members",
-  title: "Buscar miembros del equipo IC",
-  description:
-    "Busca personas del equipo interno (people) por nombre para obtener su UUID (útil como assignee_person_id o responsible_person_id).",
+  ...mcpToolMeta("search_team_members"),
   inputSchema: {
     query: z.string().describe("Nombre o parte del nombre."),
     limit: z.number().int().min(1).max(50).default(10),

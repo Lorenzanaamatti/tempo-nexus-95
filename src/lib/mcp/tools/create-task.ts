@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "create_task",
-  title: "Crear tarea",
-  description:
-    "Crea una tarea en el CRM (tabla actions). Se sincroniza automáticamente en el calendario. Requiere permisos de admin (BIG C).",
+  ...mcpToolMeta("create_task"),
   inputSchema: {
     title: z.string().describe("Título de la tarea."),
     notes: z.string().optional().describe("Notas o descripción."),
