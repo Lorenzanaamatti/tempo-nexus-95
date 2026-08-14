@@ -1,21 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
+import { createFileRoute } from "@tanstack/react-router";
+import { PaginationBar, useServerPagination } from "@/components/pagination-bar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -24,18 +15,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { ExportButton } from "@/components/export-button";
+import { FilmsTable, type FilmSortKey } from "@/components/peliculas-es/films-table";
+import { FilmEditDialog } from "@/components/peliculas-es/film-edit-dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Plus } from "lucide-react";
-import { ExportButton, type ExportField } from "@/components/export-button";
+  FILM_SELECT,
+  filmExportFields,
+  normalizeName,
+  type Film,
+  type RosterCompany,
+  type RosterComposer,
+  type RosterDirector,
+  type RosterPerson,
+} from "@/lib/spanish-films-crm";
 import {
   importSpanishFilmsByYear,
   updateSpanishFilm,
@@ -50,227 +44,7 @@ export const Route = createFileRoute("/_authenticated/_admin/peliculas-es/")({
   component: SpanishFilmsPage,
 });
 
-type Film = {
-  id: string;
-  tmdb_id: number;
-  year: number;
-  title: string;
-  title_es: string | null;
-  original_title: string | null;
-  directors: string[];
-  production_companies: string[];
-  composer: string | null;
-  music_supervisor: string | null;
-  platform: string | null;
-  box_office_eur: number | null;
-  needs_review: boolean;
-  review_reason: string | null;
-  completeness: number;
-  poster_path: string | null;
-  director_ids: string[] | null;
-  production_company_ids: string[] | null;
-  composer_person_id: string | null;
-  music_supervisor_person_id: string | null;
-};
-
-type RosterDirector = { id: string; full_name: string };
-type RosterCompany = { id: string; name: string };
-type RosterComposer = { id: string; full_name: string; artistic_name: string | null };
-type RosterPerson = { id: string; full_name: string; role: string };
-
-function normalizeName(s: string | null | undefined): string {
-  if (!s) return "";
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
-
-function slugify(s: string) {
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "") || `roster-${Date.now()}`;
-}
-
-async function addToTargetAccounts(params: {
-  name: string;
-  account_type: "roster" | "productora" | "plataforma" | "otros";
-  roster_kind?: "composer" | "artista" | "productor_musical" | "otros" | null;
-  production_company_id?: string | null;
-}) {
-  const name = params.name.trim();
-  if (!name) return toast.error("Nombre vacío");
-  const { data: existing } = await supabase
-    .from("target_accounts")
-    .select("id")
-    .ilike("name", name)
-    .eq("account_type", params.account_type)
-    .maybeSingle();
-  if (existing) {
-    toast.info(`"${name}" ya está en Cuentas Objetivo`);
-    return;
-  }
-  const { error } = await supabase.from("target_accounts").insert({
-    name,
-    account_type: params.account_type,
-    roster_kind: params.roster_kind ?? null,
-    production_company_id: params.production_company_id ?? null,
-  } as any);
-  if (error) return toast.error(error.message);
-  toast.success(`Añadido a Cuentas Objetivo: ${name}`);
-}
-
-async function addDirectorToCrm(name: string) {
-  const n = name.trim();
-  if (!n) return null;
-  const { data: existing } = await supabase
-    .from("directors")
-    .select("id")
-    .ilike("full_name", n)
-    .maybeSingle();
-  if (existing) {
-    toast.info(`"${n}" ya existe en Directores`);
-    return existing.id;
-  }
-  const { data, error } = await supabase
-    .from("directors")
-    .insert({ full_name: n })
-    .select("id")
-    .single();
-  if (error) {
-    toast.error(error.message);
-    return null;
-  }
-  toast.success(`Creado en Directores CRM: ${n}`);
-  return data.id;
-}
-
-async function addCompanyToCrm(name: string) {
-  const n = name.trim();
-  if (!n) return null;
-  const { data: existing } = await supabase
-    .from("production_companies")
-    .select("id")
-    .ilike("name", n)
-    .maybeSingle();
-  if (existing) {
-    toast.info(`"${n}" ya existe en Productoras`);
-    return existing.id;
-  }
-  const { data, error } = await supabase
-    .from("production_companies")
-    .insert({ name: n })
-    .select("id")
-    .single();
-  if (error) {
-    toast.error(error.message);
-    return null;
-  }
-  toast.success(`Creado en Productoras CRM: ${n}`);
-  return data.id;
-}
-
-async function addPlatformToCrm(name: string) {
-  const n = name.trim();
-  if (!n) return null;
-  const { data: existing } = await supabase
-    .from("platforms")
-    .select("id")
-    .ilike("name", n)
-    .maybeSingle();
-  if (existing) {
-    toast.info(`"${n}" ya existe en Plataformas`);
-    return existing.id;
-  }
-  const { data, error } = await supabase
-    .from("platforms")
-    .insert({ name: n })
-    .select("id")
-    .single();
-  if (error) {
-    toast.error(error.message);
-    return null;
-  }
-  toast.success(`Creado en Plataformas CRM: ${n}`);
-  return data.id;
-}
-
-async function addToRoster(
-  name: string,
-  roster_role: "composer" | "supervisor",
-) {
-  const n = name.trim();
-  if (!n) return null;
-  const { data: existing } = await supabase
-    .from("composers")
-    .select("id")
-    .ilike("full_name", n)
-    .maybeSingle();
-  if (existing) {
-    toast.info(`"${n}" ya existe en Roster`);
-    return existing.id;
-  }
-  const { data, error } = await supabase
-    .from("composers")
-    .insert({ full_name: n, slug: slugify(n), roster_role } as any)
-    .select("id")
-    .single();
-  if (error) {
-    toast.error(error.message);
-    return null;
-  }
-  toast.success(`Añadido al Roster: ${n}`);
-  return data.id;
-}
-
-function CrmAddMenu({
-  actions,
-}: {
-  actions: Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          className="h-8 px-2"
-          title="Añadir a CRM / Cuentas Objetivo"
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel>Añadir a…</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {actions.map((a, i) => (
-          <DropdownMenuItem key={i} onSelect={() => void a.onSelect()}>
-            {a.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function renderComposerLink(name: string | null, byName: Map<string, string>) {
-  if (!name) return <span className="text-muted-foreground">—</span>;
-  const id = byName.get(normalizeName(name));
-  if (!id) return <>{name}</>;
-  return (
-    <Link
-      to="/composers/$composerId"
-      params={{ composerId: id }}
-      className="text-primary underline-offset-2 hover:underline"
-    >
-      {name}
-    </Link>
-  );
-}
-
 function SpanishFilmsPage() {
-  type FilmSortKey = "year" | "title" | "original_title" | "composer" | "music_supervisor" | "platform" | "completeness";
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
   const updateFn = useServerFn(updateSpanishFilm);
@@ -286,7 +60,8 @@ function SpanishFilmsPage() {
   const [projecting, setProjecting] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
-  const pg = useServerPagination<FilmSortKey>({ list: "peliculas-es",
+  const pg = useServerPagination<FilmSortKey>({
+    list: "peliculas-es",
     sortKey: "year",
     sortDir: "desc",
     pageSize: 50,
@@ -297,12 +72,7 @@ function SpanishFilmsPage() {
   const { data: result, isLoading } = useQuery({
     queryKey: ["spanish-films", yearFilter, reviewOnly, q, page, pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      let query = supabase
-        .from("spanish_films")
-        .select(
-          "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids, composer_person_id, music_supervisor_person_id",
-          { count: "exact" },
-        );
+      let query = supabase.from("spanish_films").select(FILM_SELECT, { count: "exact" });
       if (yearFilter !== "all") query = query.eq("year", Number(yearFilter));
       if (reviewOnly) query = query.eq("needs_review", true);
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -316,12 +86,6 @@ function SpanishFilmsPage() {
   const data = result?.rows;
   const totalCount = result?.count ?? 0;
   const pageCount = pg.pageCountOf(totalCount);
-
-  const Th = (props: { k: FilmSortKey; children: React.ReactNode; className?: string }) => (
-    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort} className={props.className}>
-      {props.children}
-    </SortTh>
-  );
 
   const { data: rosterPeople } = useQuery({
     queryKey: ["roster-people-composers-supervisors"],
@@ -339,10 +103,7 @@ function SpanishFilmsPage() {
   const { data: rosterDirectors } = useQuery({
     queryKey: ["roster-directors"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("directors")
-        .select("id, full_name")
-        .order("full_name");
+      const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
       if (error) throw error;
       return (data ?? []) as RosterDirector[];
     },
@@ -351,10 +112,7 @@ function SpanishFilmsPage() {
   const { data: rosterCompanies } = useQuery({
     queryKey: ["roster-companies"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("production_companies")
-        .select("id, name")
-        .order("name");
+      const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
       if (error) throw error;
       return (data ?? []) as RosterCompany[];
     },
@@ -363,9 +121,7 @@ function SpanishFilmsPage() {
   const { data: rosterComposers } = useQuery({
     queryKey: ["roster-composers-all"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("composers")
-        .select("id, full_name, artistic_name");
+      const { data, error } = await supabase.from("composers").select("id, full_name, artistic_name");
       if (error) throw error;
       return (data ?? []) as RosterComposer[];
     },
@@ -414,9 +170,7 @@ function SpanishFilmsPage() {
   async function runProject() {
     setProjecting(true);
     try {
-      const { data, error } = await (supabase as any).rpc(
-        "backfill_spanish_films_to_productions",
-      );
+      const { data, error } = await (supabase as any).rpc("backfill_spanish_films_to_productions");
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       toast.success(
@@ -437,8 +191,8 @@ function SpanishFilmsPage() {
           <p className="smallcaps text-muted-foreground">Inteligencia de mercado</p>
           <h1 className="mt-1 font-display text-5xl">Películas ES</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Catálogo de cine español (2021–{CURRENT_YEAR}) importado desde TMDb. Cruza
-            créditos con tu roster para detectar oportunidades.
+            Catálogo de cine español (2021–{CURRENT_YEAR}) importado desde TMDb. Cruza créditos con tu roster
+            para detectar oportunidades.
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
@@ -505,7 +259,7 @@ function SpanishFilmsPage() {
               if (error) throw error;
               return (data ?? []) as Film[];
             }}
-            fields={exportFields()}
+            fields={filmExportFields()}
           />
         </div>
       </div>
@@ -534,9 +288,7 @@ function SpanishFilmsPage() {
           <Switch checked={reviewOnly} onCheckedChange={setReviewOnly} />
           <span>Solo necesitan revisión</span>
         </label>
-        <span className="ml-auto smallcaps text-muted-foreground">
-          {totalCount} películas
-        </span>
+        <span className="ml-auto smallcaps text-muted-foreground">{totalCount} películas</span>
       </div>
 
       {isLoading ? (
@@ -549,125 +301,19 @@ function SpanishFilmsPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
-              <tr>
-                <Th k="year">Año</Th>
-                <Th k="title">Título ES</Th>
-                <Th k="original_title">Título original</Th>
-                <th className="px-3 py-2">Director(es)</th>
-                <th className="px-3 py-2">Productoras</th>
-                <Th k="composer">Compositor BSO</Th>
-                <Th k="music_supervisor">Supervisor musical</Th>
-                <Th k="platform">Plataforma</Th>
-                <Th k="completeness" className="text-center">Completo</Th>
-                <th className="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((f) => (
-                <tr key={f.id} className="border-b border-border/50 hover:bg-muted/20">
-                  <td className="px-3 py-2 font-mono text-xs">{f.year}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setEditing(f); }}
-                      className="text-left font-medium text-primary underline-offset-2 hover:underline"
-                    >
-                      {f.title_es || f.title}
-                    </button>
-                    {f.needs_review && (
-                      <div className="mt-0.5 flex items-center gap-1 text-xs text-amber-600">
-                        <AlertTriangle className="h-3 w-3" />
-                        {f.review_reason}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{f.original_title || "—"}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.directors.length === 0 ? (
-                      "—"
-                    ) : (
-                      <ul className="space-y-0.5">
-                        {f.directors.map((name, i) => {
-                          const id = directorByName.get(normalizeName(name));
-                          return (
-                            <li key={i}>
-                              {id ? (
-                                <Link
-                                  to="/directors/$directorId"
-                                  params={{ directorId: id }}
-                                  className="text-primary underline-offset-2 hover:underline"
-                                >
-                                  {name}
-                                </Link>
-                              ) : (
-                                name
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {f.production_companies.length === 0 ? (
-                      "—"
-                    ) : (
-                      <ul className="space-y-0.5">
-                        {f.production_companies.map((name, i) => {
-                          const id = companyByName.get(normalizeName(name));
-                          return (
-                            <li key={i}>
-                              {id ? (
-                                <Link
-                                  to="/production-companies/$companyId"
-                                  params={{ companyId: id }}
-                                  className="text-primary underline-offset-2 hover:underline"
-                                >
-                                  {name}
-                                </Link>
-                              ) : (
-                                name
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs">{renderComposerLink(f.composer, composerByName)}</td>
-                  <td className="px-3 py-2 text-xs">{renderComposerLink(f.music_supervisor, composerByName)}</td>
-                  <td className="px-3 py-2 text-xs">{f.platform || <span className="text-muted-foreground">—</span>}</td>
-                  <td className="px-3 py-2 text-center">
-                    <Badge
-                      variant="outline"
-                      className={
-                        "rounded-sm font-mono " +
-                        (f.completeness === 7
-                          ? "border-green-500/40 text-green-600"
-                          : f.completeness >= 5
-                            ? "border-amber-500/40 text-amber-600"
-                            : "border-red-500/40 text-red-600")
-                      }
-                    >
-                      {f.completeness}/7
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(f)}>
-                      Abrir ficha
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <FilmsTable
+          films={data}
+          directorByName={directorByName}
+          companyByName={companyByName}
+          composerByName={composerByName}
+          sortKey={pg.sortKey}
+          sortDir={pg.sortDir}
+          onSort={pg.toggleSort}
+          onOpen={setEditing}
+        />
       )}
       <PaginationBar
-          latencyMs={pg.lastLatencyMs}
+        latencyMs={pg.lastLatencyMs}
         page={page}
         pageCount={pageCount}
         pageSize={pageSize}
@@ -677,7 +323,7 @@ function SpanishFilmsPage() {
         label="películas"
       />
 
-      <EditDialog
+      <FilmEditDialog
         film={editing}
         rosterDirectors={rosterDirectors ?? []}
         rosterCompanies={rosterCompanies ?? []}
@@ -685,7 +331,12 @@ function SpanishFilmsPage() {
         onClose={() => setEditing(null)}
         onDelete={async () => {
           if (!editing) return;
-          if (!confirm(`¿Eliminar "${editing.title_es || editing.title}" del catálogo? Esta acción no se puede deshacer.`)) return;
+          if (
+            !confirm(
+              `¿Eliminar "${editing.title_es || editing.title}" del catálogo? Esta acción no se puede deshacer.`,
+            )
+          )
+            return;
           try {
             await deleteFn({ data: { id: editing.id } });
             toast.success("Película eliminada");
@@ -709,465 +360,4 @@ function SpanishFilmsPage() {
       />
     </div>
   );
-}
-
-function EditDialog({
-  film,
-  rosterDirectors,
-  rosterCompanies,
-  rosterPeople,
-  onClose,
-  onSave,
-  onDelete,
-}: {
-  film: Film | null;
-  rosterDirectors: RosterDirector[];
-  rosterCompanies: RosterCompany[];
-  rosterPeople: RosterPerson[];
-  onClose: () => void;
-  onSave: (patch: {
-    composer: string | null;
-    music_supervisor: string | null;
-    platform: string | null;
-    needs_review: boolean;
-    directors: string[];
-    director_ids: string[];
-    production_companies: string[];
-    production_company_ids: string[];
-    composer_person_id: string | null;
-    music_supervisor_person_id: string | null;
-  }) => Promise<void>;
-  onDelete: () => Promise<void>;
-}) {
-  const [composer, setComposer] = useState("");
-  const [supervisor, setSupervisor] = useState("");
-  const [platform, setPlatform] = useState("");
-  const [needsReview, setNeedsReview] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [directors, setDirectors] = useState<Array<{ name: string; id: string | null }>>([]);
-  const [companies, setCompanies] = useState<Array<{ name: string; id: string | null }>>([]);
-  const [composerPersonId, setComposerPersonId] = useState<string | null>(null);
-  const [supervisorPersonId, setSupervisorPersonId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (film) {
-      setComposer(film.composer ?? "");
-      setSupervisor(film.music_supervisor ?? "");
-      setPlatform(film.platform ?? "");
-      setNeedsReview(film.needs_review);
-      const dIds = film.director_ids ?? [];
-      setDirectors(
-        (film.directors ?? []).map((name, i) => ({ name, id: dIds[i] ?? null })),
-      );
-      const cIds = film.production_company_ids ?? [];
-      setCompanies(
-        (film.production_companies ?? []).map((name, i) => ({ name, id: cIds[i] ?? null })),
-      );
-      setComposerPersonId(film.composer_person_id ?? null);
-      setSupervisorPersonId(film.music_supervisor_person_id ?? null);
-    }
-  }, [film]);
-
-  const composerOptions = rosterPeople.filter((p) => p.role === "composer");
-  const supervisorOptions = rosterPeople.filter((p) => p.role === "supervisor");
-
-  return (
-    <Dialog
-      open={!!film}
-      onOpenChange={(o) => {
-        if (!o) onClose();
-      }}
-    >
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{film?.title}</DialogTitle>
-          <DialogDescription>
-            {film?.year} · TMDb {film?.tmdb_id}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <EntityListEditor
-            title="Directores"
-            items={directors}
-            onChange={setDirectors}
-            roster={rosterDirectors.map((d) => ({ id: d.id, label: d.full_name }))}
-            placeholder="Nombre del director"
-            crmActionsFor={(it, setId) => [
-              {
-                label: it.id ? "Ya en Directores CRM" : "→ Crear en Directores CRM",
-                onSelect: async () => {
-                  const id = await addDirectorToCrm(it.name);
-                  if (id) setId(id);
-                },
-              },
-              {
-                label: "→ Añadir a Cuentas Objetivo (otros)",
-                onSelect: () =>
-                  addToTargetAccounts({ name: it.name, account_type: "otros" }),
-              },
-            ]}
-          />
-          <EntityListEditor
-            title="Productoras"
-            items={companies}
-            onChange={setCompanies}
-            roster={rosterCompanies.map((c) => ({ id: c.id, label: c.name }))}
-            placeholder="Nombre de la productora"
-            crmActionsFor={(it, setId) => [
-              {
-                label: it.id ? "Ya en Productoras CRM" : "→ Crear en Productoras CRM",
-                onSelect: async () => {
-                  const id = await addCompanyToCrm(it.name);
-                  if (id) setId(id);
-                },
-              },
-              {
-                label: "→ Añadir a Cuentas Objetivo (productora)",
-                onSelect: () =>
-                  addToTargetAccounts({
-                    name: it.name,
-                    account_type: "productora",
-                    production_company_id: it.id,
-                  }),
-              },
-            ]}
-          />
-          <div className="space-y-1.5">
-            <Label>Compositor BSO</Label>
-            <div className="flex items-center gap-2">
-              <Input value={composer} onChange={(e) => setComposer(e.target.value)} className="flex-1" />
-              {composer.trim() && (
-                <CrmAddMenu
-                  actions={[
-                    {
-                      label: composerPersonId ? "Ya en Roster" : "→ Añadir al Roster (composer)",
-                      onSelect: async () => {
-                        await addToRoster(composer, "composer");
-                      },
-                    },
-                    {
-                      label: "→ Añadir a Cuentas Objetivo (roster · composer)",
-                      onSelect: () =>
-                        addToTargetAccounts({
-                          name: composer,
-                          account_type: "roster",
-                          roster_kind: "composer",
-                        }),
-                    },
-                  ]}
-                />
-              )}
-            </div>
-            <Select
-              value={composerPersonId ?? "none"}
-              onValueChange={(v) => {
-                if (v === "none") {
-                  setComposerPersonId(null);
-                } else {
-                  setComposerPersonId(v);
-                  const picked = composerOptions.find((p) => p.id === v);
-                  if (picked) setComposer(picked.full_name);
-                }
-              }}
-            >
-              <SelectTrigger className="rounded-sm">
-                <SelectValue placeholder="Vincular compositor del CRM…" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— Sin vincular —</SelectItem>
-                {composerOptions.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-[11px] text-muted-foreground">
-              {composerPersonId ? "● Vinculado al CRM" : "○ Solo texto (no aparecerá en su ficha)"}
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Supervisor musical</Label>
-            <div className="flex items-center gap-2">
-              <Input value={supervisor} onChange={(e) => setSupervisor(e.target.value)} className="flex-1" />
-              {supervisor.trim() && (
-                <CrmAddMenu
-                  actions={[
-                    {
-                      label: supervisorPersonId ? "Ya en Roster" : "→ Añadir al Roster (supervisor)",
-                      onSelect: async () => {
-                        await addToRoster(supervisor, "supervisor");
-                      },
-                    },
-                    {
-                      label: "→ Añadir a Cuentas Objetivo (roster · otros)",
-                      onSelect: () =>
-                        addToTargetAccounts({
-                          name: supervisor,
-                          account_type: "roster",
-                          roster_kind: "otros",
-                        }),
-                    },
-                  ]}
-                />
-              )}
-            </div>
-            <Select
-              value={supervisorPersonId ?? "none"}
-              onValueChange={(v) => {
-                if (v === "none") {
-                  setSupervisorPersonId(null);
-                } else {
-                  setSupervisorPersonId(v);
-                  const picked = supervisorOptions.find((p) => p.id === v);
-                  if (picked) setSupervisor(picked.full_name);
-                }
-              }}
-            >
-              <SelectTrigger className="rounded-sm">
-                <SelectValue placeholder="Vincular supervisor/a del CRM…" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— Sin vincular —</SelectItem>
-                {supervisorOptions.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-[11px] text-muted-foreground">
-              {supervisorPersonId ? "● Vinculado al CRM" : "○ Solo texto (no aparecerá en su ficha)"}
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Plataforma</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                value={platform}
-                onChange={(e) => setPlatform(e.target.value)}
-                placeholder="Netflix, Filmin, Movistar+, Cine…"
-                className="flex-1"
-              />
-              {platform.trim() && (
-                <CrmAddMenu
-                  actions={[
-                    {
-                      label: "→ Crear en Plataformas CRM",
-                      onSelect: async () => {
-                        await addPlatformToCrm(platform);
-                      },
-                    },
-                    {
-                      label: "→ Añadir a Cuentas Objetivo (plataforma)",
-                      onSelect: () =>
-                        addToTargetAccounts({
-                          name: platform,
-                          account_type: "plataforma",
-                        }),
-                    },
-                  ]}
-                />
-              )}
-            </div>
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <Switch checked={needsReview} onCheckedChange={setNeedsReview} />
-            <span>Necesita revisión</span>
-          </label>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="destructive"
-            onClick={async () => {
-              setBusy(true);
-              await onDelete();
-              setBusy(false);
-            }}
-            disabled={busy}
-            className="mr-auto"
-          >
-            Eliminar
-          </Button>
-          <Button variant="outline" onClick={onClose} disabled={busy}>
-            Cancelar
-          </Button>
-          <Button
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              await onSave({
-                composer: composer.trim() || null,
-                music_supervisor: supervisor.trim() || null,
-                platform: platform.trim() || null,
-                needs_review: needsReview,
-                directors: directors.map((d) => d.name.trim()).filter(Boolean),
-                director_ids: directors.map((d) => d.id).filter((x): x is string => !!x),
-                production_companies: companies.map((c) => c.name.trim()).filter(Boolean),
-                production_company_ids: companies.map((c) => c.id).filter((x): x is string => !!x),
-                composer_person_id: composerPersonId,
-                music_supervisor_person_id: supervisorPersonId,
-              });
-              setBusy(false);
-            }}
-          >
-            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Download className="mr-1 h-4 w-4" />}
-            Guardar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function EntityListEditor({
-  title,
-  items,
-  onChange,
-  roster,
-  placeholder,
-  crmActionsFor,
-}: {
-  title: string;
-  items: Array<{ name: string; id: string | null }>;
-  onChange: (next: Array<{ name: string; id: string | null }>) => void;
-  roster: Array<{ id: string; label: string }>;
-  placeholder: string;
-  crmActionsFor?: (
-    item: { name: string; id: string | null },
-    setId: (id: string | null) => void,
-  ) => Array<{ label: string; onSelect: () => unknown | Promise<unknown> }>;
-}) {
-  function normalize(s: string) {
-    return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-  }
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>{title}</Label>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => onChange([...items, { name: "", id: null }])}
-        >
-          + Añadir
-        </Button>
-      </div>
-      {items.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Sin entradas.</p>
-      ) : (
-        <ul className="space-y-2">
-          {items.map((it, idx) => {
-            const n = normalize(it.name);
-            const suggestions = !it.id && n
-              ? roster
-                  .filter((r) => normalize(r.label).includes(n))
-                  .slice(0, 4)
-              : [];
-            return (
-              <li key={idx} className="rounded-sm border border-border p-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={it.name}
-                    placeholder={placeholder}
-                    onChange={(e) => {
-                      const next = [...items];
-                      next[idx] = { name: e.target.value, id: null };
-                      onChange(next);
-                    }}
-                    className="flex-1"
-                  />
-                  <Select
-                    value={it.id ?? "none"}
-                    onValueChange={(v) => {
-                      const next = [...items];
-                      if (v === "none") {
-                        next[idx] = { ...next[idx], id: null };
-                      } else {
-                        const picked = roster.find((r) => r.id === v);
-                        next[idx] = {
-                          name: picked?.label ?? next[idx].name,
-                          id: v,
-                        };
-                      }
-                      onChange(next);
-                    }}
-                  >
-                    <SelectTrigger className="w-56 rounded-sm">
-                      <SelectValue placeholder="Vincular CRM…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">— Sin vincular —</SelectItem>
-                      {roster.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onChange(items.filter((_, i) => i !== idx))}
-                  >
-                    ✕
-                  </Button>
-                  {crmActionsFor && it.name.trim() && (
-                    <CrmAddMenu
-                      actions={crmActionsFor(it, (id) => {
-                        const next = [...items];
-                        next[idx] = { ...next[idx], id };
-                        onChange(next);
-                      })}
-                    />
-                  )}
-                </div>
-                <div className="mt-1 flex items-center gap-2 text-xs">
-                  {it.id ? (
-                    <span className="text-green-600">● Vinculado al CRM</span>
-                  ) : (
-                    <span className="text-muted-foreground">○ Sin vincular</span>
-                  )}
-                  {suggestions.length > 0 && (
-                    <span className="flex flex-wrap gap-1">
-                      {suggestions.map((s) => (
-                        <button
-                          key={s.id}
-                          type="button"
-                          className="rounded-sm border border-dashed border-border px-1.5 py-0.5 hover:bg-muted"
-                          onClick={() => {
-                            const next = [...items];
-                            next[idx] = { name: s.label, id: s.id };
-                            onChange(next);
-                          }}
-                        >
-                          ↳ {s.label}
-                        </button>
-                      ))}
-                    </span>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function exportFields(): ExportField<Film>[] {
-  // exported below
-  return [
-    { key: "year", label: "Año", get: (r) => r.year },
-    { key: "title", label: "Título", get: (r) => r.title },
-    { key: "directors", label: "Director", expandArray: true, get: (r) => r.directors },
-    { key: "production_companies", label: "Productora", expandArray: true, get: (r) => r.production_companies },
-    { key: "composer", label: "Compositor BSO", get: (r) => r.composer },
-    { key: "music_supervisor", label: "Supervisor musical", get: (r) => r.music_supervisor },
-    { key: "platform", label: "Plataforma", get: (r) => r.platform },
-    { key: "box_office_eur", label: "Recaudación (€)", get: (r) => r.box_office_eur },
-    { key: "completeness", label: "Completitud (0-7)", get: (r) => r.completeness },
-    { key: "needs_review", label: "Necesita revisión", default: false, get: (r) => r.needs_review },
-    { key: "review_reason", label: "Motivo revisión", default: false, get: (r) => r.review_reason },
-    { key: "tmdb_id", label: "TMDb ID", default: false, get: (r) => r.tmdb_id },
-  ];
 }
