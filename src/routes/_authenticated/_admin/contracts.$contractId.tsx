@@ -253,6 +253,10 @@ function ContractDetail() {
         </div>
 
       </section>
+      <section className="mt-8">
+        <h3 className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Historial de cambios</h3>
+        <AuditTrail table="contracts" recordId={contractId} />
+      </section>
       <SaveButton floating onClick={save} saving={saving} />
     </div>
   );
