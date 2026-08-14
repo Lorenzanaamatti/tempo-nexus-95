@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Trash2, ExternalLink, Upload, FileText, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
+import { FileDropzone } from "@/components/file-dropzone";
+import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
 
 export const Route = createFileRoute("/_authenticated/_admin/candidacies/")({
   component: CandidaciesIndex,
@@ -560,39 +562,13 @@ function CandidacyDetailSheet({
                 <Label className="smallcaps text-muted-foreground flex items-center gap-2">
                   <Paperclip className="h-3 w-3" /> Documentos
                 </Label>
-                <div>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => upload(e.target.files)}
-                  />
-                  <Button size="sm" variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {uploading ? "Subiendo…" : "Subir archivos"}
-                  </Button>
-                </div>
               </div>
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragOver(false);
-                  upload(e.dataTransfer.files);
-                }}
-                onClick={() => fileRef.current?.click()}
-                className={`mb-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-sm border-2 border-dashed px-4 py-8 text-center transition-colors ${
-                  dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/60 hover:bg-muted/40"
-                }`}
-              >
-                <Upload className="h-6 w-6 text-muted-foreground" />
-                <p className="text-sm">
-                  {uploading ? "Subiendo…" : "Arrastra archivos aquí"}
-                </p>
-                <p className="text-[11px] text-muted-foreground">o haz clic para seleccionarlos</p>
-              </div>
+              <FileDropzone
+                className="mb-3 py-8"
+                busy={uploading}
+                onFiles={upload}
+                hint="o haz clic para seleccionarlos"
+              />
               {(!files || files.length === 0) ? (
                 <p className="text-xs text-muted-foreground">Sin documentos aún.</p>
               ) : (
