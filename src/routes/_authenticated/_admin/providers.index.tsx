@@ -58,14 +58,6 @@ type Provider = {
 
 type ProviderSortKey = "name" | "kind" | "contact_name" | "city" | "country" | "created_at";
 
-const PROVIDER_SORT_OPTIONS: { key: ProviderSortKey; label: string }[] = [
-  { key: "name", label: "nombre" },
-  { key: "kind", label: "categoría" },
-  { key: "contact_name", label: "contacto" },
-  { key: "city", label: "ciudad" },
-  { key: "country", label: "país" },
-  { key: "created_at", label: "fecha de alta" },
-];
 
 function ProvidersPage() {
   const qc = useQueryClient();
