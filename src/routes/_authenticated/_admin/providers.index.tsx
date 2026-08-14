@@ -1,7 +1,7 @@
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,9 @@ type Provider = {
   notes: string | null;
 };
 
+type ProviderSortKey = "name" | "kind" | "contact_name" | "city" | "country" | "created_at";
+
+
 function ProvidersPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -63,11 +66,40 @@ function ProvidersPage() {
   const [scopeFilter, setScopeFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Partial<Provider> | null>(null);
 
-  const dataQ = useQuery({
-    queryKey: ["providers"],
-    queryFn: async () =>
-      ((await (supabase as any).from("providers").select("*").order("name")).data ?? []) as Provider[],
+  const pg = useServerPagination<ProviderSortKey>({
+    sortKey: "name",
+    pageSize: 50,
+    deps: [q, kindFilter, scopeFilter],
   });
+
+  const dataQ = useQuery({
+    queryKey: ["providers", q, kindFilter, scopeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryFn: async () => {
+      let query = (supabase as any).from("providers").select("*", { count: "exact" });
+      if (kindFilter !== "all") query = query.eq("kind", kindFilter);
+      if (scopeFilter === "ic") query = query.is("composer_id", null);
+      if (scopeFilter === "composer") query = query.not("composer_id", "is", null);
+      const needle = q.trim();
+      if (needle) {
+        query = query.or(
+          ["name", "contact_name", "email", "city"].map((c) => `${c}.ilike.%${needle}%`).join(","),
+        );
+      }
+      const { data, error, count } = await pg.applyTo(query);
+      if (error) throw error;
+      return { rows: (data ?? []) as Provider[], count: count ?? 0 };
+    },
+    placeholderData: (prev) => prev,
+  });
+
+  const rows = dataQ.data?.rows ?? [];
+  const total = dataQ.data?.count ?? 0;
+
+  const Th = (props: { k: ProviderSortKey; children: React.ReactNode }) => (
+    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort}>
+      {props.children}
+    </SortTh>
+  );
 
   const composersQ = useQuery({
     queryKey: ["composers-min"],
@@ -76,19 +108,6 @@ function ProvidersPage() {
   });
   const composerName = (id: string | null) =>
     !id ? "IC (compartido)" : composersQ.data?.find((c) => c.id === id)?.artistic_name || composersQ.data?.find((c) => c.id === id)?.full_name || "—";
-
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return (dataQ.data ?? []).filter((p) => {
-      if (kindFilter !== "all" && p.kind !== kindFilter) return false;
-      if (scopeFilter === "ic" && p.composer_id !== null) return false;
-      if (scopeFilter === "composer" && p.composer_id === null) return false;
-      if (!term) return true;
-      return (p.name + " " + (p.contact_name ?? "") + " " + (p.email ?? "") + " " + (p.city ?? "")).toLowerCase().includes(term);
-    });
-  }, [dataQ.data, q, kindFilter, scopeFilter]);
-
-  const pg = usePagination(filtered, 50);
 
   return (
     <div className="mx-auto max-w-[1300px] px-6 py-6">
@@ -151,7 +170,7 @@ function ProvidersPage() {
         />
       </div>
 
-      {dataQ.isLoading ? <Skeleton className="h-[300px]" /> : filtered.length === 0 ? (
+      {dataQ.isLoading ? <Skeleton className="h-[300px]" /> : rows.length === 0 ? (
         <div className="rounded-sm border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
           <Briefcase className="mx-auto mb-2 h-8 w-8 opacity-40" />Sin proveedores
         </div>
@@ -160,16 +179,16 @@ function ProvidersPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Categoría</th>
-                <th className="px-3 py-2">Contacto</th>
+                <Th k="name">Nombre</Th>
+                <Th k="kind">Categoría</Th>
+                <Th k="contact_name">Contacto</Th>
                 <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">Ciudad</th>
+                <Th k="city">Ciudad</Th>
                 <th className="px-3 py-2">Ámbito</th>
               </tr>
             </thead>
             <tbody>
-              {pg.pageItems.map((p) => (
+              {rows.map((p) => (
                 <tr key={p.id} className="cursor-pointer border-t border-border hover:bg-muted/30" onClick={() => setEditing(p)}>
                   <td className="px-3 py-2 font-medium">{p.name}</td>
                   <td className="px-3 py-2 text-muted-foreground">{KIND_LABEL[p.kind] ?? p.kind}</td>
@@ -185,9 +204,9 @@ function ProvidersPage() {
       )}
       <PaginationBar
         page={pg.page}
-        pageCount={pg.pageCount}
+        pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}
-        total={pg.total}
+        total={total}
         onPageChange={pg.setPage}
         onPageSizeChange={pg.setPageSize}
         label="proveedores"

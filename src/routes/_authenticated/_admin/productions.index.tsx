@@ -9,11 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind } from "@/lib/production-constants";
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/")({
   component: ProductionsIndex,
 });
+
+type ProductionSortKey = "title" | "year" | "status" | "project_type" | "production_company" | "created_at";
+
+const PRODUCTION_SORT_OPTIONS: { key: ProductionSortKey; label: string }[] = [
+  { key: "title", label: "título" },
+  { key: "year", label: "año" },
+  { key: "status", label: "estado" },
+  { key: "project_type", label: "tipo" },
+  { key: "production_company", label: "productora" },
+  { key: "created_at", label: "fecha de alta" },
+];
 
 function ProductionsIndex() {
   const qc = useQueryClient();
@@ -22,19 +33,27 @@ function ProductionsIndex() {
   const [newKind, setNewKind] = useState<ProductionKind>("cine");
   const [creating, setCreating] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["productions", q],
+  const pg = useServerPagination<ProductionSortKey>({ sortKey: "title", pageSize: 50, deps: [q] });
+
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["productions", q, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = supabase
         .from("productions")
-        .select("id, title, kind, project_type, status, partner, year, production_company, director, composer_id, composers(full_name, artistic_name)")
-        .order("title");
+        .select(
+          "id, title, kind, project_type, status, partner, year, production_company, director, composer_id, composers(full_name, artistic_name)",
+          { count: "exact" },
+        );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
-      const { data, error } = await query;
+      const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
-      return data ?? [];
+      return { rows: data ?? [], count: count ?? 0 };
     },
+    placeholderData: (prev) => prev,
   });
+
+  const data = result?.rows;
+  const total = result?.count ?? 0;
 
   async function create() {
     if (!newTitle.trim()) return;
@@ -51,8 +70,6 @@ function ProductionsIndex() {
     qc.invalidateQueries({ queryKey: ["productions"] });
   }
 
-  const pg = usePagination(data as any[] | undefined, 50);
-
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
@@ -63,7 +80,16 @@ function ProductionsIndex() {
             Cada producción puede tener compositores, artistas y supervisores asignados.
           </p>
         </div>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar título…" className="w-56 rounded-sm" />
+        <div className="flex flex-wrap items-center gap-2">
+          <SortControl
+            options={PRODUCTION_SORT_OPTIONS}
+            sortKey={pg.sortKey}
+            sortDir={pg.sortDir}
+            onSortKeyChange={pg.setSortKey}
+            onSortDirChange={pg.setSortDir}
+          />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar título…" className="w-56 rounded-sm" />
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
@@ -88,7 +114,7 @@ function ProductionsIndex() {
       ) : (
         <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {pg.pageItems.map((p: any) => (
+          {(data ?? []).map((p: any) => (
             <Link
               key={p.id}
               to="/productions/$productionId"
@@ -107,9 +133,9 @@ function ProductionsIndex() {
         </div>
         <PaginationBar
           page={pg.page}
-          pageCount={pg.pageCount}
+          pageCount={pg.pageCountOf(total)}
           pageSize={pg.pageSize}
-          total={pg.total}
+          total={total}
           onPageChange={pg.setPage}
           onPageSizeChange={pg.setPageSize}
           label="producciones"

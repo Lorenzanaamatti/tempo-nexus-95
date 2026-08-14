@@ -11,7 +11,7 @@ import { Plus, Sparkles, User } from "lucide-react";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -20,6 +20,15 @@ export const Route = createFileRoute("/_authenticated/_admin/people/")({
     return { fn: fn as IcTeamFunction | "all" };
   },
 });
+
+type PeopleSortKey = "full_name" | "email" | "is_virtual_assistant" | "created_at";
+
+const PEOPLE_SORT_OPTIONS: { key: PeopleSortKey; label: string }[] = [
+  { key: "full_name", label: "nombre" },
+  { key: "email", label: "email" },
+  { key: "is_virtual_assistant", label: "tipo" },
+  { key: "created_at", label: "fecha de alta" },
+];
 
 function PeopleIndex() {
   const qc = useQueryClient();
@@ -35,30 +44,40 @@ function PeopleIndex() {
   const [newFn, setNewFn] = useState<IcTeamFunction | "none">("none");
   const [newVirtual, setNewVirtual] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["people-ic", q, fnFilter, typeFilter],
+  const pg = useServerPagination<PeopleSortKey>({
+    sortKey: "full_name",
+    pageSize: 50,
+    deps: [q, fnFilter, typeFilter],
+  });
+
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["people-ic", q, fnFilter, typeFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
-      let query = supabase
+      const rel = fnFilter === "all" ? "person_ic_functions(function)" : "person_ic_functions!inner(function)";
+      let query = (supabase as any)
         .from("people")
-        .select("id, full_name, role, email, phone, is_virtual_assistant, person_ic_functions(function)")
-        .eq("role", "ic_team")
-        .order("full_name");
+        .select(`id, full_name, role, email, phone, is_virtual_assistant, ${rel}`, { count: "exact" })
+        .eq("role", "ic_team");
       if (typeFilter === "real") query = query.eq("is_virtual_assistant", false);
       if (typeFilter === "virtual") query = query.eq("is_virtual_assistant", true);
       if (q.trim()) query = query.ilike("full_name", `%${q.trim()}%`);
-      const { data, error } = await query;
+      if (fnFilter !== "all") query = query.eq("person_ic_functions.function", fnFilter);
+      const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       const rows = (data ?? []) as Array<{
         id: string; full_name: string; role: string; email: string | null; phone: string | null; is_virtual_assistant: boolean;
         person_ic_functions: { function: IcTeamFunction }[] | null;
       }>;
-      const mapped = rows.map((r) => ({ ...r, fns: (r.person_ic_functions ?? []).map((f) => f.function) }));
-      if (fnFilter !== "all") {
-        return mapped.filter((r) => r.fns.includes(fnFilter));
-      }
-      return mapped;
+      return {
+        rows: rows.map((r) => ({ ...r, fns: (r.person_ic_functions ?? []).map((f) => f.function) })),
+        count: count ?? 0,
+      };
     },
+    placeholderData: (prev) => prev,
   });
+
+  const data = result?.rows;
+  const total = result?.count ?? 0;
 
   async function create() {
     if (!newName.trim()) return;
@@ -84,8 +103,6 @@ function PeopleIndex() {
     qc.invalidateQueries({ queryKey: ["people-ic"] });
   }
 
-  const pg = usePagination(data, 50);
-
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
@@ -98,6 +115,13 @@ function PeopleIndex() {
         </div>
         <div className="flex items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar nombre…" className="w-56 rounded-sm" />
+          <SortControl
+            options={PEOPLE_SORT_OPTIONS}
+            sortKey={pg.sortKey}
+            sortDir={pg.sortDir}
+            onSortKeyChange={pg.setSortKey}
+            onSortDirChange={pg.setSortDir}
+          />
           <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -163,7 +187,7 @@ function PeopleIndex() {
       ) : (
         <>
         <div className="divide-y divide-border rounded-sm border border-border">
-          {pg.pageItems.map((p) => (
+          {(data ?? []).map((p) => (
             <Link
               key={p.id}
               to="/people/$personId"
@@ -187,7 +211,7 @@ function PeopleIndex() {
             </Link>
           ))}
         </div>
-        <PaginationBar page={pg.page} pageCount={pg.pageCount} pageSize={pg.pageSize} total={pg.total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="personas" />
+        <PaginationBar page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="personas" />
         </>
       )}
     </div>

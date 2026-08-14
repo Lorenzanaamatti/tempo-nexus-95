@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PaginationBar } from "@/components/pagination-bar";
+import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -270,6 +270,7 @@ function renderComposerLink(name: string | null, byName: Map<string, string>) {
 }
 
 function SpanishFilmsPage() {
+  type FilmSortKey = "year" | "title" | "original_title" | "composer" | "music_supervisor" | "platform" | "completeness";
   const qc = useQueryClient();
   const importFn = useServerFn(importSpanishFilmsByYear);
   const updateFn = useServerFn(updateSpanishFilm);
@@ -285,29 +286,27 @@ function SpanishFilmsPage() {
   const [projecting, setProjecting] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-
-  useEffect(() => {
-    setPage(1);
-  }, [yearFilter, reviewOnly, q, pageSize]);
+  const pg = useServerPagination<FilmSortKey>({
+    sortKey: "year",
+    sortDir: "desc",
+    pageSize: 50,
+    deps: [yearFilter, reviewOnly, q],
+  });
+  const { page, setPage, pageSize, setPageSize } = pg;
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ["spanish-films", yearFilter, reviewOnly, q, page, pageSize],
+    queryKey: ["spanish-films", yearFilter, reviewOnly, q, page, pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = supabase
         .from("spanish_films")
         .select(
           "id, tmdb_id, year, title, title_es, original_title, directors, production_companies, composer, music_supervisor, platform, box_office_eur, needs_review, review_reason, completeness, poster_path, director_ids, production_company_ids, composer_person_id, music_supervisor_person_id",
           { count: "exact" },
-        )
-        .order("year", { ascending: false })
-        .order("title");
+        );
       if (yearFilter !== "all") query = query.eq("year", Number(yearFilter));
       if (reviewOnly) query = query.eq("needs_review", true);
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
-      const from = (page - 1) * pageSize;
-      const { data, error, count } = await query.range(from, from + pageSize - 1);
+      const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       return { rows: (data ?? []) as Film[], count: count ?? 0 };
     },
@@ -316,7 +315,13 @@ function SpanishFilmsPage() {
 
   const data = result?.rows;
   const totalCount = result?.count ?? 0;
-  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const pageCount = pg.pageCountOf(totalCount);
+
+  const Th = (props: { k: FilmSortKey; children: React.ReactNode; className?: string }) => (
+    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort} className={props.className}>
+      {props.children}
+    </SortTh>
+  );
 
   const { data: rosterPeople } = useQuery({
     queryKey: ["roster-people-composers-supervisors"],
@@ -548,15 +553,15 @@ function SpanishFilmsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">Año</th>
-                <th className="px-3 py-2">Título ES</th>
-                <th className="px-3 py-2">Título original</th>
+                <Th k="year">Año</Th>
+                <Th k="title">Título ES</Th>
+                <Th k="original_title">Título original</Th>
                 <th className="px-3 py-2">Director(es)</th>
                 <th className="px-3 py-2">Productoras</th>
-                <th className="px-3 py-2">Compositor BSO</th>
-                <th className="px-3 py-2">Supervisor musical</th>
-                <th className="px-3 py-2">Plataforma</th>
-                <th className="px-3 py-2 text-center">Completo</th>
+                <Th k="composer">Compositor BSO</Th>
+                <Th k="music_supervisor">Supervisor musical</Th>
+                <Th k="platform">Plataforma</Th>
+                <Th k="completeness" className="text-center">Completo</Th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
