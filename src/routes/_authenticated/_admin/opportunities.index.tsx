@@ -1,4 +1,4 @@
-import { PaginationBar, usePagination } from "@/components/pagination-bar";
+import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
   component: OpportunitiesIndex,
 });
 
+type OppSortKey = "title" | "kind" | "probability_pct" | "estimated_value" | "detected_date" | "expected_close_date" | "created_at";
+
 function OpportunitiesIndex() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -29,19 +31,40 @@ function OpportunitiesIndex() {
   const [kindFilter, setKindFilter] = useState<string>("all");
   const [creating, setCreating] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["opportunities", q],
+  const pg = useServerPagination<OppSortKey>({
+    sortKey: "created_at",
+    sortDir: "desc",
+    pageSize: 50,
+    deps: [q, statusFilter, kindFilter],
+  });
+
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["opportunities", q, statusFilter, kindFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
-        .select("id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
-        .order("created_at", { ascending: false });
+        .select(
+          "id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          { count: "exact" },
+        );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
-      const { data, error } = await query;
+      if (kindFilter !== "all") query = query.eq("kind", kindFilter);
+      if (statusFilter !== "all") query = query.contains("statuses", [statusFilter]);
+      const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
-      return data ?? [];
+      return { rows: (data ?? []) as any[], count: count ?? 0 };
     },
+    placeholderData: (prev) => prev,
   });
+
+  const rows = result?.rows ?? [];
+  const total = result?.count ?? 0;
+
+  const Th = (props: { k: OppSortKey; children: React.ReactNode; className?: string }) => (
+    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort} className={props.className}>
+      {props.children}
+    </SortTh>
+  );
 
   const companiesQ = useQuery({
     queryKey: ["production-companies-mini"],
@@ -81,14 +104,6 @@ function OpportunitiesIndex() {
     toast.success("Oportunidad creada");
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
-
-  const filtered = (data ?? []).filter((o: any) => {
-    if (statusFilter !== "all" && !(o.statuses ?? []).includes(statusFilter)) return false;
-    if (kindFilter !== "all" && (o.kind ?? "pitch") !== kindFilter) return false;
-    return true;
-  });
-
-  const pg = usePagination(filtered, 50);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -190,28 +205,28 @@ function OpportunitiesIndex() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
-      ) : !filtered.length ? (
+      ) : !rows.length ? (
         <p className="text-sm text-muted-foreground">Sin oportunidades aún.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left">
               <tr>
-                <th className="px-3 py-2 smallcaps text-xs">Tipo</th>
-                <th className="px-3 py-2 smallcaps text-xs">Oportunidad</th>
+                <Th k="kind">Tipo</Th>
+                <Th k="title">Oportunidad</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Partner</th>
                 <th className="px-3 py-2 smallcaps text-xs">Producción</th>
                 <th className="px-3 py-2 smallcaps text-xs">Candidatos</th>
                 <th className="px-3 py-2 smallcaps text-xs">Estado</th>
-                <th className="px-3 py-2 smallcaps text-xs text-right">Prob.</th>
-                <th className="px-3 py-2 smallcaps text-xs text-right">Valor est.</th>
-                <th className="px-3 py-2 smallcaps text-xs">Detectada</th>
-                <th className="px-3 py-2 smallcaps text-xs">Cierre est.</th>
+                <Th k="probability_pct" className="text-right">Prob.</Th>
+                <Th k="estimated_value" className="text-right">Valor est.</Th>
+                <Th k="detected_date">Detectada</Th>
+                <Th k="expected_close_date">Cierre est.</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Responsable</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {pg.pageItems.map((o: any) => (
+              {rows.map((o: any) => (
                 <tr key={o.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
@@ -251,9 +266,9 @@ function OpportunitiesIndex() {
       )}
       <PaginationBar
         page={pg.page}
-        pageCount={pg.pageCount}
+        pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}
-        total={pg.total}
+        total={total}
         onPageChange={pg.setPage}
         onPageSizeChange={pg.setPageSize}
         label="oportunidades"
