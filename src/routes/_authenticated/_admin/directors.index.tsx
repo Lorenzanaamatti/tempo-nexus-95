@@ -11,6 +11,7 @@ function DirectorsIndex() {
       table="directors"
       nameColumn="full_name"
       queryKey="directors"
+      listColumns="id,full_name,email,country,agent,created_at"
       title="Directores"
       description="Directores vinculables a los proyectos de producción."
       createPlaceholder="Nombre del director"
