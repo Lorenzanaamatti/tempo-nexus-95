@@ -4,13 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR0 } from "@/lib/money";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { fetchCatalogs } from "@/lib/composers-api";
-import { formatDateEs } from "@/lib/dates";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { VideoGallery } from "@/components/video-gallery";
@@ -25,82 +22,13 @@ import { ComposerChat } from "@/components/composer-chat";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
-import { X } from "lucide-react";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
 import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
+import { Section, KPI, Field } from "@/components/composer-detail/primitives";
+import { SpecialistTagsEditor } from "@/components/composer-detail/specialist-tags-editor";
+import { ComposerBilling } from "@/components/composer-detail/composer-billing";
+import { fetchComposerRelations } from "@/lib/composer-relations";
 
-const SPECIALIST_TAG_OPTIONS = [
-  "Instrumentista",
-  "Vocalista",
-  "Director de orquesta",
-  "Orquestador",
-  "Copista",
-  "Arreglista",
-  "Ingeniero",
-  "Editor",
-  "Asistente",
-  "Productor",
-] as const;
-
-function SpecialistTagsEditor({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
-  const selected = new Set(value);
-  function toggle(tag: string) {
-    const next = new Set(selected);
-    if (next.has(tag)) next.delete(tag);
-    else next.add(tag);
-    onChange(Array.from(next));
-  }
-  function removeTag(tag: string) {
-    onChange(value.filter((t) => t !== tag));
-  }
-  const customs = value.filter((t) => !SPECIALIST_TAG_OPTIONS.includes(t as never));
-  return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-1.5">
-        {SPECIALIST_TAG_OPTIONS.map((tag) => {
-          const active = selected.has(tag);
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggle(tag)}
-              className={`rounded-sm border px-2.5 py-1 text-xs transition ${
-                active
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {tag}
-            </button>
-          );
-        })}
-      </div>
-      {customs.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {customs.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
-              {tag}
-              <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-      <Input
-        placeholder="Añadir etiqueta personalizada y pulsar Enter"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const v = (e.target as HTMLInputElement).value.trim();
-            if (v && !selected.has(v)) onChange([...value, v]);
-            (e.target as HTMLInputElement).value = "";
-          }
-        }}
-      />
-    </div>
-  );
-}
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
   component: ComposerEditPage,
@@ -134,96 +62,9 @@ function ComposerEditPage() {
 
   const relationsQ = useQuery({
     queryKey: ["composer-relations", composerId],
-    queryFn: async () => {
-      const [demos, films, awards, styles, genres, langs, docs, projects, agents, candidacies, productions, contracts] = await Promise.all([
-        supabase.from("composer_demos").select("*").eq("composer_id", composerId).order("position"),
-        supabase.from("composer_filmography").select("*").eq("composer_id", composerId).order("position"),
-        supabase.from("composer_awards").select("*").eq("composer_id", composerId).order("position"),
-        supabase.from("composer_styles").select("style_id").eq("composer_id", composerId),
-        supabase.from("composer_genres").select("genre_id").eq("composer_id", composerId),
-        supabase.from("composer_languages").select("language_code").eq("composer_id", composerId),
-        supabase.from("composer_documents").select("*").eq("composer_id", composerId).order("position"),
-        supabase.from("composer_projects").select("*").eq("composer_id", composerId).order("year", { ascending: false }),
-        supabase.from("ic_team").select("id, full_name, email").eq("role", "ic_team").order("full_name"),
-        (supabase as any)
-          .from("opportunity_candidates")
-          .select("id, note, created_at, opportunity:opportunities(id, title, statuses, partner_name, expected_close_date, estimated_value)")
-          .eq("composer_id", composerId)
-          .order("created_at", { ascending: false }),
-        (async () => {
-          const PROD_SELECT = "id, title, year, status, platform, director, premiere_date, delivery_date, fee_amount, ic_commission, ic_commission_pct, composer_id, billing_sprints:production_billing_sprints!production_billing_sprints_production_id_fkey(id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url)";
-          // También capturamos producciones donde esta persona figura como
-          // supervisora musical (FK a people.id).
-          const { data: personRowProd } = await supabase
-            .from("people")
-            .select("id")
-            .eq("composer_id", composerId)
-            .maybeSingle();
-          const [direct, viaAssign, viaSupervisor] = await Promise.all([
-            supabase.from("productions").select(PROD_SELECT).eq("composer_id", composerId),
-            (supabase as any)
-              .from("production_assignments")
-              .select(`production:productions(${PROD_SELECT})`)
-              .eq("composer_id", composerId),
-            personRowProd?.id
-              ? (supabase as any)
-                  .from("productions")
-                  .select(PROD_SELECT)
-                  .eq("music_supervisor_person_id", personRowProd.id)
-              : Promise.resolve({ data: [], error: null }),
-          ]);
-          const map = new Map<string, any>();
-          (direct.data ?? []).forEach((p: any) => map.set(p.id, p));
-          ((viaAssign.data ?? []) as any[]).forEach((row: any) => {
-            if (row.production) map.set(row.production.id, row.production);
-          });
-          ((viaSupervisor.data ?? []) as any[]).forEach((p: any) => map.set(p.id, p));
-          const arr = Array.from(map.values()).sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
-          return { data: arr, error: direct.error ?? viaAssign.error };
-        })(),
-        supabase
-          .from("contracts")
-          .select("id, title, contract_type, sign_status, signed_date, end_date, notice_date")
-          .or(`composer_id.eq.${composerId},signer_composer_id.eq.${composerId}`)
-          .order("signed_date", { ascending: false, nullsFirst: false }),
-      ]);
-      // Películas ES vinculadas: a través de people.composer_id
-      const { data: personRow } = await supabase
-        .from("people")
-        .select("id")
-        .eq("composer_id", composerId)
-        .maybeSingle();
-      let spanishFilms: any[] = [];
-      if (personRow?.id) {
-        const { data: sf } = await supabase
-          .from("spanish_films")
-          .select("id, year, title, title_es, composer_person_id, music_supervisor_person_id, platform, directors")
-          .or(
-            `composer_person_id.eq.${personRow.id},music_supervisor_person_id.eq.${personRow.id}`,
-          )
-          .order("year", { ascending: false });
-        spanishFilms = (sf ?? []).map((f: any) => ({
-          ...f,
-          role: f.composer_person_id === personRow.id ? "Compositor BSO" : "Supervisor musical",
-        }));
-      }
-      return {
-        demos: demos.data ?? [],
-        films: films.data ?? [],
-        awards: awards.data ?? [],
-        styleIds: new Set((styles.data ?? []).map((r: any) => r.style_id)),
-        genreIds: new Set((genres.data ?? []).map((r: any) => r.genre_id)),
-        langCodes: new Set((langs.data ?? []).map((r: any) => r.language_code)),
-        docs: docs.data ?? [],
-        projects: projects.data ?? [],
-        agents: agents.data ?? [],
-        candidacies: (candidacies as any).data ?? [],
-        productions: productions.data ?? [],
-        contracts: contracts.data ?? [],
-        spanishFilms,
-      };
-    },
+    queryFn: () => fetchComposerRelations(composerId),
   });
+
 
   if (composerQ.isLoading || catalogsQ.isLoading || relationsQ.isLoading) {
     return <div className="p-10 font-display text-muted-foreground">Cargando ficha…</div>;
@@ -1025,178 +866,6 @@ function Inner({
       </Section>
 
       <SaveButton floating onClick={saveCore} saving={saving} title={dirty ? "Guardar cambios" : "Guardar ficha"} />
-    </div>
-  );
-}
-
-function Section({ title, children }: { title?: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-4 py-8">
-      {title && (
-        <>
-          <h2 className="font-display text-2xl">{title}</h2>
-          <Separator />
-        </>
-      )}
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function KPI({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-sm border border-border bg-card/50 px-4 py-3">
-      <div className="smallcaps text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 font-display text-2xl">{value}</div>
-    </div>
-  );
-}
-
-function ComposerBilling({ productions, composerId }: { productions: any[]; composerId: string }) {
-  const sprints = productions.flatMap((p) =>
-    (p.billing_sprints ?? []).map((s: any) => ({ ...s, production_title: p.title, production_id: p.id })),
-  );
-  if (productions.length === 0) {
-    return <p className="text-sm text-muted-foreground">Asigna al representado a una producción para ver su facturación.</p>;
-  }
-  if (sprints.length === 0) {
-    return (
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Ninguna producción tiene sprints de facturación todavía. Crea sprints desde la ficha de cada producción.
-        </p>
-        <ProductionFeeSummary productions={productions} />
-        <Link to="/finance" search={{ composerId }} className="inline-block text-xs underline text-muted-foreground hover:text-foreground">
-          Abrir dashboard económico completo →
-        </Link>
-      </div>
-    );
-  }
-  const today = new Date().toISOString().slice(0, 10);
-  // Bruto = trabajo (lo que el representado factura). Comisión IC = lo que IC le descuenta.
-  // Neto representado = bruto − comisión IC. Nunca sumar ambos como "previsto".
-  const totals = sprints.reduce(
-    (acc: any, s: any) => {
-      const a = Number(s.amount) || 0;
-      const bucket = s.kind === "comision" ? acc.comision : acc.trabajo;
-      bucket.previsto += a;
-      if (s.invoiced_date) bucket.fact += a;
-      if (s.paid_date) bucket.cob += a;
-      if (s.due_date && !s.invoiced_date && s.due_date < today) bucket.venc += a;
-      return acc;
-    },
-    {
-      trabajo: { previsto: 0, fact: 0, cob: 0, venc: 0 },
-      comision: { previsto: 0, fact: 0, cob: 0, venc: 0 },
-    },
-  );
-  const neto = {
-    previsto: totals.trabajo.previsto - totals.comision.previsto,
-    fact: totals.trabajo.fact - totals.comision.fact,
-    cob: totals.trabajo.cob - totals.comision.cob,
-  };
-  sprints.sort((a: any, b: any) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-sm border border-primary/30 bg-card p-3">
-          <div className="smallcaps text-xs text-muted-foreground">Bruto (lo que factura el representado)</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(totals.trabajo.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(totals.trabajo.fact)} · Cobrado {formatEUR0(totals.trabajo.cob)}</div>
-        </div>
-        <div className="rounded-sm border border-amber-500/40 bg-card p-3">
-          <div className="smallcaps text-xs text-muted-foreground">− Comisión IC</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">−{formatEUR0(totals.comision.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturada {formatEUR0(totals.comision.fact)} · Cobrada {formatEUR0(totals.comision.cob)}</div>
-        </div>
-        <div className="rounded-sm border border-emerald-500/40 bg-card p-3">
-          <div className="smallcaps text-xs text-muted-foreground">Neto representado</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(neto.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(neto.fact)} · Cobrado {formatEUR0(neto.cob)}</div>
-        </div>
-      </div>
-      {totals.trabajo.venc > 0 && (
-        <p className="text-xs text-amber-600 dark:text-amber-400">
-          Vencido sin facturar (trabajo): {formatEUR0(totals.trabajo.venc)}
-        </p>
-      )}
-      <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="min-w-full text-sm">
-          <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2">Producción</th>
-              <th className="px-3 py-2">Sprint</th>
-              <th className="px-3 py-2">Tipo</th>
-              <th className="px-3 py-2 text-right">Importe</th>
-              <th className="px-3 py-2">Vencimiento</th>
-              <th className="px-3 py-2">Estado</th>
-              <th className="px-3 py-2">Ref. Holded</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sprints.map((s: any) => {
-              const vencido = s.due_date && !s.invoiced_date && s.due_date < today;
-              return (
-                <tr key={s.id} className={`border-t border-border ${vencido ? "bg-amber-500/5" : ""}`}>
-                  <td className="px-3 py-2">
-                    <Link to="/productions/$productionId" params={{ productionId: s.production_id }} className="hover:underline">
-                      {s.production_title}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">#{s.sprint_number}{s.label ? ` · ${s.label}` : ""}</td>
-                  <td className="px-3 py-2 text-xs">{s.kind === "comision" ? "Comisión IC" : s.kind === "trabajo" ? "Trabajo" : s.kind}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR0(Number(s.amount ?? 0))}</td>
-                  <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(s.due_date)}</td>
-                  <td className="px-3 py-2 text-xs">{s.status}</td>
-                  <td className="px-3 py-2 text-xs">
-                    {s.holded_url ? (
-                      <a href={s.holded_url} target="_blank" rel="noreferrer" className="underline">
-                        {s.holded_invoice_ref || "ver"}
-                      </a>
-                    ) : (
-                      s.holded_invoice_ref || "—"
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <Link to="/finance" search={{ composerId }} className="inline-block text-xs underline text-muted-foreground hover:text-foreground">
-        Abrir dashboard económico completo →
-      </Link>
-    </div>
-  );
-}
-
-function ProductionFeeSummary({ productions }: { productions: any[] }) {
-  const withFee = productions.filter((p) => p.fee_amount != null || p.ic_commission != null);
-  if (withFee.length === 0) return null;
-  return (
-    <ul className="space-y-1 text-xs text-muted-foreground">
-      {withFee.map((p) => (
-        <li key={p.id}>
-          <span className="text-foreground">{p.title}</span> · Fee {formatEUR0(Number(p.fee_amount ?? 0))} · Comisión IC {formatEUR0(Number(p.ic_commission ?? 0))}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Field({
-  label,
-  className,
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={"space-y-1.5 " + (className ?? "")}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
     </div>
   );
 }
