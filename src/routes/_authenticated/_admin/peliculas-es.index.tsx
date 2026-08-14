@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PaginationBar } from "@/components/pagination-bar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -660,6 +661,15 @@ function SpanishFilmsPage() {
           </table>
         </div>
       )}
+      <PaginationBar
+        page={page}
+        pageCount={pageCount}
+        pageSize={pageSize}
+        total={totalCount}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+        label="películas"
+      />
 
       <EditDialog
         film={editing}
