@@ -33,7 +33,7 @@ function ProductionsIndex() {
   const [newKind, setNewKind] = useState<ProductionKind>("cine");
   const [creating, setCreating] = useState(false);
 
-  const pg = useServerPagination<ProductionSortKey>({ sortKey: "title", pageSize: 50, deps: [q] });
+  const pg = useServerPagination<ProductionSortKey>({ list: "producciones", sortKey: "title", pageSize: 50, deps: [q] });
 
   const { data: result, isLoading } = useQuery({
     queryKey: ["productions", q, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
@@ -132,6 +132,7 @@ function ProductionsIndex() {
           ))}
         </div>
         <PaginationBar
+          latencyMs={pg.lastLatencyMs}
           page={pg.page}
           pageCount={pg.pageCountOf(total)}
           pageSize={pg.pageSize}

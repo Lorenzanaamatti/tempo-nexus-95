@@ -31,7 +31,7 @@ function OpportunitiesIndex() {
   const [kindFilter, setKindFilter] = useState<string>("all");
   const [creating, setCreating] = useState(false);
 
-  const pg = useServerPagination<OppSortKey>({
+  const pg = useServerPagination<OppSortKey>({ list: "oportunidades",
     sortKey: "created_at",
     sortDir: "desc",
     pageSize: 50,
@@ -265,6 +265,7 @@ function OpportunitiesIndex() {
         </div>
       )}
       <PaginationBar
+          latencyMs={pg.lastLatencyMs}
         page={pg.page}
         pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}

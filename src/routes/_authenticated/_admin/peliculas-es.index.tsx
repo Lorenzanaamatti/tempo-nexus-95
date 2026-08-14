@@ -286,7 +286,7 @@ function SpanishFilmsPage() {
   const [projecting, setProjecting] = useState(false);
   const [editing, setEditing] = useState<Film | null>(null);
 
-  const pg = useServerPagination<FilmSortKey>({
+  const pg = useServerPagination<FilmSortKey>({ list: "peliculas-es",
     sortKey: "year",
     sortDir: "desc",
     pageSize: 50,
@@ -667,6 +667,7 @@ function SpanishFilmsPage() {
         </div>
       )}
       <PaginationBar
+          latencyMs={pg.lastLatencyMs}
         page={page}
         pageCount={pageCount}
         pageSize={pageSize}

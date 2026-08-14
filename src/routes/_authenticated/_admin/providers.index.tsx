@@ -66,7 +66,7 @@ function ProvidersPage() {
   const [scopeFilter, setScopeFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Partial<Provider> | null>(null);
 
-  const pg = useServerPagination<ProviderSortKey>({
+  const pg = useServerPagination<ProviderSortKey>({ list: "proveedores",
     sortKey: "name",
     pageSize: 50,
     deps: [q, kindFilter, scopeFilter],
@@ -203,6 +203,7 @@ function ProvidersPage() {
         </div>
       )}
       <PaginationBar
+          latencyMs={pg.lastLatencyMs}
         page={pg.page}
         pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}
