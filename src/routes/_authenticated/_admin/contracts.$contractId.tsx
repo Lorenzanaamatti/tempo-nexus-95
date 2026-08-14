@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { ContractSignerInput } from "@/components/contract-signer-input";
+import { AuditTrail } from "@/components/audit-trail";
 import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
 import {
   CONTRACT_STATUS_LABEL,
