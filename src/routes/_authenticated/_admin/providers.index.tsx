@@ -103,6 +103,12 @@ function ProvidersPage() {
   const rows = dataQ.data?.rows ?? [];
   const total = dataQ.data?.count ?? 0;
 
+  const Th = (props: { k: ProviderSortKey; children: React.ReactNode }) => (
+    <SortTh k={props.k} sortKey={pg.sortKey} sortDir={pg.sortDir} onSort={pg.toggleSort}>
+      {props.children}
+    </SortTh>
+  );
+
   const composersQ = useQuery({
     queryKey: ["composers-min"],
     queryFn: async () =>
