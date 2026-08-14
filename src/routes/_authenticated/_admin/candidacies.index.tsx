@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, ExternalLink, Upload, FileText, Paperclip } from "lucide-react";
+import { Plus, Trash2, ExternalLink, FileText, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
+import { FileDropzone } from "@/components/file-dropzone";
+import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
 
 export const Route = createFileRoute("/_authenticated/_admin/candidacies/")({
   component: CandidaciesIndex,
@@ -375,9 +377,7 @@ function CandidacyDetailSheet({
   team: any[];
 }) {
   const qc = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
 
   const { data: c } = useQuery({
     queryKey: ["candidacy", candidacyId],
@@ -434,14 +434,12 @@ function CandidacyDetailSheet({
     qc.invalidateQueries({ queryKey: ["candidacy", c.id] });
   }
 
-  async function upload(fs: FileList | null) {
-    if (!c || !fs || fs.length === 0) return;
+  async function upload(fs: File[]) {
+    if (!c || fs.length === 0) return;
     setUploading(true);
     try {
-      for (const f of Array.from(fs)) {
-        const path = `${c.id}/${Date.now()}-${f.name}`;
-        const { error: upErr } = await supabase.storage.from("candidacy-files").upload(path, f);
-        if (upErr) throw upErr;
+      for (const f of fs) {
+        const path = await uploadToBucket("candidacy-files", c.id, f);
         const { data: userData } = await supabase.auth.getUser();
         const { error: insErr } = await (supabase as any).from("candidacy_files").insert({
           candidacy_id: c.id,
@@ -459,19 +457,18 @@ function CandidacyDetailSheet({
       toast.error(e.message ?? String(e));
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
   async function openFile(path: string) {
-    const { data, error } = await supabase.storage.from("candidacy-files").createSignedUrl(path, 60 * 5);
-    if (error || !data?.signedUrl) return toast.error(error?.message ?? "No se pudo abrir");
-    window.open(data.signedUrl, "_blank");
+    const url = await signBucketPath("candidacy-files", path, 60 * 5);
+    if (!url) return toast.error("No se pudo abrir");
+    window.open(url, "_blank");
   }
 
   async function removeFile(id: string, path: string) {
     if (!confirm("¿Eliminar archivo?")) return;
-    await supabase.storage.from("candidacy-files").remove([path]);
+    await removeFromBucket("candidacy-files", path);
     const { error } = await (supabase as any).from("candidacy_files").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["candidacy_files", c?.id] });
@@ -563,39 +560,13 @@ function CandidacyDetailSheet({
                 <Label className="smallcaps text-muted-foreground flex items-center gap-2">
                   <Paperclip className="h-3 w-3" /> Documentos
                 </Label>
-                <div>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => upload(e.target.files)}
-                  />
-                  <Button size="sm" variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {uploading ? "Subiendo…" : "Subir archivos"}
-                  </Button>
-                </div>
               </div>
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragOver(false);
-                  upload(e.dataTransfer.files);
-                }}
-                onClick={() => fileRef.current?.click()}
-                className={`mb-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-sm border-2 border-dashed px-4 py-8 text-center transition-colors ${
-                  dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/60 hover:bg-muted/40"
-                }`}
-              >
-                <Upload className="h-6 w-6 text-muted-foreground" />
-                <p className="text-sm">
-                  {uploading ? "Subiendo…" : "Arrastra archivos aquí"}
-                </p>
-                <p className="text-[11px] text-muted-foreground">o haz clic para seleccionarlos</p>
-              </div>
+              <FileDropzone
+                className="mb-3 py-8"
+                busy={uploading}
+                onFiles={upload}
+                hint="o haz clic para seleccionarlos"
+              />
               {(!files || files.length === 0) ? (
                 <p className="text-xs text-muted-foreground">Sin documentos aún.</p>
               ) : (

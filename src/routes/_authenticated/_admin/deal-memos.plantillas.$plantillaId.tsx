@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { FileDropzone } from "@/components/file-dropzone";
+import { uploadToBucket, signBucketPath } from "@/lib/storage-upload";
 
 export const Route = createFileRoute("/_authenticated/_admin/deal-memos/plantillas/$plantillaId")({
   component: PlantillaEditor,
@@ -48,12 +50,14 @@ function PlantillaEditor() {
   }
 
   async function handleFile(file: File) {
-    const path = `plantillas/${plantillaId}/${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("composer-assets").upload(path, file);
-    if (error) return toast.error("No se pudo subir: " + error.message);
-    const { data: signed } = await supabase.storage.from("composer-assets").createSignedUrl(path, 60 * 60 * 24 * 365);
-    setForm({ ...form, word_template_url: signed?.signedUrl ?? path });
-    toast.success("Archivo subido");
+    try {
+      const path = await uploadToBucket("composer-assets", `plantillas/${plantillaId}`, file);
+      const signed = await signBucketPath("composer-assets", path, 60 * 60 * 24 * 365);
+      setForm({ ...form, word_template_url: signed ?? path });
+      toast.success("Archivo subido");
+    } catch (e: any) {
+      toast.error("No se pudo subir: " + (e?.message ?? String(e)));
+    }
   }
 
   if (q.isLoading || !form) return <div className="mx-auto max-w-[900px] px-6 py-6"><Skeleton className="h-[500px]" /></div>;
@@ -92,10 +96,15 @@ function PlantillaEditor() {
 
         <div className="space-y-3 rounded-sm border border-border bg-card p-4">
           <h3 className="text-xs uppercase tracking-wider text-muted-foreground">Plantilla Word (.docx)</h3>
-          <div className="flex items-center gap-2">
-            <Input type="file" accept=".docx" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-            {form.word_template_url && <a href={form.word_template_url} target="_blank" rel="noreferrer" className="text-xs underline">Ver actual</a>}
-          </div>
+          <FileDropzone
+            accept=".docx"
+            multiple={false}
+            label="Arrastra el .docx aquí o haz clic para seleccionarlo"
+            onFiles={(files) => files[0] && handleFile(files[0])}
+          />
+          {form.word_template_url && (
+            <a href={form.word_template_url} target="_blank" rel="noreferrer" className="text-xs underline">Ver actual</a>
+          )}
         </div>
 
         <div className="space-y-2 rounded-sm border border-border bg-card p-4">
