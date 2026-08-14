@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "create_target_account",
-  title: "Crear cuenta objetivo",
-  description:
-    "Crea una nueva cuenta objetivo (cliente potencial) en el CRM. Requiere permisos de admin (BIG C).",
+  ...mcpToolMeta("create_target_account"),
   inputSchema: {
     name: z.string().describe("Nombre de la cuenta."),
     account_type: z

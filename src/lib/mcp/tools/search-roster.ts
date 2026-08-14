@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "search_roster",
-  title: "Buscar en el roster",
-  description:
-    "Busca personas del roster (compositores, artistas, supervisores, especialistas) por nombre. Devuelve id, nombre, rol y email.",
+  ...mcpToolMeta("search_roster"),
   inputSchema: {
     query: z.string().min(1).describe("Nombre o parte del nombre a buscar."),
     limit: z.number().int().min(1).max(50).default(10),

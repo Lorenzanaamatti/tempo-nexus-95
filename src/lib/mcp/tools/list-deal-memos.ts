@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "list_deal_memos",
-  title: "Listar deal memos recientes",
-  description:
-    "Devuelve los deal memos más recientes (referencia, obra, importe propuesto, estado). Respeta los permisos del usuario autenticado.",
+  ...mcpToolMeta("list_deal_memos"),
   inputSchema: {
     limit: z.number().int().min(1).max(50).default(10),
     estado: z.string().optional().describe("Filtrar por estado, ej: borrador, enviado, firmado."),

@@ -1,11 +1,10 @@
 import { defineTool } from "@lovable.dev/mcp-js";
+import { mcpToolMeta } from "@/lib/tool-catalog";
 import { z } from "zod";
 
 export default defineTool({
   name: "update_target_account",
-  title: "Actualizar cuenta objetivo",
-  description:
-    "Modifica campos de una cuenta objetivo existente por id. Solo actualiza los campos enviados. Requiere permisos de admin (BIG C).",
+  ...mcpToolMeta("update_target_account"),
   inputSchema: {
     id: z.string().uuid().describe("UUID de la cuenta objetivo."),
     name: z.string().optional(),
