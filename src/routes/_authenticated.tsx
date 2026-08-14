@@ -114,6 +114,7 @@ function Shell() {
             {!roleLoading && role && (
               <span className="ml-auto smallcaps text-muted-foreground">{role === "admin" ? "Equipo IC" : "Compositor"}</span>
             )}
+            <div className={role && !roleLoading ? "" : "ml-auto"}><GlobalSearch /></div>
             {role === "admin" && <TaskInboxBell />}
           </header>
           <main className="flex-1">
