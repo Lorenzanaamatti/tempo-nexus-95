@@ -140,12 +140,12 @@ function ProvidersPage() {
           </SelectContent>
         </Select>
         <Button onClick={() => setEditing({ kind: "estudio_grabacion", shared_with_ic: true, composer_id: null })}>
-          <Plus className="mr-1 h-4 w-4" />Nuevo proveedor
+          <Plus className="mr-1 h-4 w-4" />Nuevo partner
         </Button>
         <ExportButton
-          entityLabel="Proveedores"
-          filename="proveedores"
-          sheetName="Proveedores"
+          entityLabel="Otros partners"
+          filename="otros-partners"
+          sheetName="Otros partners"
           fetchAll={async () => {
             const { data, error } = await (supabase as any).from("providers").select("*").order("name");
             if (error) throw error;
