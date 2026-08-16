@@ -149,13 +149,15 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   ];
 
   // 0. TAREAS — acciones de creación por área + mis tareas personales
-  const taskAreas: { label: string; area: TaskArea; icon: typeof Music }[] = [
+  const taskAreas: { label: string; area: TaskArea; icon: typeof Music }[] = ([
     { label: "Roster", area: "roster", icon: LibraryBig },
     { label: "Oportunidades", area: "oportunidades", icon: Target },
     { label: "Económico", area: "economico", icon: Wallet },
     { label: "Legal", area: "legal", icon: Scale },
     { label: "Marketing", area: "marketing", icon: Megaphone },
-  ].filter((t) => !(isTeamView && t.area === "economico"));
+  ] as { label: string; area: TaskArea; icon: typeof Music }[]).filter(
+    (t) => !(isTeamView && t.area === "economico"),
+  );
 
   const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
     { label: "Roster",        icon: LibraryBig,  items: rosterItems },
