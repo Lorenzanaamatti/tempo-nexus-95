@@ -28,6 +28,7 @@ export type Database = {
           notes: string | null
           position: number
           requester_user_id: string | null
+          status: string
           subarea: string | null
           subject_id: string | null
           subject_type:
@@ -49,6 +50,7 @@ export type Database = {
           notes?: string | null
           position?: number
           requester_user_id?: string | null
+          status?: string
           subarea?: string | null
           subject_id?: string | null
           subject_type?:
@@ -70,6 +72,7 @@ export type Database = {
           notes?: string | null
           position?: number
           requester_user_id?: string | null
+          status?: string
           subarea?: string | null
           subject_id?: string | null
           subject_type?:

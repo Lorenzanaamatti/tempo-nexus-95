@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TASK_AREAS, type TaskArea } from "@/lib/task-areas";
+import { TASK_STATUSES } from "@/lib/task-status";
 
 type OpenOptions = { area?: TaskArea | null };
 type Ctx = { open: (opts?: OpenOptions) => void };
@@ -50,6 +51,7 @@ function NewTaskDialog({
   const [subarea, setSubarea] = useState("");
   const [assignee, setAssignee] = useState<string>("");
   const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState<string>("pendiente");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -97,13 +99,14 @@ function NewTaskDialog({
       subarea: subarea.trim() || null,
       due_date: dueDate || null,
       assignee_person_id: assignee || null,
+      status,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Tarea creada");
     qc.invalidateQueries({ queryKey: ["tasks"] });
     qc.invalidateQueries({ queryKey: ["task-inbox"] });
-    setTitle(""); setSubarea(""); setAssignee(""); setDueDate("");
+    setTitle(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente");
     onClose();
   }
 
@@ -159,6 +162,17 @@ function NewTaskDialog({
               <Label className="text-xs">Fecha de entrega</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
+          </div>
+          <div>
+            <Label className="text-xs">Estado</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {TASK_STATUSES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <p className="text-[11px] text-muted-foreground">
             La fecha de entrada y el solicitante se rellenan automáticamente.

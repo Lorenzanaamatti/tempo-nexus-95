@@ -26,6 +26,7 @@ import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
+import { useMyDueTaskCount } from "@/lib/use-my-tasks";
 import type { TaskArea } from "@/lib/task-areas";
 import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
 import { RefreshCw, Home as HomeIcon } from "lucide-react";
@@ -45,6 +46,8 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const effectiveView: SessionView = role === "admin" ? sessionView ?? "bigc" : "bigc";
   const isRosterView = role === "admin" && effectiveView === "roster";
   const isTeamView = role === "admin" && effectiveView === "team";
+
+  const { data: myDueTasks } = useMyDueTaskCount();
 
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
@@ -207,10 +210,19 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={onCal && calView === "personal"}>
-                      <Link to="/calendar" search={{ view: "personal" } as never} className="flex items-center gap-2">
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/tareas")}>
+                      <Link to="/tareas" className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        {!collapsed && <span>Personal · mis tareas</span>}
+                        {!collapsed && (
+                          <span className="flex flex-1 items-center justify-between gap-2">
+                            <span>Personal · mis tareas</span>
+                            {(myDueTasks ?? 0) > 0 && (
+                              <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                                {myDueTasks}
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
