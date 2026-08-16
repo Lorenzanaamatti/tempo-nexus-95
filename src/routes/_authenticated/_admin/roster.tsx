@@ -39,7 +39,7 @@ function RosterAll() {
         supabase
           .from("composers")
           .select(
-            "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date",
+            "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
           )
           .order("full_name"),
         supabase.from("productions").select("id, title, year, status, composer_id, premiere_date"),
