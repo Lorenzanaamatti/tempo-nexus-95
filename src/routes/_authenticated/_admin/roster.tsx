@@ -256,8 +256,17 @@ function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; v
             <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Representado</th>
-                <th className="px-3 py-2">Contratación</th>
-                <th className="px-3 py-2">Vencimiento</th>
+                {variant === "prospect" ? (
+                  <>
+                    <th className="px-3 py-2">Próxima acción</th>
+                    <th className="px-3 py-2">Objetivo contratación</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-3 py-2">Contratación</th>
+                    <th className="px-3 py-2">Vencimiento</th>
+                  </>
+                )}
                 <th className="px-3 py-2">Proyectos en curso</th>
               </tr>
             </thead>
@@ -285,8 +294,17 @@ function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; v
                       </span>
                     </Link>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{year(c.representation_start_date) ?? "—"}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.renewal_date)}</td>
+                  {variant === "prospect" ? (
+                    <>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_next_action_date)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_target_date)}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-3 py-2 font-mono text-xs">{year(c.representation_start_date) ?? "—"}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.renewal_date)}</td>
+                    </>
+                  )}
                   <td className="px-3 py-2 font-mono text-xs">{c.open}</td>
                 </tr>
               ))}
