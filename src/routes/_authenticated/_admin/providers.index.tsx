@@ -113,7 +113,7 @@ function ProvidersPage() {
     <div className="mx-auto max-w-[1300px] px-6 py-6">
       <header className="mb-4">
         <p className="smallcaps text-[10px] tracking-wider text-muted-foreground">Partners</p>
-        <h1 className="font-display text-3xl">Proveedores</h1>
+        <h1 className="font-display text-3xl">Otros partners</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Estudios, mezcla, máster, músicos, abogados… Compartidos entre IC y representados.
         </p>
