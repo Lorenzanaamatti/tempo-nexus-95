@@ -110,12 +110,9 @@ function Shell() {
                   <ListChecks className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Tareas</span>
                 </Link>
-              </nav>
+            </nav>
             )}
-            {!roleLoading && role && (
-              <span className="ml-auto smallcaps text-muted-foreground">{role === "admin" ? "Equipo IC" : "Compositor"}</span>
-            )}
-            <div className={role && !roleLoading ? "" : "ml-auto"}><GlobalSearch /></div>
+            <div className="ml-auto"><GlobalSearch /></div>
             {role === "admin" && <TaskInboxBell />}
           </header>
           <main className="flex-1">
