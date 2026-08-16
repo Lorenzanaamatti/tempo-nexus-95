@@ -1,96 +1,119 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TASK_AREAS, TASK_AREA_LABEL, TASK_AREA_TONE, type TaskArea } from "@/lib/task-areas";
+import { TASK_STATUSES, TASK_STATUS_LABEL, TASK_STATUS_TONE, todayISO, type TaskStatus } from "@/lib/task-status";
+import { useMyPersonId, useMyDueTaskCount } from "@/lib/use-my-tasks";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
+import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
   component: TareasPage,
 });
 
+type Row = {
+  id: string;
+  title: string;
+  area: TaskArea | null;
+  subarea: string | null;
+  entry_date: string | null;
+  due_date: string | null;
+  status: TaskStatus;
+  done: boolean;
+  assignee_person_id: string | null;
+  assignee?: { id: string; full_name: string } | null;
+};
+
+const SELECT =
+  "id, title, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name)";
+
 function TareasPage() {
   const { user } = useAuth();
   const { open: openNewTask } = useNewTaskDialog();
   const qc = useQueryClient();
+  const personId = useMyPersonId().data ?? null;
+  const dueCount = useMyDueTaskCount().data ?? 0;
+
+  const [mine, setMine] = useState(true);
   const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<"pending" | "done" | "all">("pending");
+  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [q, setQ] = useState("");
 
-  const personQ = useQuery({
-    queryKey: ["my-person-id", user?.id],
-    enabled: !!user?.id,
+  const peopleQ = useQuery({
+    queryKey: ["people-ic-team"],
     queryFn: async () => {
-      const { data: byUser } = await (supabase as any)
-        .from("people").select("id").eq("user_id", user!.id).maybeSingle();
-      if (byUser?.id) return byUser.id as string;
-      const { data: prof } = await supabase
-        .from("profiles").select("composer_id").eq("id", user!.id).maybeSingle();
-      if (!prof?.composer_id) return null;
-      const { data: byComp } = await (supabase as any)
-        .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
-      return (byComp?.id as string) ?? null;
+      const { data, error } = await supabase
+        .from("people").select("id, full_name").eq("role", "ic_team").order("full_name");
+      if (error) throw error;
+      return data ?? [];
     },
   });
-  const personId = personQ.data;
 
-  const baseSelect = "id, title, area, subarea, due_date, entry_date, done, done_at, created_at, assignee:people!actions_assignee_person_id_fkey(id, full_name)";
-
-  const assignedQ = useQuery({
-    queryKey: ["tasks", "assigned", personId, areaFilter, statusFilter],
-    enabled: !!personId,
+  const tasksQ = useQuery({
+    queryKey: ["tasks", mine, personId, user?.id, areaFilter, statusFilter],
     queryFn: async () => {
-      let q = (supabase as any).from("actions").select(baseSelect).eq("assignee_person_id", personId);
-      if (areaFilter !== "all") q = q.eq("area", areaFilter);
-      if (statusFilter === "pending") q = q.eq("done", false);
-      if (statusFilter === "done") q = q.eq("done", true);
-      const { data, error } = await q.order("done").order("due_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
-      if (error) {
-        const { data: d2 } = await (supabase as any).from("actions").select("*").eq("assignee_person_id", personId);
-        return d2 ?? [];
+      let query = (supabase as any).from("actions").select(SELECT).eq("kind", "tarea");
+      if (mine) {
+        const filters = [
+          personId ? `assignee_person_id.eq.${personId}` : null,
+          user?.id ? `requester_user_id.eq.${user.id}` : null,
+        ].filter(Boolean) as string[];
+        if (!filters.length) return [] as Row[];
+        query = query.or(filters.join(","));
       }
-      return data ?? [];
+      if (areaFilter !== "all") query = query.eq("area", areaFilter);
+      if (statusFilter === "pending") query = query.eq("done", false);
+      else if (statusFilter !== "all") query = query.eq("status", statusFilter);
+      const { data, error } = await query
+        .order("done")
+        .order("due_date", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Row[];
     },
   });
 
-  const createdQ = useQuery({
-    queryKey: ["tasks", "created", user?.id, areaFilter, statusFilter],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      let q = (supabase as any).from("actions").select(baseSelect).eq("requester_user_id", user!.id);
-      if (areaFilter !== "all") q = q.eq("area", areaFilter);
-      if (statusFilter === "pending") q = q.eq("done", false);
-      if (statusFilter === "done") q = q.eq("done", true);
-      const { data, error } = await q.order("done").order("due_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
-      if (error) return [];
-      return data ?? [];
-    },
-  });
+  const needle = q.trim().toLowerCase();
+  const rows = (tasksQ.data ?? []).filter(
+    (t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)),
+  );
 
-  async function toggle(id: string, done: boolean) {
-    const { error } = await (supabase as any)
-      .from("actions")
-      .update({ done, done_at: done ? new Date().toISOString() : null })
-      .eq("id", id);
+  async function patch(id: string, values: Record<string, unknown>) {
+    const { error } = await (supabase as any).from("actions").update(values).eq("id", id);
     if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["tasks"] });
+    qc.invalidateQueries({ queryKey: ["my-due-tasks"] });
     qc.invalidateQueries({ queryKey: ["task-inbox"] });
   }
 
+  const today = todayISO();
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl">Tareas</h1>
-          <p className="text-sm text-muted-foreground">Las que te han delegado y las que has creado.</p>
+          <p className="smallcaps text-muted-foreground">Tareas</p>
+          <h1 className="font-display text-4xl">Qué hay que hacer</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Área, responsable, fecha de entrada, fecha de entrega y estado en una sola lista.
+          </p>
         </div>
-        <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
+        <div className="flex items-center gap-3">
+          <div className="rounded-sm border border-primary/40 bg-primary/10 px-3 py-2 text-center">
+            <div className="font-display text-2xl leading-none text-primary">{dueCount}</div>
+            <div className="smallcaps text-[10px] text-muted-foreground">pendientes hoy</div>
+          </div>
+          <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
+        </div>
       </div>
 
       {!personId && (
@@ -99,75 +122,111 @@ function TareasPage() {
         </div>
       )}
 
-      <div className="mb-4 flex flex-wrap gap-3">
-        <div>
-          <span className="block smallcaps text-[10px] text-muted-foreground">Área</span>
-          <Select value={areaFilter} onValueChange={setAreaFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {TASK_AREAS.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
+      <div className="mb-4 flex flex-wrap items-end gap-2">
+        <div className="inline-flex overflow-hidden rounded-sm border border-border">
+          <button
+            type="button"
+            onClick={() => setMine(true)}
+            className={cn("px-3 py-1.5 text-xs smallcaps", mine ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Mis tareas
+          </button>
+          <button
+            type="button"
+            onClick={() => setMine(false)}
+            className={cn("px-3 py-1.5 text-xs smallcaps", !mine ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Todas
+          </button>
         </div>
-        <div>
-          <span className="block smallcaps text-[10px] text-muted-foreground">Estado</span>
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pendientes</SelectItem>
-              <SelectItem value="done">Hechas</SelectItem>
-              <SelectItem value="all">Todas</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las áreas</SelectItem>
+            {TASK_AREAS.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">Sin terminar</SelectItem>
+            {TASK_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+            <SelectItem value="all">Todos los estados</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tarea…" className="h-8 max-w-[220px] text-sm" />
+        <span className="ml-auto text-xs text-muted-foreground">{rows.length} tarea(s)</span>
       </div>
 
-      <Tabs defaultValue="assigned">
-        <TabsList>
-          <TabsTrigger value="assigned">Asignadas a mí ({assignedQ.data?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="created">Creadas por mí ({createdQ.data?.length ?? 0})</TabsTrigger>
-        </TabsList>
-        <TabsContent value="assigned">
-          <TaskList rows={assignedQ.data ?? []} onToggle={toggle} />
-        </TabsContent>
-        <TabsContent value="created">
-          <TaskList rows={createdQ.data ?? []} onToggle={toggle} showAssignee />
-        </TabsContent>
-      </Tabs>
+      {tasksQ.isLoading ? (
+        <ListSkeleton rows={6} />
+      ) : !rows.length ? (
+        <EmptyState title="Sin tareas en esta vista" hint="Crea una nueva tarea o cambia los filtros." />
+      ) : (
+        <ul className="divide-y divide-border rounded-sm border border-border">
+          {rows.map((t) => {
+            const overdue = !t.done && t.due_date && t.due_date < today;
+            const dueToday = !t.done && t.due_date === today;
+            return (
+              <li key={t.id} className={cn("px-3 py-3", t.done && "opacity-60")}>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    className="mt-1"
+                    checked={t.done}
+                    onCheckedChange={(v) => patch(t.id, { status: v ? "hecha" : "pendiente" })}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("text-sm", t.done && "line-through")}>{t.title}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                      {t.area && (
+                        <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_AREA_TONE[t.area])}>
+                          {TASK_AREA_LABEL[t.area]}
+                        </span>
+                      )}
+                      {t.subarea && <span className="text-muted-foreground">{t.subarea}</span>}
+                      <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_STATUS_TONE[t.status] ?? "")}>
+                        {TASK_STATUS_LABEL[t.status] ?? t.status}
+                      </span>
+                      <span className="text-muted-foreground">Entrada {t.entry_date ?? "—"}</span>
+                      <span className={cn("text-muted-foreground", overdue && "text-destructive", dueToday && "text-primary")}>
+                        Entrega {t.due_date ?? "—"}
+                        {overdue ? " · vencida" : dueToday ? " · hoy" : ""}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                    <Select
+                      value={t.assignee_person_id ?? "none"}
+                      onValueChange={(v) => patch(t.id, { assignee_person_id: v === "none" ? null : v })}
+                    >
+                      <SelectTrigger className="h-7 w-[150px] text-xs"><SelectValue placeholder="Responsable" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin responsable</SelectItem>
+                        {(peopleQ.data ?? []).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={t.status} onValueChange={(v) => patch(t.id, { status: v })}>
+                      <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TASK_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="date"
+                      value={t.due_date ?? ""}
+                      onChange={(e) => patch(t.id, { due_date: e.target.value || null })}
+                      className="h-7 w-[140px] text-xs"
+                      title="Fecha de entrega"
+                    />
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
-  );
-}
-
-function TaskList({
-  rows, onToggle, showAssignee,
-}: { rows: any[]; onToggle: (id: string, done: boolean) => void; showAssignee?: boolean }) {
-  if (!rows.length) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">Sin tareas en esta vista.</p>;
-  }
-  return (
-    <ul className="divide-y divide-border rounded-sm border border-border">
-      {rows.map((t) => (
-        <li key={t.id} className={`flex items-start gap-3 px-3 py-3 ${t.done ? "opacity-60" : ""}`}>
-          <Checkbox checked={t.done} onCheckedChange={(v) => onToggle(t.id, !!v)} />
-          <div className="flex-1">
-            <p className={`text-sm ${t.done ? "line-through" : ""}`}>{t.title}</p>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
-              {t.area && (
-                <span className={`rounded-sm px-1.5 py-0.5 smallcaps ${TASK_AREA_TONE[t.area as TaskArea]}`}>
-                  {TASK_AREA_LABEL[t.area as TaskArea]}
-                </span>
-              )}
-              {t.subarea && <span className="text-muted-foreground">{t.subarea}</span>}
-              {t.due_date && <span className="text-muted-foreground">· entrega {t.due_date}</span>}
-              {t.entry_date && <span className="text-muted-foreground">· entrada {t.entry_date}</span>}
-              {showAssignee && t.assignee?.full_name && (
-                <span className="text-muted-foreground">· {t.assignee.full_name}</span>
-              )}
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
   );
 }
