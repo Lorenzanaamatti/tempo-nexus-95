@@ -42,18 +42,20 @@ const GROUPS: Group[] = [
     label: "Partners",
     icon: Handshake,
     items: [
-      { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair },
       { title: "Productoras", to: "/production-companies", icon: Building2 },
       { title: "Plataformas", to: "/platforms", icon: Tv },
       { title: "Directores", to: "/directors", icon: Clapperboard },
-      { title: "Proveedores", to: "/providers", icon: Briefcase },
-      { title: "Películas ES", to: "/peliculas-es", icon: Database },
+      { title: "Otros partners", to: "/providers", icon: Briefcase },
     ],
   },
   {
     label: "Oportunidades",
     icon: Target,
-    items: [{ title: "Oportunidades", to: "/opportunities", icon: Target }],
+    items: [
+      { title: "Oportunidades", to: "/opportunities", icon: Target },
+      { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair },
+      { title: "Candidaturas", to: "/candidacies", icon: Inbox },
+    ],
   },
   {
     label: "Económico",
