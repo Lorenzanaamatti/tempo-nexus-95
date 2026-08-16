@@ -150,17 +150,6 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Legal",        to: "/calendar", search: { view: "legal" },        icon: Scale,        active: onCal && calView === "legal" },
   ];
 
-  // 0. TAREAS — acciones de creación por área + mis tareas personales
-  const taskAreas: { label: string; area: TaskArea; icon: typeof Music }[] = ([
-    { label: "Roster", area: "roster", icon: LibraryBig },
-    { label: "Oportunidades", area: "oportunidades", icon: Target },
-    { label: "Económico", area: "economico", icon: Wallet },
-    { label: "Legal", area: "legal", icon: Scale },
-    { label: "Marketing", area: "marketing", icon: Megaphone },
-  ] as { label: string; area: TaskArea; icon: typeof Music }[]).filter(
-    (t) => !(isTeamView && t.area === "economico"),
-  );
-
   const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
     { label: "Roster",        icon: LibraryBig,  items: rosterItems },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
@@ -226,17 +215,12 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  {taskAreas.map((t) => (
-                    <SidebarMenuItem key={t.area}>
-                      <SidebarMenuButton
-                        onClick={() => openNewTask({ area: t.area })}
-                        title={`Nueva tarea en ${t.label}`}
-                      >
-                        <Plus className="h-4 w-4 text-primary" />
-                        {!collapsed && <span>Nueva tarea · {t.label}</span>}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={() => openNewTask({})} title="Nueva tarea">
+                      <Plus className="h-4 w-4 text-primary" />
+                      {!collapsed && <span>Nueva tarea</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
