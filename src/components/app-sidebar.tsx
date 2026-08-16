@@ -226,17 +226,12 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  {taskAreas.map((t) => (
-                    <SidebarMenuItem key={t.area}>
-                      <SidebarMenuButton
-                        onClick={() => openNewTask({ area: t.area })}
-                        title={`Nueva tarea en ${t.label}`}
-                      >
-                        <Plus className="h-4 w-4 text-primary" />
-                        {!collapsed && <span>Nueva tarea · {t.label}</span>}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={() => openNewTask({})} title="Nueva tarea">
+                      <Plus className="h-4 w-4 text-primary" />
+                      {!collapsed && <span>Nueva tarea</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
