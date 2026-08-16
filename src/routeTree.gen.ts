@@ -65,6 +65,7 @@ import { Route as AuthenticatedAdminMarketingCalendarRouteImport } from './route
 import { Route as AuthenticatedAdminLegalTemplatesPresupuestoRouteImport } from './routes/_authenticated/_admin/legal.templates-presupuesto'
 import { Route as AuthenticatedAdminLegalTemplatesDealMemoRouteImport } from './routes/_authenticated/_admin/legal.templates-deal-memo'
 import { Route as AuthenticatedAdminLegalTemplatesContratoRouteImport } from './routes/_authenticated/_admin/legal.templates-contrato'
+import { Route as AuthenticatedAdminLegalContratosFirmadosRouteImport } from './routes/_authenticated/_admin/legal.contratos-firmados'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
 import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
@@ -399,6 +400,12 @@ const AuthenticatedAdminLegalTemplatesContratoRoute =
     path: '/legal/templates-contrato',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminLegalContratosFirmadosRoute =
+  AuthenticatedAdminLegalContratosFirmadosRouteImport.update({
+    id: '/legal/contratos-firmados',
+    path: '/legal/contratos-firmados',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDirectorsDirectorIdRoute =
   AuthenticatedAdminDirectorsDirectorIdRouteImport.update({
     id: '/directors/$directorId',
@@ -532,6 +539,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
   '/legal/templates-contrato': typeof AuthenticatedAdminLegalTemplatesContratoRoute
   '/legal/templates-deal-memo': typeof AuthenticatedAdminLegalTemplatesDealMemoRoute
   '/legal/templates-presupuesto': typeof AuthenticatedAdminLegalTemplatesPresupuestoRoute
@@ -601,6 +609,7 @@ export interface FileRoutesByTo {
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
   '/legal/templates-contrato': typeof AuthenticatedAdminLegalTemplatesContratoRoute
   '/legal/templates-deal-memo': typeof AuthenticatedAdminLegalTemplatesDealMemoRoute
   '/legal/templates-presupuesto': typeof AuthenticatedAdminLegalTemplatesPresupuestoRoute
@@ -675,6 +684,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/_authenticated/_admin/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
   '/_authenticated/_admin/legal/templates-contrato': typeof AuthenticatedAdminLegalTemplatesContratoRoute
   '/_authenticated/_admin/legal/templates-deal-memo': typeof AuthenticatedAdminLegalTemplatesDealMemoRoute
   '/_authenticated/_admin/legal/templates-presupuesto': typeof AuthenticatedAdminLegalTemplatesPresupuestoRoute
@@ -748,6 +758,7 @@ export interface FileRouteTypes {
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
     | '/directors/$directorId'
+    | '/legal/contratos-firmados'
     | '/legal/templates-contrato'
     | '/legal/templates-deal-memo'
     | '/legal/templates-presupuesto'
@@ -817,6 +828,7 @@ export interface FileRouteTypes {
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
     | '/directors/$directorId'
+    | '/legal/contratos-firmados'
     | '/legal/templates-contrato'
     | '/legal/templates-deal-memo'
     | '/legal/templates-presupuesto'
@@ -890,6 +902,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/deal-memos/configuracion'
     | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
+    | '/_authenticated/_admin/legal/contratos-firmados'
     | '/_authenticated/_admin/legal/templates-contrato'
     | '/_authenticated/_admin/legal/templates-deal-memo'
     | '/_authenticated/_admin/legal/templates-presupuesto'
@@ -1325,6 +1338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLegalTemplatesContratoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/legal/contratos-firmados': {
+      id: '/_authenticated/_admin/legal/contratos-firmados'
+      path: '/legal/contratos-firmados'
+      fullPath: '/legal/contratos-firmados'
+      preLoaderRoute: typeof AuthenticatedAdminLegalContratosFirmadosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/directors/$directorId': {
       id: '/_authenticated/_admin/directors/$directorId'
       path: '/directors/$directorId'
@@ -1478,6 +1498,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersNewRoute: typeof AuthenticatedAdminComposersNewRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  AuthenticatedAdminLegalContratosFirmadosRoute: typeof AuthenticatedAdminLegalContratosFirmadosRoute
   AuthenticatedAdminLegalTemplatesContratoRoute: typeof AuthenticatedAdminLegalTemplatesContratoRoute
   AuthenticatedAdminLegalTemplatesDealMemoRoute: typeof AuthenticatedAdminLegalTemplatesDealMemoRoute
   AuthenticatedAdminLegalTemplatesPresupuestoRoute: typeof AuthenticatedAdminLegalTemplatesPresupuestoRoute
@@ -1524,6 +1545,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminContractsContractIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
+  AuthenticatedAdminLegalContratosFirmadosRoute:
+    AuthenticatedAdminLegalContratosFirmadosRoute,
   AuthenticatedAdminLegalTemplatesContratoRoute:
     AuthenticatedAdminLegalTemplatesContratoRoute,
   AuthenticatedAdminLegalTemplatesDealMemoRoute:
