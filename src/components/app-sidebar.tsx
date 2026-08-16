@@ -151,7 +151,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   ];
 
   const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
-    { label: "Roster",        icon: LibraryBig,  items: rosterItems },
+    { label: "Clientes",      icon: LibraryBig,  items: rosterItems },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
     { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
     { label: "Económico",     icon: Wallet,      items: economicoItems },
