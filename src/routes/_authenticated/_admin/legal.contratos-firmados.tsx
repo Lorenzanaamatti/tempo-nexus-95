@@ -79,7 +79,7 @@ function SignedContracts() {
       ) : error ? (
         <ErrorState message={(error as Error).message} />
       ) : !sorted.length ? (
-        <EmptyState title="No hay contratos firmados" description="Los contratos aparecerán aquí al marcarse como firmados." />
+        <EmptyState title="No hay contratos firmados" hint="Los contratos aparecerán aquí al marcarse como firmados." />
       ) : (
         <div className="space-y-8">
           {sorted.map(([cat, items]) => (
