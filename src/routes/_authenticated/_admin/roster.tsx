@@ -236,10 +236,12 @@ type Row = {
   photo_path: string | null;
   representation_start_date: string | null;
   renewal_date: string | null;
+  prospect_next_action_date: string | null;
+  prospect_target_date: string | null;
   open: number;
 };
 
-function RosterSection({ title, rows }: { title: string; rows: Row[] }) {
+function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; variant: "active" | "prospect" }) {
   return (
     <section>
       <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
