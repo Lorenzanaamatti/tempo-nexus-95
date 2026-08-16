@@ -4,6 +4,7 @@ import {
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
   Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database, Plus,
+  ListChecks,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,16 +146,24 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Facturación",  to: "/calendar", search: { view: "economico" },    icon: Receipt,      active: onCal && calView === "economico" },
     { title: "Marketing",    to: "/calendar", search: { view: "marketing" },    icon: Megaphone,    active: onCal && calView === "marketing" },
     { title: "Legal",        to: "/calendar", search: { view: "legal" },        icon: Scale,        active: onCal && calView === "legal" },
-    { title: "Personal · mis tareas", to: "/calendar", search: { view: "personal" }, icon: User,    active: onCal && calView === "personal" },
   ];
 
-  const adminGroups: { label: string; icon: typeof Music; items: NavItem[]; area?: TaskArea }[] = [
-    { label: "Roster",        icon: LibraryBig,  items: rosterItems,        area: "roster" },
+  // 0. TAREAS — acciones de creación por área + mis tareas personales
+  const taskAreas: { label: string; area: TaskArea; icon: typeof Music }[] = [
+    { label: "Roster", area: "roster", icon: LibraryBig },
+    { label: "Oportunidades", area: "oportunidades", icon: Target },
+    { label: "Económico", area: "economico", icon: Wallet },
+    { label: "Legal", area: "legal", icon: Scale },
+    { label: "Marketing", area: "marketing", icon: Megaphone },
+  ].filter((t) => !(isTeamView && t.area === "economico"));
+
+  const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
+    { label: "Roster",        icon: LibraryBig,  items: rosterItems },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
-    { label: "Oportunidades", icon: Target,      items: opportunitiesItems, area: "oportunidades" },
-    { label: "Económico",     icon: Wallet,      items: economicoItems,     area: "economico" },
-    { label: "Legal",         icon: Scale,       items: legalItems,         area: "legal" },
-    { label: "Marketing",     icon: Megaphone,   items: marketingItems,     area: "marketing" },
+    { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
+    { label: "Económico",     icon: Wallet,      items: economicoItems },
+    { label: "Legal",         icon: Scale,       items: legalItems },
+    { label: "Marketing",     icon: Megaphone,   items: marketingItems },
     { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
   ];
 
@@ -187,23 +196,43 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
       <SidebarContent>
         {role === "admin" && !isRosterView ? (
           <>
+            <SidebarGroup>
+              {!collapsed && (
+                <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-primary">
+                  <ListChecks className="h-3 w-3" />
+                  <span className="flex-1">Tareas</span>
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={onCal && calView === "personal"}>
+                      <Link to="/calendar" search={{ view: "personal" } as never} className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {!collapsed && <span>Personal · mis tareas</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  {taskAreas.map((t) => (
+                    <SidebarMenuItem key={t.area}>
+                      <SidebarMenuButton
+                        onClick={() => openNewTask({ area: t.area })}
+                        title={`Nueva tarea en ${t.label}`}
+                      >
+                        <Plus className="h-4 w-4 text-primary" />
+                        {!collapsed && <span>Nueva tarea · {t.label}</span>}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
             {visibleAdminGroups.map((group) => (
               <SidebarGroup key={group.label}>
                 {!collapsed && (
                   <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]">
                     <group.icon className="h-3 w-3" />
                     <span className="flex-1">{group.label}</span>
-                    {group.area && (
-                      <button
-                        type="button"
-                        onClick={() => openNewTask({ area: group.area })}
-                        className="rounded-sm p-1 text-primary transition hover:bg-primary/10"
-                        title={`Nueva tarea en ${group.label}`}
-                        aria-label={`Nueva tarea en ${group.label}`}
-                      >
-                        <Plus className="h-5 w-5" />
-                      </button>
-                    )}
                   </SidebarGroupLabel>
                 )}
                 <SidebarGroupContent>
