@@ -14,7 +14,7 @@ import {
   type SocialLinks,
 } from "@/components/social-links";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
-import { Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone } from "lucide-react";
+import { Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone, Film } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated/_admin/ic")({
@@ -88,6 +88,7 @@ function ICCompanyPage() {
       </header>
 
       <ICKpisSection />
+      <ICActiveProductionsSection />
       <ICCombinedFilmographySection icId={ic.id} />
       <ICAwardsAggregatedSection />
       <ICTopPartnersSection />
@@ -179,6 +180,108 @@ function Kpi({ label, value }: { label: string; value: string }) {
 }
 
 function ICCombinedFilmographySection({ icId: _icId }: { icId: string }) {
+  return <CombinedFilmographyBody />;
+}
+
+const ACTIVE_PRODUCTION_STATUSES = new Set([
+  "compositor_confirmado","presupuesto_enviado","presupuesto_confirmado","contrato_enviado",
+  "contrato_negociacion","contrato_firmado","visuales_entregados","en_composicion",
+  "en_produccion","en_mezclas","entrega_parcial","entrega_total","entregables_completados",
+]);
+
+function ICActiveProductionsSection() {
+  const { data } = useQuery({
+    queryKey: ["ic-active-productions"],
+    queryFn: async () => {
+      const { data: prods, error } = await supabase
+        .from("productions")
+        .select(
+          "id, title, year, status, project_type, delivery_date, composer_id, composers(id, full_name, artistic_name, roster_role)",
+        )
+        .order("year", { ascending: false, nullsFirst: false });
+      if (error) throw error;
+      return ((prods ?? []) as any[])
+        .filter((p) => ACTIVE_PRODUCTION_STATUSES.has(p.status))
+        .map((p) => ({
+          id: p.id as string,
+          title: p.title as string,
+          year: (p.year ?? null) as number | null,
+          status: (p.status ?? "—") as string,
+          kind: (p.project_type ?? "—") as string,
+          delivery: (p.delivery_date ?? null) as string | null,
+          composer: p.composers
+            ? { id: p.composers.id as string, name: (p.composers.artistic_name || p.composers.full_name) as string }
+            : null,
+        }));
+    },
+  });
+
+  const byComposer = new Map<string, number>();
+  for (const r of data ?? []) if (r.composer) byComposer.set(r.composer.id, (byComposer.get(r.composer.id) ?? 0) + 1);
+
+  return (
+    <section>
+      <SectionHeader
+        icon={Film}
+        title="Producciones en curso"
+        hint={`${data?.length ?? 0} producciones · ${byComposer.size} representados`}
+      />
+      {!data?.length ? (
+        <p className="text-sm text-muted-foreground">No hay producciones en curso ahora mismo.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-sm border border-border">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2">Título</th>
+                <th className="px-3 py-2">Representado</th>
+                <th className="px-3 py-2">Tipo</th>
+                <th className="px-3 py-2">Estado</th>
+                <th className="px-3 py-2">Entrega</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((r) => (
+                <tr key={r.id} className="border-b border-border/60 last:border-0">
+                  <td className="px-3 py-2">
+                    <Link
+                      to="/productions/$productionId"
+                      params={{ productionId: r.id }}
+                      className="font-medium hover:text-primary"
+                    >
+                      {r.title}
+                    </Link>
+                    {r.year ? <span className="ml-2 text-muted-foreground">{r.year}</span> : null}
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.composer ? (
+                      <Link
+                        to="/composers/$composerId"
+                        params={{ composerId: r.composer.id }}
+                        className="hover:text-primary"
+                      >
+                        {r.composer.name}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.kind}</td>
+                  <td className="px-3 py-2">
+                    <Badge variant="secondary">{r.status.replace(/_/g, " ")}</Badge>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.delivery ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CombinedFilmographyBody() {
   const { data } = useQuery({
     queryKey: ["ic-combined-filmo"],
     queryFn: async () => {
