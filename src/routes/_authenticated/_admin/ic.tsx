@@ -14,7 +14,7 @@ import {
   type SocialLinks,
 } from "@/components/social-links";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
-import { Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone } from "lucide-react";
+import { Receipt, Trophy, Users, Briefcase, Award, FileText, Calendar, Link2, Phone, Film } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated/_admin/ic")({
