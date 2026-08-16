@@ -152,8 +152,8 @@ function RosterAll() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-14">
-          <RosterSection title="Roster actual" rows={actual} />
-          <RosterSection title="Roster en prospección" rows={prospeccion} />
+          <RosterSection title="Roster actual" rows={actual} variant="active" />
+          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" />
 
           <section>
             <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl">Roster objetivo</h2>
