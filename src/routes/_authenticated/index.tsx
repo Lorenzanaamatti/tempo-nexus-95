@@ -78,13 +78,10 @@ const GROUPS: Group[] = [
     label: "Marketing",
     icon: Megaphone,
     items: [
-      { title: "Decks de venta", to: "/marketing/decks", icon: Presentation },
-      { title: "Clipping", to: "/marketing/clippings", icon: Newspaper },
       { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette },
-      { title: "Casos de éxito", to: "/marketing/case-studies", icon: Trophy },
-      { title: "Plantillas", to: "/marketing/templates", icon: Mail },
-      { title: "Press kits", to: "/marketing/press-kits", icon: FolderOpen },
-      { title: "Redes sociales", to: "/marketing/social", icon: Share2 },
+      { title: "Ventas", to: "/marketing/ventas", icon: Presentation },
+      { title: "Comunicación", to: "/marketing/comunicacion", icon: Share2 },
+      { title: "Templates", to: "/marketing/templates", icon: Mail },
     ],
   },
   {
