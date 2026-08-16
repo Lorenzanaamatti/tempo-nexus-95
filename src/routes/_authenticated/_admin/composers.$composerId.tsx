@@ -150,6 +150,8 @@ function Inner({
         agent_person_id: c.agent_person_id,
         representation_start_date: c.representation_start_date,
         renewal_date: c.renewal_date,
+        prospect_next_action_date: c.prospect_next_action_date,
+        prospect_target_date: c.prospect_target_date,
         career_notes: c.career_notes,
         portal_url: c.portal_url,
         current_location: (c as { current_location?: string | null }).current_location ?? null,
@@ -381,20 +383,41 @@ function Inner({
               ))}
             </select>
           </Field>
-          <Field label="Fecha de inicio de representación">
-            <Input
-              type="date"
-              value={c.representation_start_date ?? ""}
-              onChange={(e) => field("representation_start_date", e.target.value || null)}
-            />
-          </Field>
-          <Field label="Fecha de renovación">
-            <Input
-              type="date"
-              value={c.renewal_date ?? ""}
-              onChange={(e) => field("renewal_date", e.target.value || null)}
-            />
-          </Field>
+          {c.representation_status === "en_negociacion" ? (
+            <>
+              <Field label="Próxima acción">
+                <Input
+                  type="date"
+                  value={c.prospect_next_action_date ?? ""}
+                  onChange={(e) => field("prospect_next_action_date", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Objetivo de contratación">
+                <Input
+                  type="date"
+                  value={c.prospect_target_date ?? ""}
+                  onChange={(e) => field("prospect_target_date", e.target.value || null)}
+                />
+              </Field>
+            </>
+          ) : (
+            <>
+              <Field label="Fecha de inicio de representación">
+                <Input
+                  type="date"
+                  value={c.representation_start_date ?? ""}
+                  onChange={(e) => field("representation_start_date", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Fecha de renovación">
+                <Input
+                  type="date"
+                  value={c.renewal_date ?? ""}
+                  onChange={(e) => field("renewal_date", e.target.value || null)}
+                />
+              </Field>
+            </>
+          )}
           <Field label="Notas de carrera" className="sm:col-span-2">
             <Textarea
               rows={4}

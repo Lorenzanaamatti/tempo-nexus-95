@@ -39,7 +39,7 @@ function RosterAll() {
         supabase
           .from("composers")
           .select(
-            "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date",
+            "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
           )
           .order("full_name"),
         supabase.from("productions").select("id, title, year, status, composer_id, premiere_date"),
@@ -152,8 +152,8 @@ function RosterAll() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-14">
-          <RosterSection title="Roster actual" rows={actual} />
-          <RosterSection title="Roster en prospección" rows={prospeccion} />
+          <RosterSection title="Roster actual" rows={actual} variant="active" />
+          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" />
 
           <section>
             <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl">Roster objetivo</h2>
@@ -236,10 +236,12 @@ type Row = {
   photo_path: string | null;
   representation_start_date: string | null;
   renewal_date: string | null;
+  prospect_next_action_date: string | null;
+  prospect_target_date: string | null;
   open: number;
 };
 
-function RosterSection({ title, rows }: { title: string; rows: Row[] }) {
+function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; variant: "active" | "prospect" }) {
   return (
     <section>
       <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
@@ -254,8 +256,17 @@ function RosterSection({ title, rows }: { title: string; rows: Row[] }) {
             <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Representado</th>
-                <th className="px-3 py-2">Contratación</th>
-                <th className="px-3 py-2">Vencimiento</th>
+                {variant === "prospect" ? (
+                  <>
+                    <th className="px-3 py-2">Próxima acción</th>
+                    <th className="px-3 py-2">Objetivo contratación</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-3 py-2">Contratación</th>
+                    <th className="px-3 py-2">Vencimiento</th>
+                  </>
+                )}
                 <th className="px-3 py-2">Proyectos en curso</th>
               </tr>
             </thead>
@@ -283,8 +294,17 @@ function RosterSection({ title, rows }: { title: string; rows: Row[] }) {
                       </span>
                     </Link>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{year(c.representation_start_date) ?? "—"}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.renewal_date)}</td>
+                  {variant === "prospect" ? (
+                    <>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_next_action_date)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_target_date)}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-3 py-2 font-mono text-xs">{year(c.representation_start_date) ?? "—"}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.renewal_date)}</td>
+                    </>
+                  )}
                   <td className="px-3 py-2 font-mono text-xs">{c.open}</td>
                 </tr>
               ))}

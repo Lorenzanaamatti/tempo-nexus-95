@@ -1356,6 +1356,8 @@ export type Database = {
           photo_path: string | null
           portal_url: string | null
           postal_code: string | null
+          prospect_next_action_date: string | null
+          prospect_target_date: string | null
           province: string | null
           reel_url: string | null
           renewal_date: string | null
@@ -1403,6 +1405,8 @@ export type Database = {
           photo_path?: string | null
           portal_url?: string | null
           postal_code?: string | null
+          prospect_next_action_date?: string | null
+          prospect_target_date?: string | null
           province?: string | null
           reel_url?: string | null
           renewal_date?: string | null
@@ -1450,6 +1454,8 @@ export type Database = {
           photo_path?: string | null
           portal_url?: string | null
           postal_code?: string | null
+          prospect_next_action_date?: string | null
+          prospect_target_date?: string | null
           province?: string | null
           reel_url?: string | null
           renewal_date?: string | null
