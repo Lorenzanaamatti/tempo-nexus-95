@@ -97,19 +97,18 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Interesante Compañía", to: "/ic", icon: Building2,                       active: pathname.startsWith("/ic") },
   ];
 
-  // 2. PARTNERS (productoras, plataformas, directores, cuentas objetivo)
+  // 2. PARTNERS
   const partnersItems: NavItem[] = [
-    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
     { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
     { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
     { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
-    { title: "Proveedores", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
-    { title: "CRM Películas ES", to: "/peliculas-es", icon: Database, active: pathname.startsWith("/peliculas-es") },
+    { title: "Otros partners", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
   ];
 
   // 3. OPORTUNIDADES
   const opportunitiesItems: NavItem[] = [
     { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
+    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
     { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
   ];
 
