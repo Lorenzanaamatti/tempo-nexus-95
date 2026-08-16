@@ -291,32 +291,38 @@ export type Database = {
       }
       brand_assets: {
         Row: {
+          category: string | null
           created_at: string
           external_url: string | null
           id: string
           kind: string | null
           notes: string | null
           position: number
+          section: string
           storage_path: string | null
           title: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           external_url?: string | null
           id?: string
           kind?: string | null
           notes?: string | null
           position?: number
+          section?: string
           storage_path?: string | null
           title: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           external_url?: string | null
           id?: string
           kind?: string | null
           notes?: string | null
           position?: number
+          section?: string
           storage_path?: string | null
           title?: string
         }

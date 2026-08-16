@@ -69,13 +69,10 @@ import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './rou
 import { Route as AuthenticatedAdminContractsContractIdRouteImport } from './routes/_authenticated/_admin/contracts.$contractId'
 import { Route as AuthenticatedAdminComposersNewRouteImport } from './routes/_authenticated/_admin/composers.new'
 import { Route as AuthenticatedAdminComposersComposerIdRouteImport } from './routes/_authenticated/_admin/composers.$composerId'
+import { Route as AuthenticatedAdminMarketingVentasIndexRouteImport } from './routes/_authenticated/_admin/marketing.ventas.index'
 import { Route as AuthenticatedAdminMarketingTemplatesIndexRouteImport } from './routes/_authenticated/_admin/marketing.templates.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsIndexRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.index'
-import { Route as AuthenticatedAdminMarketingSocialIndexRouteImport } from './routes/_authenticated/_admin/marketing.social.index'
-import { Route as AuthenticatedAdminMarketingPressKitsIndexRouteImport } from './routes/_authenticated/_admin/marketing.press-kits.index'
-import { Route as AuthenticatedAdminMarketingDecksIndexRouteImport } from './routes/_authenticated/_admin/marketing.decks.index'
-import { Route as AuthenticatedAdminMarketingClippingsIndexRouteImport } from './routes/_authenticated/_admin/marketing.clippings.index'
-import { Route as AuthenticatedAdminMarketingCaseStudiesIndexRouteImport } from './routes/_authenticated/_admin/marketing.case-studies.index'
+import { Route as AuthenticatedAdminMarketingComunicacionIndexRouteImport } from './routes/_authenticated/_admin/marketing.comunicacion.index'
 import { Route as AuthenticatedAdminMarketingBrandIndexRouteImport } from './routes/_authenticated/_admin/marketing.brand.index'
 import { Route as AuthenticatedAdminDealMemosPlantillasIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
@@ -423,6 +420,12 @@ const AuthenticatedAdminComposersComposerIdRoute =
     path: '/composers/$composerId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketingVentasIndexRoute =
+  AuthenticatedAdminMarketingVentasIndexRouteImport.update({
+    id: '/marketing/ventas/',
+    path: '/marketing/ventas/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingTemplatesIndexRoute =
   AuthenticatedAdminMarketingTemplatesIndexRouteImport.update({
     id: '/marketing/templates/',
@@ -435,34 +438,10 @@ const AuthenticatedAdminMarketingTargetAccountsIndexRoute =
     path: '/marketing/target-accounts/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminMarketingSocialIndexRoute =
-  AuthenticatedAdminMarketingSocialIndexRouteImport.update({
-    id: '/marketing/social/',
-    path: '/marketing/social/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminMarketingPressKitsIndexRoute =
-  AuthenticatedAdminMarketingPressKitsIndexRouteImport.update({
-    id: '/marketing/press-kits/',
-    path: '/marketing/press-kits/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminMarketingDecksIndexRoute =
-  AuthenticatedAdminMarketingDecksIndexRouteImport.update({
-    id: '/marketing/decks/',
-    path: '/marketing/decks/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminMarketingClippingsIndexRoute =
-  AuthenticatedAdminMarketingClippingsIndexRouteImport.update({
-    id: '/marketing/clippings/',
-    path: '/marketing/clippings/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminMarketingCaseStudiesIndexRoute =
-  AuthenticatedAdminMarketingCaseStudiesIndexRouteImport.update({
-    id: '/marketing/case-studies/',
-    path: '/marketing/case-studies/',
+const AuthenticatedAdminMarketingComunicacionIndexRoute =
+  AuthenticatedAdminMarketingComunicacionIndexRouteImport.update({
+    id: '/marketing/comunicacion/',
+    path: '/marketing/comunicacion/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminMarketingBrandIndexRoute =
@@ -553,13 +532,10 @@ export interface FileRoutesByFullPath {
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
-  '/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
-  '/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
-  '/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
-  '/marketing/press-kits/': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
-  '/marketing/social/': typeof AuthenticatedAdminMarketingSocialIndexRoute
+  '/marketing/comunicacion/': typeof AuthenticatedAdminMarketingComunicacionIndexRoute
   '/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
+  '/marketing/ventas/': typeof AuthenticatedAdminMarketingVentasIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -622,13 +598,10 @@ export interface FileRoutesByTo {
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/marketing/brand': typeof AuthenticatedAdminMarketingBrandIndexRoute
-  '/marketing/case-studies': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
-  '/marketing/clippings': typeof AuthenticatedAdminMarketingClippingsIndexRoute
-  '/marketing/decks': typeof AuthenticatedAdminMarketingDecksIndexRoute
-  '/marketing/press-kits': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
-  '/marketing/social': typeof AuthenticatedAdminMarketingSocialIndexRoute
+  '/marketing/comunicacion': typeof AuthenticatedAdminMarketingComunicacionIndexRoute
   '/marketing/target-accounts': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/marketing/templates': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
+  '/marketing/ventas': typeof AuthenticatedAdminMarketingVentasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -696,13 +669,10 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/_authenticated/_admin/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
-  '/_authenticated/_admin/marketing/case-studies/': typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
-  '/_authenticated/_admin/marketing/clippings/': typeof AuthenticatedAdminMarketingClippingsIndexRoute
-  '/_authenticated/_admin/marketing/decks/': typeof AuthenticatedAdminMarketingDecksIndexRoute
-  '/_authenticated/_admin/marketing/press-kits/': typeof AuthenticatedAdminMarketingPressKitsIndexRoute
-  '/_authenticated/_admin/marketing/social/': typeof AuthenticatedAdminMarketingSocialIndexRoute
+  '/_authenticated/_admin/marketing/comunicacion/': typeof AuthenticatedAdminMarketingComunicacionIndexRoute
   '/_authenticated/_admin/marketing/target-accounts/': typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   '/_authenticated/_admin/marketing/templates/': typeof AuthenticatedAdminMarketingTemplatesIndexRoute
+  '/_authenticated/_admin/marketing/ventas/': typeof AuthenticatedAdminMarketingVentasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -769,13 +739,10 @@ export interface FileRouteTypes {
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas/'
     | '/marketing/brand/'
-    | '/marketing/case-studies/'
-    | '/marketing/clippings/'
-    | '/marketing/decks/'
-    | '/marketing/press-kits/'
-    | '/marketing/social/'
+    | '/marketing/comunicacion/'
     | '/marketing/target-accounts/'
     | '/marketing/templates/'
+    | '/marketing/ventas/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -838,13 +805,10 @@ export interface FileRouteTypes {
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas'
     | '/marketing/brand'
-    | '/marketing/case-studies'
-    | '/marketing/clippings'
-    | '/marketing/decks'
-    | '/marketing/press-kits'
-    | '/marketing/social'
+    | '/marketing/comunicacion'
     | '/marketing/target-accounts'
     | '/marketing/templates'
+    | '/marketing/ventas'
   id:
     | '__root__'
     | '/_authenticated'
@@ -911,13 +875,10 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
     | '/_authenticated/_admin/deal-memos/plantillas/'
     | '/_authenticated/_admin/marketing/brand/'
-    | '/_authenticated/_admin/marketing/case-studies/'
-    | '/_authenticated/_admin/marketing/clippings/'
-    | '/_authenticated/_admin/marketing/decks/'
-    | '/_authenticated/_admin/marketing/press-kits/'
-    | '/_authenticated/_admin/marketing/social/'
+    | '/_authenticated/_admin/marketing/comunicacion/'
     | '/_authenticated/_admin/marketing/target-accounts/'
     | '/_authenticated/_admin/marketing/templates/'
+    | '/_authenticated/_admin/marketing/ventas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1353,6 +1314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminComposersComposerIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/marketing/ventas/': {
+      id: '/_authenticated/_admin/marketing/ventas/'
+      path: '/marketing/ventas'
+      fullPath: '/marketing/ventas/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingVentasIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/templates/': {
       id: '/_authenticated/_admin/marketing/templates/'
       path: '/marketing/templates'
@@ -1367,39 +1335,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/_admin/marketing/social/': {
-      id: '/_authenticated/_admin/marketing/social/'
-      path: '/marketing/social'
-      fullPath: '/marketing/social/'
-      preLoaderRoute: typeof AuthenticatedAdminMarketingSocialIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/_admin/marketing/press-kits/': {
-      id: '/_authenticated/_admin/marketing/press-kits/'
-      path: '/marketing/press-kits'
-      fullPath: '/marketing/press-kits/'
-      preLoaderRoute: typeof AuthenticatedAdminMarketingPressKitsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/_admin/marketing/decks/': {
-      id: '/_authenticated/_admin/marketing/decks/'
-      path: '/marketing/decks'
-      fullPath: '/marketing/decks/'
-      preLoaderRoute: typeof AuthenticatedAdminMarketingDecksIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/_admin/marketing/clippings/': {
-      id: '/_authenticated/_admin/marketing/clippings/'
-      path: '/marketing/clippings'
-      fullPath: '/marketing/clippings/'
-      preLoaderRoute: typeof AuthenticatedAdminMarketingClippingsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/_admin/marketing/case-studies/': {
-      id: '/_authenticated/_admin/marketing/case-studies/'
-      path: '/marketing/case-studies'
-      fullPath: '/marketing/case-studies/'
-      preLoaderRoute: typeof AuthenticatedAdminMarketingCaseStudiesIndexRouteImport
+    '/_authenticated/_admin/marketing/comunicacion/': {
+      id: '/_authenticated/_admin/marketing/comunicacion/'
+      path: '/marketing/comunicacion'
+      fullPath: '/marketing/comunicacion/'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingComunicacionIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/marketing/brand/': {
@@ -1496,13 +1436,10 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProvidersIndexRoute: typeof AuthenticatedAdminProvidersIndexRoute
   AuthenticatedAdminMarketingTargetAccountsAccountIdRoute: typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   AuthenticatedAdminMarketingBrandIndexRoute: typeof AuthenticatedAdminMarketingBrandIndexRoute
-  AuthenticatedAdminMarketingCaseStudiesIndexRoute: typeof AuthenticatedAdminMarketingCaseStudiesIndexRoute
-  AuthenticatedAdminMarketingClippingsIndexRoute: typeof AuthenticatedAdminMarketingClippingsIndexRoute
-  AuthenticatedAdminMarketingDecksIndexRoute: typeof AuthenticatedAdminMarketingDecksIndexRoute
-  AuthenticatedAdminMarketingPressKitsIndexRoute: typeof AuthenticatedAdminMarketingPressKitsIndexRoute
-  AuthenticatedAdminMarketingSocialIndexRoute: typeof AuthenticatedAdminMarketingSocialIndexRoute
+  AuthenticatedAdminMarketingComunicacionIndexRoute: typeof AuthenticatedAdminMarketingComunicacionIndexRoute
   AuthenticatedAdminMarketingTargetAccountsIndexRoute: typeof AuthenticatedAdminMarketingTargetAccountsIndexRoute
   AuthenticatedAdminMarketingTemplatesIndexRoute: typeof AuthenticatedAdminMarketingTemplatesIndexRoute
+  AuthenticatedAdminMarketingVentasIndexRoute: typeof AuthenticatedAdminMarketingVentasIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -1553,20 +1490,14 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketingTargetAccountsAccountIdRoute,
   AuthenticatedAdminMarketingBrandIndexRoute:
     AuthenticatedAdminMarketingBrandIndexRoute,
-  AuthenticatedAdminMarketingCaseStudiesIndexRoute:
-    AuthenticatedAdminMarketingCaseStudiesIndexRoute,
-  AuthenticatedAdminMarketingClippingsIndexRoute:
-    AuthenticatedAdminMarketingClippingsIndexRoute,
-  AuthenticatedAdminMarketingDecksIndexRoute:
-    AuthenticatedAdminMarketingDecksIndexRoute,
-  AuthenticatedAdminMarketingPressKitsIndexRoute:
-    AuthenticatedAdminMarketingPressKitsIndexRoute,
-  AuthenticatedAdminMarketingSocialIndexRoute:
-    AuthenticatedAdminMarketingSocialIndexRoute,
+  AuthenticatedAdminMarketingComunicacionIndexRoute:
+    AuthenticatedAdminMarketingComunicacionIndexRoute,
   AuthenticatedAdminMarketingTargetAccountsIndexRoute:
     AuthenticatedAdminMarketingTargetAccountsIndexRoute,
   AuthenticatedAdminMarketingTemplatesIndexRoute:
     AuthenticatedAdminMarketingTemplatesIndexRoute,
+  AuthenticatedAdminMarketingVentasIndexRoute:
+    AuthenticatedAdminMarketingVentasIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
