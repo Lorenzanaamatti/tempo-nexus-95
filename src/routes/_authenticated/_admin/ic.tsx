@@ -88,6 +88,7 @@ function ICCompanyPage() {
       </header>
 
       <ICKpisSection />
+      <ICActiveProductionsSection />
       <ICCombinedFilmographySection icId={ic.id} />
       <ICAwardsAggregatedSection />
       <ICTopPartnersSection />
