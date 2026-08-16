@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TASK_AREAS, type TaskArea } from "@/lib/task-areas";
+import { TASK_STATUSES } from "@/lib/task-status";
 
 type OpenOptions = { area?: TaskArea | null };
 type Ctx = { open: (opts?: OpenOptions) => void };
