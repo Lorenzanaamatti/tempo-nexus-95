@@ -113,7 +113,7 @@ function ProvidersPage() {
     <div className="mx-auto max-w-[1300px] px-6 py-6">
       <header className="mb-4">
         <p className="smallcaps text-[10px] tracking-wider text-muted-foreground">Partners</p>
-        <h1 className="font-display text-3xl">Proveedores</h1>
+        <h1 className="font-display text-3xl">Otros partners</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Estudios, mezcla, máster, músicos, abogados… Compartidos entre IC y representados.
         </p>
@@ -140,12 +140,12 @@ function ProvidersPage() {
           </SelectContent>
         </Select>
         <Button onClick={() => setEditing({ kind: "estudio_grabacion", shared_with_ic: true, composer_id: null })}>
-          <Plus className="mr-1 h-4 w-4" />Nuevo proveedor
+          <Plus className="mr-1 h-4 w-4" />Nuevo partner
         </Button>
         <ExportButton
-          entityLabel="Proveedores"
-          filename="proveedores"
-          sheetName="Proveedores"
+          entityLabel="Otros partners"
+          filename="otros-partners"
+          sheetName="Otros partners"
           fetchAll={async () => {
             const { data, error } = await (supabase as any).from("providers").select("*").order("name");
             if (error) throw error;
