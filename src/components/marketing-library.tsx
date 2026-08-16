@@ -36,12 +36,14 @@ export function MarketingLibrary({
   eyebrow,
   title,
   description,
+  allowCustomCategories = false,
 }: {
   section: string;
   categories: LibraryCategory[];
   eyebrow: string;
   title: string;
   description: string;
+  allowCustomCategories?: boolean;
 }) {
   const qc = useQueryClient();
   const [category, setCategory] = useState(categories[0]?.key ?? "general");
@@ -62,6 +64,16 @@ export function MarketingLibrary({
   });
 
   const assets = (assetsQ.data ?? []).filter((a) => (a.category ?? categories[0]?.key) === category);
+  // Categorías extra creadas por el usuario (existen en datos pero no en el catálogo base)
+  const extraCategories: LibraryCategory[] = [];
+  for (const a of assetsQ.data ?? []) {
+    const key = a.category ?? "";
+    if (!key) continue;
+    if (categories.some((c) => c.key === key)) continue;
+    if (extraCategories.some((c) => c.key === key)) continue;
+    extraCategories.push({ key, label: key });
+  }
+  const allCategories = [...categories, ...extraCategories];
   const counts = new Map<string, number>();
   for (const a of assetsQ.data ?? []) {
     const key = a.category ?? categories[0]?.key ?? "general";
@@ -102,6 +114,12 @@ export function MarketingLibrary({
     qc.invalidateQueries({ queryKey: ["marketing-library", section] });
   }
 
+  function addCategory() {
+    const name = prompt("Nombre de la nueva categoría:");
+    if (!name?.trim()) return;
+    setCategory(name.trim());
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 border-b border-border pb-6">
@@ -111,7 +129,7 @@ export function MarketingLibrary({
       </div>
 
       <div className="mb-5 flex flex-wrap gap-1.5">
-        {categories.map((c) => (
+        {allCategories.map((c) => (
           <button
             key={c.key}
             type="button"
@@ -127,11 +145,20 @@ export function MarketingLibrary({
             <span className="ml-1.5 opacity-70">{counts.get(c.key) ?? 0}</span>
           </button>
         ))}
+        {allowCustomCategories && (
+          <button
+            type="button"
+            onClick={addCategory}
+            className="rounded-sm border border-dashed border-border px-3 py-1 text-xs opacity-70 transition hover:opacity-100"
+          >
+            + Nueva categoría
+          </button>
+        )}
       </div>
 
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-2xl">{categories.find((c) => c.key === category)?.label}</h2>
+          <h2 className="font-display text-2xl">{allCategories.find((c) => c.key === category)?.label ?? category}</h2>
           <div className="flex items-center gap-2">
             <div className="inline-flex overflow-hidden rounded-sm border border-border">
               <ViewBtn active={view === "collections"} onClick={() => setView("collections")} icon={<FolderOpen className="h-3.5 w-3.5" />} label="Colecciones" />

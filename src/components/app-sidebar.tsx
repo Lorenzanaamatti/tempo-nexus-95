@@ -120,10 +120,12 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
 
   // 5. LEGAL
   const legalItems: NavItem[] = [
-    { title: "Contratos", to: "/contracts", icon: ScrollText, active: pathname.startsWith("/contracts") },
-    { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature, active: pathname.startsWith("/deal-memos/plantillas") },
-    { title: "Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
-    { title: "Acciones agentes", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
+    { title: "Templates contrato", to: "/legal/templates-contrato", icon: ScrollText, active: pathname.startsWith("/legal/templates-contrato") },
+    { title: "Templates deal memo", to: "/legal/templates-deal-memo", icon: FileSignature, active: pathname.startsWith("/legal/templates-deal-memo") },
+    { title: "Templates presupuesto", to: "/legal/templates-presupuesto", icon: Receipt, active: pathname.startsWith("/legal/templates-presupuesto") },
+    { title: "Personal · Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
+    { title: "Personal IA · Equipo agentes IC", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
+    { title: "Contratos firmados", to: "/legal/contratos-firmados", icon: FileSignature, active: pathname.startsWith("/legal/contratos-firmados") || pathname.startsWith("/contracts") },
   ];
 
   // 6. MKTG
