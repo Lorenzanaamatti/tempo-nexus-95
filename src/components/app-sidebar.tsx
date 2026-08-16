@@ -26,6 +26,7 @@ import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
+import { useMyDueTaskCount } from "@/lib/use-my-tasks";
 import type { TaskArea } from "@/lib/task-areas";
 import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
 import { RefreshCw, Home as HomeIcon } from "lucide-react";
