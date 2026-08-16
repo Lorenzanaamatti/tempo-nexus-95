@@ -128,13 +128,10 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
 
   // 6. MKTG
   const marketingItems: NavItem[] = [
-    { title: "Decks de venta", to: "/marketing/decks", icon: Presentation, active: pathname.startsWith("/marketing/decks") },
-    { title: "Clipping", to: "/marketing/clippings", icon: Newspaper, active: pathname.startsWith("/marketing/clippings") },
     { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette, active: pathname.startsWith("/marketing/brand") },
-    { title: "Casos de éxito", to: "/marketing/case-studies", icon: Trophy, active: pathname.startsWith("/marketing/case-studies") },
-    { title: "Plantillas", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
-    { title: "Press kits", to: "/marketing/press-kits", icon: FolderOpen, active: pathname.startsWith("/marketing/press-kits") },
-    { title: "Redes sociales", to: "/marketing/social", icon: Share2, active: pathname.startsWith("/marketing/social") },
+    { title: "Ventas", to: "/marketing/ventas", icon: Presentation, active: pathname.startsWith("/marketing/ventas") },
+    { title: "Comunicación", to: "/marketing/comunicacion", icon: Share2, active: pathname.startsWith("/marketing/comunicacion") },
+    { title: "Templates", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
   ];
 
   // 7. CALENDARIOS — todas las vistas (presets de /calendar)
