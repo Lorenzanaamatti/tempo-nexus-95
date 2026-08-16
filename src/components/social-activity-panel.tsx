@@ -22,7 +22,7 @@ export function SocialActivityPanel({ composerId, productionId }: { composerId?:
     <div>
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Últimos 20 posts vinculados.</p>
-        <Link to="/marketing/social" search={{ ...(composerId ? { composer: composerId } : {}), ...(productionId ? { production: productionId } : {}) } as any} className="text-xs text-primary hover:underline">Abrir en redes sociales →</Link>
+        <Link to="/marketing/comunicacion" className="text-xs text-primary hover:underline">Abrir en comunicación →</Link>
       </div>
       {!data?.length ? (
         <p className="text-sm text-muted-foreground">Aún no hay actividad.</p>
