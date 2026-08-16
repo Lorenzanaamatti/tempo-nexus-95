@@ -4,7 +4,7 @@ import { useCurrentRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import {
   LibraryBig, Music, Mic2, Headphones, Sparkles, ListMusic, Building2,
-  Handshake, Crosshair, Tv, Clapperboard, Briefcase, Database,
+  Handshake, Crosshair, Tv, Clapperboard, Briefcase, Inbox,
   Target, Wallet, LineChart, Film, KanbanSquare, Receipt,
   Scale, ScrollText, FileSignature, User, Users,
   Megaphone, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, Share2,
