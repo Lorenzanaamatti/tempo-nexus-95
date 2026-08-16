@@ -112,12 +112,11 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
   ];
 
-  // 4. ECONÓMICO
-  const economicoItems: NavItem[] = [
+  // 4. EMPRESA
+  const empresaItems: NavItem[] = [
+    { title: "Producciones en curso", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
     { title: "Dashboard económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
-    { title: "Producciones", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
-    { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare, active: pathname === "/deal-memos" || pathname.startsWith("/deal-memos/lista") || pathname.startsWith("/deal-memos/configuracion") },
-    { title: "Plan facturación IC", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
+    { title: "Pipeline de facturación", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
   ];
 
   // 5. LEGAL
@@ -125,6 +124,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Templates contrato", to: "/legal/templates-contrato", icon: ScrollText, active: pathname.startsWith("/legal/templates-contrato") },
     { title: "Templates deal memo", to: "/legal/templates-deal-memo", icon: FileSignature, active: pathname.startsWith("/legal/templates-deal-memo") },
     { title: "Templates presupuesto", to: "/legal/templates-presupuesto", icon: Receipt, active: pathname.startsWith("/legal/templates-presupuesto") },
+    { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare, active: pathname === "/deal-memos" || pathname.startsWith("/deal-memos/lista") || pathname.startsWith("/deal-memos/configuracion") },
     { title: "Personal · Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
     { title: "Personal IA · Equipo agentes IC", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
     { title: "Contratos firmados", to: "/legal/contratos-firmados", icon: FileSignature, active: pathname.startsWith("/legal/contratos-firmados") || pathname.startsWith("/contracts") },
@@ -138,22 +138,16 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     { title: "Templates", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
   ];
 
-  // 7. CALENDARIOS — todas las vistas (presets de /calendar)
-  const calView = (search as { view?: string } | undefined)?.view;
-  const onCal = pathname.startsWith("/calendar");
+  // 7. CALENDARIOS — una sola entrada; las vistas se eligen dentro de /calendar
   const calendarItems: NavItem[] = [
-    { title: "General",      to: "/calendar", search: { view: "global" },       icon: CalendarDays, active: onCal && (calView === "global" || !calView) },
-    { title: "Producciones", to: "/calendar", search: { view: "producciones" }, icon: Film,         active: onCal && calView === "producciones" },
-    { title: "Facturación",  to: "/calendar", search: { view: "economico" },    icon: Receipt,      active: onCal && calView === "economico" },
-    { title: "Marketing",    to: "/calendar", search: { view: "marketing" },    icon: Megaphone,    active: onCal && calView === "marketing" },
-    { title: "Legal",        to: "/calendar", search: { view: "legal" },        icon: Scale,        active: onCal && calView === "legal" },
+    { title: "Calendarios", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
   ];
 
   const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
     { label: "Clientes",      icon: LibraryBig,  items: rosterItems },
     { label: "Partners",      icon: Handshake,   items: partnersItems },
     { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
-    { label: "Económico",     icon: Wallet,      items: economicoItems },
+    { label: "Empresa",       icon: Wallet,      items: empresaItems },
     { label: "Legal",         icon: Scale,       items: legalItems },
     { label: "Marketing",     icon: Megaphone,   items: marketingItems },
     { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
@@ -162,7 +156,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   // In TEAM view, hide the pure-admin surfaces: Económico dashboard, agentes IA,
   // "Usuarios y permisos" no aparece aquí (vive en /users). Deja el resto operativo.
   const teamGroups = adminGroups
-    .filter((g) => g.label !== "Económico")
+    .filter((g) => g.label !== "Empresa")
     .map((g) =>
       g.label === "Legal"
         ? { ...g, items: g.items.filter((i) => i.to !== "/agent-actions") }
