@@ -49,13 +49,43 @@ export const LAYOUT_LABELS: Record<Layout, string> = {
 };
 
 export const CAL_VIEWS = [
-  { key: "global",       label: "Global",       cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
+  { key: "global",       label: "General",      cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
   { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["production"] as string[] },
+  { key: "roster",       label: "Roster",       cats: ["operativo","personal"] as Category[], onlyMine: false, subjectTypes: ["composer","person"] as string[] },
   { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[], onlyMine: false },
-  { key: "economico",    label: "Económico",    cats: ["facturacion"] as Category[], onlyMine: false },
-  { key: "personal",     label: "Personal",     cats: ["personal"] as Category[], onlyMine: true },
+  { key: "economico",    label: "Facturación",  cats: ["facturacion"] as Category[], onlyMine: false },
   { key: "legal",        label: "Legal",        cats: ["operativo"] as Category[], onlyMine: false },
+  { key: "tareas",       label: "Tareas",       cats: ["operativo","personal","oportunidades","marketing"] as Category[], onlyMine: false },
+  { key: "personal",     label: "Mis tareas",   cats: ["operativo","personal","oportunidades","marketing"] as Category[], onlyMine: true },
 ] as const;
+
+/** Views offered in the calendar entry picker (order matters). */
+export const CAL_PICKER_KEYS = ["global","producciones","roster","economico","marketing","legal","tareas"] as const;
+
+/** Merge several presets into a single board configuration. */
+export function mergeCalViews(keys: string[]) {
+  const presets = keys
+    .map((k) => CAL_VIEWS.find((v) => v.key === k))
+    .filter(Boolean) as (typeof CAL_VIEWS)[number][];
+  if (presets.length === 0) return null;
+  const cats = new Set<Category>();
+  let subjectTypes: Set<string> | undefined = new Set<string>();
+  let onlyMine = true;
+  for (const p of presets) {
+    for (const c of p.cats) cats.add(c);
+    const st = "subjectTypes" in p ? (p as { subjectTypes?: readonly string[] }).subjectTypes : undefined;
+    if (!st) subjectTypes = undefined;
+    else if (subjectTypes) for (const s of st) subjectTypes.add(s);
+    if (!p.onlyMine) onlyMine = false;
+  }
+  return {
+    keys: presets.map((p) => p.key as string),
+    label: presets.map((p) => p.label).join(" + "),
+    cats: [...cats],
+    subjectTypes: subjectTypes ? [...subjectTypes] : undefined,
+    onlyMine,
+  };
+}
 
 export function initialCategoryState(
   lockedCategory?: Category,
