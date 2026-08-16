@@ -58,13 +58,12 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    label: "Económico",
+    label: "Empresa",
     icon: Wallet,
     items: [
+      { title: "Producciones en curso", to: "/productions", icon: Film },
       { title: "Dashboard económico", to: "/finance", icon: LineChart },
-      { title: "Producciones", to: "/productions", icon: Film },
-      { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare },
-      { title: "Plan facturación IC", to: "/billing", icon: Receipt },
+      { title: "Pipeline de facturación", to: "/billing", icon: Receipt },
     ],
   },
   {
@@ -72,6 +71,7 @@ const GROUPS: Group[] = [
     icon: Scale,
     items: [
       { title: "Contratos", to: "/contracts", icon: ScrollText },
+      { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare },
       { title: "Plantillas DM", to: "/deal-memos/plantillas", icon: FileSignature },
       { title: "Equipo IC", to: "/people", icon: Users },
     ],
@@ -90,12 +90,7 @@ const GROUPS: Group[] = [
     label: "Calendarios",
     icon: CalendarDays,
     items: [
-      { title: "General", to: "/calendar", search: { view: "global" }, icon: CalendarDays },
-      { title: "Producciones", to: "/calendar", search: { view: "producciones" }, icon: Film },
-      { title: "Facturación", to: "/calendar", search: { view: "economico" }, icon: Receipt },
-      { title: "Marketing", to: "/calendar", search: { view: "marketing" }, icon: Megaphone },
-      { title: "Legal", to: "/calendar", search: { view: "legal" }, icon: Scale },
-      { title: "Personal · mis tareas", to: "/calendar", search: { view: "personal" }, icon: User },
+      { title: "Calendarios", to: "/calendar", icon: CalendarDays },
     ],
   },
 ];
@@ -119,7 +114,7 @@ function Index() {
     );
   }
 
-  const visibleGroups = GROUPS.filter((g) => isBigC || g.label !== "Económico").map((g) =>
+  const visibleGroups = GROUPS.filter((g) => isBigC || g.label !== "Empresa").map((g) =>
     g.label === "Legal" && isBigC
       ? { ...g, items: [...g.items, { title: "Usuarios y permisos", to: "/users", icon: UserCog }] as typeof g.items }
       : g,
