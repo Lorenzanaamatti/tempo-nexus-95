@@ -150,6 +150,8 @@ function Inner({
         agent_person_id: c.agent_person_id,
         representation_start_date: c.representation_start_date,
         renewal_date: c.renewal_date,
+        prospect_next_action_date: c.prospect_next_action_date,
+        prospect_target_date: c.prospect_target_date,
         career_notes: c.career_notes,
         portal_url: c.portal_url,
         current_location: (c as { current_location?: string | null }).current_location ?? null,
