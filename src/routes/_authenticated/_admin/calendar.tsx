@@ -19,7 +19,7 @@ function GlobalCalendar() {
   const merged = mergeCalViews(selected);
 
   const go = (keys: string[]) =>
-    nav({ search: keys.length ? { view: keys.join(",") } : {} });
+    nav({ search: { view: keys.length ? keys.join(",") : undefined } });
 
   if (!merged) {
     return (
