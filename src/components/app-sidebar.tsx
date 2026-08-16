@@ -46,6 +46,8 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const isRosterView = role === "admin" && effectiveView === "roster";
   const isTeamView = role === "admin" && effectiveView === "team";
 
+  const { data: myDueTasks } = useMyDueTaskCount();
+
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
     enabled: role === "admin",
