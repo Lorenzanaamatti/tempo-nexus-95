@@ -39,6 +39,13 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
 
+/** Iniciales para el avatar generado cuando no hay foto. */
+function initials(name?: string | null) {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  if (!parts.length) return "·";
+  return parts.map((p) => p[0]!.toUpperCase()).join("");
+}
+
 export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
   validateSearch: (s: { role?: unknown }): { role: RosterRole } => {
