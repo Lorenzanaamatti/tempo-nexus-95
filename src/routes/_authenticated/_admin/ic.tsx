@@ -72,7 +72,7 @@ function ICCompanyPage() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-12">
       <header className="border-b border-border pb-6">
-        <p className="smallcaps text-muted-foreground">Roster · Interesante Filmografía</p>
+        <p className="smallcaps text-muted-foreground">Empresa · Ficha corporativa</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-5xl flex items-center gap-4 title-caps">
