@@ -26,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/_admin/contracts/")({
 type SortKey = "title" | "contract_type" | "signer_name" | "signed_date" | "end_date" | "notice_date" | "sign_status" | "language";
 
 function ContractsIndex() {
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -196,7 +197,11 @@ function ContractsIndex() {
             </thead>
             <tbody className="divide-y divide-border">
               {rows.map((c: any) => (
-                <tr key={c.id} className="cursor-pointer transition-colors hover:bg-accent/60">
+                <tr
+                  key={c.id}
+                  onClick={() => navigate({ to: "/contracts/$contractId", params: { contractId: c.id } })}
+                  className="cursor-pointer transition-colors hover:bg-accent/60"
+                >
                   <td className="px-3 py-2">
                     <Link to="/contracts/$contractId" params={{ contractId: c.id }} className="font-display hover:underline">{c.title}</Link>
                   </td>
