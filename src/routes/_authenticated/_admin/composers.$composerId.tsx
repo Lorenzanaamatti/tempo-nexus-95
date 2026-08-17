@@ -39,6 +39,7 @@ import {
 import { CurrentLocationEditor } from "@/components/current-location-editor";
 import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 import { Section, KPI, Field } from "@/components/composer-detail/primitives";
+import { ComposerCareerPlan } from "@/components/career-plan/composer-career-plan";
 import { SpecialistTagsEditor } from "@/components/composer-detail/specialist-tags-editor";
 import { ComposerBilling } from "@/components/composer-detail/composer-billing";
 import { fetchComposerRelations } from "@/lib/composer-relations";
@@ -373,6 +374,11 @@ function Inner({
         <KPI label="Facturación histórica" value={formatEUR0(totalRevenue)} />
         <KPI label="Margen neto" value={formatEUR0(totalMargin)} />
       </section>
+
+      {/* Plan de carrera */}
+      <Section title="Plan de carrera">
+        <ComposerCareerPlan composerId={c.id} agentPersonId={c.agent_person_id ?? null} />
+      </Section>
 
       {/* Representación */}
       <Section title="Representación">

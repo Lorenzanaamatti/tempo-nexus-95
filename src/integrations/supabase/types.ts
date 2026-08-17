@@ -579,6 +579,222 @@ export type Database = {
           },
         ]
       }
+      career_plan_actions: {
+        Row: {
+          career_plan_id: string
+          created_at: string
+          descripcion: string
+          fecha: string
+          id: string
+          resultado: string | null
+          tipo: Database["public"]["Enums"]["career_action_type"]
+          vinculo_id: string | null
+          vinculo_tipo: Database["public"]["Enums"]["career_link_type"]
+        }
+        Insert: {
+          career_plan_id: string
+          created_at?: string
+          descripcion: string
+          fecha?: string
+          id?: string
+          resultado?: string | null
+          tipo?: Database["public"]["Enums"]["career_action_type"]
+          vinculo_id?: string | null
+          vinculo_tipo?: Database["public"]["Enums"]["career_link_type"]
+        }
+        Update: {
+          career_plan_id?: string
+          created_at?: string
+          descripcion?: string
+          fecha?: string
+          id?: string
+          resultado?: string | null
+          tipo?: Database["public"]["Enums"]["career_action_type"]
+          vinculo_id?: string | null
+          vinculo_tipo?: Database["public"]["Enums"]["career_link_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_plan_actions_career_plan_id_fkey"
+            columns: ["career_plan_id"]
+            isOneToOne: false
+            referencedRelation: "career_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_plan_social: {
+        Row: {
+          año: number
+          career_plan_id: string
+          id: string
+          red_social: Database["public"]["Enums"]["career_social_network"]
+          seguidores_objetivo: number | null
+          seguidores_real: number | null
+          trimestre: number
+        }
+        Insert: {
+          año: number
+          career_plan_id: string
+          id?: string
+          red_social: Database["public"]["Enums"]["career_social_network"]
+          seguidores_objetivo?: number | null
+          seguidores_real?: number | null
+          trimestre: number
+        }
+        Update: {
+          año?: number
+          career_plan_id?: string
+          id?: string
+          red_social?: Database["public"]["Enums"]["career_social_network"]
+          seguidores_objetivo?: number | null
+          seguidores_real?: number | null
+          trimestre?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_plan_social_career_plan_id_fkey"
+            columns: ["career_plan_id"]
+            isOneToOne: false
+            referencedRelation: "career_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_plan_social_custom: {
+        Row: {
+          año: number
+          career_plan_id: string
+          id: string
+          metrica_nombre: string
+          nombre_red: string
+          trimestre: number
+          valor_objetivo: number | null
+          valor_real: number | null
+        }
+        Insert: {
+          año: number
+          career_plan_id: string
+          id?: string
+          metrica_nombre?: string
+          nombre_red: string
+          trimestre: number
+          valor_objetivo?: number | null
+          valor_real?: number | null
+        }
+        Update: {
+          año?: number
+          career_plan_id?: string
+          id?: string
+          metrica_nombre?: string
+          nombre_red?: string
+          trimestre?: number
+          valor_objetivo?: number | null
+          valor_real?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_plan_social_custom_career_plan_id_fkey"
+            columns: ["career_plan_id"]
+            isOneToOne: false
+            referencedRelation: "career_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_plan_targets: {
+        Row: {
+          año: number
+          career_plan_id: string
+          id: string
+          metrica: Database["public"]["Enums"]["career_metric"]
+          valor_objetivo: number | null
+          valor_real: number | null
+        }
+        Insert: {
+          año: number
+          career_plan_id: string
+          id?: string
+          metrica: Database["public"]["Enums"]["career_metric"]
+          valor_objetivo?: number | null
+          valor_real?: number | null
+        }
+        Update: {
+          año?: number
+          career_plan_id?: string
+          id?: string
+          metrica?: Database["public"]["Enums"]["career_metric"]
+          valor_objetivo?: number | null
+          valor_real?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_plan_targets_career_plan_id_fkey"
+            columns: ["career_plan_id"]
+            isOneToOne: false
+            referencedRelation: "career_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_plans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notas_generales: string | null
+          objetivo_facturacion_3y: number | null
+          objetivo_posicionamiento: string | null
+          objetivo_presentacion_clientes: string | null
+          representado_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notas_generales?: string | null
+          objetivo_facturacion_3y?: number | null
+          objetivo_posicionamiento?: string | null
+          objetivo_presentacion_clientes?: string | null
+          representado_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notas_generales?: string | null
+          objetivo_facturacion_3y?: number | null
+          objetivo_posicionamiento?: string | null
+          objetivo_presentacion_clientes?: string | null
+          representado_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "career_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "career_plans_representado_id_fkey"
+            columns: ["representado_id"]
+            isOneToOne: true
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       case_studies: {
         Row: {
           client: string | null
@@ -1905,6 +2121,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      default_platforms: {
+        Row: {
+          created_at: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
       }
       directors: {
         Row: {
@@ -3624,6 +3858,82 @@ export type Database = {
           },
         ]
       }
+      representado_plataformas: {
+        Row: {
+          estado: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion: string | null
+          id: string
+          nombre: Database["public"]["Enums"]["default_platform_name"]
+          notas: string | null
+          representado_id: string
+          url: string | null
+        }
+        Insert: {
+          estado?: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion?: string | null
+          id?: string
+          nombre: Database["public"]["Enums"]["default_platform_name"]
+          notas?: string | null
+          representado_id: string
+          url?: string | null
+        }
+        Update: {
+          estado?: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion?: string | null
+          id?: string
+          nombre?: Database["public"]["Enums"]["default_platform_name"]
+          notas?: string | null
+          representado_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "representado_plataformas_representado_id_fkey"
+            columns: ["representado_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      representado_plataformas_custom: {
+        Row: {
+          estado: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion: string | null
+          id: string
+          nombre_plataforma: string
+          notas: string | null
+          representado_id: string
+          url: string | null
+        }
+        Insert: {
+          estado?: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion?: string | null
+          id?: string
+          nombre_plataforma: string
+          notas?: string | null
+          representado_id: string
+          url?: string | null
+        }
+        Update: {
+          estado?: Database["public"]["Enums"]["platform_status"]
+          fecha_ultima_actualizacion?: string | null
+          id?: string
+          nombre_plataforma?: string
+          notas?: string | null
+          representado_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "representado_plataformas_custom_representado_id_fkey"
+            columns: ["representado_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roster_prospects: {
         Row: {
           created_at: string
@@ -4333,6 +4643,15 @@ export type Database = {
         }[]
       }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
+      can_edit_composer_plan: {
+        Args: { _composer_id: string }
+        Returns: boolean
+      }
+      can_view_composer_plan: {
+        Args: { _composer_id: string }
+        Returns: boolean
+      }
+      career_plan_composer: { Args: { _plan_id: string }; Returns: string }
       current_user_is_admin: { Args: never; Returns: boolean }
       current_user_is_big_c: { Args: never; Returns: boolean }
       ensure_composer_chat_channels: {
@@ -4403,6 +4722,32 @@ export type Database = {
         | "media_coverage"
         | "public_appearance"
         | "target_account"
+      career_action_type:
+        | "Pitch"
+        | "Reunión con productor"
+        | "Festival"
+        | "Evento"
+        | "Formación"
+        | "Lanzamiento de música"
+        | "Campaña de marketing"
+        | "Construcción de identidad"
+        | "Otro"
+      career_link_type: "Producción" | "Oportunidad" | "Tarea" | "Ninguno"
+      career_metric:
+        | "pitches"
+        | "facturacion"
+        | "tracks_publicados"
+        | "premios_nominaciones"
+        | "proyectos_internacionales"
+        | "cobertura_prensa"
+        | "sincronizaciones"
+      career_social_network:
+        | "Spotify"
+        | "LinkedIn"
+        | "Instagram"
+        | "Facebook"
+        | "TikTok"
+        | "YouTube"
       case_study_visibility: "interna" | "externa"
       chat_channel_kind:
         | "general"
@@ -4441,6 +4786,7 @@ export type Database = {
         | "cerrado"
         | "cancelado"
       deck_purpose: "corto" | "largo" | "generico" | "por_cliente" | "sector"
+      default_platform_name: "ReelCrafter" | "Web" | "IMDB"
       dm_contacto_tipo: "interno" | "cliente" | "contraparte" | "validador"
       dm_evento_tipo:
         | "creado"
@@ -4562,6 +4908,7 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+      platform_status: "Actualizado" | "Desactualizado" | "Sin perfil"
       press_kit_scope: "ic_global" | "compositor"
       production_kind:
         | "cine"
@@ -4861,6 +5208,35 @@ export const Constants = {
         "public_appearance",
         "target_account",
       ],
+      career_action_type: [
+        "Pitch",
+        "Reunión con productor",
+        "Festival",
+        "Evento",
+        "Formación",
+        "Lanzamiento de música",
+        "Campaña de marketing",
+        "Construcción de identidad",
+        "Otro",
+      ],
+      career_link_type: ["Producción", "Oportunidad", "Tarea", "Ninguno"],
+      career_metric: [
+        "pitches",
+        "facturacion",
+        "tracks_publicados",
+        "premios_nominaciones",
+        "proyectos_internacionales",
+        "cobertura_prensa",
+        "sincronizaciones",
+      ],
+      career_social_network: [
+        "Spotify",
+        "LinkedIn",
+        "Instagram",
+        "Facebook",
+        "TikTok",
+        "YouTube",
+      ],
       case_study_visibility: ["interna", "externa"],
       chat_channel_kind: [
         "general",
@@ -4907,6 +5283,7 @@ export const Constants = {
         "cancelado",
       ],
       deck_purpose: ["corto", "largo", "generico", "por_cliente", "sector"],
+      default_platform_name: ["ReelCrafter", "Web", "IMDB"],
       dm_contacto_tipo: ["interno", "cliente", "contraparte", "validador"],
       dm_evento_tipo: [
         "creado",
@@ -5039,6 +5416,7 @@ export const Constants = {
         "curator",
         "other",
       ],
+      platform_status: ["Actualizado", "Desactualizado", "Sin perfil"],
       press_kit_scope: ["ic_global", "compositor"],
       production_kind: [
         "cine",

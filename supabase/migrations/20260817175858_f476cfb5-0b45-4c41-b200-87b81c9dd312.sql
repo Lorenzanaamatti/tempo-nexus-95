@@ -1,0 +1,1 @@
+ALTER TABLE public.career_plan_targets ADD COLUMN IF NOT EXISTS valor_real numeric;
