@@ -274,36 +274,52 @@ function ProductionEdit() {
           )}
         </div>
         <div>
-          <Label>Representado asignado</Label>
+          <Label>Representado principal</Label>
           <Select value={form.composer_id || undefined} onValueChange={(v) => setForm({ ...form, composer_id: v })}>
             <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
             <SelectContent>
               {(composersQ.data ?? []).map((c: any) => (
-                <SelectItem key={c.id} value={c.id}>{c.artistic_name || c.full_name}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {(c.artistic_name || c.full_name)}
+                  {c.roster_role ? ` · ${ROSTER_ROLE_LABEL[c.roster_role] ?? c.roster_role}` : ""}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Compositores, artistas, supervisores, especialistas y curadores. Vincula al resto del equipo en “Representados”.
+          </p>
         </div>
         <div>
           <Label>Partner / Productora</Label>
           <div className="flex gap-2">
-            <Select value={form.partner_company_id || undefined} onValueChange={(v) => setForm({ ...form, partner_company_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecciona productora…" /></SelectTrigger>
-              <SelectContent>
-                {(companiesQ.data ?? []).map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex-1">
+              <SuggestInput
+                value={form.partner || selectedPartnerName}
+                placeholder="Escribe cualquier partner (del CRM o no vinculado)"
+                options={partnerOptions}
+                onChange={(v, picked) =>
+                  setForm({ ...form, partner: v, partner_company_id: picked?.id ?? "" })
+                }
+              />
+            </div>
             <Button type="button" variant="outline" size="sm" onClick={async () => {
-              const name = window.prompt("Nombre de la productora");
+              const name = window.prompt("Nombre de la productora a crear en el CRM", form.partner || "");
               if (!name?.trim()) return;
               const { data, error } = await supabase.from("production_companies").insert({ name: name.trim() }).select("id").single();
               if (error) return toast.error(error.message);
-              setForm((f) => ({ ...f, partner_company_id: data.id }));
+              setForm((f) => ({ ...f, partner_company_id: data.id, partner: name.trim() }));
               qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
+              qc.invalidateQueries({ queryKey: ["partners-mini"] });
             }}><Plus className="h-3 w-3" /></Button>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {form.partner_company_id
+              ? "Vinculado a una ficha del CRM."
+              : form.partner
+                ? "Partner no vinculado: se guarda como texto libre."
+                : "Puedes escribir un partner que no esté en el CRM."}
+          </p>
           <Link to="/production-companies" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar productoras →</Link>
         </div>
         <div>
