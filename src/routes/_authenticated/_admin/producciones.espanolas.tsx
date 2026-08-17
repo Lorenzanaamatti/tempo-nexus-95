@@ -4,8 +4,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, Search, Film } from "lucide-react";
+import { Loader2, RefreshCw, Search, Film, Download, LayoutGrid, List as ListIcon, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +21,10 @@ import {
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
-  importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
+  importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
 } from "@/lib/producciones-espanolas.functions";
+import { addCompanyToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
+import { addEspanolaToProducciones, addPartner, addProspectFichaje } from "@/lib/espanolas-actions";
 import { cn } from "@/lib/utils";
 
 const db = supabase as any;
