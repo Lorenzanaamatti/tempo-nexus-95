@@ -163,18 +163,6 @@ function ProduccionesEspanolas() {
     }
   }
 
-  async function runSyncLegacy() {
-    setSyncing(true);
-    try {
-      const res = await syncFn({});
-      toast.success(`${(res as any).updated} fichas actualizadas`);
-      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
-    } catch (e: any) {
-      toast.error(e?.message ?? "Error al sincronizar");
-    } finally {
-      setSyncing(false);
-    }
-  }
 
   /** Importa el catálogo completo de cine español desde `desde` hasta el año en curso. */
   async function runBulkImport(desde = 2020) {
