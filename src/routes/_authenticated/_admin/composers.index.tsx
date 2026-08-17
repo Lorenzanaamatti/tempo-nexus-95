@@ -65,7 +65,13 @@ function initials(name?: string | null) {
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
-  validateSearch: (s: Record<string, unknown>) => {
+  validateSearch: (s: Record<string, unknown>): {
+    role: RoleFilter;
+    genero?: Genero;
+    pais?: string;
+    ciudad?: string;
+    q?: string;
+  } => {
     const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
     const r = str(s.role) || "composer";
     const role = (r === "todos" || r === "other" || ALL_ROLES.includes(r as RosterRole)
@@ -74,7 +80,7 @@ export const Route = createFileRoute("/_authenticated/_admin/composers/")({
     const g = str(s.genero);
     return {
       role,
-      genero: (["mujer", "hombre", "no_binario"].includes(g) ? g : "") as Genero | "" | undefined,
+      genero: (["mujer", "hombre", "no_binario"].includes(g) ? (g as Genero) : undefined),
       pais: str(s.pais) || undefined,
       ciudad: str(s.ciudad) || undefined,
       q: str(s.q) || undefined,
