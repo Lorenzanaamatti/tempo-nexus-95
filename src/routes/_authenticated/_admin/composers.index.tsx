@@ -112,7 +112,7 @@ function ComposersIndex() {
   const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
   const [viewMode, setViewMode] = usePersistedState<"list" | "cards">("roster.viewMode", "list");
   const { data, isLoading } = useQuery({
-    queryKey: ["composers", "roster", genero, pais, ciudad, q],
+    queryKey: ["composers", "roster", genero, q],
     queryFn: async () => {
       let query = supabase
         .from("composers")
@@ -122,8 +122,6 @@ function ComposersIndex() {
         .neq("roster_role", "ic_company")
         .order("full_name", { ascending: true });
       if (genero) query = query.eq("genero", genero);
-      if (pais) query = query.eq("pais_origen", pais);
-      if (ciudad) query = query.ilike("ciudad_origen", `%${ciudad}%`);
       if (q.trim()) {
         const term = q.trim().replace(/[%,]/g, " ");
         const like = `%${term}%`;
@@ -137,15 +135,20 @@ function ComposersIndex() {
     },
   });
 
-  const base = (data ?? []) as any[];
+  const raw = (data ?? []) as any[];
+  // El área geográfica combina residencia (city/country) y origen (ciudad_origen/pais_origen).
+  const base = raw.filter(
+    (c) =>
+      matchesLocation(pais, c.country, c.pais_origen) && matchesLocation(ciudad, c.city, c.ciudad_origen),
+  );
   const roleCounts = ROLE_TABS.reduce<Record<string, number>>((acc, t) => {
     acc[t.value] = t.value === "todos" ? base.length : base.filter((c) => c.roster_role === t.value).length;
     return acc;
   }, {});
   const byRole = role === "todos" ? base : base.filter((c) => c.roster_role === role);
-  const paises = [...new Set(base.map((c) => (c.pais_origen ?? "").trim()).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, "es"),
-  );
+  const paises = [
+    ...new Set(raw.flatMap((c) => [c.country, c.pais_origen]).map((p) => (p ?? "").trim()).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b, "es"));
   const activeFilters = [
     role !== "todos" ? { key: "role", label: ROLE_TABS.find((t) => t.value === role)?.label ?? role } : null,
     genero ? { key: "genero", label: GENERO_LABEL[genero] ?? genero } : null,
@@ -355,25 +358,23 @@ function ComposersIndex() {
           <input
             list="roster-paises"
             value={pais}
-            onChange={(e) => setSearch({ pais: e.target.value || undefined, ciudad: undefined })}
+            onChange={(e) => setSearch({ pais: e.target.value || undefined })}
             placeholder="Todos los países"
             className="h-9 w-48 rounded-sm border border-border bg-background px-2 text-xs"
-            aria-label="Filtrar por país de origen"
+            aria-label="Filtrar por país (residencia u origen)"
           />
           <datalist id="roster-paises">
             {paises.map((p) => (
               <option key={p} value={p} />
             ))}
           </datalist>
-          {pais && (
-            <input
-              value={ciudad}
-              onChange={(e) => setSearch({ ciudad: e.target.value || undefined })}
-              placeholder="Ciudad de origen"
-              className="h-9 w-40 rounded-sm border border-border bg-background px-2 text-xs"
-              aria-label="Filtrar por ciudad de origen"
-            />
-          )}
+          <input
+            value={ciudad}
+            onChange={(e) => setSearch({ ciudad: e.target.value || undefined })}
+            placeholder="Ciudad"
+            className="h-9 w-40 rounded-sm border border-border bg-background px-2 text-xs"
+            aria-label="Filtrar por ciudad (residencia u origen)"
+          />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
