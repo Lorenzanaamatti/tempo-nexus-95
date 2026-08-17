@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposerThumb } from "@/components/composer-thumb";
-import { Plus } from "lucide-react";
+import { Plus, LayoutGrid, Rows3 } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import { ListSkeleton } from "@/components/list-states";
 
@@ -53,6 +53,7 @@ function ComposersIndex() {
   const [q, setQ] = usePersistedState("roster.q", "");
   const [tagFilter, setTagFilter] = usePersistedState<string | null>("roster.tag", null);
   const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
+  const [viewMode, setViewMode] = usePersistedState<"list" | "cards">("roster.viewMode", "list");
   const { data, isLoading } = useQuery({
     queryKey: ["composers", role, q],
     queryFn: async () => {
