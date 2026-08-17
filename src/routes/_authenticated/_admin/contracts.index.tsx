@@ -196,7 +196,7 @@ function ContractsIndex() {
             </thead>
             <tbody className="divide-y divide-border">
               {rows.map((c: any) => (
-                <tr key={c.id} className="hover:bg-muted/30">
+                <tr key={c.id} className="cursor-pointer transition-colors hover:bg-accent/60">
                   <td className="px-3 py-2">
                     <Link to="/contracts/$contractId" params={{ contractId: c.id }} className="font-display hover:underline">{c.title}</Link>
                   </td>
