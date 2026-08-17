@@ -97,9 +97,9 @@ function ComposersIndex() {
   const q = search.q ?? "";
   const listRole: RosterRole = role === "todos" || role === "other" ? "composer" : role;
   const navigate = useNavigate({ from: "/composers/" });
-  const setSearch = (patch: Record<string, string>) =>
+  const setSearch = (patch: Record<string, string | undefined>) =>
     navigate({ to: ".", search: (prev) => ({ ...prev, ...patch }) as typeof search });
-  const setQ = (v: string) => setSearch({ q: v });
+  const setQ = (v: string) => setSearch({ q: v || undefined });
   const meta =
     role === "todos" || role === "other"
       ? {
@@ -319,6 +319,98 @@ function ComposersIndex() {
             <Link to="/composers/new" search={{ role: listRole }}><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
           </Button>
         </div>
+      </div>
+
+      <div className="sticky top-0 z-20 -mx-6 mb-8 border-b border-border bg-background/95 px-6 py-3 backdrop-blur">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center rounded-sm border border-border">
+            {ROLE_TABS.map((t) => {
+              const active = role === t.value;
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setSearch({ role: t.value })}
+                  className={`px-3 py-1.5 text-xs font-mono transition ${
+                    active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.label} <span className="opacity-70">({roleCounts[t.value] ?? 0})</span>
+                </button>
+              );
+            })}
+          </div>
+          <select
+            value={genero}
+            onChange={(e) => setSearch({ genero: e.target.value || undefined })}
+            className="h-9 rounded-sm border border-border bg-background px-2 text-xs"
+            aria-label="Filtrar por género"
+          >
+            <option value="">Todos los géneros</option>
+            <option value="mujer">Mujer</option>
+            <option value="hombre">Hombre</option>
+            <option value="no_binario">No binario</option>
+          </select>
+          <input
+            list="roster-paises"
+            value={pais}
+            onChange={(e) => setSearch({ pais: e.target.value || undefined, ciudad: undefined })}
+            placeholder="Todos los países"
+            className="h-9 w-48 rounded-sm border border-border bg-background px-2 text-xs"
+            aria-label="Filtrar por país de origen"
+          />
+          <datalist id="roster-paises">
+            {paises.map((p) => (
+              <option key={p} value={p} />
+            ))}
+          </datalist>
+          {pais && (
+            <input
+              value={ciudad}
+              onChange={(e) => setSearch({ ciudad: e.target.value || undefined })}
+              placeholder="Ciudad de origen"
+              className="h-9 w-40 rounded-sm border border-border bg-background px-2 text-xs"
+              aria-label="Filtrar por ciudad de origen"
+            />
+          )}
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre…"
+            className="h-9 w-56 rounded-sm text-xs"
+          />
+        </div>
+        {activeFilters.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {activeFilters.map((f) => (
+              <span
+                key={f.key}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-0.5 text-xs"
+              >
+                {f.label}
+                <button
+                  type="button"
+                  aria-label={`Quitar filtro ${f.label}`}
+                  onClick={() => setSearch({ [f.key]: f.key === "role" ? "todos" : undefined })}
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            <span className="text-xs text-muted-foreground">{filtered.length} resultados</span>
+            <button
+              type="button"
+              onClick={() =>
+                setSearch({ role: "todos", genero: undefined, pais: undefined, ciudad: undefined, q: undefined })
+              }
+              className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
