@@ -35,6 +35,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
       { title: "Plan de facturación", to: "/billing", icon: Receipt },
       { title: "Equipo IC", to: "/empresa/equipo", match: ["/people"], icon: Users },
+      { title: "Filmografía IC", to: "/empresa/filmografia", icon: Clapperboard, match: ["/ic", "/producciones/filmografia"] },
       { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, match: ["/agent-actions"] },
     ],
   },
@@ -83,7 +84,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
       { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
-      { title: "Filmografía IC", to: "/producciones/filmografia", icon: Clapperboard, match: ["/ic"] },
+      { title: "Producciones españolas", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
     ],
   },
   {

@@ -233,35 +233,14 @@ function RosterAll() {
 
           <section>
             <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-              <h2 className="font-display text-3xl title-caps">Interesante Filmografía</h2>
-              <Link to="/ic" className="smallcaps text-xs text-muted-foreground hover:text-foreground">
-                Ficha corporativa →
+              <h2 className="font-display text-3xl title-caps">Filmografía IC</h2>
+              <Link to="/empresa/filmografia" className="smallcaps text-xs text-muted-foreground hover:text-foreground">
+                Ver filmografía completa →
               </Link>
             </div>
-            {!filmografia.length ? (
-              <EmptyState icon={Film} title="Sin obras registradas" description="La filmografía de las fichas del roster se agregará aquí automáticamente." />
-            ) : (
-              <div className="space-y-6">
-                {filmografia.map((g) => (
-                  <div key={g.year}>
-                    <p className="mb-2 font-mono text-sm text-primary">{g.year}</p>
-                    <div className="overflow-x-auto rounded-sm border border-border">
-                      <table className="w-full min-w-[640px] text-sm">
-                        <tbody>
-                          {g.items.map((i) => (
-                            <tr key={i.key} className="border-b border-border last:border-0">
-                              <td className="px-3 py-2 font-display text-base">{i.title}</td>
-                              <td className="px-3 py-2 text-muted-foreground">{i.who}</td>
-                              <td className="px-3 py-2 text-right text-xs text-muted-foreground">{i.source}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p className="text-sm text-muted-foreground">
+              La filmografía agregada de Interesante Compañía se consulta en EMPRESA · Filmografía IC.
+            </p>
           </section>
         </div>
       )}

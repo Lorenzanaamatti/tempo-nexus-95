@@ -60,11 +60,13 @@ import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminCandidaciesIndexRouteImport } from './routes/_authenticated/_admin/candidacies.index'
+import { Route as ApiPublicCronSyncProduccionesEspanolasRouteImport } from './routes/api/public/cron/sync-producciones-espanolas'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/_admin/templates.$templateId'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminProduccionesFinalizadasRouteImport } from './routes/_authenticated/_admin/producciones.finalizadas'
 import { Route as AuthenticatedAdminProduccionesFilmografiaRouteImport } from './routes/_authenticated/_admin/producciones.filmografia'
+import { Route as AuthenticatedAdminProduccionesEspanolasRouteImport } from './routes/_authenticated/_admin/producciones.espanolas'
 import { Route as AuthenticatedAdminProduccionesActivasRouteImport } from './routes/_authenticated/_admin/producciones.activas'
 import { Route as AuthenticatedAdminProduccionesProductionIdRouteImport } from './routes/_authenticated/_admin/producciones.$productionId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
@@ -95,6 +97,7 @@ import { Route as AuthenticatedAdminLegalTemplatesContratoRouteImport } from './
 import { Route as AuthenticatedAdminLegalContratosFirmadosRouteImport } from './routes/_authenticated/_admin/legal.contratos-firmados'
 import { Route as AuthenticatedAdminEmpresaRosterProspectsRouteImport } from './routes/_authenticated/_admin/empresa.roster-prospects'
 import { Route as AuthenticatedAdminEmpresaKpisRouteImport } from './routes/_authenticated/_admin/empresa.kpis'
+import { Route as AuthenticatedAdminEmpresaFilmografiaRouteImport } from './routes/_authenticated/_admin/empresa.filmografia'
 import { Route as AuthenticatedAdminEmpresaAgentesRouteImport } from './routes/_authenticated/_admin/empresa.agentes'
 import { Route as AuthenticatedAdminEmpresaActividadInternacionalRouteImport } from './routes/_authenticated/_admin/empresa.actividad-internacional'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
@@ -411,6 +414,12 @@ const AuthenticatedAdminCandidaciesIndexRoute =
     path: '/candidacies/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicCronSyncProduccionesEspanolasRoute =
+  ApiPublicCronSyncProduccionesEspanolasRouteImport.update({
+    id: '/api/public/cron/sync-producciones-espanolas',
+    path: '/api/public/cron/sync-producciones-espanolas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminTemplatesTemplateIdRoute =
   AuthenticatedAdminTemplatesTemplateIdRouteImport.update({
     id: '/templates/$templateId',
@@ -439,6 +448,12 @@ const AuthenticatedAdminProduccionesFilmografiaRoute =
   AuthenticatedAdminProduccionesFilmografiaRouteImport.update({
     id: '/producciones/filmografia',
     path: '/producciones/filmografia',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProduccionesEspanolasRoute =
+  AuthenticatedAdminProduccionesEspanolasRouteImport.update({
+    id: '/producciones/espanolas',
+    path: '/producciones/espanolas',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminProduccionesActivasRoute =
@@ -619,6 +634,12 @@ const AuthenticatedAdminEmpresaKpisRoute =
   AuthenticatedAdminEmpresaKpisRouteImport.update({
     id: '/empresa/kpis',
     path: '/empresa/kpis',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEmpresaFilmografiaRoute =
+  AuthenticatedAdminEmpresaFilmografiaRouteImport.update({
+    id: '/empresa/filmografia',
+    path: '/empresa/filmografia',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminEmpresaAgentesRoute =
@@ -843,6 +864,7 @@ export interface FileRoutesByFullPath {
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
+  '/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -873,11 +895,13 @@ export interface FileRoutesByFullPath {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
   '/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
+  '/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
+  '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
   '/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
@@ -955,6 +979,7 @@ export interface FileRoutesByTo {
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
+  '/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -985,11 +1010,13 @@ export interface FileRoutesByTo {
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
   '/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
+  '/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
+  '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
   '/candidacies': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
   '/contracts': typeof AuthenticatedAdminContractsIndexRoute
@@ -1072,6 +1099,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
+  '/_authenticated/_admin/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
   '/_authenticated/_admin/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/_authenticated/_admin/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/_authenticated/_admin/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -1102,11 +1130,13 @@ export interface FileRoutesById {
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
   '/_authenticated/_admin/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
+  '/_authenticated/_admin/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/_authenticated/_admin/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/_authenticated/_admin/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
+  '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
   '/_authenticated/_admin/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
   '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
@@ -1188,6 +1218,7 @@ export interface FileRouteTypes {
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
+    | '/empresa/filmografia'
     | '/empresa/kpis'
     | '/empresa/roster-prospects'
     | '/legal/contratos-firmados'
@@ -1218,11 +1249,13 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/producciones/$productionId'
     | '/producciones/activas'
+    | '/producciones/espanolas'
     | '/producciones/filmografia'
     | '/producciones/finalizadas'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/templates/$templateId'
+    | '/api/public/cron/sync-producciones-espanolas'
     | '/candidacies/'
     | '/composers/'
     | '/contracts/'
@@ -1300,6 +1333,7 @@ export interface FileRouteTypes {
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
+    | '/empresa/filmografia'
     | '/empresa/kpis'
     | '/empresa/roster-prospects'
     | '/legal/contratos-firmados'
@@ -1330,11 +1364,13 @@ export interface FileRouteTypes {
     | '/people/$personId'
     | '/producciones/$productionId'
     | '/producciones/activas'
+    | '/producciones/espanolas'
     | '/producciones/filmografia'
     | '/producciones/finalizadas'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/templates/$templateId'
+    | '/api/public/cron/sync-producciones-espanolas'
     | '/candidacies'
     | '/composers'
     | '/contracts'
@@ -1416,6 +1452,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/empresa/actividad-internacional'
     | '/_authenticated/_admin/empresa/agentes'
+    | '/_authenticated/_admin/empresa/filmografia'
     | '/_authenticated/_admin/empresa/kpis'
     | '/_authenticated/_admin/empresa/roster-prospects'
     | '/_authenticated/_admin/legal/contratos-firmados'
@@ -1446,11 +1483,13 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/producciones/$productionId'
     | '/_authenticated/_admin/producciones/activas'
+    | '/_authenticated/_admin/producciones/espanolas'
     | '/_authenticated/_admin/producciones/filmografia'
     | '/_authenticated/_admin/producciones/finalizadas'
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/templates/$templateId'
+    | '/api/public/cron/sync-producciones-espanolas'
     | '/_authenticated/_admin/candidacies/'
     | '/_authenticated/_admin/composers/'
     | '/_authenticated/_admin/contracts/'
@@ -1487,6 +1526,7 @@ export interface RootRouteChildren {
   AprobarTokenRoute: typeof AprobarTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicCronSyncProduccionesEspanolasRoute: typeof ApiPublicCronSyncProduccionesEspanolasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1848,6 +1888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCandidaciesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/cron/sync-producciones-espanolas': {
+      id: '/api/public/cron/sync-producciones-espanolas'
+      path: '/api/public/cron/sync-producciones-espanolas'
+      fullPath: '/api/public/cron/sync-producciones-espanolas'
+      preLoaderRoute: typeof ApiPublicCronSyncProduccionesEspanolasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/_admin/templates/$templateId': {
       id: '/_authenticated/_admin/templates/$templateId'
       path: '/templates/$templateId'
@@ -1881,6 +1928,13 @@ declare module '@tanstack/react-router' {
       path: '/producciones/filmografia'
       fullPath: '/producciones/filmografia'
       preLoaderRoute: typeof AuthenticatedAdminProduccionesFilmografiaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/producciones/espanolas': {
+      id: '/_authenticated/_admin/producciones/espanolas'
+      path: '/producciones/espanolas'
+      fullPath: '/producciones/espanolas'
+      preLoaderRoute: typeof AuthenticatedAdminProduccionesEspanolasRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/producciones/activas': {
@@ -2091,6 +2145,13 @@ declare module '@tanstack/react-router' {
       path: '/empresa/kpis'
       fullPath: '/empresa/kpis'
       preLoaderRoute: typeof AuthenticatedAdminEmpresaKpisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/empresa/filmografia': {
+      id: '/_authenticated/_admin/empresa/filmografia'
+      path: '/empresa/filmografia'
+      fullPath: '/empresa/filmografia'
+      preLoaderRoute: typeof AuthenticatedAdminEmpresaFilmografiaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/empresa/agentes': {
@@ -2362,6 +2423,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
+  AuthenticatedAdminEmpresaFilmografiaRoute: typeof AuthenticatedAdminEmpresaFilmografiaRoute
   AuthenticatedAdminEmpresaKpisRoute: typeof AuthenticatedAdminEmpresaKpisRoute
   AuthenticatedAdminEmpresaRosterProspectsRoute: typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   AuthenticatedAdminLegalContratosFirmadosRoute: typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -2392,6 +2454,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProduccionesProductionIdRoute: typeof AuthenticatedAdminProduccionesProductionIdRoute
   AuthenticatedAdminProduccionesActivasRoute: typeof AuthenticatedAdminProduccionesActivasRoute
+  AuthenticatedAdminProduccionesEspanolasRoute: typeof AuthenticatedAdminProduccionesEspanolasRoute
   AuthenticatedAdminProduccionesFilmografiaRoute: typeof AuthenticatedAdminProduccionesFilmografiaRoute
   AuthenticatedAdminProduccionesFinalizadasRoute: typeof AuthenticatedAdminProduccionesFinalizadasRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
@@ -2459,6 +2522,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminEmpresaActividadInternacionalRoute,
   AuthenticatedAdminEmpresaAgentesRoute:
     AuthenticatedAdminEmpresaAgentesRouteWithChildren,
+  AuthenticatedAdminEmpresaFilmografiaRoute:
+    AuthenticatedAdminEmpresaFilmografiaRoute,
   AuthenticatedAdminEmpresaKpisRoute: AuthenticatedAdminEmpresaKpisRoute,
   AuthenticatedAdminEmpresaRosterProspectsRoute:
     AuthenticatedAdminEmpresaRosterProspectsRoute,
@@ -2515,6 +2580,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProduccionesProductionIdRoute,
   AuthenticatedAdminProduccionesActivasRoute:
     AuthenticatedAdminProduccionesActivasRoute,
+  AuthenticatedAdminProduccionesEspanolasRoute:
+    AuthenticatedAdminProduccionesEspanolasRoute,
   AuthenticatedAdminProduccionesFilmografiaRoute:
     AuthenticatedAdminProduccionesFilmografiaRoute,
   AuthenticatedAdminProduccionesFinalizadasRoute:
@@ -2631,6 +2698,8 @@ const rootRouteChildren: RootRouteChildren = {
   AprobarTokenRoute: AprobarTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicCronSyncProduccionesEspanolasRoute:
+    ApiPublicCronSyncProduccionesEspanolasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
