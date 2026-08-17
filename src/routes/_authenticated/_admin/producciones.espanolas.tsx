@@ -214,6 +214,12 @@ function ProduccionesEspanolas() {
             {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
             Sincronizar
           </Button>
+          <Button variant="outline" onClick={() => void runEnrich()} disabled={enriching.running || bulk.running}>
+            {enriching.running ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+            {enriching.running
+              ? `Completando créditos… ${enriching.remaining ?? ""}`
+              : "Completar créditos"}
+          </Button>
         </div>
       </div>
 
