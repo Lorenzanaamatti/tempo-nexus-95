@@ -345,8 +345,8 @@ function Inner({
 
       {/* KPIs */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Proyectos activos" value={String(activeProductions.length)} />
-        <KPI label="Proyectos totales" value={String(projects.length)} />
+        <KPI label="Proyectos en curso" value={String(activeProductions.length)} />
+        <KPI label="Producciones totales" value={String(productionsRel.length)} />
         <KPI label="Facturación histórica" value={formatEUR0(totalRevenue)} />
         <KPI label="Margen neto" value={formatEUR0(totalMargin)} />
       </section>
