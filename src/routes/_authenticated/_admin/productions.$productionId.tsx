@@ -21,6 +21,7 @@ import { SaveButton } from "@/components/save-button";
 import { useDirtyForm } from "@/lib/use-dirty-form";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { ROSTER_ROLE_LABEL } from "@/lib/production-milestones";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -237,6 +238,14 @@ function ProductionEdit() {
   if (isLoading || !data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
 
   const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
+  const partnerOptions = [
+    ...(companiesQ.data ?? []).map((c: any) => ({ id: c.id, label: c.name as string, hint: "Productora (CRM)" })),
+    ...(partnersQ.data ?? [])
+      .filter((p: any) => !(companiesQ.data ?? []).some((c: any) => c.id === p.id))
+      .map((p: any) => ({ id: p.id, label: p.nombre as string, hint: p.tipo as string })),
+  ];
+  const selectedPartnerName =
+    (companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? "";
   const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
   const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
