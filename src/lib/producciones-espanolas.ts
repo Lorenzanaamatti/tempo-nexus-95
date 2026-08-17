@@ -32,6 +32,10 @@ export type ProduccionEspanola = {
   synopsis: string | null;
   tmdb_url: string | null;
   tmdb_status: string | null;
+  composer: string | null;
+  music_supervisor: string | null;
+  box_office: number | null;
+  budget: number | null;
   ic_participo: boolean;
   produccion_ic_vinculada: string | null;
   representados_vinculados: string[];
