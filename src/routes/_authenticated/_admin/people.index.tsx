@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Sparkles, User } from "lucide-react";
+import { Plus, Sparkles, User, Users } from "lucide-react";
 import { IC_FUNCTION_GROUPS, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { IcFunctionTags } from "@/components/ic-function-tags";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
-import { ListSkeleton } from "@/components/list-states";
+import { ListSkeleton, EmptyState } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/people/")({
   component: PeopleIndex,
@@ -185,7 +185,7 @@ function PeopleIndex() {
       {isLoading ? (
         <ListSkeleton rows={8} />
       ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin personas en el Equipo IC.</p>
+        <EmptyState icon={Users} title="Sin personas en el equipo IC" description="Añade a la primera persona con el formulario de arriba para poder asignarle tareas y funciones." />
       ) : (
         <>
         <div className="divide-y divide-border rounded-sm border border-border">

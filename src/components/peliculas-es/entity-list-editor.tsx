@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/list-states";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +43,7 @@ export function EntityListEditor({
         </Button>
       </div>
       {items.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Sin entradas.</p>
+        <EmptyState variant="inline" title="Sin entradas" description="Añade la primera desde el campo de arriba." />
       ) : (
         <ul className="space-y-2">
           {items.map((it, idx) => {

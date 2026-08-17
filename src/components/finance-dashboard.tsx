@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { Receipt, BarChart3 } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
@@ -243,7 +245,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
           </thead>
           <tbody>
             {buckets.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">Sin datos de facturación.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-4"><EmptyState variant="inline" icon={BarChart3} title="Sin datos de facturación" description="Registra producciones y sprints para alimentar este cuadro." /></td></tr>
             ) : (
               buckets.map((b) => (
                 <tr key={b.key} className="border-t border-border">
@@ -269,7 +271,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
         <section className="space-y-2">
           <h3 className="font-display text-xl">Próximas facturas</h3>
           {upcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin facturas previstas.</p>
+            <EmptyState variant="inline" icon={Receipt} title="Sin facturas previstas" description="Aparecerán aquí al planificar sprints de facturación en las producciones." />
           ) : (
             <div className="overflow-x-auto rounded-sm border border-border">
               <table className="min-w-full text-sm">

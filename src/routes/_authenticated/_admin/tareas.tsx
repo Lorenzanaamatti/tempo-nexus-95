@@ -13,7 +13,7 @@ import { useMyPersonId, useMyDueTaskCount } from "@/lib/use-my-tasks";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
@@ -161,7 +161,7 @@ function TareasPage() {
       {tasksQ.isLoading ? (
         <ListSkeleton rows={6} />
       ) : !rows.length ? (
-        <EmptyState title="Sin tareas en esta vista" hint="Crea una nueva tarea o cambia los filtros." />
+        <EmptyState icon={CheckCircle2} title="Todo al día" description="No hay tareas pendientes con los filtros actuales." action={{ label: "Nueva tarea", onClick: () => openNewTask() }} secondaryAction={mine ? { label: "Ver todas", onClick: () => setMine(false) } : undefined} />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {rows.map((t) => {

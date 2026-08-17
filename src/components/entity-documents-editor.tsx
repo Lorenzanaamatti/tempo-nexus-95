@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/list-states";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Plus, ExternalLink } from "lucide-react";
+import { Trash2, Plus, ExternalLink, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,7 +91,7 @@ export function EntityDocumentsEditor({
       {docsQ.isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !docsQ.data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin documentos.</p>
+        <EmptyState variant="inline" icon={FileText} title="Sin documentos" description="Sube contratos, briefings o cualquier archivo asociado a esta ficha." />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {docsQ.data.map((d: any) => (

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, KanbanSquare } from "lucide-react";
+import { Plus, KanbanSquare, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { KANBAN_COLUMNS, buildNextReference, type KanbanColumnKey } from "@/lib/deal-memo-constants";
 import { KanbanCard, type KanbanCardData } from "@/components/deal-memos/kanban-card";
@@ -201,7 +202,7 @@ function DealMemosKanban() {
                   {cards.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-1 py-8 text-center">
                       <KanbanSquare className="h-5 w-5 text-muted-foreground/50" />
-                      <p className="text-xs text-muted-foreground">Sin deal memos</p>
+                      <EmptyState variant="inline" icon={FileText} title="Sin deal memos" description="Genera el primero desde una oportunidad o contrato." />
                     </div>
                   ) : (
                     cards.map((c) => <KanbanCard key={c.id} data={c} />)

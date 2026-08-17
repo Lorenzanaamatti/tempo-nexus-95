@@ -1,4 +1,6 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { Clapperboard } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,7 +94,7 @@ function CompanyDetail() {
         {historyQ.isLoading ? (
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : !historyQ.data?.length ? (
-          <p className="text-sm text-muted-foreground">Aún no hay producciones registradas con esta productora.</p>
+          <EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Vincula producciones a esta productora para ver aquí su histórico." action={{ label: "Ver producciones", to: "/productions" }} />
         ) : (
           <div className="overflow-x-auto rounded-sm border border-border">
             <table className="w-full text-sm">

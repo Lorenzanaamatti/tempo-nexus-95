@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
@@ -160,7 +161,7 @@ function BillingPlan() {
             {sprintsQ.isLoading ? (
               <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Cargando…</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Sin facturas de comisión con esos filtros.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-4"><EmptyState variant="filtered" title="Ningún resultado" description="Ninguna factura de comisión coincide con los filtros actuales." /></td></tr>
             ) : (
               rows.map((r) => {
                 const vencido = r.due_date && !r.invoiced_date && r.due_date < today;

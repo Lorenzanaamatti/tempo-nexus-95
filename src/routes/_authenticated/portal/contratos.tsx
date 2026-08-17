@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { FileSignature } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
@@ -85,7 +87,7 @@ function ContractSection({ contracts }: { contracts: Contract[] }) {
     <section className="space-y-3">
       <h3 className="font-display text-xl">Contratos registrados por IC</h3>
       {!contracts.length ? (
-        <p className="text-sm text-muted-foreground">Aún no hay contratos vinculados a tu ficha.</p>
+        <EmptyState icon={FileSignature} title="Sin contratos" description="Aquí verás tus contratos en cuanto el equipo legal los vincule a tu ficha." />
       ) : (
         <ul className="space-y-3">
           {contracts.map((c) => (

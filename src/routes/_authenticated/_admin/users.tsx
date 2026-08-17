@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listUsers, setUserAccess } from "@/lib/users-admin.functions";
@@ -8,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, UserCheck } from "lucide-react";
 import { useCurrentRole } from "@/lib/use-role";
 
 export const Route = createFileRoute("/_authenticated/_admin/users")({
@@ -84,7 +85,7 @@ function UsersPage() {
             count={pending.length}
           >
             {pending.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No hay solicitudes pendientes.</p>
+              <EmptyState variant="inline" icon={UserCheck} title="Sin solicitudes pendientes" description="Cuando alguien se registre aparecerá aquí para aprobar su acceso." />
             ) : (
               pending.map((u) => (
                 <UserCard

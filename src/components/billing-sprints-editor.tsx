@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, CalendarClock } from "lucide-react";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { savedToast } from "@/lib/saved-feedback";
 
@@ -100,7 +101,7 @@ export function BillingSprintsEditor({
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !rows.length ? (
-        <p className="text-sm text-muted-foreground">Aún no hay sprints. Pueden crearse hasta 6.</p>
+        <EmptyState variant="inline" icon={CalendarClock} title="Sin sprints de facturación" description="Crea hasta 6 sprints para repartir los cobros de esta producción." />
       ) : (
         <ul className="space-y-2">
           {rows.map((r: any) => (

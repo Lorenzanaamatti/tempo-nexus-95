@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Target } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
@@ -35,7 +37,7 @@ function Propuestas() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin propuestas activas por ahora.</p>
+        <EmptyState icon={Target} title="Sin propuestas activas" description="Te avisaremos aquí cuando haya una nueva oportunidad en la que estés propuesto." />
       ) : (
         <ul className="space-y-3">
           {data.map((c: any) => {

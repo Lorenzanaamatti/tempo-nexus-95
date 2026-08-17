@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Clapperboard } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
@@ -84,7 +86,7 @@ function Proyectos() {
             </section>
           )}
           {!productions.length && !history.length && (
-            <p className="text-sm text-muted-foreground">Aún no hay producciones asignadas por la agencia.</p>
+            <EmptyState icon={Clapperboard} title="Sin producciones asignadas" description="Cuando el equipo de Interesante Compañía te asigne una producción, aparecerá aquí con sus fases y entregas." />
           )}
         </>
       )}

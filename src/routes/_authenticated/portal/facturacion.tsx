@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Clapperboard, BarChart3, Receipt } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
@@ -175,7 +177,7 @@ function Facturacion() {
                 </thead>
                 <tbody>
                   {!perProduction.length ? (
-                    <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">Sin producciones.</td></tr>
+                    <tr><td colSpan={8} className="px-3 py-4"><EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Cuando tengas producciones facturables aparecerán aquí." /></td></tr>
                   ) : perProduction.map(({ p, fee, pct, icExpected, workIssued, workPaid, icIssued, icPaid }) => (
                     <tr key={p.id} className="border-t border-border">
                       <td className="px-3 py-2 font-display">{p.title ?? "—"}</td>
@@ -276,7 +278,7 @@ function Facturacion() {
             </thead>
             <tbody>
               {!data?.projects.length ? (
-                <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">Sin datos.</td></tr>
+                <tr><td colSpan={7} className="px-3 py-4"><EmptyState variant="inline" icon={BarChart3} title="Sin datos" description="Aún no hay importes registrados en este periodo." /></td></tr>
               ) : data.projects.map((p) => (
                 <tr key={p.id} className="border-t border-border">
                   <td className="px-3 py-2 font-display">{p.production}</td>
@@ -339,7 +341,7 @@ function SprintTable({
         </thead>
         <tbody>
           {!rows.length ? (
-            <tr><td colSpan={columns.length} className="px-3 py-6 text-center text-muted-foreground">Sin movimientos.</td></tr>
+            <tr><td colSpan={columns.length} className="px-3 py-4"><EmptyState variant="inline" icon={Receipt} title="Sin movimientos" description="Aquí verás cobros y pagos en cuanto se registren." /></td></tr>
           ) : rows.map((s) => (
             <tr key={s.id} className="border-t border-border">
               {render(s).map((cell, i) => (
@@ -373,7 +375,7 @@ function CalendarView({ sprints }: { sprints: Sprint[] }) {
     <section className="space-y-3">
       <h3 className="font-display text-xl">{title}</h3>
       {!list.length ? (
-        <p className="text-sm text-muted-foreground">Sin movimientos.</p>
+        <EmptyState variant="inline" icon={Receipt} title="Sin movimientos" description="Aquí verás cobros y pagos en cuanto se registren." />
       ) : (
         <ul className="space-y-2">
           {list.map((i, idx) => (

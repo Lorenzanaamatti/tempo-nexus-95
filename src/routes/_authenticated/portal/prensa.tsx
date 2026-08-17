@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { Newspaper, FileText, ExternalLink, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +62,7 @@ function PortalPrensa() {
       <section>
         <h3 className="mb-3 font-display text-xl flex items-center gap-2"><FileText className="h-4 w-4" /> Press kits / EPK</h3>
         {kitsQ.isLoading ? <p className="text-sm text-muted-foreground">Cargando…</p>
-          : !kitsQ.data?.length ? <p className="text-sm text-muted-foreground">Aún no hay press kits publicados para ti.</p>
+          : !kitsQ.data?.length ? <EmptyState icon={Newspaper} title="Sin press kits" description="El equipo de marketing publicará aquí tus dossieres de prensa." />
           : (
             <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {kitsQ.data.map((k: any) => (
@@ -86,7 +87,7 @@ function PortalPrensa() {
       <section>
         <h3 className="mb-3 font-display text-xl flex items-center gap-2"><Newspaper className="h-4 w-4" /> Clipping</h3>
         {clippingsQ.isLoading ? <p className="text-sm text-muted-foreground">Cargando…</p>
-          : !clippingsQ.data?.length ? <p className="text-sm text-muted-foreground">Aún no hay apariciones en prensa publicadas.</p>
+          : !clippingsQ.data?.length ? <EmptyState icon={Newspaper} title="Sin apariciones en prensa" description="Las menciones y entrevistas recopiladas por el equipo aparecerán aquí." />
           : (
             <ul className="space-y-3">
               {clippingsQ.data.map((c: any) => (

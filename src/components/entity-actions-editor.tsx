@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/list-states";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, ListChecks } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -171,7 +172,7 @@ export function EntityActionsEditor({
       {actionsQ.isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !actionsQ.data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin acciones registradas.</p>
+        <EmptyState variant="inline" icon={ListChecks} title="Sin acciones registradas" description="Registra la próxima acción y su responsable: aparecerá en tareas y calendario." />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {actionsQ.data.map((a: any) => (

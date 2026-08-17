@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { Activity } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +27,7 @@ export function SocialActivityPanel({ composerId, productionId }: { composerId?:
         <Link to="/marketing/comunicacion" className="text-xs text-primary hover:underline">Abrir en comunicación →</Link>
       </div>
       {!data?.length ? (
-        <p className="text-sm text-muted-foreground">Aún no hay actividad.</p>
+        <EmptyState variant="inline" icon={Activity} title="Sin actividad" description="Las publicaciones y métricas aparecerán aquí." />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {data.map((p: any) => (

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Clapperboard } from "lucide-react";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
 
@@ -110,7 +111,7 @@ function ProductionsIndex() {
       {isLoading ? (
         <p className="font-display text-muted-foreground">Cargando…</p>
       ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin producciones.</p>
+        <EmptyState icon={Clapperboard} title="Sin producciones" description="Crea la primera producción para asignar compositores, fases y sprints de facturación." />
       ) : (
         <>
         <div className="divide-y divide-border rounded-sm border border-border">

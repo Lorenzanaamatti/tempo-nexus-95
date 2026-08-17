@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, Trash2, FileText, Download, Hash, Folder, FolderOpen, ChevronRight, ChevronDown } from "lucide-react";
+import { Paperclip, Send, Trash2, FileText, Download, Hash, Folder, FolderOpen, ChevronRight, ChevronDown, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { Link } from "@tanstack/react-router";
@@ -313,7 +314,7 @@ function MessageList({
   return (
     <div data-chat-scroll className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
       {messages.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground">No hay mensajes en este canal todavía.</p>
+        <EmptyState variant="inline" icon={MessageSquare} title="Sin mensajes" description="Escribe el primero para abrir la conversación de este canal." />
       ) : (
         messages.map((m) => {
           const mine = m.author_user_id === currentUserId;

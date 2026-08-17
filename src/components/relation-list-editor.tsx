@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
         </Button>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin entradas.</p>
+        <EmptyState variant="inline" title="Sin entradas" description="Añade la primera desde el campo de arriba." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

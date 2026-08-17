@@ -1,20 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR0 } from "@/lib/money";
-import {
-  FolderKanban,
-  Inbox,
-  CalendarDays,
-  FileSignature,
-  User,
-  MessagesSquare,
-  TrendingUp,
-  Receipt,
-  ArrowUpRight,
-} from "lucide-react";
+import { FolderKanban, Inbox, CalendarDays, FileSignature, User, MessagesSquare, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
@@ -159,7 +150,7 @@ function PortalHome() {
                 <span className="font-mono text-xs text-[color:var(--portal-muted)]">{formatDateEs(data.nextEvent.start_date)}</span>
               </div>
             ) : (
-              <p className="mt-0.5 text-sm text-[color:var(--portal-muted)]">No hay hitos próximos programados.</p>
+              <EmptyState variant="inline" icon={CalendarDays} title="Sin hitos próximos" description="Las fechas clave de tus producciones aparecerán aquí." />
             )}
           </div>
         </div>

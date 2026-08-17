@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Link2, ExternalLink } from "lucide-react";
+import { Trash2, Link2, ExternalLink, Film } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { savedToast } from "@/lib/saved-feedback";
@@ -129,7 +130,7 @@ export function FilmographyEditor({
         usa "+ Crear nuevo" para añadirlos al instante.
       </p>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin entradas.</p>
+        <EmptyState variant="inline" icon={Film} title="Sin filmografía" description="Añade la primera obra con el buscador de arriba." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

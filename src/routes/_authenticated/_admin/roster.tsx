@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Target, Film, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,7 +159,7 @@ function RosterAll() {
           <section>
             <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl title-caps">Roster objetivo</h2>
             {!objetivo.length ? (
-              <EmptyState title="Sin candidatos en cuentas objetivo." hint="Añade cuentas de tipo Roster desde Cuentas objetivo." />
+              <EmptyState icon={Target} title="Sin roster en prospección" description="Añade cuentas de tipo Roster para hacer seguimiento de futuras incorporaciones." action={{ label: "Ir a cuentas objetivo", to: "/marketing/target-accounts" }} />
             ) : (
               <div className="overflow-x-auto rounded-sm border border-border">
                 <table className="w-full min-w-[640px] text-sm">
@@ -197,7 +198,7 @@ function RosterAll() {
               </Link>
             </div>
             {!filmografia.length ? (
-              <EmptyState title="Sin obras registradas todavía." />
+              <EmptyState icon={Film} title="Sin obras registradas" description="La filmografía de las fichas del roster se agregará aquí automáticamente." />
             ) : (
               <div className="space-y-6">
                 {filmografia.map((g) => (
@@ -249,7 +250,7 @@ function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; v
         <span className="font-mono text-xs text-muted-foreground">{rows.length}</span>
       </div>
       {!rows.length ? (
-        <EmptyState title="Sin fichas en esta categoría." />
+        <EmptyState icon={Users} title="Sin fichas en esta categoría" description="Crea una ficha nueva o revisa las otras categorías del roster." action={{ label: "Añadir ficha", to: "/composers/new" }} />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="w-full min-w-[760px] text-sm">

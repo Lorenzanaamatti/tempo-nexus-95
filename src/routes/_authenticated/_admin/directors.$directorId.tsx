@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ExternalLink, Plus } from "lucide-react";
+import { ExternalLink, Plus, Clapperboard } from "lucide-react";
 import { useState } from "react";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { RelatedWorks } from "@/components/related-works";
@@ -140,7 +141,7 @@ function DirectorDetail() {
         {historyQ.isLoading ? (
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : !historyQ.data?.length ? (
-          <p className="text-sm text-muted-foreground">Aún no hay producciones registradas con este director.</p>
+          <EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Vincula producciones a este director para ver aquí su histórico." action={{ label: "Ver producciones", to: "/productions" }} />
         ) : (
           <div className="overflow-x-auto rounded-sm border border-border">
             <table className="w-full text-sm">
