@@ -226,7 +226,7 @@ export function PaginationBar({
       </p>
       <div className="flex items-center gap-2">
         <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-          <SelectTrigger className="h-8 w-auto min-w-[9.5rem] whitespace-nowrap rounded-sm text-xs">
+          <SelectTrigger className="h-8 w-auto min-w-[11.5rem] shrink-0 whitespace-nowrap rounded-sm text-xs [&>span]:truncate-none [&>span]:whitespace-nowrap">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
