@@ -55,6 +55,9 @@ function TareasPage() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [q, setQ] = useState("");
+  const { filter } = Route.useSearch();
+  const nav = Route.useNavigate();
+  const onlyToday = filter === "hoy";
 
   const peopleQ = useQuery({
     queryKey: ["people-ic-team"],
@@ -91,9 +94,9 @@ function TareasPage() {
   });
 
   const needle = q.trim().toLowerCase();
-  const rows = (tasksQ.data ?? []).filter(
-    (t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)),
-  );
+  const rows = (tasksQ.data ?? [])
+    .filter((t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    .filter((t) => !onlyToday || (t.due_date != null && t.due_date <= todayISO()));
 
   async function patch(id: string, values: Record<string, unknown>) {
     const { error } = await (supabase as any).from("actions").update(values).eq("id", id);
