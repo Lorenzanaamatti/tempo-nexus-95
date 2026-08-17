@@ -174,20 +174,23 @@ function ProduccionesEspanolas() {
     let total = 0;
     try {
       for (let y = hasta; y >= desde; y--) {
-        let page = 1;
-        let totalPages = 1;
-        do {
-          const res = (await yearFn({ data: { year: y, page } })) as {
-            saved: number; totalPages: number; totalResults: number;
-          };
-          totalPages = res.totalPages;
-          total += res.saved;
-          setBulk({ running: true, label: `${y} · página ${page}/${totalPages}`, done: total });
-          page++;
-        } while (page <= totalPages);
+        for (const mediaType of ["movie", "tv"] as const) {
+          const tipo = mediaType === "movie" ? "cine" : "series";
+          let page = 1;
+          let totalPages = 1;
+          do {
+            const res = (await yearFn({ data: { year: y, page, mediaType } })) as {
+              saved: number; totalPages: number; totalResults: number;
+            };
+            totalPages = res.totalPages;
+            total += res.saved;
+            setBulk({ running: true, label: `${y} · ${tipo} · página ${page}/${totalPages}`, done: total });
+            page++;
+          } while (page <= totalPages);
+        }
         qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
       }
-      toast.success(`Catálogo importado: ${total} títulos entre ${desde} y ${hasta}`);
+      toast.success(`Catálogo importado: ${total} títulos (cine y series) entre ${desde} y ${hasta}`);
       void runEnrich();
     } catch (e: any) {
       toast.error(e?.message ?? "Error al importar el catálogo");
