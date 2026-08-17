@@ -8,7 +8,6 @@ import { useCurrentRole } from "@/lib/use-role";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView } from "@/lib/session-view";
-import { BrandLogo } from "@/components/brand-logo";
 import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -83,7 +82,6 @@ function Shell() {
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
-            <BrandLogo variant="auto" className="hidden h-4 w-auto sm:block" />
             <div className="min-w-0 flex-1"><Breadcrumbs /></div>
             <GlobalSearch />
             {role === "admin" && <TaskInboxBell />}
