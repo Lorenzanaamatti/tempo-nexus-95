@@ -142,6 +142,7 @@ function ProduccionesEspanolas() {
 
   /** Importa el catálogo completo de cine español desde `desde` hasta el año en curso. */
   async function runBulkImport(desde = 2020) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const hasta = new Date().getFullYear();
     setBulk({ running: true, label: `Preparando ${desde}–${hasta}…`, done: 0 });
     let total = 0;
