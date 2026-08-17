@@ -55,6 +55,9 @@ function TareasPage() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [q, setQ] = useState("");
+  const { filter } = Route.useSearch();
+  const nav = Route.useNavigate();
+  const onlyToday = filter === "hoy";
 
   const peopleQ = useQuery({
     queryKey: ["people-ic-team"],
@@ -91,9 +94,9 @@ function TareasPage() {
   });
 
   const needle = q.trim().toLowerCase();
-  const rows = (tasksQ.data ?? []).filter(
-    (t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)),
-  );
+  const rows = (tasksQ.data ?? [])
+    .filter((t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    .filter((t) => !onlyToday || (t.due_date != null && t.due_date <= todayISO()));
 
   async function patch(id: string, values: Record<string, unknown>) {
     const { error } = await (supabase as any).from("actions").update(values).eq("id", id);
@@ -208,6 +211,16 @@ function TareasPage() {
           </SelectContent>
         </Select>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tarea…" className="h-8 max-w-[220px] text-sm" />
+        <button
+          type="button"
+          onClick={() => nav({ search: onlyToday ? {} : { filter: "hoy" } })}
+          className={cn(
+            "rounded-sm border border-border px-3 py-1.5 text-xs smallcaps",
+            onlyToday ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+          )}
+        >
+          Para hoy
+        </button>
         <span className="ml-auto text-xs text-muted-foreground">{rows.length} tarea(s)</span>
       </div>
 
