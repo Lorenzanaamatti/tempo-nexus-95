@@ -118,12 +118,18 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
+                    <SidebarMenuButton onClick={() => openNewTask({})} title="Nueva tarea">
+                      <Plus className="h-4 w-4 text-primary" />
+                      {!collapsed && <span>Nueva tarea</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={pathname.startsWith("/tareas")}>
-                      <Link to="/tareas" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                      <Link to="/tareas" search={{ filter: "hoy" } as never} className="flex items-center gap-2">
+                        <ListChecks className="h-4 w-4" />
                         {!collapsed && (
                           <span className="flex flex-1 items-center justify-between gap-2">
-                            <span>Personal · mis tareas</span>
+                            <span>Tareas para hoy</span>
                             {(myDueTasks ?? 0) > 0 && (
                               <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
                                 {myDueTasks}
@@ -132,12 +138,6 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                           </span>
                         )}
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => openNewTask({})} title="Nueva tarea">
-                      <Plus className="h-4 w-4 text-primary" />
-                      {!collapsed && <span>Nueva tarea</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
