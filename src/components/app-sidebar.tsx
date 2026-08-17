@@ -190,6 +190,13 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
+          {!collapsed && (
+            <SidebarMenuItem>
+              <SidebarGroupLabel className="px-2 font-display text-sm font-semibold uppercase tracking-[0.12em]">
+                Configuración
+              </SidebarGroupLabel>
+            </SidebarMenuItem>
+          )}
           {role === "admin" && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/users")}>
