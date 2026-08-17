@@ -21,7 +21,8 @@ import {
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
-  importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
+  enrichEspanolas, importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas,
+  syncProduccionesEspanolas,
 } from "@/lib/producciones-espanolas.functions";
 import { addCompanyToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
 import { addEspanolaToProducciones, addPartner, addProspectFichaje } from "@/lib/espanolas-actions";
@@ -38,12 +39,22 @@ function useEspanolas() {
   return useQuery({
     queryKey: ["producciones-espanolas"],
     queryFn: async () => {
-      const { data, error } = await db
-        .from("producciones_espanolas")
-        .select("*")
-        .order("year", { ascending: false, nullsFirst: false });
-      if (error) throw error;
-      return (data ?? []) as ProduccionEspanola[];
+      // PostgREST devuelve como máximo 1000 filas por petición: paginamos por bloques.
+      const all: ProduccionEspanola[] = [];
+      const size = 1000;
+      for (let from = 0; from < 40_000; from += size) {
+        const { data, error } = await db
+          .from("producciones_espanolas")
+          .select("*")
+          .order("year", { ascending: false, nullsFirst: false })
+          .order("title", { ascending: true })
+          .range(from, from + size - 1);
+        if (error) throw error;
+        const chunk = (data ?? []) as ProduccionEspanola[];
+        all.push(...chunk);
+        if (chunk.length < size) break;
+      }
+      return all;
     },
   });
 }
