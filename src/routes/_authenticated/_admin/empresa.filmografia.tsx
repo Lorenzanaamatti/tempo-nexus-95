@@ -153,6 +153,7 @@ function FilmografiaIC() {
   const [kind, setKind] = useState(ALL);
   const [rep, setRep] = useState(ALL);
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"grid" | "list">("list");
 
   const entries = q.data?.entries ?? [];
   const years = useMemo(() => [...new Set(entries.map((e) => e.year))].sort((a, b) => (a < b ? 1 : -1)), [entries]);
@@ -200,15 +201,87 @@ function FilmografiaIC() {
               {(q.data?.roster ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
             </SelectContent>
           </Select>
+          <div className="flex items-center rounded-sm border border-border">
+            <Button
+              variant={view === "list" ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Vista de lista"
+              onClick={() => setView("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={view === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Vista de cuadrícula"
+              onClick={() => setView("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
           <Button onClick={() => setOpen(true)}><Plus className="mr-1 h-4 w-4" /> Entrada histórica</Button>
         </div>
       </div>
 
       <div className="mt-8">
         {q.isLoading ? (
-          <ListSkeleton rows={8} variant="grid" />
+          <ListSkeleton rows={8} variant={view === "grid" ? "grid" : "list"} />
         ) : !rows.length ? (
           <EmptyState icon={Film} title="Sin registros" description="Añade una entrada histórica o marca producciones españolas con participación de IC." />
+        ) : view === "list" ? (
+          <div className="overflow-x-auto rounded-sm border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                  <th className="px-3 py-2">Título</th>
+                  <th className="px-3 py-2">Roster asociado</th>
+                  <th className="px-3 py-2">Productora</th>
+                  <th className="px-3 py-2">Año</th>
+                  <th className="px-3 py-2 text-right">Presupuesto</th>
+                  <th className="px-3 py-2 text-right">Comisión IC</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((e) => (
+                  <tr key={e.key} className="border-b border-border/60 last:border-0 align-top">
+                    <td className="px-3 py-2">
+                      <span className="font-display">
+                        {e.to ? (
+                          <Link to="/producciones/$productionId" params={{ productionId: e.to.id }} className="hover:underline">{e.title}</Link>
+                        ) : e.title}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">{e.kind}</span>
+                      {e.source !== "Producción IC" && (
+                        <Badge variant="outline" className="ml-2 rounded-sm text-[10px]">{e.source}</Badge>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {e.credits.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {e.credits.map((c, i) => (
+                            <Badge key={`${e.key}-l-${c.composerId}-${i}`} variant="secondary" className="rounded-sm text-[10px]">
+                              {c.name} · {c.role}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </td>
+                    <td className="px-3 py-2">{e.company ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{e.year}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{e.budget != null ? formatEUR(e.budget) : "—"}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{e.commission != null ? formatEUR(e.commission) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border bg-muted/30 font-mono text-xs">
+                  <td className="px-3 py-2" colSpan={4}>{rows.length} registros</td>
+                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.budget ?? 0), 0))}</td>
+                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.commission ?? 0), 0))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {rows.map((e) => (
