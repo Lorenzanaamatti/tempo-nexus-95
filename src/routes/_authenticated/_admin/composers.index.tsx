@@ -203,6 +203,26 @@ function ComposersIndex() {
             placeholder="Buscar por nombre, bio o filmografía…"
             className="w-72 rounded-sm"
           />
+          <div className="flex items-center rounded-sm border border-border">
+            <button
+              type="button"
+              onClick={() => setViewMode("list")}
+              aria-pressed={viewMode === "list"}
+              title="Vista de lista"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs transition ${viewMode === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Rows3 className="h-3.5 w-3.5" /> Lista
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("cards")}
+              aria-pressed={viewMode === "cards"}
+              title="Vista de tarjetas (útil para presentaciones)"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs transition ${viewMode === "cards" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Tarjetas
+            </button>
+          </div>
           <ExportButton
             entityLabel={meta.title}
             filename={`roster-${role}`}
@@ -247,22 +267,33 @@ function ComposersIndex() {
                     <span className="smallcaps text-muted-foreground">{items.length}</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map((c: any) => (
-                    <SpecialistCard key={`${tag}-${c.id}`} c={c} role={role} />
-                  ))}
-                </div>
+                {viewMode === "list" ? (
+                  <RosterList items={items} role={role} />
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {items.map((c: any) => (
+                      <SpecialistCard key={`${tag}-${c.id}`} c={c} role={role} />
+                    ))}
+                  </div>
+                )}
               </section>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...filtered]
-              .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
-              .map((c: any) => (
-                <SpecialistCard key={c.id} c={c} role={role} />
-              ))}
-          </div>
+          viewMode === "list" ? (
+            <RosterList
+              items={[...filtered].sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))}
+              role={role}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[...filtered]
+                .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
+                .map((c: any) => (
+                  <SpecialistCard key={c.id} c={c} role={role} />
+                ))}
+            </div>
+          )
         )
       ) : (
         <div className="space-y-12">
