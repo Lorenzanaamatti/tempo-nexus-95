@@ -230,9 +230,12 @@ function TargetAccountDetail() {
             <Sparkles className="mr-1 h-4 w-4" />
             {creatingOpp ? "Creando…" : "Crear oportunidad desde esta cuenta"}
           </Button>
-          <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive">
-            <Trash2 className="mr-1 h-4 w-4" /> Eliminar
-          </Button>
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title="¿Eliminar esta cuenta objetivo?"
+            description="Se borrará la cuenta y sus datos asociados de forma permanente. Esta acción no se puede deshacer."
+            confirmLabel="Eliminar cuenta"
+          />
         </div>
       </div>
 
