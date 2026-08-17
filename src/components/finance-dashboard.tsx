@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Receipt, BarChart3 } from "lucide-react";
+import { Receipt, BarChart3, FileText } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,6 +66,39 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
       return data ?? [];
     },
   });
+
+  const dealMemosQ = useQuery({
+    queryKey: ["finance-deal-memos"],
+    enabled: !composerId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("deal_memos")
+        .select("id, referencia, obra, estado, importe_propuesto, moneda, created_at, fecha_envio")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const dealMemos = (dealMemosQ.data ?? []) as Array<{
+    id: string; referencia: string; obra: string; estado: string;
+    importe_propuesto: number | null; created_at: string; fecha_envio: string | null;
+  }>;
+
+  const dmTotals = useMemo(() => {
+    const openStates = new Set(["borrador", "generando", "revision_interna", "corrigiendo", "revision_final"]);
+    const sentStates = new Set(["enviado", "respondido"]);
+    const acc = { total: 0, enCurso: 0, enviado: 0, cerrado: 0 };
+    for (const d of dealMemos) {
+      const a = Number(d.importe_propuesto) || 0;
+      if (d.estado === "cancelado") continue;
+      acc.total += a;
+      if (openStates.has(d.estado)) acc.enCurso += a;
+      else if (sentStates.has(d.estado)) acc.enviado += a;
+      else if (d.estado === "cerrado") acc.cerrado += a;
+    }
+    return acc;
+  }, [dealMemos]);
 
   const budgets = useMemo(() => {
     const list = (productionsQ.data ?? []) as any[];
