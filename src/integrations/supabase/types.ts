@@ -3935,6 +3935,7 @@ export type Database = {
           estado_prospeccion: Database["public"]["Enums"]["prospeccion_estado"]
           genres: string[]
           ic_participo: boolean
+          ic_personas: string[]
           id: string
           last_synced_at: string | null
           media_type: string
@@ -3942,6 +3943,7 @@ export type Database = {
           music_supervisor: string | null
           notas: string | null
           oportunidad_vinculada: string | null
+          origen: string
           orquesta: string | null
           orquestador: string | null
           platform: string | null
@@ -3973,6 +3975,7 @@ export type Database = {
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
           ic_participo?: boolean
+          ic_personas?: string[]
           id?: string
           last_synced_at?: string | null
           media_type?: string
@@ -3980,6 +3983,7 @@ export type Database = {
           music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
+          origen?: string
           orquesta?: string | null
           orquestador?: string | null
           platform?: string | null
@@ -4011,6 +4015,7 @@ export type Database = {
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
           ic_participo?: boolean
+          ic_personas?: string[]
           id?: string
           last_synced_at?: string | null
           media_type?: string
@@ -4018,6 +4023,7 @@ export type Database = {
           music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
+          origen?: string
           orquesta?: string | null
           orquestador?: string | null
           platform?: string | null
@@ -5650,6 +5656,7 @@ export type Database = {
       current_user_is_admin: { Args: never; Returns: boolean }
       current_user_is_big_c: { Args: never; Returns: boolean }
       deadline_owner_person: { Args: { _composer_id: string }; Returns: string }
+      detect_ic_personas: { Args: { _names: string[] }; Returns: string[] }
       ensure_composer_chat_channels: {
         Args: { _composer_id: string }
         Returns: undefined
