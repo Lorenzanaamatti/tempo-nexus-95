@@ -22,7 +22,7 @@ export function ConfirmDeleteButton({
   iconOnly = false,
   disabled,
 }: {
-  onConfirm: () => void | Promise<void>;
+  onConfirm: () => unknown;
   title: string;
   description?: string;
   label?: string;
