@@ -22,6 +22,10 @@ export type DeadlineField = {
   options?: readonly string[];
   required?: boolean;
   full?: boolean;
+  /** Show this field only when the form matches the predicate */
+  showIf?: (form: Record<string, any>) => boolean;
+  /** Require this field only when the form matches the predicate */
+  requiredIf?: (form: Record<string, any>) => boolean;
 };
 
 export type DeadlineColumn = { key: string; label: string; type?: "date" | "money" | "text" };
@@ -237,12 +241,14 @@ function RecordDialog({
   }
 
   async function save() {
-    const missing = fields.filter((f) => f.required && !form[f.key]);
+    const visible = fields.filter((f) => !f.showIf || f.showIf(form));
+    const missing = visible.filter((f) => (f.required || f.requiredIf?.(form)) && !form[f.key]);
     if (missing.length) return toast.error(`Falta: ${missing.map((m) => m.label).join(", ")}`);
     setSaving(true);
     const payload: Row = {};
     for (const f of fields) {
-      const v = form[f.key];
+      const hidden = f.showIf && !f.showIf(form);
+      const v = hidden ? null : form[f.key];
       payload[f.key] = v === "" || v === undefined ? null : f.type === "number" ? Number(v) : v;
     }
     const { error } = record?.id
@@ -302,9 +308,9 @@ function RecordDialog({
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-3">
-          {fields.map((f) => (
+          {fields.filter((f) => !f.showIf || f.showIf(form)).map((f) => (
             <div key={f.key} className={cn("grid gap-1.5", f.full && "col-span-2")}>
-              <Label>{f.label}{f.required && " *"}</Label>
+              <Label>{f.label}{(f.required || f.requiredIf?.(form)) && " *"}</Label>
               {renderField(f)}
             </div>
           ))}

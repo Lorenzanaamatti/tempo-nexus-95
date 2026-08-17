@@ -76,6 +76,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
       { title: "Festivales", to: "/oportunidades/festivales", icon: Sparkles },
       { title: "Premios", to: "/oportunidades/premios", icon: Target },
+      { title: "Prensa", to: "/oportunidades/prensa", icon: Sparkles },
     ],
   },
   {

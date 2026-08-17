@@ -3074,6 +3074,95 @@ export type Database = {
           },
         ]
       }
+      oportunidades_prensa: {
+        Row: {
+          ambito: string | null
+          created_at: string
+          estado: string
+          fecha_deadline: string | null
+          fecha_publicacion_prevista: string | null
+          id: string
+          iniciativa: Database["public"]["Enums"]["prensa_iniciativa"]
+          medio_vinculado: string | null
+          medios_destinatarios: string | null
+          nombre: string
+          notas: string | null
+          produccion_vinculada: string | null
+          representado_vinculado: string | null
+          resultado_notas: string | null
+          tipo: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          ambito?: string | null
+          created_at?: string
+          estado?: string
+          fecha_deadline?: string | null
+          fecha_publicacion_prevista?: string | null
+          id?: string
+          iniciativa?: Database["public"]["Enums"]["prensa_iniciativa"]
+          medio_vinculado?: string | null
+          medios_destinatarios?: string | null
+          nombre: string
+          notas?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          tipo?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          ambito?: string | null
+          created_at?: string
+          estado?: string
+          fecha_deadline?: string | null
+          fecha_publicacion_prevista?: string | null
+          id?: string
+          iniciativa?: Database["public"]["Enums"]["prensa_iniciativa"]
+          medio_vinculado?: string | null
+          medios_destinatarios?: string | null
+          nombre?: string
+          notas?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          tipo?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_prensa_medio_vinculado_fkey"
+            columns: ["medio_vinculado"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_prensa_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_prensa_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_prensa_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oportunidades_subvenciones: {
         Row: {
           ambito: Database["public"]["Enums"]["subvencion_ambito"]
@@ -5843,6 +5932,7 @@ export type Database = {
         | "Nominado"
         | "Premio obtenido"
         | "No seleccionado"
+      prensa_iniciativa: "Reactiva" | "Proactiva" | "Autocandidatura"
       press_kit_scope: "ic_global" | "compositor"
       production_kind:
         | "cine"
@@ -6469,6 +6559,7 @@ export const Constants = {
         "Premio obtenido",
         "No seleccionado",
       ],
+      prensa_iniciativa: ["Reactiva", "Proactiva", "Autocandidatura"],
       press_kit_scope: ["ic_global", "compositor"],
       production_kind: [
         "cine",
