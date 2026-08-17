@@ -32,6 +32,7 @@ function fmtDate(d: string | null | undefined) {
 
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
+  const [onlyIncomplete, setOnlyIncomplete] = usePersistedState("roster-all:incomplete", false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v2"],
@@ -79,8 +80,17 @@ function RosterAll() {
       .map((c) => ({ ...c, open: openByComposer.get(c.id) ?? 0 }));
   }, [data, term]);
 
-  const actual = rows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
-  const prospeccion = rows.filter((c) => c.representation_status === "en_negociacion");
+  const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
+    variant === "active"
+      ? !c.representation_start_date || !c.renewal_date
+      : !c.prospect_next_action_date || !c.prospect_target_date;
+
+  const actualAll = rows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
+  const prospeccionAll = rows.filter((c) => c.representation_status === "en_negociacion");
+  const actual = onlyIncomplete ? actualAll.filter((c) => isIncomplete(c, "active")) : actualAll;
+  const prospeccion = onlyIncomplete ? prospeccionAll.filter((c) => isIncomplete(c, "prospect")) : prospeccionAll;
+  const actualMissing = actualAll.filter((c) => isIncomplete(c, "active")).length;
+  const prospeccionMissing = prospeccionAll.filter((c) => isIncomplete(c, "prospect")).length;
   const objetivo = (data?.targets ?? []).filter((t) => !term || t.name.toLowerCase().includes(term));
 
   const filmografia = useMemo(() => {
@@ -138,13 +148,30 @@ function RosterAll() {
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Estos son nuestros clientes y clientas seleccionados según su sector de actividad profesional.
           </p>
+          <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+            «Pendiente» en una fecha significa que el dato falta por completar en la ficha del representado, no que no exista contrato.
+          </p>
         </div>
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nombre…"
-          className="w-72 rounded-sm"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setOnlyIncomplete(!onlyIncomplete)}
+            aria-pressed={onlyIncomplete}
+            className={
+              onlyIncomplete
+                ? "smallcaps rounded-sm bg-primary px-3 py-2 text-xs text-primary-foreground"
+                : "smallcaps rounded-sm border border-border px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
+            }
+          >
+            Solo incompletas
+          </button>
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre…"
+            className="w-72 rounded-sm"
+          />
+        </div>
       </div>
 
       {error ? (
@@ -153,8 +180,8 @@ function RosterAll() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-14">
-          <RosterSection title="Roster actual" rows={actual} variant="active" />
-          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" />
+          <RosterSection title="Roster actual" rows={actual} variant="active" missing={actualMissing} />
+          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" missing={prospeccionMissing} />
 
           <section>
             <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl title-caps">Roster objetivo</h2>
