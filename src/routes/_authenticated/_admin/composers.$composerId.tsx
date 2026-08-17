@@ -42,6 +42,8 @@ import { Section, KPI, Field } from "@/components/composer-detail/primitives";
 import { SpecialistTagsEditor } from "@/components/composer-detail/specialist-tags-editor";
 import { ComposerBilling } from "@/components/composer-detail/composer-billing";
 import { fetchComposerRelations } from "@/lib/composer-relations";
+import { CrmTransferMenu } from "@/components/crm-transfer-menu";
+import { composerToTargetAccount, composerToOpportunity } from "@/lib/crm-transfer";
 
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
@@ -111,6 +113,7 @@ function Inner({
   onDeleted: () => void;
 }) {
   const [c, setC] = useState(initial);
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [styleIds, setStyleIds] = useState<Set<string>>(initialRelations.styleIds);
@@ -270,6 +273,26 @@ function Inner({
           <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha
         </p>
         <div className="flex items-center gap-2">
+          <CrmTransferMenu
+            actions={[
+              {
+                label: "Cuentas objetivo",
+                description: "Crea la cuenta con los datos de esta ficha",
+                onSelect: async () => {
+                  const r = await composerToTargetAccount(c as never);
+                  if (r) navigate({ to: "/marketing/target-accounts/$accountId", params: { accountId: r.id } });
+                },
+              },
+              {
+                label: "Oportunidades",
+                description: "Crea la oportunidad y añade a esta persona como candidata",
+                onSelect: async () => {
+                  const r = await composerToOpportunity(c as never);
+                  if (r) navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: r.id } });
+                },
+              },
+            ]}
+          />
           <Button asChild size="sm" variant="outline">
             <Link to="/finance" search={{ composerId: c.id }}>Dashboard económico</Link>
           </Button>

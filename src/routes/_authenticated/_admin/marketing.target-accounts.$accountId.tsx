@@ -19,6 +19,8 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { toast } from "sonner";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
+import { CrmTransferMenu } from "@/components/crm-transfer-menu";
+import { targetAccountToComposer, targetAccountToCompany } from "@/lib/crm-transfer";
 import {
   TARGET_ACCOUNT_STATUSES,
   TARGET_ACCOUNT_STATUS_LABEL,
@@ -226,6 +228,28 @@ function TargetAccountDetail() {
           <Link to="/marketing/target-accounts"><ArrowLeft className="mr-1 h-4 w-4" /> Cuentas objetivo</Link>
         </Button>
         <div className="flex items-center gap-2">
+          <CrmTransferMenu
+            actions={[
+              {
+                label: "Roster",
+                description: "Crea la ficha de representado con estos datos",
+                onSelect: async () => {
+                  const r = await targetAccountToComposer(form as never);
+                  qc.invalidateQueries({ queryKey: ["composers"] });
+                  if (r) navigate({ to: "/composers/$composerId", params: { composerId: r.id } });
+                },
+              },
+              {
+                label: "Productoras",
+                description: "Crea o vincula la ficha de productora",
+                onSelect: async () => {
+                  const r = await targetAccountToCompany(form as never);
+                  qc.invalidateQueries({ queryKey: ["target-account", accountId] });
+                  if (r) navigate({ to: "/production-companies/$companyId", params: { companyId: r.id } });
+                },
+              },
+            ]}
+          />
           <Button variant="outline" size="sm" onClick={createOpportunity} disabled={creatingOpp}>
             <Sparkles className="mr-1 h-4 w-4" />
             {creatingOpp ? "Creando…" : "Crear oportunidad desde esta cuenta"}

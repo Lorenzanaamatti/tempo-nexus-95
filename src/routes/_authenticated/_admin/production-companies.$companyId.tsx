@@ -1,7 +1,7 @@
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Clapperboard } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { RelatedWorks } from "@/components/related-works";
+import { CrmTransferMenu } from "@/components/crm-transfer-menu";
+import { companyToTargetAccount, companyToOpportunity } from "@/lib/crm-transfer";
 
 export const Route = createFileRoute("/_authenticated/_admin/production-companies/$companyId")({
   component: CompanyDetail,
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/_admin/production-companie
 function CompanyDetail() {
   const { companyId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const companyQ = useQuery({
     queryKey: ["production-company", companyId],
@@ -52,9 +55,31 @@ function CompanyDetail() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-6 border-b border-border pb-4">
-        <PageCrumb label={c.name} />
-        <h1 className="mt-1 font-display text-4xl">{c.name}</h1>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <PageCrumb label={c.name} />
+          <h1 className="mt-1 font-display text-4xl">{c.name}</h1>
+        </div>
+        <CrmTransferMenu
+          actions={[
+            {
+              label: "Cuentas objetivo",
+              description: "Crea la cuenta vinculada a esta productora",
+              onSelect: async () => {
+                const r = await companyToTargetAccount(c);
+                if (r) navigate({ to: "/marketing/target-accounts/$accountId", params: { accountId: r.id } });
+              },
+            },
+            {
+              label: "Oportunidades",
+              description: "Crea la oportunidad con esta productora como partner",
+              onSelect: async () => {
+                const r = await companyToOpportunity(c);
+                if (r) navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: r.id } });
+              },
+            },
+          ]}
+        />
       </div>
 
       <section className="space-y-4">
