@@ -38,7 +38,7 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
   curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
-type RoleFilter = RosterRole | "todos";
+type RoleFilter = RosterRole | "other" | "todos";
 const ROLE_TABS: Array<{ value: RoleFilter; label: string }> = [
   { value: "todos", label: "Todos" },
   { value: "composer", label: "Compositor" },
@@ -74,19 +74,25 @@ export const Route = createFileRoute("/_authenticated/_admin/composers/")({
     const g = str(s.genero);
     return {
       role,
-      genero: (["mujer", "hombre", "no_binario"].includes(g) ? g : "") as Genero | "",
-      pais: str(s.pais),
-      ciudad: str(s.ciudad),
-      q: str(s.q),
+      genero: (["mujer", "hombre", "no_binario"].includes(g) ? g : "") as Genero | "" | undefined,
+      pais: str(s.pais) || undefined,
+      ciudad: str(s.ciudad) || undefined,
+      q: str(s.q) || undefined,
     };
   },
 });
 
 function ComposersIndex() {
-  const { role, genero, pais, ciudad, q } = Route.useSearch();
-  const navigate = useNavigate({ from: "/composers" });
+  const search = Route.useSearch();
+  const role = search.role;
+  const genero = search.genero ?? "";
+  const pais = search.pais ?? "";
+  const ciudad = search.ciudad ?? "";
+  const q = search.q ?? "";
+  const listRole: RosterRole = role === "todos" || role === "other" ? "composer" : role;
+  const navigate = useNavigate({ from: "/composers/" });
   const setSearch = (patch: Record<string, string>) =>
-    navigate({ to: ".", search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ to: ".", search: (prev) => ({ ...prev, ...patch }) as typeof search });
   const setQ = (v: string) => setSearch({ q: v });
   const meta =
     role === "todos" || role === "other"
@@ -295,18 +301,16 @@ function ComposersIndex() {
             filename={`roster-${role}`}
             sheetName={meta.title}
             fetchAll={async () => {
-              const { data, error } = await supabase
-                .from("composers")
-                .select("*")
-                .eq("roster_role", role)
-                .order("full_name");
+              let qy = supabase.from("composers").select("*").order("full_name");
+              if (role !== "todos") qy = qy.eq("roster_role", role);
+              const { data, error } = await qy;
               if (error) throw error;
               return data ?? [];
             }}
             fields={composerExportFields()}
           />
           <Button asChild size="sm">
-            <Link to="/composers/new" search={{ role }}><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
+            <Link to="/composers/new" search={{ role: listRole }}><Plus className="mr-1 h-4 w-4" /> Nuevo</Link>
           </Button>
         </div>
       </div>
@@ -320,7 +324,7 @@ function ComposersIndex() {
             Empieza añadiendo el primer {meta.singular} a la cartera.
           </p>
           <Button asChild className="mt-6">
-            <Link to="/composers/new" search={{ role }}><Plus className="mr-1 h-4 w-4" /> Añadir {meta.singular}</Link>
+            <Link to="/composers/new" search={{ role: listRole }}><Plus className="mr-1 h-4 w-4" /> Añadir {meta.singular}</Link>
           </Button>
         </div>
       ) : role !== "composer" ? (
@@ -335,11 +339,11 @@ function ComposersIndex() {
                   </div>
                 </div>
                 {viewMode === "list" ? (
-                  <RosterList items={items} role={role} />
+                  <RosterList items={items} role={listRole} />
                 ) : (
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {items.map((c: any) => (
-                      <SpecialistCard key={`${tag}-${c.id}`} c={c} role={role} />
+                      <SpecialistCard key={`${tag}-${c.id}`} c={c} role={listRole} />
                     ))}
                   </div>
                 )}
@@ -350,14 +354,14 @@ function ComposersIndex() {
           viewMode === "list" ? (
             <RosterList
               items={[...filtered].sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))}
-              role={role}
+              role={listRole}
             />
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[...filtered]
                 .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "", "es"))
                 .map((c: any) => (
-                  <SpecialistCard key={c.id} c={c} role={role} />
+                  <SpecialistCard key={c.id} c={c} role={listRole} />
                 ))}
             </div>
           )
