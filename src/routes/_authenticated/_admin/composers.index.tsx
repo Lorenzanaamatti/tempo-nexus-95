@@ -324,10 +324,11 @@ function ComposersIndex() {
                     alt={c.full_name}
                     className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
                     imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
+                    fallbackClassName="flex h-24 w-full shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-muted to-muted/40"
                     fallback={
-                      <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
-                        {c.full_name?.[0] ?? "·"}
-                      </div>
+                      <span className="grid h-14 w-14 place-items-center rounded-full border border-border bg-background font-display text-xl text-muted-foreground">
+                        {initials(c.full_name)}
+                      </span>
                     }
                   />
                   <div className="flex flex-1 flex-col p-5">
@@ -453,10 +454,11 @@ function SpecialistCard({ c, role }: { c: any; role: RosterRole }) {
           alt={c.full_name}
           className="aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
           imgClassName="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          fallbackClassName="flex h-24 w-full shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-muted to-muted/40"
           fallback={
-            <div className="flex h-full items-center justify-center font-display text-4xl text-muted-foreground">
-              {c.full_name?.[0] ?? "·"}
-            </div>
+            <span className="grid h-14 w-14 place-items-center rounded-full border border-border bg-background font-display text-xl text-muted-foreground">
+              {initials(c.full_name)}
+            </span>
           }
         />
         <div className="flex flex-1 flex-col p-5">
