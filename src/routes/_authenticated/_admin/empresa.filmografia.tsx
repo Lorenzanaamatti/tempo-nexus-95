@@ -1,5 +1,5 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -327,53 +327,161 @@ function FilmografiaIC() {
 
 function HistoricalDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const qc = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [kind, setKind] = useState<ProductionKind>("cine");
-  const [year, setYear] = useState("");
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    title: "",
+    kind: "cine" as ProductionKind,
+    year: "",
+    production_company: "",
+    director: "",
+    composer_id: "",
+    external_composer: "",
+    music_supervisor_name: "",
+    platform: "",
+    premiere_date: "",
+    fee_amount: "",
+    ic_commission_pct: "",
+    notes: "",
+  });
   const [saving, setSaving] = useState(false);
+  const roster = useQuery({
+    queryKey: ["roster-min"],
+    queryFn: async () => {
+      const { data } = await db.from("composers").select("id, full_name, artistic_name").order("full_name");
+      return ((data ?? []) as any[]).map((c) => ({ id: c.id, name: c.artistic_name || c.full_name }));
+    },
+    enabled: open,
+  });
+
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+
+  /** Garantiza que la producción también exista en Producciones españolas. */
+  async function ensureEspanola(productionId: string) {
+    const { data: linked } = await db
+      .from("producciones_espanolas")
+      .select("id")
+      .eq("produccion_ic_vinculada", productionId)
+      .maybeSingle();
+    if (linked) return;
+    const { data: match } = await db
+      .from("producciones_espanolas")
+      .select("id")
+      .ilike("title", form.title.trim())
+      .limit(1)
+      .maybeSingle();
+    const payload = {
+      title: form.title.trim(),
+      title_es: form.title.trim(),
+      year: form.year ? Number(form.year) : null,
+      media_type: form.kind === "serie" ? "tv" : "movie",
+      composer: form.external_composer || roster.data?.find((r) => r.id === form.composer_id)?.name || null,
+      music_supervisor: form.music_supervisor_name || null,
+      platform: form.platform || null,
+      production_companies: form.production_company ? [form.production_company] : [],
+      directors: form.director ? [form.director] : [],
+      ic_participo: true,
+      produccion_ic_vinculada: productionId,
+      origen: "produccion_ic",
+    };
+    if (match) await db.from("producciones_espanolas").update(payload).eq("id", (match as any).id);
+    else await db.from("producciones_espanolas").insert(payload);
+  }
 
   async function save() {
-    if (!title.trim()) return;
+    if (!form.title.trim()) return toast.error("El título es obligatorio");
     setSaving(true);
-    const { error } = await db.from("productions").insert({
-      title: title.trim(),
-      project_type: kind,
-      kind: PRODUCTION_KIND_LABEL[kind],
-      year: year ? Number(year) : null,
-      is_historical: true,
-      status: STAGE_DEFAULT_STATUS.finalizada,
-    });
+    const fee = form.fee_amount ? Number(form.fee_amount) : null;
+    const pct = form.ic_commission_pct ? Number(form.ic_commission_pct) : null;
+    const { data, error } = await db
+      .from("productions")
+      .insert({
+        title: form.title.trim(),
+        project_type: form.kind,
+        kind: PRODUCTION_KIND_LABEL[form.kind],
+        year: form.year ? Number(form.year) : null,
+        production_company: form.production_company || null,
+        director: form.director || null,
+        composer_id: form.composer_id || null,
+        external_composer: form.external_composer || null,
+        music_supervisor_name: form.music_supervisor_name || null,
+        platform: form.platform || null,
+        premiere_date: form.premiere_date || null,
+        fee_amount: fee,
+        ic_commission_pct: pct,
+        ic_commission: fee != null && pct != null ? (fee * pct) / 100 : null,
+        notes: form.notes || null,
+        is_historical: true,
+        status: STAGE_DEFAULT_STATUS.finalizada,
+      })
+      .select("id")
+      .single();
+    if (error || !data) {
+      setSaving(false);
+      return toast.error(error?.message ?? "No se pudo crear la ficha");
+    }
+    const id = (data as any).id as string;
+    try {
+      await ensureEspanola(id);
+    } catch {
+      /* la sincronización automática de la base de datos se encarga si falla */
+    }
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Entrada histórica añadida");
-    setTitle(""); setYear("");
+    toast.success("Ficha creada y vinculada a producciones españolas");
     onOpenChange(false);
     qc.invalidateQueries({ queryKey: ["filmografia-ic"] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
+    qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+    void navigate({ to: "/producciones/$productionId", params: { productionId: id } });
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>Nueva entrada histórica</DialogTitle></DialogHeader>
         <div className="grid gap-3">
-          <div className="grid gap-1.5"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-1.5"><Label>Título</Label><Input value={form.title} onChange={(e) => set({ title: e.target.value })} /></div>
+          <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
               <Label>Tipo</Label>
-              <Select value={kind} onValueChange={(v) => setKind(v as ProductionKind)}>
+              <Select value={form.kind} onValueChange={(v) => set({ kind: v as ProductionKind })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(PRODUCTION_KIND_LABEL).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-1.5"><Label>Año</Label><Input type="number" value={year} onChange={(e) => setYear(e.target.value)} /></div>
+            <div className="grid gap-1.5"><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => set({ year: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => set({ premiere_date: e.target.value })} /></div>
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Productora</Label><Input value={form.production_company} onChange={(e) => set({ production_company: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Director/a</Label><Input value={form.director} onChange={(e) => set({ director: e.target.value })} /></div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label>Representado IC</Label>
+              <Select value={form.composer_id || undefined} onValueChange={(v) => set({ composer_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
+                <SelectContent>
+                  {(roster.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-1.5"><Label>Compositor externo</Label><Input value={form.external_composer} onChange={(e) => set({ external_composer: e.target.value })} /></div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Supervisión musical</Label><Input value={form.music_supervisor_name} onChange={(e) => set({ music_supervisor_name: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Plataforma</Label><Input value={form.platform} onChange={(e) => set({ platform: e.target.value })} /></div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Presupuesto (€)</Label><Input type="number" value={form.fee_amount} onChange={(e) => set({ fee_amount: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Comisión IC (%)</Label><Input type="number" value={form.ic_commission_pct} onChange={(e) => set({ ic_commission_pct: e.target.value })} /></div>
+          </div>
+          <div className="grid gap-1.5"><Label>Notas</Label><Input value={form.notes} onChange={(e) => set({ notes: e.target.value })} /></div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={save} disabled={saving || !title.trim()}>Añadir</Button>
+          <Button onClick={save} disabled={saving || !form.title.trim()}>Crear ficha y abrir</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
