@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { formatLocation, matchesLocation } from "@/lib/geo";
 import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -506,7 +507,7 @@ function ComposersIndex() {
                       <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
                       <Badge variant="outline" className="shrink-0 rounded-sm font-mono">{c.tier ?? "—"}</Badge>
                     </div>
-                    <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+                    <p className="min-h-[1rem] text-xs text-muted-foreground">{formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "\u00A0"}</p>
                     <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
                       {(c.tags ?? []).slice(0, 4).map((t: string) => (
                         <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
@@ -581,7 +582,7 @@ function RosterList({ items, role }: { items: any[]; role: RosterRole }) {
                   <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{c.tier ?? "—"}</td>
                 )}
                 <td className="hidden px-3 py-2 text-xs text-muted-foreground sm:table-cell">
-                  {[c.city, c.country].filter(Boolean).join(" · ") || "—"}
+                  {formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "—"}
                 </td>
                 <td className="hidden px-3 py-2 md:table-cell">
                   <div className="flex flex-wrap gap-1">
@@ -645,7 +646,7 @@ function SpecialistCard({ c, role }: { c: any; role: RosterRole }) {
             </div>
           )}
           <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
-          <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+          <p className="min-h-[1rem] text-xs text-muted-foreground">{formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "\u00A0"}</p>
           {role !== "specialist" && (
             <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
               {tags.slice(0, 4).map((t) => (
