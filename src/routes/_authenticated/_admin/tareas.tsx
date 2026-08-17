@@ -209,6 +209,12 @@ function TareasPage() {
 
       {tasksQ.isLoading ? (
         <ListSkeleton rows={6} />
+      ) : tasksQ.isError ? (
+        <div role="alert" className="rounded-sm border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          <p className="font-medium">No se han podido cargar las tareas.</p>
+          <p className="mt-1 text-muted-foreground">{(tasksQ.error as any)?.message ?? "Error desconocido"}</p>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => tasksQ.refetch()}>Reintentar</Button>
+        </div>
       ) : !rows.length ? (
         <EmptyState icon={CheckCircle2} title="Todo al día" description="No hay tareas pendientes con los filtros actuales." action={{ label: "Nueva tarea", onClick: () => openNewTask() }} secondaryAction={mine ? { label: "Ver todas", onClick: () => setMine(false) } : undefined} />
       ) : (
