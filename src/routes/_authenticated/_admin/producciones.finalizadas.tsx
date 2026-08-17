@@ -31,7 +31,10 @@ function ProduccionesFinalizadas() {
             Archivo histórico de producciones cerradas, agrupadas por año.
           </p>
         </div>
-        <ProductionSearch value={q} onChange={setQ} />
+        <div className="flex flex-wrap items-center gap-2">
+          <ProductionSearch value={q} onChange={setQ} />
+          <ExportRowsButton rows={rows} filename="producciones-finalizadas" sheetName="Finalizadas" />
+        </div>
       </div>
 
       {productionsQ.isLoading ? (
