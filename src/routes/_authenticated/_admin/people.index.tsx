@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Sparkles, User } from "lucide-react";
-import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { IC_FUNCTION_GROUPS, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { IcFunctionTags } from "@/components/ic-function-tags";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PaginationBar, SortControl, useServerPagination } from "@/components/pagination-bar";
@@ -193,22 +194,27 @@ function PeopleIndex() {
               key={p.id}
               to="/people/$personId"
               params={{ personId: p.id }}
-              className="flex flex-wrap items-center gap-2 px-4 py-3 transition hover:bg-muted/40"
+              className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-4 py-3 transition hover:bg-muted/40"
             >
-              <span className="font-display text-lg">{p.full_name}</span>
-              <Badge variant="outline" className="rounded-sm text-[10px]">
-                {p.is_virtual_assistant ? (
-                  <><Sparkles className="mr-1 h-3 w-3" /> Agente virtual</>
-                ) : (
-                  <><User className="mr-1 h-3 w-3" /> Persona real</>
-                )}
-              </Badge>
-              {p.fns?.map((fn) => (
-                <Badge key={fn} variant="secondary" className="rounded-sm text-[10px]">
-                  {IC_FUNCTION_LABEL[fn]}
-                </Badge>
-              ))}
-              {p.email && <span className="text-xs text-muted-foreground">{p.email}</span>}
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="font-display text-lg leading-tight">{p.full_name}</span>
+                  {p.is_virtual_assistant ? (
+                    <Badge variant="outline" className="rounded-sm text-[10px]">
+                      <Sparkles className="mr-1 h-3 w-3" /> Agente virtual
+                    </Badge>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <User className="h-3 w-3" /> Persona real
+                    </span>
+                  )}
+                </div>
+                <IcFunctionTags fns={(p.fns ?? []) as IcTeamFunction[]} />
+              </div>
+              <div className="shrink-0 text-right text-xs leading-relaxed text-muted-foreground">
+                {p.email && <div className="truncate">{p.email}</div>}
+                {p.phone && <div className="truncate">{p.phone}</div>}
+              </div>
             </Link>
           ))}
         </div>
