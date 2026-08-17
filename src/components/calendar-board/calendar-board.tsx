@@ -60,15 +60,22 @@ export function CalendarBoard({
   const [layout, setLayout] = useState<Layout>(initialOnlyMine ? "kanban" : "gantt");
   const [anchor, setAnchor] = useState<Date>(new Date());
   const [onlyMine, setOnlyMine] = useState(initialOnlyMine);
-  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(() =>
-    initialCategoryState(lockedCategory, initialCategories),
+  const [activeCategories, setActiveCategories] = useState<Record<Category, boolean>>(() => {
+    const base = initialCategoryState(lockedCategory, initialCategories);
+    // "Personal" solo existe en la vista Personal (Equipo)
+    return initialOnlyMine ? base : { ...base, personal: false };
+  });
+  // En vistas que no son "Personal" no se ofrecen filtros por sujeto (Equipo / Roster)
+  const showSubjectFilters = initialOnlyMine;
+  const visibleCategories = (Object.keys(CATEGORY_LABEL) as Category[]).filter(
+    (c) => initialOnlyMine || c !== "personal",
   );
   // Subjects not present in the map are considered visible (default-on).
   const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());
   const [filtersOpen, setFiltersOpen] = useState(false);
   const activeFilterCount =
-    (lockedCategory ? 0 : (Object.keys(CATEGORY_LABEL) as Category[]).filter((c) => !activeCategories[c]).length) +
-    hiddenSubjects.size;
+    (lockedCategory ? 0 : visibleCategories.filter((c) => !activeCategories[c]).length) +
+    (showSubjectFilters ? hiddenSubjects.size : 0);
   const toggleSubject = (key: string) =>
     setHiddenSubjects((prev) => {
       const next = new Set(prev);
@@ -250,7 +257,7 @@ export function CalendarBoard({
 
       {filtersOpen && !lockedCategory && (
         <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
+          {visibleCategories.map((c) => (
             <FamilyChip
               key={c}
               active={activeCategories[c]}
@@ -296,7 +303,7 @@ export function CalendarBoard({
       )}
 
       {/* Source family filters — secondary axis */}
-      {filtersOpen && (
+      {filtersOpen && showSubjectFilters && (
         <SubjectFilters
           people={(data.peopleQ.data ?? []) as any[]}
           composers={(data.composersQ.data ?? []) as any[]}
