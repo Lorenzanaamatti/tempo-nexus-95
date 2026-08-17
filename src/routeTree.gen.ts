@@ -84,6 +84,7 @@ import { Route as AuthenticatedAdminOpportunitiesOpportunityIdRouteImport } from
 import { Route as AuthenticatedAdminOportunidadesSubvencionesRouteImport } from './routes/_authenticated/_admin/oportunidades.subvenciones'
 import { Route as AuthenticatedAdminOportunidadesRosterRouteImport } from './routes/_authenticated/_admin/oportunidades.roster'
 import { Route as AuthenticatedAdminOportunidadesProduccionesRouteImport } from './routes/_authenticated/_admin/oportunidades.producciones'
+import { Route as AuthenticatedAdminOportunidadesPrensaRouteImport } from './routes/_authenticated/_admin/oportunidades.prensa'
 import { Route as AuthenticatedAdminOportunidadesPremiosRouteImport } from './routes/_authenticated/_admin/oportunidades.premios'
 import { Route as AuthenticatedAdminOportunidadesPartnersRouteImport } from './routes/_authenticated/_admin/oportunidades.partners'
 import { Route as AuthenticatedAdminOportunidadesFestivalesRouteImport } from './routes/_authenticated/_admin/oportunidades.festivales'
@@ -558,6 +559,12 @@ const AuthenticatedAdminOportunidadesProduccionesRoute =
     path: '/oportunidades/producciones',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminOportunidadesPrensaRoute =
+  AuthenticatedAdminOportunidadesPrensaRouteImport.update({
+    id: '/oportunidades/prensa',
+    path: '/oportunidades/prensa',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminOportunidadesPremiosRoute =
   AuthenticatedAdminOportunidadesPremiosRouteImport.update({
     id: '/oportunidades/premios',
@@ -878,6 +885,7 @@ export interface FileRoutesByFullPath {
   '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
+  '/oportunidades/prensa': typeof AuthenticatedAdminOportunidadesPrensaRoute
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
   '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
@@ -993,6 +1001,7 @@ export interface FileRoutesByTo {
   '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
+  '/oportunidades/prensa': typeof AuthenticatedAdminOportunidadesPrensaRoute
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
   '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
@@ -1113,6 +1122,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/_authenticated/_admin/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/_authenticated/_admin/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
+  '/_authenticated/_admin/oportunidades/prensa': typeof AuthenticatedAdminOportunidadesPrensaRoute
   '/_authenticated/_admin/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/_authenticated/_admin/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
   '/_authenticated/_admin/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
@@ -1232,6 +1242,7 @@ export interface FileRouteTypes {
     | '/oportunidades/festivales'
     | '/oportunidades/partners'
     | '/oportunidades/premios'
+    | '/oportunidades/prensa'
     | '/oportunidades/producciones'
     | '/oportunidades/roster'
     | '/oportunidades/subvenciones'
@@ -1347,6 +1358,7 @@ export interface FileRouteTypes {
     | '/oportunidades/festivales'
     | '/oportunidades/partners'
     | '/oportunidades/premios'
+    | '/oportunidades/prensa'
     | '/oportunidades/producciones'
     | '/oportunidades/roster'
     | '/oportunidades/subvenciones'
@@ -1466,6 +1478,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/oportunidades/festivales'
     | '/_authenticated/_admin/oportunidades/partners'
     | '/_authenticated/_admin/oportunidades/premios'
+    | '/_authenticated/_admin/oportunidades/prensa'
     | '/_authenticated/_admin/oportunidades/producciones'
     | '/_authenticated/_admin/oportunidades/roster'
     | '/_authenticated/_admin/oportunidades/subvenciones'
@@ -2056,6 +2069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOportunidadesProduccionesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/oportunidades/prensa': {
+      id: '/_authenticated/_admin/oportunidades/prensa'
+      path: '/oportunidades/prensa'
+      fullPath: '/oportunidades/prensa'
+      preLoaderRoute: typeof AuthenticatedAdminOportunidadesPrensaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/oportunidades/premios': {
       id: '/_authenticated/_admin/oportunidades/premios'
       path: '/oportunidades/premios'
@@ -2437,6 +2457,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOportunidadesFestivalesRoute: typeof AuthenticatedAdminOportunidadesFestivalesRoute
   AuthenticatedAdminOportunidadesPartnersRoute: typeof AuthenticatedAdminOportunidadesPartnersRoute
   AuthenticatedAdminOportunidadesPremiosRoute: typeof AuthenticatedAdminOportunidadesPremiosRoute
+  AuthenticatedAdminOportunidadesPrensaRoute: typeof AuthenticatedAdminOportunidadesPrensaRoute
   AuthenticatedAdminOportunidadesProduccionesRoute: typeof AuthenticatedAdminOportunidadesProduccionesRoute
   AuthenticatedAdminOportunidadesRosterRoute: typeof AuthenticatedAdminOportunidadesRosterRoute
   AuthenticatedAdminOportunidadesSubvencionesRoute: typeof AuthenticatedAdminOportunidadesSubvencionesRoute
@@ -2549,6 +2570,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminOportunidadesPartnersRoute,
   AuthenticatedAdminOportunidadesPremiosRoute:
     AuthenticatedAdminOportunidadesPremiosRoute,
+  AuthenticatedAdminOportunidadesPrensaRoute:
+    AuthenticatedAdminOportunidadesPrensaRoute,
   AuthenticatedAdminOportunidadesProduccionesRoute:
     AuthenticatedAdminOportunidadesProduccionesRoute,
   AuthenticatedAdminOportunidadesRosterRoute:
