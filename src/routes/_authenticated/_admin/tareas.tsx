@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TASK_AREAS, TASK_AREA_LABEL, TASK_AREA_TONE, type TaskArea } from "@/lib/task-areas";
 import { TASK_STATUSES, TASK_STATUS_LABEL, TASK_STATUS_TONE, todayISO, type TaskStatus } from "@/lib/task-status";
 import { useMyPersonId, useMyDueTaskCount } from "@/lib/use-my-tasks";
+import { usePendingAssignments, useRespondAssignment } from "@/lib/use-notifications";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { toast } from "sonner";
@@ -42,6 +43,9 @@ function TareasPage() {
   const qc = useQueryClient();
   const personId = useMyPersonId().data ?? null;
   const dueCount = useMyDueTaskCount().data ?? 0;
+  const pendingQ = usePendingAssignments(personId);
+  const respond = useRespondAssignment();
+  const pendingAssignments = pendingQ.data ?? [];
 
   const [mine, setMine] = useState(true);
   const [areaFilter, setAreaFilter] = useState<string>("all");
@@ -120,6 +124,51 @@ function TareasPage() {
         <div className="mb-4 rounded-sm border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
           Tu usuario aún no está enlazado a una persona del equipo. Un administrador debe asociarte desde Equipo IC para recibir tareas.
         </div>
+      )}
+
+      {pendingAssignments.length > 0 && (
+        <section className="mb-6 rounded-sm border border-primary/40 bg-primary/5 p-4">
+          <h2 className="smallcaps text-[11px] text-muted-foreground">
+            Te han asignado {pendingAssignments.length} tarea{pendingAssignments.length > 1 ? "s" : ""}
+          </h2>
+          <ul className="mt-2 divide-y divide-border">
+            {pendingAssignments.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <div className="min-w-0">
+                  <p className="text-sm">{t.title}</p>
+                  <p className="smallcaps text-[10px] text-muted-foreground">
+                    {[t.subarea, t.due_date ? `entrega ${t.due_date}` : null].filter(Boolean).join(" · ") || "sin fecha"}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="h-7"
+                    disabled={respond.isPending}
+                    onClick={async () => {
+                      await respond.mutateAsync({ actionId: t.id, accept: true });
+                      toast.success("Tarea aceptada");
+                    }}
+                  >
+                    Aceptar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7"
+                    disabled={respond.isPending}
+                    onClick={async () => {
+                      await respond.mutateAsync({ actionId: t.id, accept: false });
+                      toast.success("Tarea rechazada");
+                    }}
+                  >
+                    Rechazar
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <div className="mb-4 flex flex-wrap items-end gap-2">
