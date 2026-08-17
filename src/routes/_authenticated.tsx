@@ -1,15 +1,15 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { GlobalSearch } from "@/components/global-search";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
-import { CalendarDays, Users, ListChecks } from "lucide-react";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView } from "@/lib/session-view";
 import { BrandLogo } from "@/components/brand-logo";
+import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
   component: Shell,
@@ -77,42 +77,15 @@ function Shell() {
   return (
     <SidebarProvider>
       <TaskDialogProvider>
+      <PageCrumbProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar role={role} sessionView={sessionView} />
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
-            <BrandLogo variant="auto" className="h-4 w-auto" />
-            {role === "admin" && (
-              <nav className="ml-4 flex items-center gap-1">
-                <Link
-                  to="/calendar"
-                  search={{ view: "global" }}
-                  className="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs smallcaps text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  activeProps={{ className: "flex items-center gap-1.5 rounded-sm bg-muted px-2 py-1 text-xs smallcaps text-foreground" }}
-                >
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Calendarios</span>
-                </Link>
-                <Link
-                  to="/people"
-                  className="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs smallcaps text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  activeProps={{ className: "flex items-center gap-1.5 rounded-sm bg-muted px-2 py-1 text-xs smallcaps text-foreground" }}
-                >
-                  <Users className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Equipo IC</span>
-                </Link>
-                <Link
-                  to="/tareas"
-                  className="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs smallcaps text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  activeProps={{ className: "flex items-center gap-1.5 rounded-sm bg-muted px-2 py-1 text-xs smallcaps text-foreground" }}
-                >
-                  <ListChecks className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Tareas</span>
-                </Link>
-            </nav>
-            )}
-            <div className="ml-auto"><GlobalSearch /></div>
+            <BrandLogo variant="auto" className="hidden h-4 w-auto sm:block" />
+            <div className="min-w-0 flex-1"><Breadcrumbs /></div>
+            <GlobalSearch />
             {role === "admin" && <TaskInboxBell />}
           </header>
           <main className="flex-1">
@@ -120,6 +93,7 @@ function Shell() {
           </main>
         </div>
       </div>
+      </PageCrumbProvider>
       </TaskDialogProvider>
     </SidebarProvider>
   );
