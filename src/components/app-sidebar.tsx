@@ -79,91 +79,16 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const composerActive = pathname.startsWith("/composers");
   const composersRole = composerActive ? (search?.role ?? "composer") : null;
 
-  type NavItem = {
-    title: string;
-    to: string;
-    search?: Record<string, string>;
-    icon: typeof Music;
-    active: boolean;
-  };
-  // 1. ROSTER
-  const rosterItems: NavItem[] = [
-    { title: "Roster completo", to: "/roster", icon: LibraryBig, active: pathname.startsWith("/roster") },
-    { title: "Compositores",        to: "/composers", search: { role: "composer" },   icon: Music,            active: composersRole === "composer" },
-    { title: "Artistas",            to: "/composers", search: { role: "artist" },     icon: Mic2,             active: composersRole === "artist" },
-    { title: "Supervisores musicales", to: "/composers", search: { role: "supervisor" }, icon: Headphones,    active: composersRole === "supervisor" },
-    { title: "Especialistas",       to: "/composers", search: { role: "specialist" }, icon: Sparkles,         active: composersRole === "specialist" },
-    { title: "Curadores musicales", to: "/composers", search: { role: "curator" },    icon: ListMusic,        active: composersRole === "curator" },
-    { title: "Interesante Compañía", to: "/ic", icon: Building2,                       active: pathname.startsWith("/ic") },
-  ];
-
-  // 2. PARTNERS
-  const partnersItems: NavItem[] = [
-    { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
-    { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
-    { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
-    { title: "Otros partners", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
-  ];
-
-  // 3. OPORTUNIDADES
-  const opportunitiesItems: NavItem[] = [
-    { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
-    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
-    { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
-  ];
-
-  // 4. EMPRESA
-  const empresaItems: NavItem[] = [
-    { title: "Producciones en curso", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
-    { title: "Dashboard económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
-    { title: "Pipeline de facturación", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
-  ];
-
-  // 5. LEGAL
-  const legalItems: NavItem[] = [
-    { title: "Templates contrato", to: "/legal/templates-contrato", icon: ScrollText, active: pathname.startsWith("/legal/templates-contrato") },
-    { title: "Templates deal memo", to: "/legal/templates-deal-memo", icon: FileSignature, active: pathname.startsWith("/legal/templates-deal-memo") },
-    { title: "Templates presupuesto", to: "/legal/templates-presupuesto", icon: Receipt, active: pathname.startsWith("/legal/templates-presupuesto") },
-    { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare, active: pathname === "/deal-memos" || pathname.startsWith("/deal-memos/lista") || pathname.startsWith("/deal-memos/configuracion") },
-    { title: "Personal · Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
-    { title: "Personal IA · Equipo agentes IC", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
-    { title: "Contratos firmados", to: "/legal/contratos-firmados", icon: FileSignature, active: pathname.startsWith("/legal/contratos-firmados") || pathname.startsWith("/contracts") },
-  ];
-
-  // 6. MKTG
-  const marketingItems: NavItem[] = [
-    { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette, active: pathname.startsWith("/marketing/brand") },
-    { title: "Ventas", to: "/marketing/ventas", icon: Presentation, active: pathname.startsWith("/marketing/ventas") },
-    { title: "Comunicación", to: "/marketing/comunicacion", icon: Share2, active: pathname.startsWith("/marketing/comunicacion") },
-    { title: "Templates", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
-  ];
-
-  // 7. CALENDARIOS — una sola entrada; las vistas se eligen dentro de /calendar
-  const calendarItems: NavItem[] = [
-    { title: "Calendarios", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
-  ];
-
-  const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
-    { label: "Clientes",      icon: LibraryBig,  items: rosterItems },
-    { label: "Partners",      icon: Handshake,   items: partnersItems },
-    { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
-    { label: "Empresa",       icon: Wallet,      items: empresaItems },
-    { label: "Legal",         icon: Scale,       items: legalItems },
-    { label: "Marketing",     icon: Megaphone,   items: marketingItems },
-    { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
-  ];
-
-  // In TEAM view, hide the pure-admin surfaces: Económico dashboard, agentes IA,
-  // "Usuarios y permisos" no aparece aquí (vive en /users). Deja el resto operativo.
-  const teamGroups = adminGroups
-    .filter((g) => g.label !== "Empresa")
+  const groups = NAV_GROUPS
+    .filter((g) => !(g.bigCOnly && isTeamView))
     .map((g) =>
-      g.label === "Legal"
+      isTeamView && g.label === "Legal"
         ? { ...g, items: g.items.filter((i) => i.to !== "/agent-actions") }
         : g,
     );
 
-  const visibleAdminGroups = isTeamView ? teamGroups : adminGroups;
+  const visibleAdminGroups = groups;
+
 
   return (
     <Sidebar collapsible="icon">
