@@ -3833,6 +3833,121 @@ export type Database = {
           },
         ]
       }
+      producciones_espanolas: {
+        Row: {
+          backdrop_path: string | null
+          countries: string[]
+          created_at: string
+          directors: string[]
+          estado_prospeccion: Database["public"]["Enums"]["prospeccion_estado"]
+          genres: string[]
+          ic_participo: boolean
+          id: string
+          last_synced_at: string | null
+          media_type: string
+          notas: string | null
+          oportunidad_vinculada: string | null
+          platform: string | null
+          poster_path: string | null
+          produccion_ic_vinculada: string | null
+          production_companies: string[]
+          release_date: string | null
+          representados_vinculados: string[]
+          runtime: number | null
+          synopsis: string | null
+          title: string
+          title_es: string | null
+          title_original: string | null
+          tmdb_id: number | null
+          tmdb_status: string | null
+          tmdb_url: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          backdrop_path?: string | null
+          countries?: string[]
+          created_at?: string
+          directors?: string[]
+          estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
+          genres?: string[]
+          ic_participo?: boolean
+          id?: string
+          last_synced_at?: string | null
+          media_type?: string
+          notas?: string | null
+          oportunidad_vinculada?: string | null
+          platform?: string | null
+          poster_path?: string | null
+          produccion_ic_vinculada?: string | null
+          production_companies?: string[]
+          release_date?: string | null
+          representados_vinculados?: string[]
+          runtime?: number | null
+          synopsis?: string | null
+          title: string
+          title_es?: string | null
+          title_original?: string | null
+          tmdb_id?: number | null
+          tmdb_status?: string | null
+          tmdb_url?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          backdrop_path?: string | null
+          countries?: string[]
+          created_at?: string
+          directors?: string[]
+          estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
+          genres?: string[]
+          ic_participo?: boolean
+          id?: string
+          last_synced_at?: string | null
+          media_type?: string
+          notas?: string | null
+          oportunidad_vinculada?: string | null
+          platform?: string | null
+          poster_path?: string | null
+          produccion_ic_vinculada?: string | null
+          production_companies?: string[]
+          release_date?: string | null
+          representados_vinculados?: string[]
+          runtime?: number | null
+          synopsis?: string | null
+          title?: string
+          title_es?: string | null
+          title_original?: string | null
+          tmdb_id?: number | null
+          tmdb_status?: string | null
+          tmdb_url?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producciones_espanolas_oportunidad_vinculada_fkey"
+            columns: ["oportunidad_vinculada"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producciones_espanolas_produccion_ic_vinculada_fkey"
+            columns: ["produccion_ic_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producciones_espanolas_produccion_ic_vinculada_fkey"
+            columns: ["produccion_ic_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_assignments: {
         Row: {
           composer_id: string | null
@@ -5774,6 +5889,11 @@ export type Database = {
         | "comunicada_nominacion"
         | "comunicado_premio"
       profile_status: "pending" | "active" | "rejected"
+      prospeccion_estado:
+        | "sin_valorar"
+        | "interesa_contactar"
+        | "contactada"
+        | "descartada"
       provider_kind:
         | "estudio_grabacion"
         | "mezcla"
@@ -6397,6 +6517,12 @@ export const Constants = {
         "comunicado_premio",
       ],
       profile_status: ["pending", "active", "rejected"],
+      prospeccion_estado: [
+        "sin_valorar",
+        "interesa_contactar",
+        "contactada",
+        "descartada",
+      ],
       provider_kind: [
         "estudio_grabacion",
         "mezcla",
