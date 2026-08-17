@@ -306,6 +306,9 @@ function ComposersIndex() {
                 </div>
                 <p className="hidden max-w-md text-right text-xs text-muted-foreground sm:block">{TIER_HINT[tier]}</p>
               </div>
+              {viewMode === "list" ? (
+                <RosterList items={items as any[]} role={role} />
+              ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((c: any) => {
             return (
@@ -347,10 +350,84 @@ function ComposersIndex() {
             );
                 })}
               </div>
+              )}
             </section>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Vista densa por defecto: una fila por representado, escaneable. */
+function RosterList({ items, role }: { items: any[]; role: RosterRole }) {
+  const tagsOf = (c: any): string[] => {
+    const set = new Set<string>();
+    for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    if (role === "specialist") for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
+    return [...set];
+  };
+  const availability = (v: string | null) =>
+    v === "available" ? "Disponible" : v === "partial" ? "Parcial" : "No disponible";
+  return (
+    <div className="overflow-hidden rounded-sm border border-border">
+      <table className="w-full text-sm">
+        <thead className="border-b border-border bg-muted/40">
+          <tr className="text-left">
+            <th className="px-3 py-2 smallcaps text-xs">Nombre</th>
+            {role === "composer" && <th className="px-3 py-2 smallcaps text-xs w-20">Tier</th>}
+            <th className="hidden px-3 py-2 smallcaps text-xs sm:table-cell">Ubicación</th>
+            <th className="hidden px-3 py-2 smallcaps text-xs md:table-cell">Tags</th>
+            <th className="px-3 py-2 smallcaps text-xs w-36">Disponibilidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((c) => {
+            const tags = tagsOf(c);
+            return (
+              <tr key={c.id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                <td className="px-3 py-2">
+                  <Link
+                    to="/composers/$composerId"
+                    params={{ composerId: c.id }}
+                    className="flex min-w-0 items-center gap-3 hover:text-primary"
+                  >
+                    <ComposerThumb
+                      path={c.photo_path as string | null}
+                      alt={c.full_name}
+                      className="h-9 w-9 shrink-0 overflow-hidden rounded-sm bg-muted"
+                      imgClassName="h-full w-full object-cover"
+                      fallback={
+                        <div className="flex h-full items-center justify-center font-display text-sm text-muted-foreground">
+                          {c.full_name?.[0] ?? "·"}
+                        </div>
+                      }
+                    />
+                    <span className="truncate font-medium">{c.full_name}</span>
+                  </Link>
+                </td>
+                {role === "composer" && (
+                  <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{c.tier ?? "—"}</td>
+                )}
+                <td className="hidden px-3 py-2 text-xs text-muted-foreground sm:table-cell">
+                  {[c.city, c.country].filter(Boolean).join(" · ") || "—"}
+                </td>
+                <td className="hidden px-3 py-2 md:table-cell">
+                  <div className="flex flex-wrap gap-1">
+                    {tags.slice(0, 3).map((t) => (
+                      <Badge key={t} variant="outline" className="rounded-sm text-[11px]">{t}</Badge>
+                    ))}
+                    {tags.length > 3 && (
+                      <span className="text-[11px] text-muted-foreground">+{tags.length - 3}</span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-2 smallcaps text-xs text-muted-foreground">{availability(c.availability)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
