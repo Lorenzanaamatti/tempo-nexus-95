@@ -14,7 +14,11 @@ import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { ROLES_FICHAJE } from "@/lib/producciones-espanolas";
-import { ROSTER_PROSPECT_ESTADOS, type RosterProspectEstado } from "@/lib/kpi-constants";
+import {
+  ROSTER_PROSPECT_ESTADOS,
+  ROSTER_PROSPECT_ESTADO_LABEL,
+  type RosterProspectEstado,
+} from "@/lib/kpi-constants";
 
 export const Route = createFileRoute("/_authenticated/_admin/oportunidades/prospect/$prospectId")({
   component: ProspectDetailPage,
@@ -149,8 +153,8 @@ function ProspectDetailPage() {
           <Select value={form.estado} onValueChange={(v) => setForm({ ...form, estado: v as RosterProspectEstado })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {ROSTER_PROSPECT_ESTADOS.map((o: any) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              {ROSTER_PROSPECT_ESTADOS.map((o) => (
+                <SelectItem key={o} value={o}>{ROSTER_PROSPECT_ESTADO_LABEL[o]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
