@@ -66,6 +66,7 @@ function ProduccionesEspanolas() {
   const importFn = useServerFn(importProduccionEspanola);
   const syncFn = useServerFn(syncProduccionesEspanolas);
   const yearFn = useServerFn(importEspanolasYearPage);
+  const enrichFn = useServerFn(enrichEspanolas);
 
   const [q, setQ] = useState("");
   const [year, setYear] = useState(ALL);
@@ -80,6 +81,9 @@ function ProduccionesEspanolas() {
   const [view, setView] = useState<"lista" | "fichas">("lista");
   const [bulk, setBulk] = useState<{ running: boolean; label: string; done: number }>({
     running: false, label: "", done: 0,
+  });
+  const [enriching, setEnriching] = useState<{ running: boolean; remaining: number | null }>({
+    running: false, remaining: null,
   });
 
   const all = rowsQ.data ?? [];
@@ -128,6 +132,38 @@ function ProduccionesEspanolas() {
   }
 
   async function runSync() {
+    setSyncing(true);
+    try {
+      const res = await syncFn({});
+      toast.success(`${(res as any).updated} fichas actualizadas`);
+      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al sincronizar");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  /** Completa por lotes compositor, supervisor, productoras, plataforma y taquilla. */
+  async function runEnrich() {
+    setEnriching({ running: true, remaining: null });
+    try {
+      for (;;) {
+        const res = (await enrichFn({ data: { limit: 24 } })) as { enriched: number; remaining: number };
+        setEnriching({ running: true, remaining: res.remaining });
+        qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+        if (res.enriched === 0 || res.remaining === 0) break;
+      }
+      toast.success("Créditos musicales completados");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al completar créditos");
+    } finally {
+      setEnriching({ running: false, remaining: null });
+      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+    }
+  }
+
+  async function runSyncLegacy() {
     setSyncing(true);
     try {
       const res = await syncFn({});
