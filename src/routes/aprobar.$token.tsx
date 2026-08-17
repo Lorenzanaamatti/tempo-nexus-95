@@ -124,7 +124,7 @@ function AprobarPage() {
         </div>
 
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Token: <span className="font-mono">{token}</span> · La verificación real del token se implementará en Bloque 6.
+          Enlace de aprobación privado. No lo compartas fuera del equipo.
         </p>
       </main>
     </div>

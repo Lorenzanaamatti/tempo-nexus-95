@@ -140,8 +140,8 @@ export function CalendarBoard({
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             {description ?? (
               <>
-                Una sola fuente: <span className="font-mono">calendar_events</span>. Tareas, contratos,
-                entregas, estrenos, check-ins y publicaciones aparecen automáticamente.
+                Todos los eventos de IC en un solo sitio: tareas, contratos, entregas, estrenos,
+                check-ins y publicaciones aparecen automáticamente.
               </>
             )}
           </p>

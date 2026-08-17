@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   onClick: () => void;
@@ -15,8 +16,9 @@ type Props = {
 };
 
 /**
- * Botón global de guardado: SIEMPRE redondo y verde.
- * En modo `floating` se fija en el extremo inferior derecho de la pantalla.
+ * Botón global de guardado. Usa el color de acción del sistema (primary).
+ * En modo `floating` se fija abajo a la derecha como píldora con etiqueta visible.
+ * Tras guardar muestra una confirmación breve con el token semántico `success`.
  */
 export function SaveButton({
   onClick,
@@ -28,29 +30,59 @@ export function SaveButton({
   size = "lg",
   title,
 }: Props) {
-  const sizeCls =
-    size === "sm" ? "h-9 w-9" : size === "md" ? "h-11 w-11" : "h-14 w-14";
   const iconCls = size === "sm" ? "h-4 w-4" : size === "md" ? "h-5 w-5" : "h-6 w-6";
+  const wasSaving = useRef(saving);
+  const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    if (wasSaving.current && !saving) {
+      setJustSaved(true);
+      const t = setTimeout(() => setJustSaved(false), 1800);
+      wasSaving.current = saving;
+      return () => clearTimeout(t);
+    }
+    wasSaving.current = saving;
+  }, [saving]);
+
+  const currentLabel = saving ? "Guardando…" : justSaved ? "Guardado" : label;
+
+  const shapeCls = floating
+    ? size === "sm"
+      ? "h-9 gap-2 rounded-full px-4 text-xs"
+      : size === "md"
+        ? "h-11 gap-2 rounded-full px-5 text-sm"
+        : "h-14 gap-2 rounded-full px-6 text-sm"
+    : size === "sm"
+      ? "h-9 w-9 rounded-full"
+      : size === "md"
+        ? "h-11 w-11 rounded-full"
+        : "h-14 w-14 rounded-full";
+
+  const colorCls = justSaved
+    ? "bg-success text-success-foreground hover:bg-success"
+    : "bg-primary text-primary-foreground hover:bg-primary/90";
 
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled || saving}
-      title={title ?? (saving ? "Guardando…" : label)}
-      aria-label={label}
+      title={title ?? currentLabel}
+      aria-label={currentLabel}
+      aria-live="polite"
       className={cn(
-        "inline-flex items-center justify-center rounded-full",
-        "bg-emerald-600 text-white shadow-lg ring-1 ring-emerald-700/30",
-        "transition hover:bg-emerald-500 hover:shadow-xl",
-        "active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex items-center justify-center font-semibold shadow-lg",
+        colorCls,
+        "transition hover:shadow-xl",
+        "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         floating && "fixed bottom-6 right-6 z-50 shadow-2xl",
-        sizeCls,
+        shapeCls,
         className,
       )}
     >
       {saving ? <Loader2 className={cn(iconCls, "animate-spin")} /> : <Check className={iconCls} />}
+      {floating && <span>{currentLabel}</span>}
     </button>
   );
 }
