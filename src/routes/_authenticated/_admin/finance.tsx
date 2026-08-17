@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -12,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Clapperboard, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentRole } from "@/lib/use-role";
 
@@ -207,7 +208,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
               </tr>
             ))}
             {!rows.length && (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Aún no hay producciones registradas.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-4"><EmptyState variant="inline" icon={Clapperboard} title="Sin producciones registradas" description="Crea producciones para ver aquí su pipeline económico." action={{ label: "Ir a producciones", to: "/productions" }} /></td></tr>
             )}
           </tbody>
         </table>
@@ -446,7 +447,7 @@ function IcExpensesPanel() {
                 <td className="px-3 py-2"><Button size="sm" variant="ghost" onClick={() => setEditing(e)}><Pencil className="h-3 w-3" /></Button></td>
               </tr>
             ))}
-            {!dataQ.data?.length && <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">Sin gastos registrados.</td></tr>}
+            {!dataQ.data?.length && <tr><td colSpan={7} className="px-3 py-4"><EmptyState variant="inline" icon={Receipt} title="Sin gastos registrados" description="Añade un gasto con el formulario de arriba para controlar el presupuesto." /></td></tr>}
           </tbody>
         </table>
       </div>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Receipt } from "lucide-react";
+import { Receipt, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -245,7 +245,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
           </thead>
           <tbody>
             {buckets.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">Sin datos de facturación.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-4"><EmptyState variant="inline" icon={BarChart3} title="Sin datos de facturación" description="Registra producciones y sprints para alimentar este cuadro." /></td></tr>
             ) : (
               buckets.map((b) => (
                 <tr key={b.key} className="border-t border-border">
