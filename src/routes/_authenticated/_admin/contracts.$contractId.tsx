@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
+import { useDirtyForm } from "@/lib/use-dirty-form";
 import { ContractSignerInput } from "@/components/contract-signer-input";
 import { AuditTrail } from "@/components/audit-trail";
 import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
@@ -76,12 +77,13 @@ function ContractDetail() {
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const { dirty, markClean } = useDirtyForm(form);
 
   useEffect(() => {
     if (!q.data) return;
     const d: any = q.data;
     const known = CONTRACT_TYPE_SUGGESTIONS.includes(d.contract_type);
-    setForm({
+    const hydrated = {
       title: d.title ?? "",
       contract_type: d.contract_type ? (known ? d.contract_type : "__custom__") : "",
       contract_type_custom: d.contract_type && !known ? d.contract_type : "",
@@ -97,7 +99,10 @@ function ContractDetail() {
       language: d.language ?? "es",
       url: d.url ?? "",
       notes: d.notes ?? "",
-    });
+    };
+    setForm(hydrated);
+    markClean(hydrated as typeof form);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q.data]);
 
   async function save() {
@@ -122,6 +127,7 @@ function ContractDetail() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
+    markClean(form);
     qc.invalidateQueries({ queryKey: ["contract", contractId] });
     qc.invalidateQueries({ queryKey: ["contracts"] });
   }
@@ -259,7 +265,7 @@ function ContractDetail() {
         <h3 className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Historial de cambios</h3>
         <AuditTrail table="contracts" recordId={contractId} />
       </section>
-      <SaveButton floating onClick={save} saving={saving} />
+      <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
     </div>
   );
 }
