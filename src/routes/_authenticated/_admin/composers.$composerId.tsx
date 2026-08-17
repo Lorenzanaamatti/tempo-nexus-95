@@ -270,6 +270,26 @@ function Inner({
           <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha
         </p>
         <div className="flex items-center gap-2">
+          <CrmTransferMenu
+            actions={[
+              {
+                label: "Cuentas objetivo",
+                description: "Crea la cuenta con los datos de esta ficha",
+                onSelect: async () => {
+                  const r = await composerToTargetAccount(c as never);
+                  if (r) navigate({ to: "/marketing/target-accounts/$accountId", params: { accountId: r.id } });
+                },
+              },
+              {
+                label: "Oportunidades",
+                description: "Crea la oportunidad y añade a esta persona como candidata",
+                onSelect: async () => {
+                  const r = await composerToOpportunity(c as never);
+                  if (r) navigate({ to: "/opportunities/$opportunityId", params: { opportunityId: r.id } });
+                },
+              },
+            ]}
+          />
           <Button asChild size="sm" variant="outline">
             <Link to="/finance" search={{ composerId: c.id }}>Dashboard económico</Link>
           </Button>
