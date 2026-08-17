@@ -36,7 +36,7 @@ function EquipoIndex() {
         db.from("composers").select("id, agent_person_id"),
         db.from("actions").select("assignee_person_id, done"),
       ]);
-      return rows.map((p) => ({
+      return rows.map((p): Record<string, any> => ({
         ...p,
         representados: (composers ?? []).filter((c: any) => c.agent_person_id === p.id).length,
         pendientes: (actions ?? []).filter((a: any) => a.assignee_person_id === p.id && !a.done).length,
@@ -79,7 +79,7 @@ function EquipoIndex() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {data.map((p) => (
+              {data.map((p: any) => (
                 <tr key={p.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
                     <Avatar className="h-8 w-8 rounded-sm">
