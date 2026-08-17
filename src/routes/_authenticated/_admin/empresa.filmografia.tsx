@@ -481,7 +481,7 @@ function HistoricalDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={save} disabled={saving || !title.trim()}>Añadir</Button>
+          <Button onClick={save} disabled={saving || !form.title.trim()}>Crear ficha y abrir</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
