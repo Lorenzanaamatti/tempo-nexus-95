@@ -126,6 +126,7 @@ function ListaDealMemos() {
             {Object.entries(ESTADO_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
+        <ExportRowsButton rows={filtered} filename="deal-memos" sheetName="Deal memos" className="ml-auto" />
       </div>
 
       {dmQ.isLoading ? (
