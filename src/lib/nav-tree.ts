@@ -30,6 +30,8 @@ export const NAV_GROUPS: NavGroup[] = [
     bigCOnly: true,
     items: [
       { title: "KPIs & Objetivos", to: "/empresa/kpis", icon: Gauge },
+      { title: "Prospects de fichaje", to: "/empresa/roster-prospects", icon: Target },
+      { title: "Actividad internacional", to: "/empresa/actividad-internacional", icon: Handshake },
       { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
       { title: "Plan de facturación", to: "/billing", icon: Receipt },
       { title: "Equipo IC", to: "/people", icon: Users },
