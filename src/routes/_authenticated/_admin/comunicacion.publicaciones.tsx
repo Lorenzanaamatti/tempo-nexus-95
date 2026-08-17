@@ -1,21 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { RecordTable } from "@/components/record-table";
+import {
+  PUBLICACION_CANALES, PUBLICACION_ESTADOS, PUBLICACION_TIPOS,
+} from "@/lib/comunicacion-model";
 
 export const Route = createFileRoute("/_authenticated/_admin/comunicacion/publicaciones")({
-  component: StubPage,
+  component: PublicacionesPage,
 });
 
-function StubPage() {
+function PublicacionesPage() {
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">COMUNICACIÓN</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Templates de publicaciones</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Plantillas de publicaciones por canal y touch point.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
+    <RecordTable
+      table="publicaciones"
+      kicker="Comunicación"
+      title="Publicaciones"
+      description="Registro de publicaciones y comunicaciones enviadas al exterior. Se alimenta manualmente y desde las campañas de marketing."
+      newLabel="Nueva publicación"
+      searchKey="contenido_resumen"
+      orderBy="fecha"
+      filters={[
+        { key: "canal", label: "Canal", options: PUBLICACION_CANALES },
+        { key: "estado", label: "Estado", options: PUBLICACION_ESTADOS },
+      ]}
+      columns={[
+        { key: "fecha", label: "Fecha", type: "date" },
+        { key: "canal", label: "Canal", options: PUBLICACION_CANALES },
+        { key: "tipo", label: "Tipo", options: PUBLICACION_TIPOS },
+        { key: "contenido_resumen", label: "Resumen" },
+        { key: "estado", label: "Estado", type: "badge", options: PUBLICACION_ESTADOS },
+        { key: "alcance", label: "Alcance" },
+      ]}
+      fields={[
+        { key: "fecha", label: "Fecha", type: "date", required: true },
+        { key: "estado", label: "Estado", type: "select", options: PUBLICACION_ESTADOS, required: true },
+        { key: "canal", label: "Canal", type: "select", options: PUBLICACION_CANALES, required: true },
+        { key: "tipo", label: "Tipo", type: "select", options: PUBLICACION_TIPOS, required: true },
+        { key: "contenido_resumen", label: "Resumen del contenido", type: "textarea", full: true },
+        { key: "representado_vinculado", label: "Representado vinculado", type: "composer" },
+        { key: "proyecto_vinculado", label: "Proyecto vinculado", type: "production" },
+        { key: "url", label: "URL de la publicación", type: "url" },
+        { key: "alcance", label: "Alcance", type: "number" },
+      ]}
+    />
   );
 }

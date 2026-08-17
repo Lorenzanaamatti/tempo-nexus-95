@@ -456,6 +456,65 @@ export type Database = {
         }
         Relationships: []
       }
+      campanas: {
+        Row: {
+          canales: string[]
+          created_at: string
+          estado: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          id: string
+          inversion_real: number | null
+          nombre: string
+          objetivo: string | null
+          presupuesto: number | null
+          representado_vinculado: string | null
+          resultados_resumen: string | null
+          tipo: Database["public"]["Enums"]["campana_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          canales?: string[]
+          created_at?: string
+          estado?: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          inversion_real?: number | null
+          nombre: string
+          objetivo?: string | null
+          presupuesto?: number | null
+          representado_vinculado?: string | null
+          resultados_resumen?: string | null
+          tipo?: Database["public"]["Enums"]["campana_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          canales?: string[]
+          created_at?: string
+          estado?: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          inversion_real?: number | null
+          nombre?: string
+          objetivo?: string | null
+          presupuesto?: number | null
+          representado_vinculado?: string | null
+          resultados_resumen?: string | null
+          tipo?: Database["public"]["Enums"]["campana_tipo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campanas_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidacies: {
         Row: {
           created_at: string
@@ -1776,6 +1835,45 @@ export type Database = {
           },
         ]
       }
+      comunicacion_identidad: {
+        Row: {
+          bio_castellano: string | null
+          bio_catalan: string | null
+          bio_ingles: string | null
+          guia_uso: string | null
+          id: string
+          paleta: Json
+          redes: Json
+          tipografias: string | null
+          tono: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio_castellano?: string | null
+          bio_catalan?: string | null
+          bio_ingles?: string | null
+          guia_uso?: string | null
+          id?: string
+          paleta?: Json
+          redes?: Json
+          tipografias?: string | null
+          tono?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio_castellano?: string | null
+          bio_catalan?: string | null
+          bio_ingles?: string | null
+          guia_uso?: string | null
+          id?: string
+          paleta?: Json
+          redes?: Json
+          tipografias?: string | null
+          tono?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contract_counterparties: {
         Row: {
           contract_id: string
@@ -2600,6 +2698,59 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_metricas: {
+        Row: {
+          alcance_promedio: number | null
+          composer_id: string | null
+          created_at: string
+          crecimiento_mes: number | null
+          crecimiento_pct: number | null
+          id: string
+          mejor_publicacion_url: string | null
+          periodo: string
+          plataforma: string
+          publicaciones_mes: number | null
+          seguidores: number | null
+          updated_at: string
+        }
+        Insert: {
+          alcance_promedio?: number | null
+          composer_id?: string | null
+          created_at?: string
+          crecimiento_mes?: number | null
+          crecimiento_pct?: number | null
+          id?: string
+          mejor_publicacion_url?: string | null
+          periodo?: string
+          plataforma: string
+          publicaciones_mes?: number | null
+          seguidores?: number | null
+          updated_at?: string
+        }
+        Update: {
+          alcance_promedio?: number | null
+          composer_id?: string | null
+          created_at?: string
+          crecimiento_mes?: number | null
+          crecimiento_pct?: number | null
+          id?: string
+          mejor_publicacion_url?: string | null
+          periodo?: string
+          plataforma?: string
+          publicaciones_mes?: number | null
+          seguidores?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_metricas_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       music_styles: {
         Row: {
           id: string
@@ -2667,6 +2818,74 @@ export type Database = {
             columns: ["action_id"]
             isOneToOne: false
             referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obligaciones_comunicacion: {
+        Row: {
+          contrato_vinculado: string | null
+          created_at: string
+          descripcion: string
+          estado: Database["public"]["Enums"]["obligacion_estado"]
+          fecha_limite: string
+          id: string
+          notas: string | null
+          produccion_vinculada: string | null
+          representado_vinculado: string | null
+          updated_at: string
+        }
+        Insert: {
+          contrato_vinculado?: string | null
+          created_at?: string
+          descripcion: string
+          estado?: Database["public"]["Enums"]["obligacion_estado"]
+          fecha_limite: string
+          id?: string
+          notas?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contrato_vinculado?: string | null
+          created_at?: string
+          descripcion?: string
+          estado?: Database["public"]["Enums"]["obligacion_estado"]
+          fecha_limite?: string
+          id?: string
+          notas?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obligaciones_comunicacion_contrato_vinculado_fkey"
+            columns: ["contrato_vinculado"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligaciones_comunicacion_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligaciones_comunicacion_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obligaciones_comunicacion_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
         ]
@@ -3219,50 +3438,89 @@ export type Database = {
       }
       people: {
         Row: {
+          agent_active: boolean
+          agent_description: string | null
+          agent_last_used_at: string | null
           assistant_model: string
           assistant_persona: string | null
           composer_id: string | null
+          contract_end: string | null
+          contract_fee_amount: number | null
+          contract_fee_period: string | null
+          contract_notes: string | null
+          contract_salary_annual: number | null
+          contract_start: string | null
+          contract_type: Database["public"]["Enums"]["contrato_ic_tipo"] | null
           created_at: string
           email: string | null
           full_name: string
+          ic_roles: Database["public"]["Enums"]["ic_rol"][]
           id: string
           is_virtual_assistant: boolean
+          last_name: string | null
           notes: string | null
           phone: string | null
           photo_path: string | null
           role: Database["public"]["Enums"]["person_role"]
+          role_description: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          agent_active?: boolean
+          agent_description?: string | null
+          agent_last_used_at?: string | null
           assistant_model?: string
           assistant_persona?: string | null
           composer_id?: string | null
+          contract_end?: string | null
+          contract_fee_amount?: number | null
+          contract_fee_period?: string | null
+          contract_notes?: string | null
+          contract_salary_annual?: number | null
+          contract_start?: string | null
+          contract_type?: Database["public"]["Enums"]["contrato_ic_tipo"] | null
           created_at?: string
           email?: string | null
           full_name: string
+          ic_roles?: Database["public"]["Enums"]["ic_rol"][]
           id?: string
           is_virtual_assistant?: boolean
+          last_name?: string | null
           notes?: string | null
           phone?: string | null
           photo_path?: string | null
           role: Database["public"]["Enums"]["person_role"]
+          role_description?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          agent_active?: boolean
+          agent_description?: string | null
+          agent_last_used_at?: string | null
           assistant_model?: string
           assistant_persona?: string | null
           composer_id?: string | null
+          contract_end?: string | null
+          contract_fee_amount?: number | null
+          contract_fee_period?: string | null
+          contract_notes?: string | null
+          contract_salary_annual?: number | null
+          contract_start?: string | null
+          contract_type?: Database["public"]["Enums"]["contrato_ic_tipo"] | null
           created_at?: string
           email?: string | null
           full_name?: string
+          ic_roles?: Database["public"]["Enums"]["ic_rol"][]
           id?: string
           is_virtual_assistant?: boolean
+          last_name?: string | null
           notes?: string | null
           phone?: string | null
           photo_path?: string | null
           role?: Database["public"]["Enums"]["person_role"]
+          role_description?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -3376,6 +3634,44 @@ export type Database = {
             columns: ["verifier_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plataforma_checklist: {
+        Row: {
+          actualizado: boolean
+          composer_id: string | null
+          created_at: string
+          id: string
+          plataforma: string
+          ultima_actualizacion: string | null
+          updated_at: string
+        }
+        Insert: {
+          actualizado?: boolean
+          composer_id?: string | null
+          created_at?: string
+          id?: string
+          plataforma: string
+          ultima_actualizacion?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actualizado?: boolean
+          composer_id?: string | null
+          created_at?: string
+          id?: string
+          plataforma?: string
+          ultima_actualizacion?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plataforma_checklist_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
         ]
@@ -4195,6 +4491,86 @@ export type Database = {
           },
         ]
       }
+      publicaciones: {
+        Row: {
+          alcance: number | null
+          campana_id: string | null
+          canal: Database["public"]["Enums"]["publicacion_canal"]
+          contenido_resumen: string | null
+          creado_por: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["publicacion_estado"]
+          fecha: string
+          id: string
+          proyecto_vinculado: string | null
+          representado_vinculado: string | null
+          tipo: Database["public"]["Enums"]["publicacion_tipo"]
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          alcance?: number | null
+          campana_id?: string | null
+          canal?: Database["public"]["Enums"]["publicacion_canal"]
+          contenido_resumen?: string | null
+          creado_por?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["publicacion_estado"]
+          fecha?: string
+          id?: string
+          proyecto_vinculado?: string | null
+          representado_vinculado?: string | null
+          tipo?: Database["public"]["Enums"]["publicacion_tipo"]
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          alcance?: number | null
+          campana_id?: string | null
+          canal?: Database["public"]["Enums"]["publicacion_canal"]
+          contenido_resumen?: string | null
+          creado_por?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["publicacion_estado"]
+          fecha?: string
+          id?: string
+          proyecto_vinculado?: string | null
+          representado_vinculado?: string | null
+          tipo?: Database["public"]["Enums"]["publicacion_tipo"]
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicaciones_campana_fk"
+            columns: ["campana_id"]
+            isOneToOne: false
+            referencedRelation: "campanas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_proyecto_vinculado_fkey"
+            columns: ["proyecto_vinculado"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_proyecto_vinculado_fkey"
+            columns: ["proyecto_vinculado"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       representado_plataformas: {
         Row: {
           estado: Database["public"]["Enums"]["platform_status"]
@@ -4855,6 +5231,51 @@ export type Database = {
         }
         Relationships: []
       }
+      templates: {
+        Row: {
+          activo: boolean
+          agente_autorizado: string[]
+          contenido: string
+          creado_por: string | null
+          created_at: string
+          descripcion: string | null
+          id: string
+          idioma: Database["public"]["Enums"]["template_idioma"]
+          nombre: string
+          tipo: Database["public"]["Enums"]["template_tipo"]
+          updated_at: string
+          uso_agentes: boolean
+        }
+        Insert: {
+          activo?: boolean
+          agente_autorizado?: string[]
+          contenido?: string
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          idioma?: Database["public"]["Enums"]["template_idioma"]
+          nombre: string
+          tipo?: Database["public"]["Enums"]["template_tipo"]
+          updated_at?: string
+          uso_agentes?: boolean
+        }
+        Update: {
+          activo?: boolean
+          agente_autorizado?: string[]
+          contenido?: string
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          idioma?: Database["public"]["Enums"]["template_idioma"]
+          nombre?: string
+          tipo?: Database["public"]["Enums"]["template_tipo"]
+          updated_at?: string
+          uso_agentes?: boolean
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -5060,6 +5481,19 @@ export type Database = {
         | "media_coverage"
         | "public_appearance"
         | "target_account"
+      campana_estado:
+        | "planificada"
+        | "activa"
+        | "completada"
+        | "pausada"
+        | "cancelada"
+      campana_tipo:
+        | "digital"
+        | "prensa"
+        | "sinc"
+        | "festival"
+        | "academica"
+        | "otra"
       career_action_type:
         | "Pitch"
         | "Reunión con productor"
@@ -5113,6 +5547,12 @@ export type Database = {
         | "firmado"
         | "vencido"
         | "cancelado"
+      contrato_ic_tipo:
+        | "laboral_indefinido"
+        | "laboral_temporal"
+        | "freelance"
+        | "proveedor"
+        | "otro"
       deal_memo_estado:
         | "borrador"
         | "generando"
@@ -5171,6 +5611,15 @@ export type Database = {
         | "gasto_operativo"
         | "gasto_marketing"
         | "gasto_otros"
+      ic_rol:
+        | "direccion"
+        | "representacion"
+        | "produccion"
+        | "administracion"
+        | "marketing"
+        | "comunicacion"
+        | "legal"
+        | "otro"
       ic_team_function:
         | "equipo_virtual"
         | "direccion_general"
@@ -5231,6 +5680,7 @@ export type Database = {
         | "email"
         | "otro"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
+      obligacion_estado: "pendiente" | "completada" | "vencida"
       opportunity_kind:
         | "fichaje"
         | "pitch"
@@ -5342,6 +5792,27 @@ export type Database = {
         | "web"
         | "pr_marketing"
         | "otros"
+      publicacion_canal:
+        | "instagram"
+        | "linkedin"
+        | "spotify"
+        | "tiktok"
+        | "youtube"
+        | "facebook"
+        | "web"
+        | "newsletter"
+        | "prensa"
+        | "otro"
+      publicacion_estado: "borrador" | "programado" | "publicado"
+      publicacion_tipo:
+        | "post"
+        | "story"
+        | "reel"
+        | "newsletter"
+        | "nota_prensa"
+        | "entrevista"
+        | "comunicado"
+        | "otro"
       representation_status:
         | "activo"
         | "pausa"
@@ -5413,6 +5884,19 @@ export type Database = {
         | "cliente_activo"
         | "en_pausa"
         | "descartado"
+      template_idioma: "castellano" | "catalan" | "ingles" | "otro"
+      template_tipo:
+        | "contrato"
+        | "deal_memo"
+        | "adenda"
+        | "contrato_laboral"
+        | "contrato_proveedor"
+        | "presupuesto"
+        | "email_cliente"
+        | "email_produccion"
+        | "email_proveedor"
+        | "comunicado_interno"
+        | "otro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5589,6 +6073,21 @@ export const Constants = {
         "public_appearance",
         "target_account",
       ],
+      campana_estado: [
+        "planificada",
+        "activa",
+        "completada",
+        "pausada",
+        "cancelada",
+      ],
+      campana_tipo: [
+        "digital",
+        "prensa",
+        "sinc",
+        "festival",
+        "academica",
+        "otra",
+      ],
       career_action_type: [
         "Pitch",
         "Reunión con productor",
@@ -5651,6 +6150,13 @@ export const Constants = {
         "firmado",
         "vencido",
         "cancelado",
+      ],
+      contrato_ic_tipo: [
+        "laboral_indefinido",
+        "laboral_temporal",
+        "freelance",
+        "proveedor",
+        "otro",
       ],
       deal_memo_estado: [
         "borrador",
@@ -5716,6 +6222,16 @@ export const Constants = {
         "gasto_marketing",
         "gasto_otros",
       ],
+      ic_rol: [
+        "direccion",
+        "representacion",
+        "produccion",
+        "administracion",
+        "marketing",
+        "comunicacion",
+        "legal",
+        "otro",
+      ],
       ic_team_function: [
         "equipo_virtual",
         "direccion_general",
@@ -5780,6 +6296,7 @@ export const Constants = {
         "otro",
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
+      obligacion_estado: ["pendiente", "completada", "vencida"],
       opportunity_kind: [
         "fichaje",
         "pitch",
@@ -5899,6 +6416,29 @@ export const Constants = {
         "pr_marketing",
         "otros",
       ],
+      publicacion_canal: [
+        "instagram",
+        "linkedin",
+        "spotify",
+        "tiktok",
+        "youtube",
+        "facebook",
+        "web",
+        "newsletter",
+        "prensa",
+        "otro",
+      ],
+      publicacion_estado: ["borrador", "programado", "publicado"],
+      publicacion_tipo: [
+        "post",
+        "story",
+        "reel",
+        "newsletter",
+        "nota_prensa",
+        "entrevista",
+        "comunicado",
+        "otro",
+      ],
       representation_status: [
         "activo",
         "pausa",
@@ -5979,6 +6519,20 @@ export const Constants = {
         "cliente_activo",
         "en_pausa",
         "descartado",
+      ],
+      template_idioma: ["castellano", "catalan", "ingles", "otro"],
+      template_tipo: [
+        "contrato",
+        "deal_memo",
+        "adenda",
+        "contrato_laboral",
+        "contrato_proveedor",
+        "presupuesto",
+        "email_cliente",
+        "email_produccion",
+        "email_proveedor",
+        "comunicado_interno",
+        "otro",
       ],
     },
   },

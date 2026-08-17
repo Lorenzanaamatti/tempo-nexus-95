@@ -1,21 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { RecordTable } from "@/components/record-table";
+import { CAMPANA_ESTADOS, CAMPANA_TIPOS, CANALES_MARKETING } from "@/lib/comunicacion-model";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/campanas")({
-  component: StubPage,
+  component: CampanasPage,
 });
 
-function StubPage() {
+function CampanasPage() {
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">MARKETING</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Campañas</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Campañas de marketing activas y pasadas.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
+    <RecordTable
+      table="campanas"
+      kicker="Marketing"
+      title="Campañas"
+      description="Seguimiento de campañas de marketing de IC y de cada representado, con presupuesto, canales y resultados."
+      newLabel="Nueva campaña"
+      searchKey="nombre"
+      orderBy="fecha_inicio"
+      filters={[
+        { key: "tipo", label: "Tipo", options: CAMPANA_TIPOS },
+        { key: "estado", label: "Estado", options: CAMPANA_ESTADOS },
+      ]}
+      columns={[
+        { key: "nombre", label: "Campaña" },
+        { key: "tipo", label: "Tipo", options: CAMPANA_TIPOS },
+        { key: "fecha_inicio", label: "Inicio", type: "date" },
+        { key: "fecha_fin", label: "Fin", type: "date" },
+        { key: "presupuesto", label: "Presupuesto", type: "money" },
+        { key: "inversion_real", label: "Inversión real", type: "money" },
+        { key: "canales", label: "Canales", type: "tags", options: CANALES_MARKETING },
+        { key: "estado", label: "Estado", type: "badge", options: CAMPANA_ESTADOS },
+      ]}
+      fields={[
+        { key: "nombre", label: "Nombre", type: "text", required: true, full: true },
+        { key: "tipo", label: "Tipo", type: "select", options: CAMPANA_TIPOS, required: true },
+        { key: "estado", label: "Estado", type: "select", options: CAMPANA_ESTADOS, required: true },
+        { key: "representado_vinculado", label: "Representado vinculado", type: "composer" },
+        { key: "presupuesto", label: "Presupuesto (€)", type: "money" },
+        { key: "fecha_inicio", label: "Fecha de inicio", type: "date" },
+        { key: "fecha_fin", label: "Fecha de fin", type: "date" },
+        { key: "inversion_real", label: "Inversión real (€)", type: "money" },
+        { key: "canales", label: "Canales", type: "multiselect", options: CANALES_MARKETING, full: true },
+        { key: "objetivo", label: "Objetivo", type: "textarea", full: true },
+        { key: "resultados_resumen", label: "Resultados", type: "textarea", full: true },
+      ]}
+    />
   );
 }
