@@ -270,6 +270,179 @@ function FilterSelect({ value, onChange, allLabel, options }: {
   );
 }
 
+type Accion = { label: string; run: () => void | Promise<unknown> };
+
+/** Dato accionable: se muestra como texto y despliega las acciones de CRM disponibles. */
+function Accionable({ text, titulo, acciones, className }: {
+  text: string | null | undefined; titulo: string; acciones: Accion[]; className?: string;
+}) {
+  if (!text) return <span className="text-muted-foreground">—</span>;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "text-left underline decoration-dotted underline-offset-4 hover:text-primary",
+            className,
+          )}
+        >
+          {text}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuLabel className="truncate">{titulo}</DropdownMenuLabel>
+        {acciones.map((a) => (
+          <DropdownMenuItem key={a.label} onSelect={() => void a.run()}>{a.label}</DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+const eur = (n: number | null | undefined) =>
+  typeof n === "number" && n > 0
+    ? new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n)
+    : "—";
+
+/** Listado por años con todos los datos accionables uno a uno. */
+function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: ProduccionEspanola) => void }) {
+  const porAno = useMemo(() => {
+    const map = new Map<number, ProduccionEspanola[]>();
+    for (const r of rows) {
+      const y = r.year ?? 0;
+      if (!map.has(y)) map.set(y, []);
+      map.get(y)!.push(r);
+    }
+    return [...map.entries()].sort((a, b) => b[0] - a[0]);
+  }, [rows]);
+
+  return (
+    <div className="mt-6 space-y-10">
+      {porAno.map(([ano, lista]) => (
+        <section key={ano}>
+          <div className="flex items-baseline gap-3 border-b border-border pb-2">
+            <h2 className="font-display text-3xl font-extrabold title-caps">{ano || "Sin año"}</h2>
+            <span className="font-mono text-xs text-muted-foreground">{lista.length} títulos</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1100px] text-sm">
+              <thead>
+                <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <th className="py-2 pr-3 text-left">Título</th>
+                  <th className="py-2 pr-3 text-left">Título original</th>
+                  <th className="py-2 pr-3 text-left">Productoras</th>
+                  <th className="py-2 pr-3 text-left">Compositor BSO</th>
+                  <th className="py-2 pr-3 text-left">Supervisor musical</th>
+                  <th className="py-2 pr-3 text-left">Plataforma</th>
+                  <th className="py-2 pr-3 text-right">Box office</th>
+                  <th className="py-2 text-right" />
+                </tr>
+              </thead>
+              <tbody>
+                {lista.map((r) => {
+                  const titulo = r.title_es ?? r.title;
+                  return (
+                    <tr key={r.id} className="border-b border-border/60 align-top hover:bg-muted/40">
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={titulo}
+                          titulo={titulo}
+                          className="font-display"
+                          acciones={[
+                            { label: "Añadir a Producciones", run: () => addEspanolaToProducciones(r) },
+                            { label: "Vincular / marcar IC participó", run: () => onEdit(r) },
+                            ...(r.tmdb_url ? [{ label: "Abrir en TMDb", run: () => window.open(r.tmdb_url!, "_blank") }] : []),
+                          ]}
+                        />
+                        {r.ic_participo && (
+                          <Badge className="ml-2 rounded-sm bg-emerald-600 text-[10px] text-white hover:bg-emerald-600">IC</Badge>
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-muted-foreground">{r.title_original ?? "—"}</td>
+                      <td className="py-2 pr-3">
+                        {(r.production_companies ?? []).length ? (
+                          <div className="flex flex-col gap-0.5">
+                            {(r.production_companies ?? []).map((c) => (
+                              <Accionable
+                                key={c}
+                                text={c}
+                                titulo={c}
+                                acciones={[
+                                  { label: "Añadir a Partners (Productora)", run: () => addPartner(c, "Productora") },
+                                  { label: "Añadir a Productoras CRM", run: () => addCompanyToCrm(c) },
+                                  { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: c, account_type: "productora" }) },
+                                ]}
+                              />
+                            ))}
+                          </div>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.composer}
+                          titulo={r.composer ?? ""}
+                          acciones={[
+                            { label: "Añadir al Roster", run: () => addToRoster(r.composer!, "composer") },
+                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.composer!, `BSO de ${titulo} (${r.year ?? "—"})`) },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.composer!, account_type: "roster", roster_kind: "composer" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.music_supervisor}
+                          titulo={r.music_supervisor ?? ""}
+                          acciones={[
+                            { label: "Añadir al Roster (supervisor)", run: () => addToRoster(r.music_supervisor!, "supervisor") },
+                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.music_supervisor!, `Supervisión musical de ${titulo}`) },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.music_supervisor!, account_type: "roster", roster_kind: "otros" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.platform}
+                          titulo={r.platform ?? ""}
+                          acciones={[
+                            { label: "Añadir a Plataformas CRM", run: () => addPlatformToCrm(r.platform!) },
+                            { label: "Añadir a Partners (Medio)", run: () => addPartner(r.platform!, "Medio") },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.platform!, account_type: "plataforma" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3 text-right font-mono text-xs">{eur(r.box_office)}</td>
+                      <td className="py-2 text-right">
+                        <Button size="icon" variant="ghost" onClick={() => onEdit(r)} aria-label="Editar vínculos">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function FilterSelectLegacy({ value, onChange, allLabel, options }: {
+  value: string; onChange: (v: string) => void; allLabel: string; options: { value: string; label: string }[];
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>{allLabel}</SelectItem>
+        {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
+}
+
 function Poster({ path, className }: { path: string | null; className?: string }) {
   const url = posterUrl(path);
   return url ? (
