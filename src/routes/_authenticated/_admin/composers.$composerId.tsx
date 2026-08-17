@@ -146,7 +146,7 @@ function Inner({
         roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "ic_company" }).roster_role) ?? "composer",
         city: c.city,
         country: c.country,
-        genero: (c as { genero?: string | null }).genero ?? null,
+        genero: ((c as { genero?: "mujer" | "hombre" | "no_binario" | "no_indica" | null }).genero) ?? null,
         pais_origen: (c as { pais_origen?: string | null }).pais_origen ?? null,
         ciudad_origen: (c as { ciudad_origen?: string | null }).ciudad_origen ?? null,
         birth_year: c.birth_year,
