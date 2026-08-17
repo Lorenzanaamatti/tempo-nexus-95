@@ -82,6 +82,7 @@ import { Route as AuthenticatedAdminOportunidadesSubvencionesRouteImport } from 
 import { Route as AuthenticatedAdminOportunidadesRosterRouteImport } from './routes/_authenticated/_admin/oportunidades.roster'
 import { Route as AuthenticatedAdminOportunidadesProduccionesRouteImport } from './routes/_authenticated/_admin/oportunidades.producciones'
 import { Route as AuthenticatedAdminOportunidadesPartnersRouteImport } from './routes/_authenticated/_admin/oportunidades.partners'
+import { Route as AuthenticatedAdminOportunidadesFestivalesRouteImport } from './routes/_authenticated/_admin/oportunidades.festivales'
 import { Route as AuthenticatedAdminMarketingObligacionesRouteImport } from './routes/_authenticated/_admin/marketing.obligaciones'
 import { Route as AuthenticatedAdminMarketingMetricasRouteImport } from './routes/_authenticated/_admin/marketing.metricas'
 import { Route as AuthenticatedAdminMarketingCampanasRouteImport } from './routes/_authenticated/_admin/marketing.campanas'
@@ -535,6 +536,12 @@ const AuthenticatedAdminOportunidadesPartnersRoute =
     path: '/oportunidades/partners',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminOportunidadesFestivalesRoute =
+  AuthenticatedAdminOportunidadesFestivalesRouteImport.update({
+    id: '/oportunidades/festivales',
+    path: '/oportunidades/festivales',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMarketingObligacionesRoute =
   AuthenticatedAdminMarketingObligacionesRouteImport.update({
     id: '/marketing/obligaciones',
@@ -795,6 +802,7 @@ export interface FileRoutesByFullPath {
   '/marketing/campanas': typeof AuthenticatedAdminMarketingCampanasRoute
   '/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
+  '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
@@ -899,6 +907,7 @@ export interface FileRoutesByTo {
   '/marketing/campanas': typeof AuthenticatedAdminMarketingCampanasRoute
   '/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
+  '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
@@ -1008,6 +1017,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/campanas': typeof AuthenticatedAdminMarketingCampanasRoute
   '/_authenticated/_admin/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/_authenticated/_admin/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
+  '/_authenticated/_admin/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
   '/_authenticated/_admin/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/_authenticated/_admin/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/_authenticated/_admin/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
@@ -1116,6 +1126,7 @@ export interface FileRouteTypes {
     | '/marketing/campanas'
     | '/marketing/metricas'
     | '/marketing/obligaciones'
+    | '/oportunidades/festivales'
     | '/oportunidades/partners'
     | '/oportunidades/producciones'
     | '/oportunidades/roster'
@@ -1220,6 +1231,7 @@ export interface FileRouteTypes {
     | '/marketing/campanas'
     | '/marketing/metricas'
     | '/marketing/obligaciones'
+    | '/oportunidades/festivales'
     | '/oportunidades/partners'
     | '/oportunidades/producciones'
     | '/oportunidades/roster'
@@ -1328,6 +1340,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/campanas'
     | '/_authenticated/_admin/marketing/metricas'
     | '/_authenticated/_admin/marketing/obligaciones'
+    | '/_authenticated/_admin/oportunidades/festivales'
     | '/_authenticated/_admin/oportunidades/partners'
     | '/_authenticated/_admin/oportunidades/producciones'
     | '/_authenticated/_admin/oportunidades/roster'
@@ -1898,6 +1911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOportunidadesPartnersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/oportunidades/festivales': {
+      id: '/_authenticated/_admin/oportunidades/festivales'
+      path: '/oportunidades/festivales'
+      fullPath: '/oportunidades/festivales'
+      preLoaderRoute: typeof AuthenticatedAdminOportunidadesFestivalesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/marketing/obligaciones': {
       id: '/_authenticated/_admin/marketing/obligaciones'
       path: '/marketing/obligaciones'
@@ -2195,6 +2215,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMarketingCampanasRoute: typeof AuthenticatedAdminMarketingCampanasRoute
   AuthenticatedAdminMarketingMetricasRoute: typeof AuthenticatedAdminMarketingMetricasRoute
   AuthenticatedAdminMarketingObligacionesRoute: typeof AuthenticatedAdminMarketingObligacionesRoute
+  AuthenticatedAdminOportunidadesFestivalesRoute: typeof AuthenticatedAdminOportunidadesFestivalesRoute
   AuthenticatedAdminOportunidadesPartnersRoute: typeof AuthenticatedAdminOportunidadesPartnersRoute
   AuthenticatedAdminOportunidadesProduccionesRoute: typeof AuthenticatedAdminOportunidadesProduccionesRoute
   AuthenticatedAdminOportunidadesRosterRoute: typeof AuthenticatedAdminOportunidadesRosterRoute
@@ -2291,6 +2312,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketingMetricasRoute,
   AuthenticatedAdminMarketingObligacionesRoute:
     AuthenticatedAdminMarketingObligacionesRoute,
+  AuthenticatedAdminOportunidadesFestivalesRoute:
+    AuthenticatedAdminOportunidadesFestivalesRoute,
   AuthenticatedAdminOportunidadesPartnersRoute:
     AuthenticatedAdminOportunidadesPartnersRoute,
   AuthenticatedAdminOportunidadesProduccionesRoute:
