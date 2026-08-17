@@ -211,6 +211,16 @@ function TareasPage() {
           </SelectContent>
         </Select>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tarea…" className="h-8 max-w-[220px] text-sm" />
+        <button
+          type="button"
+          onClick={() => nav({ search: onlyToday ? {} : { filter: "hoy" } })}
+          className={cn(
+            "rounded-sm border border-border px-3 py-1.5 text-xs smallcaps",
+            onlyToday ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+          )}
+        >
+          Para hoy
+        </button>
         <span className="ml-auto text-xs text-muted-foreground">{rows.length} tarea(s)</span>
       </div>
 
