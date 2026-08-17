@@ -17,6 +17,8 @@ import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
+import { CrmTransferMenu } from "@/components/crm-transfer-menu";
+import { opportunityToTargetAccount, opportunityToComposer, opportunityToCompany } from "@/lib/crm-transfer";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/$opportunityId")({
   component: OpportunityDetail,
@@ -198,7 +200,38 @@ function OpportunityDetail() {
           <PageCrumb label={form.title} />
           <h1 className="mt-1 font-display text-4xl">{form.title || "—"}</h1>
         </div>
-        <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
+        <div className="flex items-center gap-2">
+          <CrmTransferMenu
+            actions={[
+              {
+                label: "Cuentas objetivo",
+                description: "Crea la cuenta con los datos de esta oportunidad",
+                onSelect: async () => {
+                  const r = await opportunityToTargetAccount({ id: opportunityId, ...form } as never);
+                  if (r) navigate({ to: "/marketing/target-accounts/$accountId", params: { accountId: r.id } });
+                },
+              },
+              {
+                label: "Roster",
+                description: "Crea la ficha de representado en negociación",
+                onSelect: async () => {
+                  const r = await opportunityToComposer({ id: opportunityId, ...form } as never);
+                  if (r) navigate({ to: "/composers/$composerId", params: { composerId: r.id } });
+                },
+              },
+              {
+                label: "Productoras",
+                description: "Crea o vincula la ficha de productora",
+                onSelect: async () => {
+                  const r = await opportunityToCompany({ id: opportunityId, ...form } as never);
+                  qc.invalidateQueries({ queryKey: ["opportunity", opportunityId] });
+                  if (r) navigate({ to: "/production-companies/$companyId", params: { companyId: r.id } });
+                },
+              },
+            ]}
+          />
+          <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
+        </div>
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
