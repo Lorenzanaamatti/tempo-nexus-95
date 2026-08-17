@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Trash2, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { toast } from "sonner";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import {
@@ -175,7 +176,6 @@ function TargetAccountDetail() {
   }
 
   async function remove() {
-    if (!confirm("¿Eliminar definitivamente esta cuenta objetivo?")) return;
     const { error } = await supabase.from("target_accounts").delete().eq("id", accountId);
     if (error) {
       toast.error(error.message);
