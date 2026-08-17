@@ -21,7 +21,8 @@ import {
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
-  importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
+  enrichEspanolas, importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas,
+  syncProduccionesEspanolas,
 } from "@/lib/producciones-espanolas.functions";
 import { addCompanyToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
 import { addEspanolaToProducciones, addPartner, addProspectFichaje } from "@/lib/espanolas-actions";
@@ -38,12 +39,22 @@ function useEspanolas() {
   return useQuery({
     queryKey: ["producciones-espanolas"],
     queryFn: async () => {
-      const { data, error } = await db
-        .from("producciones_espanolas")
-        .select("*")
-        .order("year", { ascending: false, nullsFirst: false });
-      if (error) throw error;
-      return (data ?? []) as ProduccionEspanola[];
+      // PostgREST devuelve como máximo 1000 filas por petición: paginamos por bloques.
+      const all: ProduccionEspanola[] = [];
+      const size = 1000;
+      for (let from = 0; from < 40_000; from += size) {
+        const { data, error } = await db
+          .from("producciones_espanolas")
+          .select("*")
+          .order("year", { ascending: false, nullsFirst: false })
+          .order("title", { ascending: true })
+          .range(from, from + size - 1);
+        if (error) throw error;
+        const chunk = (data ?? []) as ProduccionEspanola[];
+        all.push(...chunk);
+        if (chunk.length < size) break;
+      }
+      return all;
     },
   });
 }
@@ -55,6 +66,7 @@ function ProduccionesEspanolas() {
   const importFn = useServerFn(importProduccionEspanola);
   const syncFn = useServerFn(syncProduccionesEspanolas);
   const yearFn = useServerFn(importEspanolasYearPage);
+  const enrichFn = useServerFn(enrichEspanolas);
 
   const [q, setQ] = useState("");
   const [year, setYear] = useState(ALL);
@@ -69,6 +81,9 @@ function ProduccionesEspanolas() {
   const [view, setView] = useState<"lista" | "fichas">("lista");
   const [bulk, setBulk] = useState<{ running: boolean; label: string; done: number }>({
     running: false, label: "", done: 0,
+  });
+  const [enriching, setEnriching] = useState<{ running: boolean; remaining: number | null }>({
+    running: false, remaining: null,
   });
 
   const all = rowsQ.data ?? [];
@@ -129,8 +144,29 @@ function ProduccionesEspanolas() {
     }
   }
 
+  /** Completa por lotes compositor, supervisor, productoras, plataforma y taquilla. */
+  async function runEnrich() {
+    setEnriching({ running: true, remaining: null });
+    try {
+      for (;;) {
+        const res = (await enrichFn({ data: { limit: 24 } })) as { enriched: number; remaining: number };
+        setEnriching({ running: true, remaining: res.remaining });
+        qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+        if (res.enriched === 0 || res.remaining === 0) break;
+      }
+      toast.success("Créditos musicales completados");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al completar créditos");
+    } finally {
+      setEnriching({ running: false, remaining: null });
+      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+    }
+  }
+
+
   /** Importa el catálogo completo de cine español desde `desde` hasta el año en curso. */
   async function runBulkImport(desde = 2020) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const hasta = new Date().getFullYear();
     setBulk({ running: true, label: `Preparando ${desde}–${hasta}…`, done: 0 });
     let total = 0;
@@ -142,7 +178,7 @@ function ProduccionesEspanolas() {
           const res = (await yearFn({ data: { year: y, page } })) as {
             saved: number; totalPages: number; totalResults: number;
           };
-          totalPages = Math.min(res.totalPages, 10);
+          totalPages = res.totalPages;
           total += res.saved;
           setBulk({ running: true, label: `${y} · página ${page}/${totalPages}`, done: total });
           page++;
@@ -150,6 +186,7 @@ function ProduccionesEspanolas() {
         qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
       }
       toast.success(`Catálogo importado: ${total} títulos entre ${desde} y ${hasta}`);
+      void runEnrich();
     } catch (e: any) {
       toast.error(e?.message ?? "Error al importar el catálogo");
     } finally {
@@ -176,6 +213,12 @@ function ProduccionesEspanolas() {
           <Button variant="outline" onClick={runSync} disabled={syncing || bulk.running}>
             {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
             Sincronizar
+          </Button>
+          <Button variant="outline" onClick={() => void runEnrich()} disabled={enriching.running || bulk.running}>
+            {enriching.running ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+            {enriching.running
+              ? `Completando créditos… ${enriching.remaining ?? ""}`
+              : "Completar créditos"}
           </Button>
         </div>
       </div>
