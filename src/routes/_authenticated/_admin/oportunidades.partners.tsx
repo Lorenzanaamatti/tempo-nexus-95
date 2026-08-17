@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { OpportunitiesList } from "@/components/opportunities-list";
 
 export const Route = createFileRoute("/_authenticated/_admin/oportunidades/partners")({
-  component: StubPage,
+  component: OportunidadesPartners,
 });
 
-function StubPage() {
+function OportunidadesPartners() {
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">OPORTUNIDADES DE VENTAS</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Oportunidades · Partners</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Oportunidades de relación o acuerdo con productoras, plataformas y otros partners estratégicos.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
+    <OpportunitiesList
+      fixedKinds={["presentar_ic", "fichaje_productora"]}
+      listKey="oportunidades-partners"
+      eyebrow="OPORTUNIDADES DE VENTAS · PARTNERS"
+      title="OPORTUNIDADES · PARTNERS"
+      description="Oportunidades con productoras, plataformas y otros partners estratégicos."
+    />
   );
 }

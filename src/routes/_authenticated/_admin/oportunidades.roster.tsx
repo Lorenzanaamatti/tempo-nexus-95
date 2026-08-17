@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { OpportunitiesList } from "@/components/opportunities-list";
 
 export const Route = createFileRoute("/_authenticated/_admin/oportunidades/roster")({
-  component: StubPage,
+  component: OportunidadesRoster,
 });
 
-function StubPage() {
+function OportunidadesRoster() {
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">OPORTUNIDADES DE VENTAS</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Oportunidades · Roster</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Oportunidades de colocación o desarrollo para los representados del roster.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
+    <OpportunitiesList
+      fixedKinds={["fichaje"]}
+      listKey="oportunidades-roster"
+      eyebrow="OPORTUNIDADES DE VENTAS · ROSTER"
+      title="OPORTUNIDADES · ROSTER"
+      description="Fichajes potenciales y oportunidades de incorporación de nuevo talento al roster."
+    />
   );
 }

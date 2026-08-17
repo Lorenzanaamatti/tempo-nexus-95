@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CatalogIndex } from "@/components/catalog-index";
+import { IntegratedInPartnersNotice } from "@/components/integrated-notice";
 
 export const Route = createFileRoute("/_authenticated/_admin/production-companies/")({
   component: ProductionCompaniesIndex,
@@ -7,7 +8,9 @@ export const Route = createFileRoute("/_authenticated/_admin/production-companie
 
 function ProductionCompaniesIndex() {
   return (
-    <CatalogIndex
+    <>
+      <IntegratedInPartnersNotice />
+      <CatalogIndex
       table="production_companies"
       nameColumn="name"
       queryKey="production-companies"
@@ -41,6 +44,7 @@ function ProductionCompaniesIndex() {
           {children}
         </Link>
       )}
-    />
+      />
+    </>
   );
 }

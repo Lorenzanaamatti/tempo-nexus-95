@@ -1,21 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { useMemo, useState } from "react";
+import { Archive } from "lucide-react";
+import { ListSkeleton, EmptyState } from "@/components/list-states";
+import { ProductionSearch, YearGroupedProductions, useProductions } from "@/components/production-lists";
+import { isFinalized } from "@/lib/production-lifecycle";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/finalizadas")({
-  component: StubPage,
+  component: ProduccionesFinalizadas,
 });
 
-function StubPage() {
+function ProduccionesFinalizadas() {
+  const productionsQ = useProductions();
+  const [q, setQ] = useState("");
+
+  const rows = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return (productionsQ.data ?? [])
+      .filter((p) => isFinalized(p.status))
+      .filter((p) => !needle || p.title.toLowerCase().includes(needle));
+  }, [productionsQ.data, q]);
+
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">PRODUCCIONES</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Producciones finalizadas</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Archivo de producciones completadas, organizadas por año.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
+        <div>
+          <p className="smallcaps text-muted-foreground">Producciones</p>
+          <h1 className="mt-1 font-display text-5xl title-caps">PRODUCCIONES FINALIZADAS</h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Archivo histórico de producciones cerradas, agrupadas por año.
+          </p>
+        </div>
+        <ProductionSearch value={q} onChange={setQ} />
       </div>
+
+      {productionsQ.isLoading ? (
+        <ListSkeleton rows={6} />
+      ) : !rows.length ? (
+        <EmptyState icon={Archive} title="Sin producciones finalizadas" description="Aquí aparecerán las producciones cuando se marquen como finalizadas." />
+      ) : (
+        <YearGroupedProductions rows={rows} />
+      )}
     </div>
   );
 }
