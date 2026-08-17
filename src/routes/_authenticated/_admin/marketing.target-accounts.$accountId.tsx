@@ -1,3 +1,4 @@
+import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -236,6 +237,7 @@ function TargetAccountDetail() {
       </div>
 
       <div className="mb-6 border-b border-border pb-6">
+        <PageCrumb label={form.name} />
         <p className="smallcaps text-muted-foreground">Marketing y Ventas · Cuenta objetivo</p>
         <div className="mt-2 flex items-center gap-3">
           <h1 className="font-display text-4xl">{form.name || "Sin nombre"}</h1>
