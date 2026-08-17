@@ -28,14 +28,16 @@ function RosterAll() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v2"],
     queryFn: async () => {
-      const [composers, productions, filmography, films, targets] = await Promise.all([
+      const [composers, productions, filmography, films, targets, assignments, people] = await Promise.all([
         supabase
           .from("composers")
           .select(
             "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
           )
           .order("full_name"),
-        supabase.from("productions").select("id, title, year, status, composer_id, premiere_date"),
+        supabase
+          .from("productions")
+          .select("id, title, year, status, composer_id, premiere_date, music_supervisor_person_id"),
         supabase.from("composer_filmography").select("id, title, year, composer_id, format"),
         supabase.from("spanish_films").select("id, title, title_es, year, composer, composer_person_id"),
         supabase
@@ -43,8 +45,12 @@ function RosterAll() {
           .select("id, name, status, priority, account_type, roster_kind, created_at")
           .eq("account_type", "roster")
           .order("name"),
+        supabase.from("production_assignments").select("production_id, composer_id"),
+        supabase.from("people").select("id, composer_id").not("composer_id", "is", null),
       ]);
-      const err = composers.error || productions.error || filmography.error || films.error || targets.error;
+      const err =
+        composers.error || productions.error || filmography.error || films.error || targets.error ||
+        assignments.error || people.error;
       if (err) throw err;
       return {
         composers: composers.data ?? [],
@@ -52,6 +58,8 @@ function RosterAll() {
         filmography: filmography.data ?? [],
         films: films.data ?? [],
         targets: targets.data ?? [],
+        assignments: assignments.data ?? [],
+        people: people.data ?? [],
       };
     },
   });
@@ -60,15 +68,30 @@ function RosterAll() {
 
   const rows = useMemo(() => {
     const list = (data?.composers ?? []).filter((c) => c.roster_role !== "ic_company");
-    const openByComposer = new Map<string, number>();
+    // Mismo criterio que la ficha de compositor: producción directa,
+    // asignaciones de producción y supervisión musical (vía people).
+    const composerByPerson = new Map<string, string>();
+    for (const p of data?.people ?? []) {
+      if (p.composer_id) composerByPerson.set(p.id, p.composer_id);
+    }
+    const prodById = new Map((data?.productions ?? []).map((p) => [p.id, p]));
+    const openIdsByComposer = new Map<string, Set<string>>();
+    const add = (composerId: string | null | undefined, prod: { id: string } | undefined) => {
+      if (!composerId || !prod || !isOpenProduction(prod as never)) return;
+      const set = openIdsByComposer.get(composerId) ?? new Set<string>();
+      set.add(prod.id);
+      openIdsByComposer.set(composerId, set);
+    };
     for (const p of data?.productions ?? []) {
-      if (!p.composer_id) continue;
-      if (!isOpenProduction(p)) continue;
-      openByComposer.set(p.composer_id, (openByComposer.get(p.composer_id) ?? 0) + 1);
+      add(p.composer_id, p);
+      if (p.music_supervisor_person_id) add(composerByPerson.get(p.music_supervisor_person_id), p);
+    }
+    for (const a of data?.assignments ?? []) {
+      add(a.composer_id, prodById.get(a.production_id));
     }
     return list
       .filter((c) => !term || (c.full_name ?? "").toLowerCase().includes(term) || (c.artistic_name ?? "").toLowerCase().includes(term))
-      .map((c) => ({ ...c, open: openByComposer.get(c.id) ?? 0 }));
+      .map((c) => ({ ...c, open: openIdsByComposer.get(c.id)?.size ?? 0 }));
   }, [data, term]);
 
   const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
