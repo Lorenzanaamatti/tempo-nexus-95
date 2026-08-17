@@ -1606,6 +1606,7 @@ export type Database = {
           birth_year: number | null
           career_notes: string | null
           city: string | null
+          ciudad_origen: string | null
           company_profile: Json
           country: string | null
           created_at: string
@@ -1614,6 +1615,7 @@ export type Database = {
           email_secondary: string | null
           fee_range_id: string | null
           full_name: string
+          genero: Database["public"]["Enums"]["genero_persona"] | null
           id: string
           internal_notes: string | null
           legal_name: string | null
@@ -1621,6 +1623,7 @@ export type Database = {
           nif: string | null
           owner_email: string | null
           owner_user_id: string | null
+          pais_origen: string | null
           phone: string | null
           photo_path: string | null
           portal_url: string | null
@@ -1655,6 +1658,7 @@ export type Database = {
           birth_year?: number | null
           career_notes?: string | null
           city?: string | null
+          ciudad_origen?: string | null
           company_profile?: Json
           country?: string | null
           created_at?: string
@@ -1663,6 +1667,7 @@ export type Database = {
           email_secondary?: string | null
           fee_range_id?: string | null
           full_name: string
+          genero?: Database["public"]["Enums"]["genero_persona"] | null
           id?: string
           internal_notes?: string | null
           legal_name?: string | null
@@ -1670,6 +1675,7 @@ export type Database = {
           nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
+          pais_origen?: string | null
           phone?: string | null
           photo_path?: string | null
           portal_url?: string | null
@@ -1704,6 +1710,7 @@ export type Database = {
           birth_year?: number | null
           career_notes?: string | null
           city?: string | null
+          ciudad_origen?: string | null
           company_profile?: Json
           country?: string | null
           created_at?: string
@@ -1712,6 +1719,7 @@ export type Database = {
           email_secondary?: string | null
           fee_range_id?: string | null
           full_name?: string
+          genero?: Database["public"]["Enums"]["genero_persona"] | null
           id?: string
           internal_notes?: string | null
           legal_name?: string | null
@@ -1719,6 +1727,7 @@ export type Database = {
           nif?: string | null
           owner_email?: string | null
           owner_user_id?: string | null
+          pais_origen?: string | null
           phone?: string | null
           photo_path?: string | null
           portal_url?: string | null
@@ -5154,6 +5163,7 @@ export type Database = {
         | "spot"
         | "game"
         | "other"
+      genero_persona: "mujer" | "hombre" | "no_binario" | "no_indica"
       ic_budget_category:
         | "ingreso_comision"
         | "ingreso_otros"
@@ -5697,6 +5707,7 @@ export const Constants = {
         "game",
         "other",
       ],
+      genero_persona: ["mujer", "hombre", "no_binario", "no_indica"],
       ic_budget_category: [
         "ingreso_comision",
         "ingreso_otros",
