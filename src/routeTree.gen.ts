@@ -88,6 +88,7 @@ import { Route as AuthenticatedAdminLegalContratosFirmadosRouteImport } from './
 import { Route as AuthenticatedAdminEmpresaRosterProspectsRouteImport } from './routes/_authenticated/_admin/empresa.roster-prospects'
 import { Route as AuthenticatedAdminEmpresaKpisRouteImport } from './routes/_authenticated/_admin/empresa.kpis'
 import { Route as AuthenticatedAdminEmpresaAgentesRouteImport } from './routes/_authenticated/_admin/empresa.agentes'
+import { Route as AuthenticatedAdminEmpresaActividadInternacionalRouteImport } from './routes/_authenticated/_admin/empresa.actividad-internacional'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
 import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
@@ -566,6 +567,12 @@ const AuthenticatedAdminEmpresaAgentesRoute =
     path: '/empresa/agentes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEmpresaActividadInternacionalRoute =
+  AuthenticatedAdminEmpresaActividadInternacionalRouteImport.update({
+    id: '/empresa/actividad-internacional',
+    path: '/empresa/actividad-internacional',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDirectorsDirectorIdRoute =
   AuthenticatedAdminDirectorsDirectorIdRouteImport.update({
     id: '/directors/$directorId',
@@ -741,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
@@ -839,6 +847,7 @@ export interface FileRoutesByTo {
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
@@ -942,6 +951,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
   '/_authenticated/_admin/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/_authenticated/_admin/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
@@ -1044,6 +1054,7 @@ export interface FileRouteTypes {
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
     | '/directors/$directorId'
+    | '/empresa/actividad-internacional'
     | '/empresa/agentes'
     | '/empresa/kpis'
     | '/empresa/roster-prospects'
@@ -1142,6 +1153,7 @@ export interface FileRouteTypes {
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
     | '/directors/$directorId'
+    | '/empresa/actividad-internacional'
     | '/empresa/agentes'
     | '/empresa/kpis'
     | '/empresa/roster-prospects'
@@ -1244,6 +1256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/deal-memos/configuracion'
     | '/_authenticated/_admin/deal-memos/lista'
     | '/_authenticated/_admin/directors/$directorId'
+    | '/_authenticated/_admin/empresa/actividad-internacional'
     | '/_authenticated/_admin/empresa/agentes'
     | '/_authenticated/_admin/empresa/kpis'
     | '/_authenticated/_admin/empresa/roster-prospects'
@@ -1863,6 +1876,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmpresaAgentesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/empresa/actividad-internacional': {
+      id: '/_authenticated/_admin/empresa/actividad-internacional'
+      path: '/empresa/actividad-internacional'
+      fullPath: '/empresa/actividad-internacional'
+      preLoaderRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/directors/$directorId': {
       id: '/_authenticated/_admin/directors/$directorId'
       path: '/directors/$directorId'
@@ -2064,6 +2084,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComunicacionReelsRoute: typeof AuthenticatedAdminComunicacionReelsRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
+  AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRoute
   AuthenticatedAdminEmpresaKpisRoute: typeof AuthenticatedAdminEmpresaKpisRoute
   AuthenticatedAdminEmpresaRosterProspectsRoute: typeof AuthenticatedAdminEmpresaRosterProspectsRoute
@@ -2145,6 +2166,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminContractsContractIdRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
+  AuthenticatedAdminEmpresaActividadInternacionalRoute:
+    AuthenticatedAdminEmpresaActividadInternacionalRoute,
   AuthenticatedAdminEmpresaAgentesRoute: AuthenticatedAdminEmpresaAgentesRoute,
   AuthenticatedAdminEmpresaKpisRoute: AuthenticatedAdminEmpresaKpisRoute,
   AuthenticatedAdminEmpresaRosterProspectsRoute:
