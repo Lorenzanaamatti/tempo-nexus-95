@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, FileSignature } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { ListSkeleton, EmptyState, ErrorState } from "@/components/list-states";
 
@@ -79,7 +79,7 @@ function SignedContracts() {
       ) : error ? (
         <ErrorState message={(error as Error).message} />
       ) : !sorted.length ? (
-        <EmptyState title="No hay contratos firmados" hint="Los contratos aparecerán aquí al marcarse como firmados." />
+        <EmptyState icon={FileSignature} title="Sin contratos firmados" description="Los contratos aparecerán aquí en cuanto se marquen como firmados." action={{ label: "Ir a contratos", to: "/contracts" }} />
       ) : (
         <div className="space-y-8">
           {sorted.map(([cat, items]) => (
