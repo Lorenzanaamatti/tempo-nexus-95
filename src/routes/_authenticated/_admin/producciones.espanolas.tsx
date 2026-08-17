@@ -72,8 +72,7 @@ function ProduccionesEspanolas() {
       if (year !== ALL && String(r.year ?? "") !== year) return false;
       if (genre !== ALL && !(r.genres ?? []).includes(genre)) return false;
       if (platform !== ALL && r.platform !== platform) return false;
-      if (icFilter !== ALL && r.ic_participo !== (icFilter === "si")) return false;
-      if (estado !== ALL && r.estado_prospeccion !== estado) return false;
+      if (icFilter !== ALL && r.ic_participo !== true) return false;
       if (!needle) return true;
       return [r.title, r.title_original, r.title_es, ...(r.directors ?? []), ...(r.production_companies ?? [])]
         .filter(Boolean).some((v) => String(v).toLowerCase().includes(needle));
