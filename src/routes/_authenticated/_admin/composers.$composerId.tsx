@@ -24,6 +24,7 @@ import { ComposerChat } from "@/components/composer-chat";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
+import { isOpenProduction } from "@/lib/production-progress";
 import {
   AlertDialog,
   AlertDialogAction,
