@@ -31,6 +31,10 @@ import type { TaskArea } from "@/lib/task-areas";
 import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
 import { RefreshCw, Home as HomeIcon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { NAV_GROUPS, isItemActive, findNavLocation, type NavGroup, type NavItem } from "@/lib/nav-tree";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessionView?: SessionView | null }) {
   const { state } = useSidebar();
@@ -143,37 +147,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               </SidebarGroupContent>
             </SidebarGroup>
             {visibleAdminGroups.map((group) => (
-              <SidebarGroup key={group.label}>
-                {!collapsed && (
-                  <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]">
-                    <group.icon className="h-3 w-3" />
-                    <span className="flex-1">{group.label}</span>
-                  </SidebarGroupLabel>
-                )}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={item.active}>
-                          <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                            <item.icon className="h-4 w-4" />
-                            {!collapsed && (
-                              <span className="flex flex-1 items-center justify-between gap-2">
-                                <span>{item.title}</span>
-                                {item.to === "/agent-actions" && (pendingAgentActions ?? 0) > 0 && (
-                                  <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
-                                    {pendingAgentActions}
-                                  </span>
-                                )}
-                              </span>
-                            )}
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+              <NavGroupSection
+                key={group.label}
+                group={group}
+                collapsed={collapsed}
+                pathname={pathname}
+                search={search}
+                pendingAgentActions={pendingAgentActions ?? 0}
+              />
             ))}
           </>
         ) : (
@@ -280,5 +261,111 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+const OPEN_KEY = "ic:sidebar-open-groups";
+
+function readOpenGroups(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(OPEN_KEY) ?? "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+function NavGroupSection({
+  group,
+  collapsed,
+  pathname,
+  search,
+  pendingAgentActions,
+}: {
+  group: NavGroup;
+  collapsed: boolean;
+  pathname: string;
+  search: { role?: string };
+  pendingAgentActions: number;
+}) {
+  const active = findNavLocation(pathname, search)?.group.label === group.label;
+  const [open, setOpen] = useState(active);
+
+  // Abre automáticamente el grupo de la ruta actual; el resto recuerda su estado.
+  useEffect(() => {
+    if (active) {
+      setOpen(true);
+      return;
+    }
+    setOpen(readOpenGroups()[group.label] ?? false);
+  }, [active, group.label]);
+
+  function toggle(next: boolean) {
+    setOpen(next);
+    if (typeof window === "undefined") return;
+    const stored = readOpenGroups();
+    stored[group.label] = next;
+    try {
+      window.localStorage.setItem(OPEN_KEY, JSON.stringify(stored));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }
+
+  if (collapsed) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {group.items.map((item: NavItem) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)} tooltip={item.title}>
+                  <Link to={item.to} search={item.search as never}>
+                    <item.icon className="h-4 w-4" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    );
+  }
+
+  return (
+    <Collapsible open={open} onOpenChange={toggle}>
+      <SidebarGroup>
+        <CollapsibleTrigger className="w-full">
+          <SidebarGroupLabel className="flex w-full items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] hover:text-sidebar-accent-foreground">
+            <group.icon className="h-3 w-3" />
+            <span className="flex-1 text-left">{group.label}</span>
+            <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
+          </SidebarGroupLabel>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {group.items.map((item: NavItem) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)}>
+                    <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span className="flex flex-1 items-center justify-between gap-2">
+                        <span>{item.title}</span>
+                        {item.to === "/agent-actions" && pendingAgentActions > 0 && (
+                          <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                            {pendingAgentActions}
+                          </span>
+                        )}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
   );
 }
