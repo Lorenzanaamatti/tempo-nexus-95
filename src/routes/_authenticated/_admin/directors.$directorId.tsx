@@ -13,6 +13,8 @@ import { ExternalLink, Plus, Clapperboard } from "lucide-react";
 import { useState } from "react";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { RelatedWorks } from "@/components/related-works";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/_admin/directors/$directorId")({
   component: DirectorDetail,
@@ -26,6 +28,8 @@ function DirectorDetail() {
   const [newYear, setNewYear] = useState<string>(String(new Date().getFullYear()));
   const [newKind, setNewKind] = useState<ProductionKind>("cine");
   const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
   async function createProduction(openAfter: boolean) {
     if (!newTitle.trim()) {
@@ -82,27 +86,71 @@ function DirectorDetail() {
     else qc.invalidateQueries({ queryKey: ["director", directorId] });
   }
 
+  const dData: any = directorQ.data;
+  useEffect(() => {
+    if (!dData) return;
+    setForm({
+      full_name: dData.full_name ?? "", agent: dData.agent ?? "", email: dData.email ?? "",
+      phone: dData.phone ?? "", country: dData.country ?? "", website: dData.website ?? "",
+      imdb_url: dData.imdb_url ?? "", notes: dData.notes ?? "",
+    });
+  }, [dData]);
+
+  function set(key: string, value: string) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function save() {
+    if (!form["full_name"]?.trim()) return toast.error("El nombre es obligatorio");
+    setSaving(true);
+    const v = (k: string) => (form[k]?.trim() ? form[k]!.trim() : null);
+    await update({
+      full_name: form["full_name"]!.trim(), agent: v("agent"), email: v("email"), phone: v("phone"),
+      country: v("country"), website: v("website"), imdb_url: v("imdb_url"), notes: v("notes"),
+    });
+    setSaving(false);
+    toast.success("Ficha guardada");
+  }
+
+  async function remove() {
+    const { error } = await supabase.from("directors").delete().eq("id", directorId);
+    if (error) return toast.error(error.message);
+    toast.success("Director eliminado");
+    qc.invalidateQueries({ queryKey: ["directors"] });
+    navigate({ to: "/directors" });
+  }
+
   if (directorQ.isLoading || !directorQ.data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
   const d: any = directorQ.data;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-6 border-b border-border pb-4">
-        <PageCrumb label={d.full_name} />
-        <h1 className="mt-1 font-display text-4xl">{d.full_name}</h1>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <PageCrumb label={d.full_name} />
+          <h1 className="mt-1 font-display text-4xl">{d.full_name}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title={`¿Eliminar a ${d.full_name}?`}
+            description="Se eliminará la ficha del director. Las producciones vinculadas se mantienen."
+          />
+          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
+        </div>
       </div>
 
       <section className="space-y-4">
         <h2 className="font-display text-2xl">Ficha</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div><Label>Nombre</Label><Input defaultValue={d.full_name} onBlur={(e) => e.target.value !== d.full_name && update({ full_name: e.target.value })} /></div>
-          <div><Label>Agente</Label><Input defaultValue={d.agent ?? ""} onBlur={(e) => update({ agent: e.target.value || null })} /></div>
-          <div><Label>Email</Label><Input defaultValue={d.email ?? ""} onBlur={(e) => update({ email: e.target.value || null })} /></div>
-          <div><Label>Teléfono</Label><Input defaultValue={d.phone ?? ""} onBlur={(e) => update({ phone: e.target.value || null })} /></div>
-          <div><Label>País</Label><Input defaultValue={d.country ?? ""} onBlur={(e) => update({ country: e.target.value || null })} /></div>
-          <div><Label>Web personal</Label><Input defaultValue={d.website ?? ""} placeholder="https://…" onBlur={(e) => update({ website: e.target.value || null })} /></div>
-          <div className="sm:col-span-2"><Label>Enlace IMDb</Label><Input defaultValue={d.imdb_url ?? ""} placeholder="https://www.imdb.com/name/…" onBlur={(e) => update({ imdb_url: e.target.value || null })} /></div>
-          <div className="sm:col-span-2"><Label>Notas</Label><Textarea defaultValue={d.notes ?? ""} rows={3} onBlur={(e) => update({ notes: e.target.value || null })} /></div>
+          <div><Label>Nombre</Label><Input value={form["full_name"] ?? ""} onChange={(e) => set("full_name", e.target.value)} /></div>
+          <div><Label>Agente</Label><Input value={form["agent"] ?? ""} onChange={(e) => set("agent", e.target.value)} /></div>
+          <div><Label>Email</Label><Input value={form["email"] ?? ""} onChange={(e) => set("email", e.target.value)} /></div>
+          <div><Label>Teléfono</Label><Input value={form["phone"] ?? ""} onChange={(e) => set("phone", e.target.value)} /></div>
+          <div><Label>País</Label><Input value={form["country"] ?? ""} onChange={(e) => set("country", e.target.value)} /></div>
+          <div><Label>Web personal</Label><Input value={form["website"] ?? ""} placeholder="https://…" onChange={(e) => set("website", e.target.value)} /></div>
+          <div className="sm:col-span-2"><Label>Enlace IMDb</Label><Input value={form["imdb_url"] ?? ""} placeholder="https://www.imdb.com/name/…" onChange={(e) => set("imdb_url", e.target.value)} /></div>
+          <div className="sm:col-span-2"><Label>Notas</Label><Textarea value={form["notes"] ?? ""} rows={3} onChange={(e) => set("notes", e.target.value)} /></div>
         </div>
       </section>
 

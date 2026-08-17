@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { cn } from "@/lib/utils";
 import {
   PARTNER_TIPOS, PARTNER_SUBTIPOS, PARTNER_TIPO_APOYO, PARTNER_AMBITOS, PARTNER_TIPO_TONE,
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/_admin/partners/$partnerId
 function PartnerDetail() {
   const { partnerId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState<Partial<PartnerRecord>>({});
   const [saving, setSaving] = useState(false);
 
@@ -60,6 +62,14 @@ function PartnerDetail() {
     qc.invalidateQueries({ queryKey: ["partner-detail", partnerId] });
   }
 
+  async function remove() {
+    const { error } = await db.from("partners").delete().eq("id", partnerId);
+    if (error) return toast.error(error.message);
+    toast.success("Partner eliminado");
+    qc.invalidateQueries({ queryKey: ["partners"] });
+    navigate({ to: "/partners" });
+  }
+
   if (detailQ.isLoading) {
     return <div className="mx-auto max-w-4xl px-6 py-10"><ListSkeleton rows={4} /></div>;
   }
@@ -81,7 +91,14 @@ function PartnerDetail() {
       </p>
       <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-display text-5xl title-caps">{detailQ.data.nombre}</h1>
-        <Button onClick={save} disabled={saving}>Guardar</Button>
+        <div className="flex items-center gap-2">
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title={`¿Eliminar ${detailQ.data.nombre}?`}
+            description="Se eliminará la ficha del partner. Esta acción no se puede deshacer."
+          />
+          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
+        </div>
       </div>
       <div className="mt-3">
         <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${PARTNER_TIPO_TONE[tipo]}`}>{tipo}</span>

@@ -1,5 +1,5 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -25,7 +25,7 @@ import {
   enrichEspanolas, importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas,
   syncProduccionesEspanolas,
 } from "@/lib/producciones-espanolas.functions";
-import { addCompanyToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
+import { addCompanyToCrm, addDirectorToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
 import { addEspanolaToProducciones, addPartner, addProspectFichaje } from "@/lib/espanolas-actions";
 import { cn } from "@/lib/utils";
 
@@ -352,6 +352,24 @@ const eur = (n: number | null | undefined) =>
 
 /** Listado por años con todos los datos accionables uno a uno. */
 function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: ProduccionEspanola) => void }) {
+  const navigate = useNavigate();
+
+  /** Crea la ficha independiente en el CRM correspondiente y la abre. */
+  async function crearYAbrir(kind: "director" | "productora" | "roster", nombre: string, rosterRole: "composer" | "supervisor" = "composer") {
+    if (kind === "director") {
+      const id = await addDirectorToCrm(nombre);
+      if (id) navigate({ to: "/directors/$directorId", params: { directorId: id } });
+      return;
+    }
+    if (kind === "productora") {
+      const id = await addCompanyToCrm(nombre);
+      if (id) navigate({ to: "/production-companies/$companyId", params: { companyId: id } });
+      return;
+    }
+    const id = await addToRoster(nombre, rosterRole);
+    if (id) navigate({ to: "/composers/$composerId", params: { composerId: id } });
+  }
+
   const porAno = useMemo(() => {
     const map = new Map<number, ProduccionEspanola[]>();
     for (const r of rows) {
@@ -376,6 +394,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                 <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   <th className="py-2 pr-3 text-left">Título</th>
                   <th className="py-2 pr-3 text-left">Título original</th>
+                  <th className="py-2 pr-3 text-left">Dirección</th>
                   <th className="py-2 pr-3 text-left">Productoras</th>
                   <th className="py-2 pr-3 text-left">Compositor BSO</th>
                   <th className="py-2 pr-3 text-left">Supervisor musical</th>
@@ -406,6 +425,24 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                       </td>
                       <td className="py-2 pr-3 text-muted-foreground">{r.title_original ?? "—"}</td>
                       <td className="py-2 pr-3">
+                        {(r.directors ?? []).length ? (
+                          <div className="flex flex-col gap-0.5">
+                            {(r.directors ?? []).map((d) => (
+                              <Accionable
+                                key={d}
+                                text={d}
+                                titulo={d}
+                                acciones={[
+                                  { label: "Crear ficha de director y abrir", run: () => crearYAbrir("director", d) },
+                                  { label: "Añadir a Directores CRM", run: () => addDirectorToCrm(d) },
+                                  { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: d, account_type: "otros" }) },
+                                ]}
+                              />
+                            ))}
+                          </div>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </td>
+                      <td className="py-2 pr-3">
                         {(r.production_companies ?? []).length ? (
                           <div className="flex flex-col gap-0.5">
                             {(r.production_companies ?? []).map((c) => (
@@ -414,6 +451,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                                 text={c}
                                 titulo={c}
                                 acciones={[
+                                  { label: "Crear ficha de productora y abrir", run: () => crearYAbrir("productora", c) },
                                   { label: "Añadir a Partners (Productora)", run: () => addPartner(c, "Productora") },
                                   { label: "Añadir a Productoras CRM", run: () => addCompanyToCrm(c) },
                                   { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: c, account_type: "productora" }) },
@@ -428,6 +466,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           text={r.composer}
                           titulo={r.composer ?? ""}
                           acciones={[
+                            { label: "Crear ficha de compositor y abrir", run: () => crearYAbrir("roster", r.composer!, "composer") },
                             { label: "Añadir al Roster", run: () => addToRoster(r.composer!, "composer") },
                             { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.composer!, `BSO de ${titulo} (${r.year ?? "—"})`) },
                             { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.composer!, account_type: "roster", roster_kind: "composer" }) },
@@ -439,6 +478,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           text={r.music_supervisor}
                           titulo={r.music_supervisor ?? ""}
                           acciones={[
+                            { label: "Crear ficha de supervisor y abrir", run: () => crearYAbrir("roster", r.music_supervisor!, "supervisor") },
                             { label: "Añadir al Roster (supervisor)", run: () => addToRoster(r.music_supervisor!, "supervisor") },
                             { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.music_supervisor!, `Supervisión musical de ${titulo}`) },
                             { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.music_supervisor!, account_type: "roster", roster_kind: "otros" }) },
