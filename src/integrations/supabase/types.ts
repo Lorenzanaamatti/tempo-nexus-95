@@ -3925,6 +3925,9 @@ export type Database = {
       producciones_espanolas: {
         Row: {
           backdrop_path: string | null
+          box_office: number | null
+          budget: number | null
+          composer: string | null
           countries: string[]
           created_at: string
           directors: string[]
@@ -3934,6 +3937,7 @@ export type Database = {
           id: string
           last_synced_at: string | null
           media_type: string
+          music_supervisor: string | null
           notas: string | null
           oportunidad_vinculada: string | null
           platform: string | null
@@ -3955,6 +3959,9 @@ export type Database = {
         }
         Insert: {
           backdrop_path?: string | null
+          box_office?: number | null
+          budget?: number | null
+          composer?: string | null
           countries?: string[]
           created_at?: string
           directors?: string[]
@@ -3964,6 +3971,7 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           media_type?: string
+          music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
           platform?: string | null
@@ -3985,6 +3993,9 @@ export type Database = {
         }
         Update: {
           backdrop_path?: string | null
+          box_office?: number | null
+          budget?: number | null
+          composer?: string | null
           countries?: string[]
           created_at?: string
           directors?: string[]
@@ -3994,6 +4005,7 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           media_type?: string
+          music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
           platform?: string | null
