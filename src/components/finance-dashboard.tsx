@@ -265,6 +265,46 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
         <KPI label="Vencido sin facturar" value={formatEUR(overdueTotal)} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
       </div>
 
+      {!composerId && (
+        <section className="space-y-2">
+          <h3 className="font-display text-xl">Presupuestos (deal memos)</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <KPI label="Total propuesto" value={formatEUR(dmTotals.total)} accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
+            <KPI label="En preparación / revisión" value={formatEUR(dmTotals.enCurso)} accent="muted" />
+            <KPI label="Enviados" value={formatEUR(dmTotals.enviado)} accent="warn" />
+            <KPI label="Cerrados" value={formatEUR(dmTotals.cerrado)} accent="success" />
+          </div>
+          {dealMemos.length === 0 ? (
+            <EmptyState variant="inline" icon={FileText} title="Sin presupuestos" description="Los deal memos que crees aparecerán aquí con su importe propuesto." />
+          ) : (
+            <div className="overflow-x-auto rounded-sm border border-border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2">Referencia</th>
+                    <th className="px-3 py-2">Obra</th>
+                    <th className="px-3 py-2">Estado</th>
+                    <th className="px-3 py-2">Fecha</th>
+                    <th className="px-3 py-2 text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dealMemos.map((d) => (
+                    <tr key={d.id} className="border-t border-border">
+                      <td className="px-3 py-2 font-mono text-xs">{d.referencia}</td>
+                      <td className="px-3 py-2">{d.obra}</td>
+                      <td className="px-3 py-2 text-xs uppercase text-muted-foreground">{d.estado.replace(/_/g, " ")}</td>
+                      <td className="px-3 py-2 tabular-nums">{formatDateEs(d.fecha_envio ?? d.created_at)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{formatEUR(d.importe_propuesto)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
       <div className="overflow-x-auto rounded-sm border border-border">
         <table className="min-w-full text-sm">
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
