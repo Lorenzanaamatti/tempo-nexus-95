@@ -47,6 +47,32 @@ export const REPRESENTADO_ROLES = [
   { value: "artista", label: "Artista" },
 ] as const;
 
+/** Roles adicionales del roster que pueden participar en una producción. */
+export const REPRESENTADO_ROLES_EXTRA = [
+  { value: "artista_featuring", label: "Artista invitado / featuring" },
+  { value: "interprete", label: "Intérprete / solista" },
+  { value: "orquestador", label: "Orquestador / arreglista" },
+  { value: "productor_musical", label: "Productor musical" },
+  { value: "sound_design", label: "Diseño de sonido" },
+  { value: "especialista", label: "Especialista" },
+  { value: "curador", label: "Curador musical" },
+  { value: "asesor", label: "Asesor / consultor" },
+  { value: "otro", label: "Otro (especificar)" },
+] as const;
+
+export const ALL_REPRESENTADO_ROLES = [...REPRESENTADO_ROLES, ...REPRESENTADO_ROLES_EXTRA];
+
 export const REPRESENTADO_ROLE_LABEL: Record<string, string> = Object.fromEntries(
-  REPRESENTADO_ROLES.map((r) => [r.value, r.label]),
+  ALL_REPRESENTADO_ROLES.map((r) => [r.value, r.label]),
 );
+
+/** Etiquetas de la categoría de roster (tabla composers). */
+export const ROSTER_ROLE_LABEL: Record<string, string> = {
+  composer: "Compositor",
+  artist: "Artista",
+  supervisor: "Supervisor musical",
+  specialist: "Especialista",
+  curator: "Curador musical",
+  other: "Otro",
+  ic_company: "IC",
+};
