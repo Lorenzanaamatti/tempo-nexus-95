@@ -50,11 +50,6 @@ function PlantillaEditor() {
     qc.invalidateQueries({ queryKey: ["dm-plantillas"] });
   }
 
-  async function handleFile(file: File) {
-
-    return handleFileImpl(file);
-  }
-
   async function remove() {
     const { error } = await supabase.from("dm_plantillas").delete().eq("id", plantillaId);
     if (error) return toast.error(error.message);
@@ -63,7 +58,7 @@ function PlantillaEditor() {
     navigate({ to: "/deal-memos/plantillas" });
   }
 
-  async function handleFileImpl(file: File) {
+  async function handleFile(file: File) {
     try {
       const path = await uploadToBucket("composer-assets", `plantillas/${plantillaId}`, file);
       const signed = await signBucketPath("composer-assets", path, 60 * 60 * 24 * 365);
