@@ -40,11 +40,11 @@ export const searchTmdbEspanolas = createServerFn({ method: "POST" })
     const results = pages.flat().sort((a, b) => (b.year ?? 0) - (a.year ?? 0)).slice(0, 30);
     const { data: existing } = await admin
       .from("producciones_espanolas")
-      .select("tmdb_id")
+      .select("tmdb_id, media_type")
       .in("tmdb_id", results.map((r) => r.tmdb_id));
-    const imported = new Set(((existing ?? []) as any[]).map((r) => r.tmdb_id));
+    const imported = new Set(((existing ?? []) as any[]).map((r) => `${r.media_type}-${r.tmdb_id}`));
 
-    return results.map((r) => ({ ...r, already_imported: imported.has(r.tmdb_id) }));
+    return results.map((r) => ({ ...r, already_imported: imported.has(`${r.media_type}-${r.tmdb_id}`) }));
   });
 
 /** Importa una producción desde TMDb a producciones_espanolas (upsert por tmdb_id). */
@@ -58,7 +58,7 @@ export const importProduccionEspanola = createServerFn({ method: "POST" })
     const row = await fetchDetail(data.tmdbId, data.mediaType);
     const { data: saved, error } = await admin
       .from("producciones_espanolas")
-      .upsert(row, { onConflict: "tmdb_id" })
+      .upsert(row, { onConflict: "tmdb_id,media_type" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -81,11 +81,17 @@ export const syncProduccionesEspanolas = createServerFn({ method: "POST" })
 export const importEspanolasYearPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ year: z.number().int().min(1900).max(2100), page: z.number().int().min(1).max(500) }).parse(input),
+    z
+      .object({
+        year: z.number().int().min(1900).max(2100),
+        page: z.number().int().min(1).max(500),
+        mediaType: z.enum(["movie", "tv"]).default("movie"),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const admin = await requireAdmin(context.userId);
-    return importYearPageLite(admin, data.year, data.page);
+    return importYearPageLite(admin, data.year, data.page, data.mediaType);
   });
 
 /** Completa por lotes los créditos musicales y la taquilla de las fichas importadas. */
