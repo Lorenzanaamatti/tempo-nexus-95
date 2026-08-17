@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { SaveButton } from "@/components/save-button";
 import { useDirtyForm } from "@/lib/use-dirty-form";
 import { ContractSignerInput } from "@/components/contract-signer-input";
@@ -133,7 +133,6 @@ function ContractDetail() {
   }
 
   async function remove() {
-    if (!confirm("¿Eliminar este contrato?")) return;
     const { error } = await supabase.from("contracts").delete().eq("id", contractId);
     if (error) return toast.error(error.message);
     navigate({ to: "/contracts" });
@@ -148,7 +147,14 @@ function ContractDetail() {
           <PageCrumb label={form.title} />
           <h1 className="mt-1 font-display text-4xl">{form.title || "—"}</h1>
         </div>
-        <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
+        <ConfirmDeleteButton
+          onConfirm={remove}
+          iconOnly
+          label="Eliminar contrato"
+          title="¿Eliminar este contrato?"
+          description="Se borrará el contrato de forma permanente. Esta acción no se puede deshacer."
+          confirmLabel="Eliminar contrato"
+        />
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">

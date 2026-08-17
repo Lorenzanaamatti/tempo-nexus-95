@@ -6,16 +6,19 @@ export function ComposerThumb({
   fallback,
   className,
   imgClassName,
+  fallbackClassName,
 }: {
   path?: string | null;
   alt?: string;
   fallback: React.ReactNode;
   className?: string;
   imgClassName?: string;
+  /** Clases alternativas cuando no hay foto (evita huecos vacíos grandes). */
+  fallbackClassName?: string;
 }) {
   const { data: url } = useComposerPhotoUrl(path);
   if (!path || !url) {
-    return <div className={className}>{fallback}</div>;
+    return <div className={fallbackClassName ?? className}>{fallback}</div>;
   }
   return (
     <div className={className}>

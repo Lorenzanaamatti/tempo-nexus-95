@@ -14,7 +14,8 @@ import { usePendingAssignments, useRespondAssignment } from "@/lib/use-notificat
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { toast } from "sonner";
-import { Plus, CheckCircle2 } from "lucide-react";
+import { Plus, CheckCircle2, AlertTriangle } from "lucide-react";
+import { formatDateEs } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
@@ -137,7 +138,7 @@ function TareasPage() {
                 <div className="min-w-0">
                   <p className="text-sm">{t.title}</p>
                   <p className="smallcaps text-[10px] text-muted-foreground">
-                    {[t.subarea, t.due_date ? `entrega ${t.due_date}` : null].filter(Boolean).join(" · ") || "sin fecha"}
+                    {[t.subarea, t.due_date ? `entrega ${formatDateEs(t.due_date)}` : null].filter(Boolean).join(" · ") || "sin fecha"}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -223,7 +224,14 @@ function TareasPage() {
             const overdue = !t.done && t.due_date && t.due_date < today;
             const dueToday = !t.done && t.due_date === today;
             return (
-              <li key={t.id} className={cn("px-3 py-3", t.done && "opacity-60")}>
+              <li
+                key={t.id}
+                className={cn(
+                  "px-3 py-3",
+                  t.done && "opacity-60",
+                  overdue && "border-l-2 border-destructive bg-destructive/5",
+                )}
+              >
                 <div className="flex items-start gap-3">
                   <Checkbox
                     className="mt-1"
@@ -242,11 +250,16 @@ function TareasPage() {
                       <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_STATUS_TONE[t.status] ?? "")}>
                         {TASK_STATUS_LABEL[t.status] ?? t.status}
                       </span>
-                      <span className="text-muted-foreground">Entrada {t.entry_date ?? "—"}</span>
-                      <span className={cn("text-muted-foreground", overdue && "text-destructive", dueToday && "text-primary")}>
-                        Entrega {t.due_date ?? "—"}
-                        {overdue ? " · vencida" : dueToday ? " · hoy" : ""}
+                      <span className="text-muted-foreground">Entrada {formatDateEs(t.entry_date)}</span>
+                      <span className={cn("text-muted-foreground", dueToday && "text-primary")}>
+                        Entrega {formatDateEs(t.due_date)}
+                        {dueToday ? " · hoy" : ""}
                       </span>
+                      {overdue && (
+                        <span className="inline-flex items-center gap-1 rounded-sm bg-destructive px-1.5 py-0.5 font-semibold smallcaps text-destructive-foreground">
+                          <AlertTriangle className="h-3 w-3" aria-hidden /> Vencida
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">

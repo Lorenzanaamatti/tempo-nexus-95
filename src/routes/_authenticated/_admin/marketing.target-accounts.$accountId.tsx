@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Trash2, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { toast } from "sonner";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import {
@@ -175,7 +176,6 @@ function TargetAccountDetail() {
   }
 
   async function remove() {
-    if (!confirm("¿Eliminar definitivamente esta cuenta objetivo?")) return;
     const { error } = await supabase.from("target_accounts").delete().eq("id", accountId);
     if (error) {
       toast.error(error.message);
@@ -230,9 +230,12 @@ function TargetAccountDetail() {
             <Sparkles className="mr-1 h-4 w-4" />
             {creatingOpp ? "Creando…" : "Crear oportunidad desde esta cuenta"}
           </Button>
-          <Button variant="ghost" size="sm" onClick={remove} className="text-destructive hover:text-destructive">
-            <Trash2 className="mr-1 h-4 w-4" /> Eliminar
-          </Button>
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title="¿Eliminar esta cuenta objetivo?"
+            description="Se borrará la cuenta y sus datos asociados de forma permanente. Esta acción no se puede deshacer."
+            confirmLabel="Eliminar cuenta"
+          />
         </div>
       </div>
 
