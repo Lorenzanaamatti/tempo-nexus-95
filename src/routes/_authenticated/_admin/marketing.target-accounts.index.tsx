@@ -187,6 +187,7 @@ function TargetAccountsIndex() {
             Empresas, plataformas y marcas en las que IC quiere entrar. Cada cuenta tiene estado, responsable interno y próximo paso. Cuando aparece un encargo concreto, se convierte en una Oportunidad.
           </p>
         </div>
+        <ExportRowsButton rows={filtered} filename="cuentas-objetivo" sheetName="Cuentas objetivo" />
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
