@@ -41,6 +41,8 @@ export type ProduccionEspanola = {
   box_office: number | null;
   budget: number | null;
   ic_participo: boolean;
+  origen: string;
+  ic_personas: string[];
   produccion_ic_vinculada: string | null;
   representados_vinculados: string[];
   estado_prospeccion: ProspeccionEstado;
