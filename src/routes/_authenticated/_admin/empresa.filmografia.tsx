@@ -181,6 +181,7 @@ function FilmografiaIC() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportRowsButton rows={rows} filename="filmografia-ic" sheetName="Filmografía" />
           <Select value={year} onValueChange={setYear}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
