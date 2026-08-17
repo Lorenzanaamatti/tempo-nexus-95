@@ -2032,6 +2032,33 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_objetivos: {
+        Row: {
+          anio: number
+          created_at: string
+          id: string
+          metrica: string
+          updated_at: string
+          valor_objetivo: number
+        }
+        Insert: {
+          anio: number
+          created_at?: string
+          id?: string
+          metrica: string
+          updated_at?: string
+          valor_objetivo?: number
+        }
+        Update: {
+          anio?: number
+          created_at?: string
+          id?: string
+          metrica?: string
+          updated_at?: string
+          valor_objetivo?: number
+        }
+        Relationships: []
+      }
       fee_ranges: {
         Row: {
           code: string
@@ -2136,6 +2163,45 @@ export type Database = {
           },
         ]
       }
+      international_prospects: {
+        Row: {
+          created_at: string
+          estado_propuesta: Database["public"]["Enums"]["intl_propuesta_estado"]
+          fecha_primer_contacto: string
+          id: string
+          nombre_empresa: string
+          notas: string | null
+          pais: string | null
+          reuniones_mantenidas: number
+          tipo: Database["public"]["Enums"]["intl_prospect_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado_propuesta?: Database["public"]["Enums"]["intl_propuesta_estado"]
+          fecha_primer_contacto?: string
+          id?: string
+          nombre_empresa: string
+          notas?: string | null
+          pais?: string | null
+          reuniones_mantenidas?: number
+          tipo?: Database["public"]["Enums"]["intl_prospect_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado_propuesta?: Database["public"]["Enums"]["intl_propuesta_estado"]
+          fecha_primer_contacto?: string
+          id?: string
+          nombre_empresa?: string
+          notas?: string | null
+          pais?: string | null
+          reuniones_mantenidas?: number
+          tipo?: Database["public"]["Enums"]["intl_prospect_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       languages: {
         Row: {
           code: string
@@ -2154,6 +2220,60 @@ export type Database = {
           label_ca?: string | null
           label_en?: string | null
           label_es?: string
+        }
+        Relationships: []
+      }
+      marketing_campaigns: {
+        Row: {
+          alcance: number
+          canal: Database["public"]["Enums"]["marketing_campaign_canal"]
+          conversiones: number
+          created_at: string
+          engagement: number
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          gasto_real: number
+          id: string
+          impresiones: number
+          leads_generados: number
+          nombre: string
+          notas: string | null
+          presupuesto_asignado: number
+          updated_at: string
+        }
+        Insert: {
+          alcance?: number
+          canal?: Database["public"]["Enums"]["marketing_campaign_canal"]
+          conversiones?: number
+          created_at?: string
+          engagement?: number
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          gasto_real?: number
+          id?: string
+          impresiones?: number
+          leads_generados?: number
+          nombre: string
+          notas?: string | null
+          presupuesto_asignado?: number
+          updated_at?: string
+        }
+        Update: {
+          alcance?: number
+          canal?: Database["public"]["Enums"]["marketing_campaign_canal"]
+          conversiones?: number
+          created_at?: string
+          engagement?: number
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          gasto_real?: number
+          id?: string
+          impresiones?: number
+          leads_generados?: number
+          nombre?: string
+          notas?: string | null
+          presupuesto_asignado?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3504,6 +3624,39 @@ export type Database = {
           },
         ]
       }
+      roster_prospects: {
+        Row: {
+          created_at: string
+          estado: Database["public"]["Enums"]["roster_prospect_estado"]
+          fecha_decision: string | null
+          fecha_primer_contacto: string
+          id: string
+          nombre: string
+          notas: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["roster_prospect_estado"]
+          fecha_decision?: string | null
+          fecha_primer_contacto?: string
+          id?: string
+          nombre: string
+          notas?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["roster_prospect_estado"]
+          fecha_decision?: string | null
+          fecha_primer_contacto?: string
+          id?: string
+          nombre?: string
+          notas?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_campaigns: {
         Row: {
           composer_id: string | null
@@ -4357,6 +4510,25 @@ export type Database = {
         | "seguimiento_producciones"
         | "ai_envia_presus_productoras"
         | "manager"
+      intl_propuesta_estado:
+        | "sin_propuesta"
+        | "propuesta_enviada"
+        | "aceptada"
+        | "rechazada"
+        | "en_curso"
+      intl_prospect_tipo:
+        | "productora"
+        | "plataforma"
+        | "supervisor_musical"
+        | "otro"
+      marketing_campaign_canal:
+        | "instagram"
+        | "linkedin"
+        | "prensa"
+        | "festival"
+        | "publicidad_pagada"
+        | "email"
+        | "otro"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       opportunity_kind:
         | "fichaje"
@@ -4466,6 +4638,13 @@ export type Database = {
         | "en_negociacion"
         | "finalizado"
       representation_tier: "A" | "B" | "C" | "desarrollo" | "D" | "E"
+      roster_prospect_estado:
+        | "contactado"
+        | "reunion_mantenida"
+        | "oferta_enviada"
+        | "aceptado"
+        | "rechazado_ic"
+        | "rechazado_compositor"
       roster_role:
         | "composer"
         | "artist"
@@ -4801,6 +4980,28 @@ export const Constants = {
         "ai_envia_presus_productoras",
         "manager",
       ],
+      intl_propuesta_estado: [
+        "sin_propuesta",
+        "propuesta_enviada",
+        "aceptada",
+        "rechazada",
+        "en_curso",
+      ],
+      intl_prospect_tipo: [
+        "productora",
+        "plataforma",
+        "supervisor_musical",
+        "otro",
+      ],
+      marketing_campaign_canal: [
+        "instagram",
+        "linkedin",
+        "prensa",
+        "festival",
+        "publicidad_pagada",
+        "email",
+        "otro",
+      ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       opportunity_kind: [
         "fichaje",
@@ -4918,6 +5119,14 @@ export const Constants = {
         "finalizado",
       ],
       representation_tier: ["A", "B", "C", "desarrollo", "D", "E"],
+      roster_prospect_estado: [
+        "contactado",
+        "reunion_mantenida",
+        "oferta_enviada",
+        "aceptado",
+        "rechazado_ic",
+        "rechazado_compositor",
+      ],
       roster_role: [
         "composer",
         "artist",
