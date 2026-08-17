@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { EmptyState } from "@/components/list-states";
-import { REPRESENTADO_ROLES, REPRESENTADO_ROLE_LABEL } from "@/lib/production-milestones";
+import { ALL_REPRESENTADO_ROLES, REPRESENTADO_ROLE_LABEL, ROSTER_ROLE_LABEL } from "@/lib/production-milestones";
 import { toast } from "sonner";
 import { Plus, Users } from "lucide-react";
 
@@ -17,7 +17,7 @@ export type LinkedRepresentado = {
   id: string;
   composer_id: string;
   role_in_project: string | null;
-  composers?: { id: string; full_name: string | null; artistic_name: string | null } | null;
+  composers?: { id: string; full_name: string | null; artistic_name: string | null; roster_role?: string | null } | null;
 };
 
 export function useProductionRepresentados(productionId: string) {
@@ -26,7 +26,7 @@ export function useProductionRepresentados(productionId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("production_assignments")
-        .select("id, composer_id, role_in_project, composers(id, full_name, artistic_name)")
+        .select("id, composer_id, role_in_project, composers(id, full_name, artistic_name, roster_role)")
         .eq("production_id", productionId)
         .not("composer_id", "is", null);
       if (error) throw error;
@@ -45,32 +45,51 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [role, setRole] = useState<string>("compositor_principal");
+  const [customRole, setCustomRole] = useState("");
+  const [rosterFilter, setRosterFilter] = useState<string>("all");
   const [picked, setPicked] = useState<string>("");
 
   const rosterQ = useQuery({
-    queryKey: ["composers-mini"],
+    queryKey: ["composers-mini-roles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("composers").select("id, full_name, artistic_name").order("full_name");
+      const { data, error } = await supabase
+        .from("composers")
+        .select("id, full_name, artistic_name, roster_role")
+        .order("full_name");
       if (error) throw error;
       return data ?? [];
     },
   });
 
   const needle = q.trim().toLowerCase();
-  const candidates = (rosterQ.data ?? []).filter((c: any) =>
-    !needle || `${c.artistic_name ?? ""} ${c.full_name ?? ""}`.toLowerCase().includes(needle),
-  );
+  const candidates = (rosterQ.data ?? []).filter((c: any) => {
+    const okText = !needle || `${c.artistic_name ?? ""} ${c.full_name ?? ""}`.toLowerCase().includes(needle);
+    const okRole = rosterFilter === "all" || (c.roster_role ?? "other") === rosterFilter;
+    return okText && okRole;
+  });
+
+  const rosterTabs = [
+    { value: "all", label: "Todos" },
+    { value: "composer", label: "Compositores" },
+    { value: "artist", label: "Artistas" },
+    { value: "supervisor", label: "Supervisores" },
+    { value: "specialist", label: "Especialistas" },
+    { value: "curator", label: "Curadores" },
+    { value: "other", label: "Otros" },
+  ];
 
   async function link() {
     if (!picked) return;
+    const finalRole = role === "otro" ? customRole.trim() : role;
+    if (role === "otro" && !finalRole) return toast.error("Indica el rol");
     const { error } = await supabase.from("production_assignments").insert({
       production_id: productionId,
       composer_id: picked,
-      role_in_project: role,
+      role_in_project: finalRole,
     });
     if (error) return toast.error(error.message);
     toast.success("Representado vinculado");
-    setOpen(false); setPicked(""); setQ("");
+    setOpen(false); setPicked(""); setQ(""); setCustomRole("");
     qc.invalidateQueries({ queryKey: ["production-representados", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
   }
