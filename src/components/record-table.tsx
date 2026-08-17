@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -116,6 +117,21 @@ export function RecordTable({
           <Button onClick={() => { setEditing(null); setOpen(true); }}>
             <Plus className="mr-1 h-4 w-4" /> {newLabel}
           </Button>
+          <ExportRowsButton
+            rows={rows}
+            filename={table}
+            sheetName={title}
+            columns={columns.map((c) => ({
+              key: c.key,
+              label: c.label,
+              get: (r: RecordRow) =>
+                c.options
+                  ? Array.isArray(r[c.key])
+                    ? (r[c.key] as any[]).map((v) => labelOf(c.options, v))
+                    : labelOf(c.options, r[c.key])
+                  : r[c.key],
+            }))}
+          />
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -94,9 +95,12 @@ function ActividadInternacionalPage() {
             Prospects internacionales: contactos, reuniones mantenidas y estado de las propuestas.
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link to="/empresa/kpis"><ArrowLeft className="mr-1 h-4 w-4" /> Volver a KPIs</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportRowsButton rows={rows ?? []} filename="actividad-internacional" sheetName="Internacional" />
+          <Button variant="outline" asChild>
+            <Link to="/empresa/kpis"><ArrowLeft className="mr-1 h-4 w-4" /> Volver a KPIs</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[2fr_1fr_1fr_1.3fr_auto]">

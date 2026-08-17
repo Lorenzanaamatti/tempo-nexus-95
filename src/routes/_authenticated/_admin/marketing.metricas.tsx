@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -126,6 +127,9 @@ function MetricsTable({ composerId }: { composerId: string | null }) {
   return (
     <section>
       <h2 className="mb-3 font-display text-2xl title-caps">Plataformas</h2>
+      <div className="mb-2 flex justify-end">
+        <ExportRowsButton rows={rows} filename="metricas-plataformas" sheetName="Métricas" />
+      </div>
       <div className="overflow-x-auto rounded-sm border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-left">

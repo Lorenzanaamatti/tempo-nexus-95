@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -125,6 +126,7 @@ function ListaDealMemos() {
             {Object.entries(ESTADO_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
+        <ExportRowsButton rows={filtered} filename="deal-memos" sheetName="Deal memos" className="ml-auto" />
       </div>
 
       {dmQ.isLoading ? (

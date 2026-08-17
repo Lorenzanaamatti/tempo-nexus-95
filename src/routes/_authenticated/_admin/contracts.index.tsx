@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -110,7 +111,10 @@ function ContractsIndex() {
             Todos los contratos asociados a IC. Ordena por tipo, firmante, fechas, estado de firma o idioma.
           </p>
         </div>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar contrato…" className="w-64 rounded-sm" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar contrato…" className="w-64 rounded-sm" />
+          <ExportRowsButton rows={rows} filename="contratos" sheetName="Contratos" />
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-end gap-2">

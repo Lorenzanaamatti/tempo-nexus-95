@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +99,7 @@ export function DeadlineOpportunities({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar…" className="w-56 rounded-sm" />
+          <ExportRowsButton rows={rows} filename={title.toLowerCase().replace(/\s+/g, "-")} sheetName={title} />
           <Button onClick={openNew}><Plus className="mr-1 h-4 w-4" /> {newLabel}</Button>
         </div>
       </div>

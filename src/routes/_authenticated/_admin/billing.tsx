@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -106,12 +107,15 @@ function BillingPlan() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
-      <header className="mb-8">
-        <p className="smallcaps text-muted-foreground">Operativo</p>
-        <h1 className="font-display text-4xl title-caps">Plan de facturación IC</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Facturas de comisión IC pendientes de emitir, emitidas y cobradas. Anota la referencia de la factura en Holded y un enlace directo.
-        </p>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="smallcaps text-muted-foreground">Operativo</p>
+          <h1 className="font-display text-4xl title-caps">Plan de facturación IC</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Facturas de comisión IC pendientes de emitir, emitidas y cobradas. Anota la referencia de la factura en Holded y un enlace directo.
+          </p>
+        </div>
+        <ExportRowsButton rows={rows} filename="facturacion-ic" sheetName="Facturación" />
       </header>
 
       <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

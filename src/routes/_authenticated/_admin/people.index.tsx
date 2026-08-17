@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -117,6 +118,7 @@ function PeopleIndex() {
         </div>
         <div className="flex items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar nombre…" className="w-56 rounded-sm" />
+          <ExportRowsButton rows={data ?? []} filename="equipo-ic" sheetName="Equipo IC" />
           <SortControl
             options={PEOPLE_SORT_OPTIONS}
             sortKey={pg.sortKey}

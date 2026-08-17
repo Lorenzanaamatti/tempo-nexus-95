@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -125,6 +126,7 @@ function TareasPage() {
             <div className="font-display text-2xl leading-none text-primary">{dueCount}</div>
             <div className="smallcaps text-[10px] text-muted-foreground">pendientes hoy</div>
           </div>
+          <ExportRowsButton rows={rows} filename="tareas" sheetName="Tareas" />
           <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Archive } from "lucide-react";
@@ -30,7 +31,10 @@ function ProduccionesFinalizadas() {
             Archivo histórico de producciones cerradas, agrupadas por año.
           </p>
         </div>
-        <ProductionSearch value={q} onChange={setQ} />
+        <div className="flex flex-wrap items-center gap-2">
+          <ProductionSearch value={q} onChange={setQ} />
+          <ExportRowsButton rows={rows} filename="producciones-finalizadas" sheetName="Finalizadas" />
+        </div>
       </div>
 
       {productionsQ.isLoading ? (

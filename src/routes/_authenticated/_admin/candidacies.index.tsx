@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -170,6 +171,7 @@ function CandidaciesIndex() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportRowsButton rows={filtered} filename="candidaturas" sheetName="Candidaturas" />
           <div className="inline-flex overflow-hidden rounded-sm border border-border">
             <button
               onClick={() => setView("list")}

@@ -1,3 +1,4 @@
+import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Target, Film, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -171,6 +172,7 @@ function RosterAll() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportRowsButton rows={rows} filename="roster" sheetName="Roster" />
           <button
             type="button"
             onClick={() => setOnlyIncomplete(!onlyIncomplete)}
