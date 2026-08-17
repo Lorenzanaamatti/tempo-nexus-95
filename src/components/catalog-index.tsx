@@ -102,7 +102,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="smallcaps text-muted-foreground">{props.eyebrow ?? "CRM"}</p>
-            <h1 className="mt-1 font-display text-5xl title-caps">{props.title}</h1>
+            <h1 className="mt-1 font-display text-5xl font-extrabold title-caps">{props.title}</h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">{props.description}</p>
           </div>
           <div className="flex items-center gap-2">
