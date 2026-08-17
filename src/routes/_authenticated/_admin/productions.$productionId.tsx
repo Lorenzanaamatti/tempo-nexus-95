@@ -21,6 +21,7 @@ import { SaveButton } from "@/components/save-button";
 import { useDirtyForm } from "@/lib/use-dirty-form";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
+import { ROSTER_ROLE_LABEL } from "@/lib/production-milestones";
 
 export const Route = createFileRoute("/_authenticated/_admin/productions/$productionId")({
   component: ProductionEdit,
@@ -72,9 +73,12 @@ function ProductionEdit() {
   const { dirty, markClean } = useDirtyForm(form);
 
   const composersQ = useQuery({
-    queryKey: ["composers-mini"],
+    queryKey: ["composers-mini-roles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("composers").select("id, full_name, artistic_name").order("full_name");
+      const { data, error } = await supabase
+        .from("composers")
+        .select("id, full_name, artistic_name, roster_role")
+        .order("full_name");
       if (error) throw error;
       return data ?? [];
     },
@@ -97,6 +101,15 @@ function ProductionEdit() {
     queryKey: ["production-companies-mini"],
     queryFn: async () => {
       const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const partnersQ = useQuery({
+    queryKey: ["partners-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("partners").select("id, nombre, tipo").order("nombre");
       if (error) throw error;
       return data ?? [];
     },
@@ -225,6 +238,14 @@ function ProductionEdit() {
   if (isLoading || !data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
 
   const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
+  const partnerOptions = [
+    ...(companiesQ.data ?? []).map((c: any) => ({ id: c.id, label: c.name as string, hint: "Productora (CRM)" })),
+    ...(partnersQ.data ?? [])
+      .filter((p: any) => !(companiesQ.data ?? []).some((c: any) => c.id === p.id))
+      .map((p: any) => ({ id: `free:${p.id}`, label: p.nombre as string, hint: p.tipo as string })),
+  ];
+  const selectedPartnerName =
+    (companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? "";
   const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
   const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
@@ -262,36 +283,56 @@ function ProductionEdit() {
           )}
         </div>
         <div>
-          <Label>Representado asignado</Label>
+          <Label>Representado principal</Label>
           <Select value={form.composer_id || undefined} onValueChange={(v) => setForm({ ...form, composer_id: v })}>
             <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
             <SelectContent>
               {(composersQ.data ?? []).map((c: any) => (
-                <SelectItem key={c.id} value={c.id}>{c.artistic_name || c.full_name}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {(c.artistic_name || c.full_name)}
+                  {c.roster_role ? ` · ${ROSTER_ROLE_LABEL[c.roster_role] ?? c.roster_role}` : ""}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Compositores, artistas, supervisores, especialistas y curadores. Vincula al resto del equipo en “Representados”.
+          </p>
         </div>
         <div>
           <Label>Partner / Productora</Label>
           <div className="flex gap-2">
-            <Select value={form.partner_company_id || undefined} onValueChange={(v) => setForm({ ...form, partner_company_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecciona productora…" /></SelectTrigger>
-              <SelectContent>
-                {(companiesQ.data ?? []).map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex-1">
+              <SuggestInput
+                value={form.partner || selectedPartnerName}
+                placeholder="Escribe cualquier partner (del CRM o no vinculado)"
+                options={partnerOptions}
+                onChange={(v, picked) =>
+                  setForm({
+                    ...form,
+                    partner: v,
+                    partner_company_id: picked && !picked.id.startsWith("free:") ? picked.id : "",
+                  })
+                }
+              />
+            </div>
             <Button type="button" variant="outline" size="sm" onClick={async () => {
-              const name = window.prompt("Nombre de la productora");
+              const name = window.prompt("Nombre de la productora a crear en el CRM", form.partner || "");
               if (!name?.trim()) return;
               const { data, error } = await supabase.from("production_companies").insert({ name: name.trim() }).select("id").single();
               if (error) return toast.error(error.message);
-              setForm((f) => ({ ...f, partner_company_id: data.id }));
+              setForm((f) => ({ ...f, partner_company_id: data.id, partner: name.trim() }));
               qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
+              qc.invalidateQueries({ queryKey: ["partners-mini"] });
             }}><Plus className="h-3 w-3" /></Button>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {form.partner_company_id
+              ? "Vinculado a una ficha del CRM."
+              : form.partner
+                ? "Partner no vinculado: se guarda como texto libre."
+                : "Puedes escribir un partner que no esté en el CRM."}
+          </p>
           <Link to="/production-companies" className="mt-1 inline-block text-xs text-muted-foreground hover:underline">Gestionar productoras →</Link>
         </div>
         <div>
