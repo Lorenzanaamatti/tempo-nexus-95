@@ -72,9 +72,12 @@ function ProductionEdit() {
   const { dirty, markClean } = useDirtyForm(form);
 
   const composersQ = useQuery({
-    queryKey: ["composers-mini"],
+    queryKey: ["composers-mini-roles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("composers").select("id, full_name, artistic_name").order("full_name");
+      const { data, error } = await supabase
+        .from("composers")
+        .select("id, full_name, artistic_name, roster_role")
+        .order("full_name");
       if (error) throw error;
       return data ?? [];
     },
@@ -97,6 +100,15 @@ function ProductionEdit() {
     queryKey: ["production-companies-mini"],
     queryFn: async () => {
       const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const partnersQ = useQuery({
+    queryKey: ["partners-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("partners").select("id, nombre, tipo").order("nombre");
       if (error) throw error;
       return data ?? [];
     },
