@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Film, Plus } from "lucide-react";
+import { Film, Plus, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { STAGE_DEFAULT_STATUS } from "@/lib/production-lifecycle";
 import { posterUrl } from "@/lib/producciones-espanolas";
+import { formatEUR } from "@/lib/money";
 
 const db = supabase as any;
 const ALL = "__all__";
@@ -34,6 +35,8 @@ type Entry = {
   director: string | null;
   credits: Credit[];
   source: "Producción IC" | "Externo" | "Producción española";
+  budget: number | null;
+  commission: number | null;
   to?: { path: string; id: string };
 };
 
@@ -42,7 +45,7 @@ function useFilmografia() {
     queryKey: ["filmografia-ic"],
     queryFn: async () => {
       const [prods, assigns, composers, externals, espanolas, companies, directors] = await Promise.all([
-        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id"),
+        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id, partner, fee_amount, ic_commission, ic_commission_pct"),
         db.from("production_assignments").select("production_id, composer_id, role_in_project"),
         db.from("composers").select("id, full_name, artistic_name, roster_role"),
         db.from("composer_filmography").select("id, composer_id, title, year, format, production_company, director, production_id"),
@@ -87,6 +90,13 @@ function useFilmografia() {
           director: p.director ?? directorById.get(p.director_id) ?? null,
           credits,
           source: "Producción IC",
+          budget: p.fee_amount == null ? null : Number(p.fee_amount),
+          commission:
+            p.ic_commission != null
+              ? Number(p.ic_commission)
+              : p.fee_amount != null && p.ic_commission_pct != null
+                ? (Number(p.fee_amount) * Number(p.ic_commission_pct)) / 100
+                : null,
           to: { path: "/producciones/$productionId", id: p.id },
         });
       }
@@ -104,6 +114,8 @@ function useFilmografia() {
           director: f.director ?? null,
           credits: name ? [{ composerId: f.composer_id, name, role: "Crédito externo" }] : [],
           source: "Externo",
+          budget: null,
+          commission: null,
         });
       }
 
@@ -121,6 +133,8 @@ function useFilmografia() {
             composerId: id, name: nameOf(id) ?? "—", role: "Participante",
           })),
           source: "Producción española",
+          budget: null,
+          commission: null,
         });
       }
 
@@ -139,6 +153,7 @@ function FilmografiaIC() {
   const [kind, setKind] = useState(ALL);
   const [rep, setRep] = useState(ALL);
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"grid" | "list">("list");
 
   const entries = q.data?.entries ?? [];
   const years = useMemo(() => [...new Set(entries.map((e) => e.year))].sort((a, b) => (a < b ? 1 : -1)), [entries]);
@@ -186,15 +201,87 @@ function FilmografiaIC() {
               {(q.data?.roster ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
             </SelectContent>
           </Select>
+          <div className="flex items-center rounded-sm border border-border">
+            <Button
+              variant={view === "list" ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Vista de lista"
+              onClick={() => setView("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={view === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Vista de cuadrícula"
+              onClick={() => setView("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
           <Button onClick={() => setOpen(true)}><Plus className="mr-1 h-4 w-4" /> Entrada histórica</Button>
         </div>
       </div>
 
       <div className="mt-8">
         {q.isLoading ? (
-          <ListSkeleton rows={8} variant="grid" />
+          <ListSkeleton rows={8} variant={view === "grid" ? "grid" : "list"} />
         ) : !rows.length ? (
           <EmptyState icon={Film} title="Sin registros" description="Añade una entrada histórica o marca producciones españolas con participación de IC." />
+        ) : view === "list" ? (
+          <div className="overflow-x-auto rounded-sm border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                  <th className="px-3 py-2">Título</th>
+                  <th className="px-3 py-2">Roster asociado</th>
+                  <th className="px-3 py-2">Productora</th>
+                  <th className="px-3 py-2">Año</th>
+                  <th className="px-3 py-2 text-right">Presupuesto</th>
+                  <th className="px-3 py-2 text-right">Comisión IC</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((e) => (
+                  <tr key={e.key} className="border-b border-border/60 last:border-0 align-top">
+                    <td className="px-3 py-2">
+                      <span className="font-display">
+                        {e.to ? (
+                          <Link to="/producciones/$productionId" params={{ productionId: e.to.id }} className="hover:underline">{e.title}</Link>
+                        ) : e.title}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">{e.kind}</span>
+                      {e.source !== "Producción IC" && (
+                        <Badge variant="outline" className="ml-2 rounded-sm text-[10px]">{e.source}</Badge>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {e.credits.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {e.credits.map((c, i) => (
+                            <Badge key={`${e.key}-l-${c.composerId}-${i}`} variant="secondary" className="rounded-sm text-[10px]">
+                              {c.name} · {c.role}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </td>
+                    <td className="px-3 py-2">{e.company ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{e.year}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{e.budget != null ? formatEUR(e.budget) : "—"}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{e.commission != null ? formatEUR(e.commission) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border bg-muted/30 font-mono text-xs">
+                  <td className="px-3 py-2" colSpan={4}>{rows.length} registros</td>
+                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.budget ?? 0), 0))}</td>
+                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.commission ?? 0), 0))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {rows.map((e) => (
