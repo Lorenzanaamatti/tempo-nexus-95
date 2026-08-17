@@ -80,9 +80,6 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     },
   });
 
-  const composerActive = pathname.startsWith("/composers");
-  const composersRole = composerActive ? (search?.role ?? "composer") : null;
-
   const groups = NAV_GROUPS
     .filter((g) => !(g.bigCOnly && isTeamView))
     .map((g) =>
