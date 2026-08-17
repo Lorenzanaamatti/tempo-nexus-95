@@ -121,6 +121,7 @@ import { Route as AuthenticatedAdminEmpresaEquipoIndexRouteImport } from './rout
 import { Route as AuthenticatedAdminDealMemosPlantillasIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.index'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
 import { Route as AuthenticatedAdminEmpresaEquipoPersonIdRouteImport } from './routes/_authenticated/_admin/empresa.equipo.$personId'
+import { Route as AuthenticatedAdminEmpresaAgentesAgentIdRouteImport } from './routes/_authenticated/_admin/empresa.agentes.$agentId'
 import { Route as AuthenticatedAdminDealMemosPlantillasPlantillaIdRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.$plantillaId'
 
 const McpRoute = McpRouteImport.update({
@@ -776,6 +777,12 @@ const AuthenticatedAdminEmpresaEquipoPersonIdRoute =
     path: '/empresa/equipo/$personId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEmpresaAgentesAgentIdRoute =
+  AuthenticatedAdminEmpresaAgentesAgentIdRouteImport.update({
+    id: '/$agentId',
+    path: '/$agentId',
+    getParentRoute: () => AuthenticatedAdminEmpresaAgentesRoute,
+  } as any)
 const AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute =
   AuthenticatedAdminDealMemosPlantillasPlantillaIdRouteImport.update({
     id: '/plantillas/$plantillaId',
@@ -835,7 +842,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
-  '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
+  '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -886,6 +893,7 @@ export interface FileRoutesByFullPath {
   '/providers/': typeof AuthenticatedAdminProvidersIndexRoute
   '/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
+  '/empresa/agentes/$agentId': typeof AuthenticatedAdminEmpresaAgentesAgentIdRoute
   '/empresa/equipo/$personId': typeof AuthenticatedAdminEmpresaEquipoPersonIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -946,7 +954,7 @@ export interface FileRoutesByTo {
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
-  '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
+  '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -997,6 +1005,7 @@ export interface FileRoutesByTo {
   '/providers': typeof AuthenticatedAdminProvidersIndexRoute
   '/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
+  '/empresa/agentes/$agentId': typeof AuthenticatedAdminEmpresaAgentesAgentIdRoute
   '/empresa/equipo/$personId': typeof AuthenticatedAdminEmpresaEquipoPersonIdRoute
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -1062,7 +1071,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
-  '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRoute
+  '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/_authenticated/_admin/empresa/kpis': typeof AuthenticatedAdminEmpresaKpisRoute
   '/_authenticated/_admin/empresa/roster-prospects': typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   '/_authenticated/_admin/legal/contratos-firmados': typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -1113,6 +1122,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/providers/': typeof AuthenticatedAdminProvidersIndexRoute
   '/_authenticated/_admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/_admin/deal-memos/plantillas/$plantillaId': typeof AuthenticatedAdminDealMemosPlantillasPlantillaIdRoute
+  '/_authenticated/_admin/empresa/agentes/$agentId': typeof AuthenticatedAdminEmpresaAgentesAgentIdRoute
   '/_authenticated/_admin/empresa/equipo/$personId': typeof AuthenticatedAdminEmpresaEquipoPersonIdRoute
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
@@ -1228,6 +1238,7 @@ export interface FileRouteTypes {
     | '/providers/'
     | '/templates/'
     | '/deal-memos/plantillas/$plantillaId'
+    | '/empresa/agentes/$agentId'
     | '/empresa/equipo/$personId'
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas/'
@@ -1339,6 +1350,7 @@ export interface FileRouteTypes {
     | '/providers'
     | '/templates'
     | '/deal-memos/plantillas/$plantillaId'
+    | '/empresa/agentes/$agentId'
     | '/empresa/equipo/$personId'
     | '/marketing/target-accounts/$accountId'
     | '/deal-memos/plantillas'
@@ -1454,6 +1466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/providers/'
     | '/_authenticated/_admin/templates/'
     | '/_authenticated/_admin/deal-memos/plantillas/$plantillaId'
+    | '/_authenticated/_admin/empresa/agentes/$agentId'
     | '/_authenticated/_admin/empresa/equipo/$personId'
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
     | '/_authenticated/_admin/deal-memos/plantillas/'
@@ -2262,6 +2275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmpresaEquipoPersonIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/empresa/agentes/$agentId': {
+      id: '/_authenticated/_admin/empresa/agentes/$agentId'
+      path: '/$agentId'
+      fullPath: '/empresa/agentes/$agentId'
+      preLoaderRoute: typeof AuthenticatedAdminEmpresaAgentesAgentIdRouteImport
+      parentRoute: typeof AuthenticatedAdminEmpresaAgentesRoute
+    }
     '/_authenticated/_admin/deal-memos/plantillas/$plantillaId': {
       id: '/_authenticated/_admin/deal-memos/plantillas/$plantillaId'
       path: '/plantillas/$plantillaId'
@@ -2302,6 +2322,21 @@ const AuthenticatedAdminDealMemosRouteWithChildren =
     AuthenticatedAdminDealMemosRouteChildren,
   )
 
+interface AuthenticatedAdminEmpresaAgentesRouteChildren {
+  AuthenticatedAdminEmpresaAgentesAgentIdRoute: typeof AuthenticatedAdminEmpresaAgentesAgentIdRoute
+}
+
+const AuthenticatedAdminEmpresaAgentesRouteChildren: AuthenticatedAdminEmpresaAgentesRouteChildren =
+  {
+    AuthenticatedAdminEmpresaAgentesAgentIdRoute:
+      AuthenticatedAdminEmpresaAgentesAgentIdRoute,
+  }
+
+const AuthenticatedAdminEmpresaAgentesRouteWithChildren =
+  AuthenticatedAdminEmpresaAgentesRoute._addFileChildren(
+    AuthenticatedAdminEmpresaAgentesRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAgentActionsRoute: typeof AuthenticatedAdminAgentActionsRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
@@ -2326,7 +2361,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
-  AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRoute
+  AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   AuthenticatedAdminEmpresaKpisRoute: typeof AuthenticatedAdminEmpresaKpisRoute
   AuthenticatedAdminEmpresaRosterProspectsRoute: typeof AuthenticatedAdminEmpresaRosterProspectsRoute
   AuthenticatedAdminLegalContratosFirmadosRoute: typeof AuthenticatedAdminLegalContratosFirmadosRoute
@@ -2422,7 +2457,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminEmpresaActividadInternacionalRoute:
     AuthenticatedAdminEmpresaActividadInternacionalRoute,
-  AuthenticatedAdminEmpresaAgentesRoute: AuthenticatedAdminEmpresaAgentesRoute,
+  AuthenticatedAdminEmpresaAgentesRoute:
+    AuthenticatedAdminEmpresaAgentesRouteWithChildren,
   AuthenticatedAdminEmpresaKpisRoute: AuthenticatedAdminEmpresaKpisRoute,
   AuthenticatedAdminEmpresaRosterProspectsRoute:
     AuthenticatedAdminEmpresaRosterProspectsRoute,
