@@ -123,6 +123,19 @@ export const IC_FUNCTION_LABEL: Record<IcTeamFunction, string> = Object.fromEntr
   IC_FUNCTION_GROUPS.flatMap((g) => g.items).map((i) => [i.value, i.label]),
 ) as Record<IcTeamFunction, string>;
 
+export const IC_FUNCTION_GROUP_LABEL: Record<IcTeamFunction, string> = Object.fromEntries(
+  IC_FUNCTION_GROUPS.flatMap((g) => g.items.map((i) => [i.value, g.label])),
+) as Record<IcTeamFunction, string>;
+
+/** Agrupa una lista de funciones por su categoría del catálogo, respetando el orden de IC_FUNCTION_GROUPS. */
+export function groupIcFunctions(fns: IcTeamFunction[]): { groupLabel: string; items: IcTeamFunction[] }[] {
+  const set = new Set(fns);
+  return IC_FUNCTION_GROUPS.map((g) => ({
+    groupLabel: g.label,
+    items: g.items.filter((i) => set.has(i.value)).map((i) => i.value),
+  })).filter((g) => g.items.length > 0);
+}
+
 export function PersonIcFunctionsEditor({ personId }: { personId: string }) {
   const [selected, setSelected] = useState<Set<IcTeamFunction>>(new Set());
   const [loading, setLoading] = useState(true);
