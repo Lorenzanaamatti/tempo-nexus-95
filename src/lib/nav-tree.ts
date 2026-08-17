@@ -55,6 +55,9 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Handshake,
         match: ["/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
       },
+      { title: "Productoras", to: "/partners/productoras", icon: Building2 },
+      { title: "Medios", to: "/partners/medios", icon: Newspaper },
+      { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
     ],
   },
   {
@@ -64,6 +67,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "A Producciones", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "A Partners", to: "/oportunidades/partners", icon: Building2 },
       { title: "A Roster", to: "/oportunidades/roster", icon: Music },
+      { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
+      { title: "Festivales", to: "/oportunidades/festivales", icon: Sparkles },
+      { title: "Premios", to: "/oportunidades/premios", icon: Target },
     ],
   },
   {
