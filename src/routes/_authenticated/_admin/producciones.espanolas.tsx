@@ -77,7 +77,7 @@ function ProduccionesEspanolas() {
       return [r.title, r.title_original, r.title_es, ...(r.directors ?? []), ...(r.production_companies ?? [])]
         .filter(Boolean).some((v) => String(v).toLowerCase().includes(needle));
     });
-  }, [all, q, year, genre, platform, icFilter, estado]);
+  }, [all, q, year, genre, platform, icFilter]);
 
   async function runTmdbSearch() {
     setSearching(true);
