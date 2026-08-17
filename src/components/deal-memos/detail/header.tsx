@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ArrowRight, ChevronRight, Sparkles, RefreshCw, Loader2, MoreHorizontal, Copy, Ban, Download, Mail, Send } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { buildNextReference, type DealMemoEstado } from "@/lib/deal-memo-constants";
@@ -15,6 +16,7 @@ import { SendEmailDialog } from "@/components/deal-memos/detail/send-email-dialo
 
 export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const generate = useServerFn(generateDealMemoVersion);
   const [busy, setBusy] = useState(false);
   const [emailMode, setEmailMode] = useState<"reenvio" | "reminder" | null>(null);
@@ -58,6 +60,14 @@ export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void
     onChange();
   }
 
+  async function removeDm() {
+    const { error } = await supabase.from("deal_memos").delete().eq("id", dm.id);
+    if (error) return toast.error(error.message);
+    toast.success("Deal memo eliminado");
+    qc.invalidateQueries({ queryKey: ["deal-memos"] });
+    navigate({ to: "/deal-memos/lista" });
+  }
+
   async function aiGenerate() {
     if (!dm.plantilla_id) return toast.error("Asigna una plantilla primero");
     setBusy(true);
@@ -99,6 +109,11 @@ export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void
           </div>
           <div className="flex items-center gap-2">
             <ContextualActions dm={dm} busy={busy} onAiGenerate={aiGenerate} onEmail={setEmailMode} />
+            <ConfirmDeleteButton
+              onConfirm={removeDm}
+              title={`¿Eliminar el deal memo ${dm.referencia}?`}
+              description="Se eliminará el deal memo y su historial asociado. Esta acción no se puede deshacer."
+            />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 w-9 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
