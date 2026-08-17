@@ -1,8 +1,8 @@
 import {
-  CalendarDays, Film, Music, Mic2, Headphones, Sparkles, ListMusic, LibraryBig,
-  Inbox, FileSignature, Building2, Clapperboard, Tv, Target, ScrollText, Crosshair,
-  Presentation, Palette, Mail, LineChart, Receipt, Share2, KanbanSquare, Handshake,
-  Scale, Wallet, Megaphone, Users, Briefcase,
+  CalendarDays, Film, Music, Sparkles, LibraryBig, FileSignature, Building2,
+  Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
+  KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, Clapperboard,
+  Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen,
 } from "lucide-react";
 
 export type NavItem = {
@@ -25,74 +25,100 @@ export type NavGroup = {
 
 export const NAV_GROUPS: NavGroup[] = [
   {
+    label: "Empresa",
+    icon: Wallet,
+    bigCOnly: true,
+    items: [
+      { title: "KPIs & Objetivos", to: "/empresa/kpis", icon: Gauge },
+      { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
+      { title: "Plan de facturación", to: "/billing", icon: Receipt },
+      { title: "Equipo IC", to: "/people", icon: Users },
+      { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, match: ["/agent-actions"] },
+    ],
+  },
+  {
     label: "Clientes",
     icon: LibraryBig,
     items: [
-      { title: "Roster completo", to: "/roster", icon: LibraryBig, hint: "Directorio agrupado por categoría" },
-      { title: "Compositores", to: "/composers", search: { role: "composer" }, icon: Music },
-      { title: "Artistas", to: "/composers", search: { role: "artist" }, icon: Mic2 },
-      { title: "Supervisores musicales", to: "/composers", search: { role: "supervisor" }, icon: Headphones },
-      { title: "Especialistas", to: "/composers", search: { role: "specialist" }, icon: Sparkles },
-      { title: "Curadores musicales", to: "/composers", search: { role: "curator" }, icon: ListMusic },
-      { title: "Interesante Compañía", to: "/ic", icon: Building2, hint: "Filmografía propia" },
+      { title: "Roster completo", to: "/roster", icon: LibraryBig, match: ["/composers"] },
     ],
   },
   {
     label: "Partners",
     icon: Handshake,
     items: [
-      { title: "Productoras", to: "/production-companies", icon: Building2 },
-      { title: "Plataformas", to: "/platforms", icon: Tv },
-      { title: "Directores", to: "/directors", icon: Clapperboard },
-      { title: "Otros partners", to: "/providers", icon: Briefcase },
+      {
+        title: "Vista completa",
+        to: "/partners",
+        icon: Handshake,
+        match: ["/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
+      },
     ],
   },
   {
-    label: "Oportunidades",
+    label: "Oportunidades de ventas",
     icon: Target,
     items: [
-      { title: "Oportunidades", to: "/opportunities", icon: Target },
-      { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair },
-      { title: "Candidaturas", to: "/candidacies", icon: Inbox },
+      { title: "A Producciones", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
+      { title: "A Partners", to: "/oportunidades/partners", icon: Building2 },
+      { title: "A Roster", to: "/oportunidades/roster", icon: Music },
     ],
   },
   {
-    label: "Empresa",
-    icon: Wallet,
-    bigCOnly: true,
+    label: "Producciones",
+    icon: Film,
     items: [
-      { title: "Producciones en curso", to: "/productions", icon: Film },
-      { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
-      { title: "Pipeline de facturación", to: "/billing", icon: Receipt },
+      { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
+      { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
+      { title: "Filmografía IC", to: "/producciones/filmografia", icon: Clapperboard, match: ["/ic"] },
     ],
   },
   {
-    label: "Legal",
-    icon: Scale,
+    label: "Paperwork",
+    icon: FileSignature,
     items: [
-      { title: "Templates contrato", to: "/legal/templates-contrato", icon: ScrollText },
-      { title: "Templates deal memo", to: "/legal/templates-deal-memo", icon: FileSignature },
-      { title: "Templates presupuesto", to: "/legal/templates-presupuesto", icon: Receipt },
-      { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare },
-      { title: "Contratos firmados", to: "/legal/contratos-firmados", icon: FileSignature, match: ["/contracts"] },
-      { title: "Personal · Equipo IC", to: "/people", icon: Users },
-      { title: "Personal IA · Equipo agentes IC", to: "/agent-actions", icon: Sparkles },
+      { title: "Presupuestos", to: "/paperwork/presupuestos", icon: Receipt },
+      { title: "Deal Memos", to: "/paperwork/deal-memos", icon: KanbanSquare, match: ["/deal-memos"] },
+      { title: "Contratos", to: "/contracts", icon: FileSignature, match: ["/legal/contratos-firmados"] },
+      { title: "Adendas", to: "/paperwork/adendas", icon: ScrollText },
+      { title: "Contrato Laboral", to: "/paperwork/contrato-laboral", icon: ScrollText },
+      { title: "Contrato Proveedor", to: "/paperwork/contrato-proveedor", icon: ScrollText },
+      { title: "Otros", to: "/paperwork/otros", icon: FolderOpen },
+    ],
+  },
+  {
+    label: "Templates documentos",
+    icon: ScrollText,
+    items: [
+      { title: "Templates", to: "/templates", icon: ScrollText, match: ["/legal/templates-contrato", "/legal/templates-deal-memo", "/legal/templates-presupuesto"] },
+    ],
+  },
+  {
+    label: "Comunicación",
+    icon: Share2,
+    items: [
+      { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette },
+      { title: "Templates publicaciones", to: "/comunicacion/publicaciones", icon: Mail },
+      { title: "Blog / Publicaciones", to: "/comunicacion/blog", icon: NewsIcon },
+      { title: "EPK", to: "/comunicacion/epk", icon: Presentation },
+      { title: "Reels", to: "/comunicacion/reels", icon: Video },
+      { title: "Clipping", to: "/comunicacion/clipping", icon: Newspaper },
+      { title: "Documentos de venta", to: "/comunicacion/documentos-venta", icon: Presentation, match: ["/marketing/ventas"] },
     ],
   },
   {
     label: "Marketing",
     icon: Megaphone,
     items: [
-      { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette },
-      { title: "Ventas", to: "/marketing/ventas", icon: Presentation },
-      { title: "Comunicación", to: "/marketing/comunicacion", icon: Share2 },
-      { title: "Templates", to: "/marketing/templates", icon: Mail },
+      { title: "Campañas", to: "/marketing/campanas", icon: Megaphone },
+      { title: "Métricas", to: "/marketing/metricas", icon: BarChart3 },
+      { title: "Obligaciones", to: "/marketing/obligaciones", icon: ListChecks },
     ],
   },
   {
-    label: "Calendarios",
+    label: "Calendario",
     icon: CalendarDays,
-    items: [{ title: "Calendarios", to: "/calendar", icon: CalendarDays }],
+    items: [{ title: "General", to: "/calendar", search: { view: "global" }, icon: CalendarDays }],
   },
 ];
 
@@ -108,7 +134,6 @@ export function isItemActive(item: NavItem, pathname: string, search?: { role?: 
     const current = search?.role ?? "composer";
     return current === item.search.role;
   }
-  // Don't let /composers (no role) light up role-scoped rows twice.
   return true;
 }
 
