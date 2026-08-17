@@ -4,8 +4,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, Search, Film } from "lucide-react";
+import { Loader2, RefreshCw, Search, Film, Download, LayoutGrid, List as ListIcon, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +21,10 @@ import {
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
-  importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
+  importEspanolasYearPage, importProduccionEspanola, searchTmdbEspanolas, syncProduccionesEspanolas,
 } from "@/lib/producciones-espanolas.functions";
+import { addCompanyToCrm, addPlatformToCrm, addToRoster, addToTargetAccounts } from "@/lib/spanish-films-crm";
+import { addEspanolaToProducciones, addPartner, addProspectFichaje } from "@/lib/espanolas-actions";
 import { cn } from "@/lib/utils";
 
 const db = supabase as any;
@@ -49,6 +54,7 @@ function ProduccionesEspanolas() {
   const searchFn = useServerFn(searchTmdbEspanolas);
   const importFn = useServerFn(importProduccionEspanola);
   const syncFn = useServerFn(syncProduccionesEspanolas);
+  const yearFn = useServerFn(importEspanolasYearPage);
 
   const [q, setQ] = useState("");
   const [year, setYear] = useState(ALL);
@@ -60,6 +66,10 @@ function ProduccionesEspanolas() {
   const [syncing, setSyncing] = useState(false);
   const [importingId, setImportingId] = useState<number | null>(null);
   const [editing, setEditing] = useState<ProduccionEspanola | null>(null);
+  const [view, setView] = useState<"lista" | "fichas">("lista");
+  const [bulk, setBulk] = useState<{ running: boolean; label: string; done: number }>({
+    running: false, label: "", done: 0,
+  });
 
   const all = rowsQ.data ?? [];
   const years = useMemo(() => [...new Set(all.map((r) => r.year).filter(Boolean))].sort((a, b) => (b as number) - (a as number)), [all]);
@@ -119,6 +129,35 @@ function ProduccionesEspanolas() {
     }
   }
 
+  /** Importa el catálogo completo de cine español desde `desde` hasta el año en curso. */
+  async function runBulkImport(desde = 2020) {
+    const hasta = new Date().getFullYear();
+    setBulk({ running: true, label: `Preparando ${desde}–${hasta}…`, done: 0 });
+    let total = 0;
+    try {
+      for (let y = hasta; y >= desde; y--) {
+        let page = 1;
+        let totalPages = 1;
+        do {
+          const res = (await yearFn({ data: { year: y, page } })) as {
+            saved: number; totalPages: number; totalResults: number;
+          };
+          totalPages = Math.min(res.totalPages, 10);
+          total += res.saved;
+          setBulk({ running: true, label: `${y} · página ${page}/${totalPages}`, done: total });
+          page++;
+        } while (page <= totalPages);
+        qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+      }
+      toast.success(`Catálogo importado: ${total} títulos entre ${desde} y ${hasta}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al importar el catálogo");
+    } finally {
+      setBulk({ running: false, label: "", done: total });
+      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+    }
+  }
+
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
@@ -129,10 +168,16 @@ function ProduccionesEspanolas() {
             CRM de mercado: cine y series españolas, participe o no Interesante Compañía. Inteligencia de mercado y prospección.
           </p>
         </div>
-        <Button variant="outline" onClick={runSync} disabled={syncing}>
-          {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
-          Sincronizar con TMDb
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => runBulkImport(2020)} disabled={bulk.running}>
+            {bulk.running ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Download className="mr-1 h-4 w-4" />}
+            {bulk.running ? `Importando… ${bulk.label}` : "Importar catálogo 2020–hoy"}
+          </Button>
+          <Button variant="outline" onClick={runSync} disabled={syncing || bulk.running}>
+            {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+            Sincronizar
+          </Button>
+        </div>
       </div>
 
       <div className="sticky top-0 z-10 -mx-2 mt-6 flex flex-wrap items-center gap-2 bg-background/95 px-2 py-3 backdrop-blur">
@@ -146,14 +191,25 @@ function ProduccionesEspanolas() {
         <FilterSelect value={platform} onChange={setPlatform} allLabel="Todas las plataformas" options={platforms.map((p) => ({ value: p, label: p }))} />
         <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="Todos"
           options={[{ value: "si", label: "IC participó" }]} />
+        <div className="ml-auto flex items-center gap-1 rounded-sm border border-border p-0.5">
+          <Button size="sm" variant={view === "lista" ? "secondary" : "ghost"} onClick={() => setView("lista")}>
+            <ListIcon className="mr-1 h-4 w-4" /> Lista
+          </Button>
+          <Button size="sm" variant={view === "fichas" ? "secondary" : "ghost"} onClick={() => setView("fichas")}>
+            <LayoutGrid className="mr-1 h-4 w-4" /> Fichas
+          </Button>
+        </div>
+        <span className="font-mono text-xs text-muted-foreground">{rows.length} títulos</span>
       </div>
 
       {rowsQ.isLoading ? (
         <ListSkeleton rows={8} variant="grid" />
-      ) : rows.length ? (
+      ) : rows.length && view === "fichas" ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {rows.map((r) => <FilmCard key={r.id} row={r} onEdit={() => setEditing(r)} />)}
         </div>
+      ) : rows.length ? (
+        <YearTable rows={rows} onEdit={setEditing} />
       ) : (
         <div className="mt-6">
           <EmptyState
@@ -213,6 +269,166 @@ function FilterSelect({ value, onChange, allLabel, options }: {
     </Select>
   );
 }
+
+type Accion = { label: string; run: () => void | Promise<unknown> };
+
+/** Dato accionable: se muestra como texto y despliega las acciones de CRM disponibles. */
+function Accionable({ text, titulo, acciones, className }: {
+  text: string | null | undefined; titulo: string; acciones: Accion[]; className?: string;
+}) {
+  if (!text) return <span className="text-muted-foreground">—</span>;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "text-left underline decoration-dotted underline-offset-4 hover:text-primary",
+            className,
+          )}
+        >
+          {text}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuLabel className="truncate">{titulo}</DropdownMenuLabel>
+        {acciones.map((a) => (
+          <DropdownMenuItem key={a.label} onSelect={() => void a.run()}>{a.label}</DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+const eur = (n: number | null | undefined) =>
+  typeof n === "number" && n > 0
+    ? new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n)
+    : "—";
+
+/** Listado por años con todos los datos accionables uno a uno. */
+function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: ProduccionEspanola) => void }) {
+  const porAno = useMemo(() => {
+    const map = new Map<number, ProduccionEspanola[]>();
+    for (const r of rows) {
+      const y = r.year ?? 0;
+      if (!map.has(y)) map.set(y, []);
+      map.get(y)!.push(r);
+    }
+    return [...map.entries()].sort((a, b) => b[0] - a[0]);
+  }, [rows]);
+
+  return (
+    <div className="mt-6 space-y-10">
+      {porAno.map(([ano, lista]) => (
+        <section key={ano}>
+          <div className="flex items-baseline gap-3 border-b border-border pb-2">
+            <h2 className="font-display text-3xl font-extrabold title-caps">{ano || "Sin año"}</h2>
+            <span className="font-mono text-xs text-muted-foreground">{lista.length} títulos</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1100px] text-sm">
+              <thead>
+                <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <th className="py-2 pr-3 text-left">Título</th>
+                  <th className="py-2 pr-3 text-left">Título original</th>
+                  <th className="py-2 pr-3 text-left">Productoras</th>
+                  <th className="py-2 pr-3 text-left">Compositor BSO</th>
+                  <th className="py-2 pr-3 text-left">Supervisor musical</th>
+                  <th className="py-2 pr-3 text-left">Plataforma</th>
+                  <th className="py-2 pr-3 text-right">Box office</th>
+                  <th className="py-2 text-right" />
+                </tr>
+              </thead>
+              <tbody>
+                {lista.map((r) => {
+                  const titulo = r.title_es ?? r.title;
+                  return (
+                    <tr key={r.id} className="border-b border-border/60 align-top hover:bg-muted/40">
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={titulo}
+                          titulo={titulo}
+                          className="font-display"
+                          acciones={[
+                            { label: "Añadir a Producciones", run: () => addEspanolaToProducciones(r) },
+                            { label: "Vincular / marcar IC participó", run: () => onEdit(r) },
+                            ...(r.tmdb_url ? [{ label: "Abrir en TMDb", run: () => window.open(r.tmdb_url!, "_blank") }] : []),
+                          ]}
+                        />
+                        {r.ic_participo && (
+                          <Badge className="ml-2 rounded-sm bg-emerald-600 text-[10px] text-white hover:bg-emerald-600">IC</Badge>
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-muted-foreground">{r.title_original ?? "—"}</td>
+                      <td className="py-2 pr-3">
+                        {(r.production_companies ?? []).length ? (
+                          <div className="flex flex-col gap-0.5">
+                            {(r.production_companies ?? []).map((c) => (
+                              <Accionable
+                                key={c}
+                                text={c}
+                                titulo={c}
+                                acciones={[
+                                  { label: "Añadir a Partners (Productora)", run: () => addPartner(c, "Productora") },
+                                  { label: "Añadir a Productoras CRM", run: () => addCompanyToCrm(c) },
+                                  { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: c, account_type: "productora" }) },
+                                ]}
+                              />
+                            ))}
+                          </div>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.composer}
+                          titulo={r.composer ?? ""}
+                          acciones={[
+                            { label: "Añadir al Roster", run: () => addToRoster(r.composer!, "composer") },
+                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.composer!, `BSO de ${titulo} (${r.year ?? "—"})`) },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.composer!, account_type: "roster", roster_kind: "composer" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.music_supervisor}
+                          titulo={r.music_supervisor ?? ""}
+                          acciones={[
+                            { label: "Añadir al Roster (supervisor)", run: () => addToRoster(r.music_supervisor!, "supervisor") },
+                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.music_supervisor!, `Supervisión musical de ${titulo}`) },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.music_supervisor!, account_type: "roster", roster_kind: "otros" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Accionable
+                          text={r.platform}
+                          titulo={r.platform ?? ""}
+                          acciones={[
+                            { label: "Añadir a Plataformas CRM", run: () => addPlatformToCrm(r.platform!) },
+                            { label: "Añadir a Partners (Medio)", run: () => addPartner(r.platform!, "Medio") },
+                            { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.platform!, account_type: "plataforma" }) },
+                          ]}
+                        />
+                      </td>
+                      <td className="py-2 pr-3 text-right font-mono text-xs">{eur(r.box_office)}</td>
+                      <td className="py-2 text-right">
+                        <Button size="icon" variant="ghost" onClick={() => onEdit(r)} aria-label="Editar vínculos">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 
 function Poster({ path, className }: { path: string | null; className?: string }) {
   const url = posterUrl(path);

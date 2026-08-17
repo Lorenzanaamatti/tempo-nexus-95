@@ -39,6 +39,11 @@ export async function fetchDetail(tmdbId: number, mediaType: "movie" | "tv") {
     : ((detail.created_by ?? []) as any[]).map((c) => c.name as string);
   const providers = detail["watch/providers"]?.results?.ES?.flatrate ?? [];
   const release: string | null = detail.release_date ?? detail.first_air_date ?? null;
+  const composer =
+    (crew.find((c) => c.job === "Original Music Composer")?.name as string | undefined) ??
+    (crew.find((c) => c.department === "Sound" && c.job === "Music")?.name as string | undefined) ??
+    null;
+  const supervisor = (crew.find((c) => c.job === "Music Supervisor")?.name as string | undefined) ?? null;
 
   return {
     tmdb_id: detail.id as number,
@@ -59,8 +64,65 @@ export async function fetchDetail(tmdbId: number, mediaType: "movie" | "tv") {
     synopsis: (detail.overview ?? null) as string | null,
     tmdb_url: `https://www.themoviedb.org/${mediaType}/${detail.id}`,
     tmdb_status: (detail.status ?? null) as string | null,
+    composer,
+    music_supervisor: supervisor,
+    box_office: detail.revenue ? Number(detail.revenue) : null,
+    budget: detail.budget ? Number(detail.budget) : null,
     last_synced_at: new Date().toISOString(),
   };
+}
+
+/** Lista una página de películas españolas de un año concreto (TMDb discover). */
+export async function discoverEspanolas(year: number, page: number) {
+  const json = await tmdbFetch("/discover/movie", {
+    with_origin_country: "ES",
+    primary_release_year: String(year),
+    sort_by: "popularity.desc",
+    language: "es-ES",
+    include_adult: "false",
+    page: String(page),
+  });
+  return {
+    ids: ((json.results ?? []) as any[]).map((r) => r.id as number),
+    totalPages: Math.min(Number(json.total_pages ?? 1), 25),
+    totalResults: Number(json.total_results ?? 0),
+  };
+}
+
+/** Ejecuta trabajos en paralelo con concurrencia limitada. */
+export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length) as R[];
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const i = cursor++;
+      out[i] = await fn(items[i] as T);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
+
+/** Importa (upsert) una página completa de un año. */
+export async function importYearPage(admin: any, year: number, page: number) {
+  const { ids, totalPages, totalResults } = await discoverEspanolas(year, page);
+  if (!ids.length) return { saved: 0, totalPages, totalResults };
+
+  const rows = (await mapLimit(ids, 5, async (id) => {
+    try {
+      return await fetchDetail(id, "movie");
+    } catch {
+      return null;
+    }
+  })).filter(Boolean) as any[];
+
+  for (const r of rows) if (!r.year) r.year = year;
+
+  const { error } = await admin
+    .from("producciones_espanolas")
+    .upsert(rows, { onConflict: "tmdb_id", ignoreDuplicates: false });
+  if (error) throw new Error(error.message);
+  return { saved: rows.length, totalPages, totalResults };
 }
 
 export async function runSync(admin: any) {

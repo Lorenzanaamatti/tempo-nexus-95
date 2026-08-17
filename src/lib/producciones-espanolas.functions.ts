@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   fetchDetail,
+  importYearPage,
   requireAdmin,
   runSync,
   searchInput,
@@ -70,4 +71,18 @@ export const syncProduccionesEspanolas = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const admin = await requireAdmin(context.userId);
     return runSync(admin);
+  });
+
+/**
+ * Importa (upsert) una página de películas españolas de un año concreto desde TMDb.
+ * El cliente encadena páginas y años para poder mostrar progreso.
+ */
+export const importEspanolasYearPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ year: z.number().int().min(1900).max(2100), page: z.number().int().min(1).max(25) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await requireAdmin(context.userId);
+    return importYearPage(admin, data.year, data.page);
   });
