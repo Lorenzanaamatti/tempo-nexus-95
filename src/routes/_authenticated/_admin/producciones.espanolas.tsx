@@ -429,19 +429,6 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
   );
 }
 
-function FilterSelectLegacy({ value, onChange, allLabel, options }: {
-  value: string; onChange: (v: string) => void; allLabel: string; options: { value: string; label: string }[];
-}) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ALL}>{allLabel}</SelectItem>
-        {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-      </SelectContent>
-    </Select>
-  );
-}
 
 function Poster({ path, className }: { path: string | null; className?: string }) {
   const url = posterUrl(path);
