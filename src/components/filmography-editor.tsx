@@ -49,6 +49,22 @@ export function FilmographyEditor({
     Array<{ id: string; label: string; person_id: string | null }>
   >([]);
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+
+  const years = useMemo(
+    () => [...new Set(rows.map((r) => r.year).filter((y): y is number => !!y))].sort((a, b) => b - a),
+    [rows],
+  );
+  const visibleRows = useMemo(() => {
+    const needle = normalize(query);
+    return rows.filter((r) => {
+      if (yearFilter !== "all" && String(r.year ?? "") !== yearFilter) return false;
+      if (!needle) return true;
+      return [r.title, r.director, r.production_company, r.platform]
+        .some((v) => v && normalize(v).includes(needle));
+    });
+  }, [rows, query, yearFilter]);
 
   useEffect(() => {
     (async () => {
