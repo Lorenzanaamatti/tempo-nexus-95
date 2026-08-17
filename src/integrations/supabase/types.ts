@@ -3930,6 +3930,7 @@ export type Database = {
           composer: string | null
           countries: string[]
           created_at: string
+          director_orquesta: string | null
           directors: string[]
           estado_prospeccion: Database["public"]["Enums"]["prospeccion_estado"]
           genres: string[]
@@ -3937,9 +3938,12 @@ export type Database = {
           id: string
           last_synced_at: string | null
           media_type: string
+          mezclador: string | null
           music_supervisor: string | null
           notas: string | null
           oportunidad_vinculada: string | null
+          orquesta: string | null
+          orquestador: string | null
           platform: string | null
           poster_path: string | null
           produccion_ic_vinculada: string | null
@@ -3964,6 +3968,7 @@ export type Database = {
           composer?: string | null
           countries?: string[]
           created_at?: string
+          director_orquesta?: string | null
           directors?: string[]
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
@@ -3971,9 +3976,12 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           media_type?: string
+          mezclador?: string | null
           music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
+          orquesta?: string | null
+          orquestador?: string | null
           platform?: string | null
           poster_path?: string | null
           produccion_ic_vinculada?: string | null
@@ -3998,6 +4006,7 @@ export type Database = {
           composer?: string | null
           countries?: string[]
           created_at?: string
+          director_orquesta?: string | null
           directors?: string[]
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
@@ -4005,9 +4014,12 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           media_type?: string
+          mezclador?: string | null
           music_supervisor?: string | null
           notas?: string | null
           oportunidad_vinculada?: string | null
+          orquesta?: string | null
+          orquestador?: string | null
           platform?: string | null
           poster_path?: string | null
           produccion_ic_vinculada?: string | null
@@ -4874,6 +4886,7 @@ export type Database = {
           nombre: string
           notas: string | null
           pais: string | null
+          rol: string | null
           updated_at: string
         }
         Insert: {
@@ -4886,6 +4899,7 @@ export type Database = {
           nombre: string
           notas?: string | null
           pais?: string | null
+          rol?: string | null
           updated_at?: string
         }
         Update: {
@@ -4898,6 +4912,7 @@ export type Database = {
           nombre?: string
           notas?: string | null
           pais?: string | null
+          rol?: string | null
           updated_at?: string
         }
         Relationships: []

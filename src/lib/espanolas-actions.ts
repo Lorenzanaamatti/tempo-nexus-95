@@ -44,7 +44,7 @@ export async function addEspanolaToProducciones(row: ProduccionEspanola) {
 }
 
 /** Añade una persona al embudo de fichajes (Oportunidades › Prospects de fichaje). */
-export async function addProspectFichaje(nombre: string, notas?: string | null) {
+export async function addProspectFichaje(nombre: string, notas?: string | null, rol?: string | null) {
   const n = nombre.trim();
   if (!n) return null;
   const { data: existing } = await db
@@ -63,6 +63,7 @@ export async function addProspectFichaje(nombre: string, notas?: string | null) 
       fecha_primer_contacto: new Date().toISOString().slice(0, 10),
       estado: "contactado",
       notas: notas ?? null,
+      rol: rol ?? null,
     })
     .select("id")
     .single();

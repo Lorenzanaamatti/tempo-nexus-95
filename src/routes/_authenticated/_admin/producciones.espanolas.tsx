@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import {
   EN_SEGUIMIENTO, PROSPECCION_ESTADOS, PROSPECCION_LABEL, posterUrl,
+  ROLES_FICHAJE,
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
@@ -370,6 +371,12 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
     if (id) navigate({ to: "/composers/$composerId", params: { composerId: id } });
   }
 
+  /** Crea (o reutiliza) el prospect de fichaje para un rol técnico y abre su ficha. */
+  async function crearProspectYAbrir(nombre: string, rol: string, contexto: string) {
+    const id = await addProspectFichaje(nombre, contexto, rol);
+    if (id) navigate({ to: "/oportunidades/prospect/$prospectId", params: { prospectId: id } });
+  }
+
   const porAno = useMemo(() => {
     const map = new Map<number, ProduccionEspanola[]>();
     for (const r of rows) {
@@ -398,6 +405,10 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                   <th className="py-2 pr-3 text-left">Productoras</th>
                   <th className="py-2 pr-3 text-left">Compositor BSO</th>
                   <th className="py-2 pr-3 text-left">Supervisor musical</th>
+                  <th className="py-2 pr-3 text-left">Mezclador</th>
+                  <th className="py-2 pr-3 text-left">Orquestador</th>
+                  <th className="py-2 pr-3 text-left">Orquesta</th>
+                  <th className="py-2 pr-3 text-left">Dir. orquesta</th>
                   <th className="py-2 pr-3 text-left">Plataforma</th>
                   <th className="py-2 pr-3 text-right">Box office</th>
                   <th className="py-2 text-right" />
@@ -414,6 +425,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           titulo={titulo}
                           className="font-display"
                           acciones={[
+                            { label: "Abrir ficha", run: () => onEdit(r) },
                             { label: "Añadir a Producciones", run: () => addEspanolaToProducciones(r) },
                             { label: "Vincular / marcar IC participó", run: () => onEdit(r) },
                             ...(r.tmdb_url ? [{ label: "Abrir en TMDb", run: () => window.open(r.tmdb_url!, "_blank") }] : []),
@@ -485,6 +497,37 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           ]}
                         />
                       </td>
+                      {ROLES_FICHAJE.map((rol) => {
+                        const valor = (r as any)[rol.key] as string | null;
+                        return (
+                          <td key={rol.key} className="py-2 pr-3">
+                            {valor ? (
+                              <Accionable
+                                text={valor}
+                                titulo={valor}
+                                acciones={[
+                                  {
+                                    label: "Crear prospect de fichaje y abrir ficha",
+                                    run: () => crearProspectYAbrir(valor, rol.label, `${rol.label} de ${titulo} (${r.year ?? "—"})`),
+                                  },
+                                  {
+                                    label: "Añadir a Cuentas objetivo",
+                                    run: () => addToTargetAccounts({ name: valor, account_type: "roster", roster_kind: "otros" }),
+                                  },
+                                ]}
+                              />
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => onEdit(r)}
+                                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                              >
+                                Añadir
+                              </button>
+                            )}
+                          </td>
+                        );
+                      })}
                       <td className="py-2 pr-3">
                         <Accionable
                           text={r.platform}
@@ -567,8 +610,10 @@ function FilmCard({ row, onEdit }: { row: ProduccionEspanola; onEdit: () => void
 
 function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: () => void }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [icParticipo, setIc] = useState(false);
+  const [equipo, setEquipo] = useState<Record<string, string>>({});
   const [produccion, setProduccion] = useState<string>("");
   const [reps, setReps] = useState<string[]>([]);
   const [estado, setEstado] = useState<ProspeccionEstado>("sin_valorar");
@@ -596,6 +641,12 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
     setEstado(row.estado_prospeccion);
     setOportunidad(row.oportunidad_vinculada ?? "");
     setNotas(row.notas ?? "");
+    setEquipo({
+      mezclador: (row as any).mezclador ?? "",
+      orquestador: (row as any).orquestador ?? "",
+      orquesta: (row as any).orquesta ?? "",
+      director_orquesta: (row as any).director_orquesta ?? "",
+    });
   }
 
   async function save() {
@@ -608,6 +659,10 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
       estado_prospeccion: estado,
       oportunidad_vinculada: oportunidad || null,
       notas: notas || null,
+      mezclador: equipo.mezclador?.trim() || null,
+      orquestador: equipo.orquestador?.trim() || null,
+      orquesta: equipo.orquesta?.trim() || null,
+      director_orquesta: equipo.director_orquesta?.trim() || null,
     }).eq("id", row.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -619,9 +674,49 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
 
   return (
     <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader><DialogTitle>{row?.title_es ?? row?.title}</DialogTitle></DialogHeader>
         <div className="grid gap-3">
+          <div className="grid gap-3 rounded-sm border border-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Equipo musical · oportunidades de fichaje
+            </p>
+            {ROLES_FICHAJE.map((rol) => (
+              <div key={rol.key} className="grid gap-1.5">
+                <Label>{rol.label}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={equipo[rol.key] ?? ""}
+                    onChange={(e) => setEquipo({ ...equipo, [rol.key]: e.target.value })}
+                    placeholder={`Nombre del ${rol.label.toLowerCase()}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!(equipo[rol.key] ?? "").trim()}
+                    onClick={async () => {
+                      const nombre = (equipo[rol.key] ?? "").trim();
+                      if (!row) return;
+                      await db.from("producciones_espanolas").update({ [rol.key]: nombre }).eq("id", row.id);
+                      const id = await addProspectFichaje(
+                        nombre,
+                        `${rol.label} de ${row.title_es ?? row.title} (${row.year ?? "—"})`,
+                        rol.label,
+                      );
+                      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+                      if (id) {
+                        onClose();
+                        navigate({ to: "/oportunidades/prospect/$prospectId", params: { prospectId: id } });
+                      }
+                    }}
+                  >
+                    Ficha
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={icParticipo} onChange={(e) => setIc(e.target.checked)} />
             IC participó en esta producción

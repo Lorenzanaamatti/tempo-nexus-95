@@ -34,6 +34,10 @@ export type ProduccionEspanola = {
   tmdb_status: string | null;
   composer: string | null;
   music_supervisor: string | null;
+  mezclador: string | null;
+  orquestador: string | null;
+  orquesta: string | null;
+  director_orquesta: string | null;
   box_office: number | null;
   budget: number | null;
   ic_participo: boolean;
@@ -48,3 +52,13 @@ export type ProduccionEspanola = {
 export function posterUrl(path: string | null | undefined, size: "w185" | "w342" = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
+
+/** Roles de equipo musical que la app trata como oportunidad de fichaje. */
+export const ROLES_FICHAJE = [
+  { key: "mezclador", label: "Mezclador" },
+  { key: "orquestador", label: "Orquestador" },
+  { key: "orquesta", label: "Orquesta" },
+  { key: "director_orquesta", label: "Director de orquesta" },
+] as const;
+
+export type RolFichaje = (typeof ROLES_FICHAJE)[number]["key"];
