@@ -1,10 +1,11 @@
 import { SaveButton } from "@/components/save-button";
+import { EmptyState } from "@/components/list-states";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import {
@@ -172,7 +173,7 @@ function EventsEditor({ subjectType, subjectId }: { subjectType: "person" | "pro
       {loading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin eventos. Añade uno para que aparezca en el calendario.</p>
+        <EmptyState variant="inline" icon={CalendarDays} title="Sin eventos" description="Añade uno y aparecerá automáticamente en el calendario." />
       ) : (
         rows.map((e) => <Row key={e.id} ev={e} onRemove={() => remove(e.id)} />)
       )}

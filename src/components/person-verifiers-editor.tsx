@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { savedToast } from "@/lib/saved-feedback";
 
@@ -97,7 +98,7 @@ export function PersonVerifiersEditor({ personId }: { personId: string }) {
         </Button>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin verificadores.</p>
+        <EmptyState variant="inline" icon={ShieldCheck} title="Sin verificadores" description="Asigna quién valida los contratos y deal memos de esta persona." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

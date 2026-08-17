@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/list-states";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, CalendarRange } from "lucide-react";
 import { toast } from "sonner";
 import { savedToast } from "@/lib/saved-feedback";
 
@@ -101,7 +102,7 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !data?.length ? (
-        <p className="text-sm text-muted-foreground">Sin fases. Añade las que necesites para esta producción.</p>
+        <EmptyState variant="inline" icon={CalendarRange} title="Sin fases" description="Define las fases de esta producción para verlas en el calendario." />
       ) : (
         <ul className="space-y-2">
           {data.map((p, i) => (

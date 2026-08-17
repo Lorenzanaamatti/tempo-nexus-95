@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { savedToast } from "@/lib/saved-feedback";
 import {
@@ -101,7 +102,7 @@ export function PersonAssignmentsEditor({ personId }: { personId: string }) {
         </Button>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin asignaciones.</p>
+        <EmptyState variant="inline" icon={Users} title="Sin asignaciones" description="Vincula a esta persona con las fichas del roster que gestiona." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/list-states";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -223,7 +224,7 @@ async function deleteFileRow(f: AssetFile) {
 }
 
 function FilesGrid({ files, onChanged }: { files: (AssetFile & { asset_title?: string | null })[]; onChanged: () => void }) {
-  if (!files.length) return <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No hay archivos.</p>;
+  if (!files.length) return <EmptyState icon={FolderOpen} title="Sin archivos" description="Sube el primer recurso a esta categoría para tenerlo disponible para todo el equipo." />;
   return (
     <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
       {files.map((f) => (
@@ -246,7 +247,7 @@ function FilesGrid({ files, onChanged }: { files: (AssetFile & { asset_title?: s
 }
 
 function FilesList({ files, onChanged }: { files: (AssetFile & { asset_title?: string | null })[]; onChanged: () => void }) {
-  if (!files.length) return <p className="rounded-sm border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No hay archivos.</p>;
+  if (!files.length) return <EmptyState icon={FolderOpen} title="Sin archivos" description="Sube el primer recurso a esta categoría para tenerlo disponible para todo el equipo." />;
   return (
     <ul className="divide-y divide-border rounded-sm border border-border">
       {files.map((f) => (

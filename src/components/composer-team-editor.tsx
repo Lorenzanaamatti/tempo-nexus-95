@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 import { savedToast } from "@/lib/saved-feedback";
@@ -114,7 +115,7 @@ export function ComposerTeamEditor({ composerId }: { composerId: string }) {
         </Button>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin equipo asignado todavía.</p>
+        <EmptyState variant="inline" icon={Users} title="Sin equipo asignado" description="Asigna las personas de IC que llevan esta ficha." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (
