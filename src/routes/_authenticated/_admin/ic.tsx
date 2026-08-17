@@ -75,7 +75,7 @@ function ICCompanyPage() {
         <p className="smallcaps text-muted-foreground">Roster · Interesante Filmografía</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-5xl flex items-center gap-4">
+            <h1 className="font-display text-5xl flex items-center gap-4 title-caps">
               <BrandLogo className="h-12 w-auto" />
               <span className="sr-only">{ic.artistic_name || ic.full_name}</span>
             </h1>

@@ -210,6 +210,10 @@
   .editorial-rule {
     border-top: 1px solid var(--border);
   }
+  .title-caps {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
   .smallcaps {
     text-transform: uppercase;
     letter-spacing: 0.16em;

@@ -25,7 +25,7 @@ function GlobalCalendar() {
     return (
       <div className="mx-auto max-w-[1400px] px-6 py-10">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Calendarios</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold">Elige una vista</h1>
+        <h1 className="mt-2 font-display text-3xl font-extrabold title-caps">Elige una vista</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Abre el calendario general o entra directamente en una vista temática. Dentro de una vista
           podrás añadir otras para combinarlas.

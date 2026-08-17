@@ -189,7 +189,7 @@ function SpanishFilmsPage() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Inteligencia de mercado</p>
-          <h1 className="mt-1 font-display text-5xl">Películas ES</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">Películas ES</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Catálogo de cine español (2021–{CURRENT_YEAR}) importado desde TMDb. Cruza créditos con tu roster
             para detectar oportunidades.

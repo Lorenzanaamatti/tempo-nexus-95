@@ -133,7 +133,7 @@ function RosterAll() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl">Roster completo</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">Roster completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Estos son nuestros clientes y clientas seleccionados según su sector de actividad profesional.
           </p>
@@ -156,7 +156,7 @@ function RosterAll() {
           <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" />
 
           <section>
-            <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl">Roster objetivo</h2>
+            <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl title-caps">Roster objetivo</h2>
             {!objetivo.length ? (
               <EmptyState title="Sin candidatos en cuentas objetivo." hint="Añade cuentas de tipo Roster desde Cuentas objetivo." />
             ) : (
@@ -191,7 +191,7 @@ function RosterAll() {
 
           <section>
             <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-              <h2 className="font-display text-3xl">Interesante Filmografía</h2>
+              <h2 className="font-display text-3xl title-caps">Interesante Filmografía</h2>
               <Link to="/ic" className="smallcaps text-xs text-muted-foreground hover:text-foreground">
                 Ficha corporativa →
               </Link>
@@ -245,7 +245,7 @@ function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; v
   return (
     <section>
       <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-        <h2 className="font-display text-3xl">{title}</h2>
+        <h2 className="font-display text-3xl title-caps">{title}</h2>
         <span className="font-mono text-xs text-muted-foreground">{rows.length}</span>
       </div>
       {!rows.length ? (

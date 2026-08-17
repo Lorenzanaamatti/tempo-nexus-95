@@ -57,7 +57,7 @@ function SignedContracts() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Legal</p>
-        <h1 className="mt-1 font-display text-5xl">Contratos firmados</h1>
+        <h1 className="mt-1 font-display text-5xl title-caps">Contratos firmados</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Todos los contratos firmados, agrupados por categoría, tal como constan en las fichas de cada
           persona representada o del equipo.
