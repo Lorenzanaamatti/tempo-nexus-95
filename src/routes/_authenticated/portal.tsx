@@ -19,6 +19,7 @@ import {
   FolderOpen,
   LogOut,
   Newspaper,
+  Target,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal")({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/portal")({
 const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] = [
   { to: "/portal", label: "Inicio", icon: Home, exact: true },
   { to: "/portal/carrera", label: "Mi carrera", icon: User },
+  { to: "/portal/plan", label: "Mi plan", icon: Target },
   { to: "/portal/kpis", label: "KPIs", icon: LineChart },
   { to: "/portal/proyectos", label: "Proyectos", icon: FolderKanban },
   { to: "/portal/propuestas", label: "Propuestas", icon: Inbox },
