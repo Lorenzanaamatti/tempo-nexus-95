@@ -24,6 +24,17 @@ import { ComposerChat } from "@/components/composer-chat";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
 import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 import { Section, KPI, Field } from "@/components/composer-detail/primitives";
