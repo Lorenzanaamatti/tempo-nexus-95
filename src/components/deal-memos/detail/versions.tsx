@@ -32,7 +32,7 @@ export function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => vo
     setBusy(true);
     try {
       await generate({ data: { dealMemoId: dm.id, correctionComments: isCorrection ? comments : undefined } });
-      toast.success("Nueva versión generada");
+      toast.success(isCorrection ? "Correcciones aplicadas · nueva versión generada" : "Nueva versión generada");
       setComments("");
       qc.invalidateQueries({ queryKey: ["dm-versions", dm.id] });
       qc.invalidateQueries({ queryKey: ["dm-events", dm.id] });
@@ -58,9 +58,22 @@ export function DealMemoVersions({ dm, onChange }: { dm: any; onChange: () => vo
           <div className="space-y-2">
             <Textarea rows={3} value={comments} onChange={(e) => setComments(e.target.value)} placeholder="Correcciones para la siguiente versión…" />
             <div className="flex gap-2">
-              <Button onClick={() => regenerate(false)} disabled={busy} variant="outline" size="sm"><RefreshCw className="mr-1 h-4 w-4" />Regenerar</Button>
-              <Button onClick={() => regenerate(true)} disabled={busy || !comments.trim()} size="sm"><Sparkles className="mr-1 h-4 w-4" />Pedir correcciones</Button>
+              <Button onClick={() => regenerate(false)} disabled={busy} variant="outline" size="sm">
+                {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+                Regenerar
+              </Button>
+              <Button onClick={() => regenerate(true)} disabled={busy || !comments.trim()} size="sm">
+                {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+                Pedir correcciones
+              </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              {busy
+                ? "Generando con IA… puede tardar unos segundos."
+                : comments.trim()
+                  ? "Se creará una nueva versión aplicando estas correcciones."
+                  : "Escribe las correcciones para activar el botón."}
+            </p>
           </div>
         )}
       </div>
