@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import {
   EN_SEGUIMIENTO, PROSPECCION_ESTADOS, PROSPECCION_LABEL, posterUrl,
+  ROLES_FICHAJE,
   type ProduccionEspanola, type ProspeccionEstado,
 } from "@/lib/producciones-espanolas";
 import {
@@ -370,6 +371,12 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
     if (id) navigate({ to: "/composers/$composerId", params: { composerId: id } });
   }
 
+  /** Crea (o reutiliza) el prospect de fichaje para un rol técnico y abre su ficha. */
+  async function crearProspectYAbrir(nombre: string, rol: string, contexto: string) {
+    const id = await addProspectFichaje(nombre, contexto, rol);
+    if (id) navigate({ to: "/oportunidades/prospect/$prospectId", params: { prospectId: id } });
+  }
+
   const porAno = useMemo(() => {
     const map = new Map<number, ProduccionEspanola[]>();
     for (const r of rows) {
@@ -398,6 +405,10 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                   <th className="py-2 pr-3 text-left">Productoras</th>
                   <th className="py-2 pr-3 text-left">Compositor BSO</th>
                   <th className="py-2 pr-3 text-left">Supervisor musical</th>
+                  <th className="py-2 pr-3 text-left">Mezclador</th>
+                  <th className="py-2 pr-3 text-left">Orquestador</th>
+                  <th className="py-2 pr-3 text-left">Orquesta</th>
+                  <th className="py-2 pr-3 text-left">Dir. orquesta</th>
                   <th className="py-2 pr-3 text-left">Plataforma</th>
                   <th className="py-2 pr-3 text-right">Box office</th>
                   <th className="py-2 text-right" />
@@ -414,6 +425,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           titulo={titulo}
                           className="font-display"
                           acciones={[
+                            { label: "Abrir ficha", run: () => onEdit(r) },
                             { label: "Añadir a Producciones", run: () => addEspanolaToProducciones(r) },
                             { label: "Vincular / marcar IC participó", run: () => onEdit(r) },
                             ...(r.tmdb_url ? [{ label: "Abrir en TMDb", run: () => window.open(r.tmdb_url!, "_blank") }] : []),
@@ -485,6 +497,37 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           ]}
                         />
                       </td>
+                      {ROLES_FICHAJE.map((rol) => {
+                        const valor = (r as any)[rol.key] as string | null;
+                        return (
+                          <td key={rol.key} className="py-2 pr-3">
+                            {valor ? (
+                              <Accionable
+                                text={valor}
+                                titulo={valor}
+                                acciones={[
+                                  {
+                                    label: "Crear prospect de fichaje y abrir ficha",
+                                    run: () => crearProspectYAbrir(valor, rol.label, `${rol.label} de ${titulo} (${r.year ?? "—"})`),
+                                  },
+                                  {
+                                    label: "Añadir a Cuentas objetivo",
+                                    run: () => addToTargetAccounts({ name: valor, account_type: "roster", roster_kind: "otros" }),
+                                  },
+                                ]}
+                              />
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => onEdit(r)}
+                                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                              >
+                                Añadir
+                              </button>
+                            )}
+                          </td>
+                        );
+                      })}
                       <td className="py-2 pr-3">
                         <Accionable
                           text={r.platform}
