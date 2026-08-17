@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,10 +36,12 @@ type Row = {
   done: boolean;
   assignee_person_id: string | null;
   assignee?: { id: string; full_name: string } | null;
+  production_id: string | null;
+  production?: { id: string; title: string } | null;
 };
 
 const SELECT =
-  "id, title, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name)";
+  "id, title, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name), production_id, production:productions(id, title)";
 
 function TareasPage() {
   const { user } = useAuth();
@@ -263,6 +265,15 @@ function TareasPage() {
                         </span>
                       )}
                       {t.subarea && <span className="text-muted-foreground">{t.subarea}</span>}
+                      {t.production && (
+                        <Link
+                          to="/producciones/$productionId"
+                          params={{ productionId: t.production.id }}
+                          className="rounded-sm bg-primary/10 px-1.5 py-0.5 smallcaps text-primary hover:underline"
+                        >
+                          {t.production.title}
+                        </Link>
+                      )}
                       <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_STATUS_TONE[t.status] ?? "")}>
                         {TASK_STATUS_LABEL[t.status] ?? t.status}
                       </span>

@@ -31,6 +31,7 @@ export type Database = {
           kind: string
           notes: string | null
           position: number
+          production_id: string | null
           requester_user_id: string | null
           status: string
           subarea: string | null
@@ -57,6 +58,7 @@ export type Database = {
           kind?: string
           notes?: string | null
           position?: number
+          production_id?: string | null
           requester_user_id?: string | null
           status?: string
           subarea?: string | null
@@ -83,6 +85,7 @@ export type Database = {
           kind?: string
           notes?: string | null
           position?: number
+          production_id?: string | null
           requester_user_id?: string | null
           status?: string
           subarea?: string | null
@@ -106,6 +109,20 @@ export type Database = {
             columns: ["assignee_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1610,6 +1627,7 @@ export type Database = {
           notes: string | null
           notice_date: string | null
           partner_company_id: string | null
+          production_id: string | null
           sign_status: Database["public"]["Enums"]["contract_sign_status"]
           signed_date: string | null
           signer_composer_id: string | null
@@ -1635,6 +1653,7 @@ export type Database = {
           notes?: string | null
           notice_date?: string | null
           partner_company_id?: string | null
+          production_id?: string | null
           sign_status?: Database["public"]["Enums"]["contract_sign_status"]
           signed_date?: string | null
           signer_composer_id?: string | null
@@ -1660,6 +1679,7 @@ export type Database = {
           notes?: string | null
           notice_date?: string | null
           partner_company_id?: string | null
+          production_id?: string | null
           sign_status?: Database["public"]["Enums"]["contract_sign_status"]
           signed_date?: string | null
           signer_composer_id?: string | null
@@ -1676,6 +1696,20 @@ export type Database = {
             columns: ["deal_memo_id"]
             isOneToOne: false
             referencedRelation: "deal_memos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1781,6 +1815,7 @@ export type Database = {
           opportunity_id: string | null
           plantilla_id: string | null
           plazo_respuesta_dias: number
+          production_id: string | null
           referencia: string
           updated_at: string
           validador_final_id: string | null
@@ -1807,6 +1842,7 @@ export type Database = {
           opportunity_id?: string | null
           plantilla_id?: string | null
           plazo_respuesta_dias?: number
+          production_id?: string | null
           referencia: string
           updated_at?: string
           validador_final_id?: string | null
@@ -1833,6 +1869,7 @@ export type Database = {
           opportunity_id?: string | null
           plantilla_id?: string | null
           plazo_respuesta_dias?: number
+          production_id?: string | null
           referencia?: string
           updated_at?: string
           validador_final_id?: string | null
@@ -1851,6 +1888,20 @@ export type Database = {
             columns: ["plantilla_id"]
             isOneToOne: false
             referencedRelation: "dm_plantillas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },
         ]
@@ -3110,10 +3161,12 @@ export type Database = {
       }
       productions: {
         Row: {
+          actual_delivery_date: string | null
           award_date: string | null
           color: string | null
           composer_id: string | null
           contract_id: string | null
+          country: string | null
           created_at: string
           delivery_date: string | null
           director: string | null
@@ -3124,12 +3177,14 @@ export type Database = {
           ic_commission_pct: number | null
           id: string
           imdb_url: string | null
+          is_historical: boolean
           kind: string | null
           music_supervisor_name: string | null
           music_supervisor_person_id: string | null
           negotiator_person_id: string | null
           nomination_date: string | null
           notes: string | null
+          original_language: string | null
           other_responsibles: string | null
           partner: string | null
           partner_company_id: string | null
@@ -3143,17 +3198,21 @@ export type Database = {
           production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
           project_type_note: string | null
+          source_opportunity_id: string | null
           spanish_film_id: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at: string
           year: number | null
         }
         Insert: {
+          actual_delivery_date?: string | null
           award_date?: string | null
           color?: string | null
           composer_id?: string | null
           contract_id?: string | null
+          country?: string | null
           created_at?: string
           delivery_date?: string | null
           director?: string | null
@@ -3164,12 +3223,14 @@ export type Database = {
           ic_commission_pct?: number | null
           id?: string
           imdb_url?: string | null
+          is_historical?: boolean
           kind?: string | null
           music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           nomination_date?: string | null
           notes?: string | null
+          original_language?: string | null
           other_responsibles?: string | null
           partner?: string | null
           partner_company_id?: string | null
@@ -3183,17 +3244,21 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          source_opportunity_id?: string | null
           spanish_film_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title: string
           updated_at?: string
           year?: number | null
         }
         Update: {
+          actual_delivery_date?: string | null
           award_date?: string | null
           color?: string | null
           composer_id?: string | null
           contract_id?: string | null
+          country?: string | null
           created_at?: string
           delivery_date?: string | null
           director?: string | null
@@ -3204,12 +3269,14 @@ export type Database = {
           ic_commission_pct?: number | null
           id?: string
           imdb_url?: string | null
+          is_historical?: boolean
           kind?: string | null
           music_supervisor_name?: string | null
           music_supervisor_person_id?: string | null
           negotiator_person_id?: string | null
           nomination_date?: string | null
           notes?: string | null
+          original_language?: string | null
           other_responsibles?: string | null
           partner?: string | null
           partner_company_id?: string | null
@@ -3223,7 +3290,9 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          source_opportunity_id?: string | null
           spanish_film_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["production_status"] | null
           title?: string
           updated_at?: string
@@ -3319,6 +3388,13 @@ export type Database = {
             columns: ["production_director_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_source_opportunity_id_fkey"
+            columns: ["source_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
           {

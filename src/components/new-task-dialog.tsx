@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TASK_AREAS, type TaskArea } from "@/lib/task-areas";
 import { TASK_STATUSES } from "@/lib/task-status";
 
-type OpenOptions = { area?: TaskArea | null };
+type LinkedProduction = { id: string; title: string };
+type OpenOptions = { area?: TaskArea | null; production?: LinkedProduction | null };
 type Ctx = { open: (opts?: OpenOptions) => void };
 const TaskDialogCtx = createContext<Ctx | null>(null);
 
@@ -24,9 +25,11 @@ export function useNewTaskDialog() {
 export function TaskDialogProvider({ children }: { children: ReactNode }) {
   const [isOpen, setOpen] = useState(false);
   const [initialArea, setInitialArea] = useState<TaskArea | null>(null);
+  const [initialProduction, setInitialProduction] = useState<LinkedProduction | null>(null);
 
   const open = useCallback((opts?: OpenOptions) => {
     setInitialArea(opts?.area ?? null);
+    setInitialProduction(opts?.production ?? null);
     setOpen(true);
   }, []);
 
@@ -37,14 +40,15 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
         isOpen={isOpen}
         onClose={() => setOpen(false)}
         initialArea={initialArea}
+        initialProduction={initialProduction}
       />
     </TaskDialogCtx.Provider>
   );
 }
 
 function NewTaskDialog({
-  isOpen, onClose, initialArea,
-}: { isOpen: boolean; onClose: () => void; initialArea: TaskArea | null }) {
+  isOpen, onClose, initialArea, initialProduction,
+}: { isOpen: boolean; onClose: () => void; initialArea: TaskArea | null; initialProduction: LinkedProduction | null }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -53,6 +57,7 @@ function NewTaskDialog({
   const [assignee, setAssignee] = useState<string>("");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState<string>("pendiente");
+  const [productionId, setProductionId] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const titleError = submitted && !title.trim() ? "Escribe qué hay que hacer." : null;
@@ -61,9 +66,10 @@ function NewTaskDialog({
   useEffect(() => {
     if (isOpen) {
       setArea(initialArea ?? "");
+      setProductionId(initialProduction?.id ?? "");
       setSubmitted(false);
     }
-  }, [isOpen, initialArea]);
+  }, [isOpen, initialArea, initialProduction]);
 
   const peopleQ = useQuery({
     queryKey: ["people-all-for-tasks"],
@@ -95,6 +101,17 @@ function NewTaskDialog({
     },
   });
 
+  const productionsQ = useQuery({
+    queryKey: ["productions-for-tasks"],
+    enabled: isOpen,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("productions").select("id, title").order("created_at", { ascending: false }).limit(300);
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; title: string }>;
+    },
+  });
+
   async function save() {
     setSubmitted(true);
     if (!title.trim() || !area) return;
@@ -107,6 +124,7 @@ function NewTaskDialog({
       subarea: subarea.trim() || null,
       due_date: dueDate || null,
       assignee_person_id: assignee || null,
+      production_id: productionId || null,
       status,
     });
     setSaving(false);
@@ -114,8 +132,9 @@ function NewTaskDialog({
     toast.success("Tarea creada");
     qc.invalidateQueries({ queryKey: ["tasks"] });
     qc.invalidateQueries({ queryKey: ["task-inbox"] });
-    setTitle(""); setNotes(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente");
+    setTitle(""); setNotes(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente"); setProductionId("");
     qc.invalidateQueries({ queryKey: ["notifications"] });
+    qc.invalidateQueries({ queryKey: ["production-tasks"] });
     setSubmitted(false);
     onClose();
   }
@@ -203,6 +222,18 @@ function NewTaskDialog({
               <SelectContent>
                 {TASK_STATUSES.map((s) => (
                   <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Producción vinculada <span className="text-muted-foreground">(opcional)</span></Label>
+            <Select value={productionId || "none"} onValueChange={(v) => setProductionId(v === "none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Sin producción" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sin producción</SelectItem>
+                {(productionsQ.data ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

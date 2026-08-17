@@ -82,7 +82,7 @@ export function ProductionsTable({ rows, showFinishDate = false }: { rows: Produ
           {rows.map((p) => (
             <tr key={p.id} className="hover:bg-muted/30">
               <td className="px-3 py-2">
-                <Link to="/productions/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
+                <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
                 {p.project_type && <span className="ml-2 text-xs text-muted-foreground">{PRODUCTION_KIND_LABEL[p.project_type]}</span>}
               </td>
               <td className="px-3 py-2 text-muted-foreground">{composerName(p)}</td>
