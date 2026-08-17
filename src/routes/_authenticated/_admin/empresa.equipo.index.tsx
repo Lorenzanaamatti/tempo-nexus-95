@@ -57,12 +57,15 @@ function EquipoIndex() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <div className="mb-8 border-b border-border pb-6">
-        <p className="smallcaps text-muted-foreground">Empresa</p>
-        <h1 className="mt-1 font-display text-5xl title-caps">Equipo IC</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Equipo humano de Interesante Compañía. Los agentes IA se gestionan en <Link to="/empresa/agentes" className="underline">Agentes IA</Link>.
-        </p>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <p className="smallcaps text-muted-foreground">Empresa</p>
+          <h1 className="mt-1 font-display text-5xl title-caps">Equipo IC</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Equipo humano de Interesante Compañía. Los agentes IA se gestionan en <Link to="/empresa/agentes" className="underline">Agentes IA</Link>.
+          </p>
+        </div>
+        <ExportRowsButton rows={data ?? []} filename="equipo-ic" sheetName="Equipo IC" />
       </div>
 
       {isLoading ? (
