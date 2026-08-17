@@ -270,7 +270,6 @@ function OpportunitiesIndex() {
         </div>
       )}
       <PaginationBar
-          latencyMs={pg.lastLatencyMs}
         page={pg.page}
         pageCount={pg.pageCountOf(total)}
         pageSize={pg.pageSize}

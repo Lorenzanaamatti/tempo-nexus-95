@@ -101,7 +101,6 @@ describe("las listas principales ordenan en servidor y miden latencia", () => {
       expect(src).toContain("useServerPagination");
       expect(src).toMatch(/useServerPagination<?[^(]*\(\{\s*list:/);
       expect(src).toContain("pg.applyTo(");
-      expect(src).toContain("latencyMs={pg.lastLatencyMs}");
     });
 
     test(`${file} incluye orden y página en la queryKey (refetch al ordenar)`, () => {

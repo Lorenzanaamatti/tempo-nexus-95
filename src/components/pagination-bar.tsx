@@ -202,8 +202,6 @@ export type PaginationBarProps = {
   onPageSizeChange: (n: number) => void;
   /** Etiqueta en plural, p. ej. "películas". */
   label?: string;
-  /** Latencia de la última consulta (ms) para diagnóstico. */
-  latencyMs?: number | null;
   className?: string;
 };
 
@@ -215,7 +213,6 @@ export function PaginationBar({
   onPageChange,
   onPageSizeChange,
   label = "resultados",
-  latencyMs,
   className,
 }: PaginationBarProps) {
   if (total === 0) return null;
@@ -226,20 +223,15 @@ export function PaginationBar({
     <div className={`mt-4 flex flex-wrap items-center justify-between gap-3 ${className ?? ""}`}>
       <p className="smallcaps text-xs text-muted-foreground">
         {from}–{to} de {total} {label}
-        {typeof latencyMs === "number" && (
-          <span className="ml-2 font-mono opacity-60" title="Latencia de la última consulta">
-            {Math.round(latencyMs)} ms
-          </span>
-        )}
       </p>
       <div className="flex items-center gap-2">
         <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-          <SelectTrigger className="h-8 w-28 rounded-sm text-xs">
+          <SelectTrigger className="h-8 w-auto min-w-[9.5rem] whitespace-nowrap rounded-sm text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {PAGE_SIZES.map((n) => (
-              <SelectItem key={n} value={String(n)}>
+              <SelectItem key={n} value={String(n)} className="whitespace-nowrap">
                 {n} por página
               </SelectItem>
             ))}

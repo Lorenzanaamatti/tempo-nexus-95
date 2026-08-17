@@ -313,7 +313,6 @@ function SpanishFilmsPage() {
         />
       )}
       <PaginationBar
-        latencyMs={pg.lastLatencyMs}
         page={page}
         pageCount={pageCount}
         pageSize={pageSize}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, User2, GanttChartSquare, CalendarDays, KanbanSquare } from "lucide-react";
+import { ChevronLeft, ChevronRight, User2, GanttChartSquare, CalendarDays, KanbanSquare, SlidersHorizontal } from "lucide-react";
 import { TimelineCalendar } from "@/components/timeline-calendar";
 import { CalendarMonthGrid } from "@/components/calendar-month-grid";
 import { CalendarKanban } from "@/components/calendar-kanban";
@@ -65,6 +65,10 @@ export function CalendarBoard({
   );
   // Subjects not present in the map are considered visible (default-on).
   const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount =
+    (lockedCategory ? 0 : (Object.keys(CATEGORY_LABEL) as Category[]).filter((c) => !activeCategories[c]).length) +
+    hiddenSubjects.size;
   const toggleSubject = (key: string) =>
     setHiddenSubjects((prev) => {
       const next = new Set(prev);
@@ -213,19 +217,20 @@ export function CalendarBoard({
         </div>
       )}
 
-      {/* Category chips + Mis tareas */}
+      {/* Filtros plegados por defecto; "Mis tareas" siempre visible */}
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        {!lockedCategory &&
-          (Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
-            <FamilyChip
-              key={c}
-              active={activeCategories[c]}
-              dotClass={CATEGORY_DOT[c]}
-              onClick={() => setActiveCategories((p) => ({ ...p, [c]: !p[c] }))}
-            >
-              {CATEGORY_LABEL[c]}
-            </FamilyChip>
-          ))}
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((o) => !o)}
+          aria-expanded={filtersOpen}
+          className="inline-flex items-center gap-1.5 rounded-sm border border-border px-3 py-1 text-xs text-muted-foreground transition hover:text-foreground"
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          {filtersOpen ? "Ocultar filtros" : "Filtros"}
+          {!filtersOpen && activeFilterCount > 0 && (
+            <span className="rounded-sm bg-muted px-1.5 font-mono text-[10px]">{activeFilterCount}</span>
+          )}
+        </button>
         <button
           type="button"
           onClick={() => setOnlyMine((m) => !m)}
@@ -242,6 +247,21 @@ export function CalendarBoard({
           <User2 className="h-3 w-3" /> Mis tareas
         </button>
       </div>
+
+      {filtersOpen && !lockedCategory && (
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
+            <FamilyChip
+              key={c}
+              active={activeCategories[c]}
+              dotClass={CATEGORY_DOT[c]}
+              onClick={() => setActiveCategories((p) => ({ ...p, [c]: !p[c] }))}
+            >
+              {CATEGORY_LABEL[c]}
+            </FamilyChip>
+          ))}
+        </div>
+      )}
 
       {initialOnlyMine && !data.myPersonQ.data && (
         <div
@@ -276,20 +296,22 @@ export function CalendarBoard({
       )}
 
       {/* Source family filters — secondary axis */}
-      <SubjectFilters
-        people={(data.peopleQ.data ?? []) as any[]}
-        composers={(data.composersQ.data ?? []) as any[]}
-        hidden={hiddenSubjects}
-        onToggle={toggleSubject}
-        onSetAll={(keys, visible) =>
-          setHiddenSubjects((prev) => {
-            const next = new Set(prev);
-            if (visible) for (const k of keys) next.delete(k);
-            else for (const k of keys) next.add(k);
-            return next;
-          })
-        }
-      />
+      {filtersOpen && (
+        <SubjectFilters
+          people={(data.peopleQ.data ?? []) as any[]}
+          composers={(data.composersQ.data ?? []) as any[]}
+          hidden={hiddenSubjects}
+          onToggle={toggleSubject}
+          onSetAll={(keys, visible) =>
+            setHiddenSubjects((prev) => {
+              const next = new Set(prev);
+              if (visible) for (const k of keys) next.delete(k);
+              else for (const k of keys) next.add(k);
+              return next;
+            })
+          }
+        />
+      )}
 
       {data.loading ? (
         <p className="font-display text-muted-foreground">Cargando calendario…</p>
