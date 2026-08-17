@@ -65,6 +65,7 @@ import { Route as AuthenticatedAdminProduccionesFinalizadasRouteImport } from '.
 import { Route as AuthenticatedAdminProduccionesFilmografiaRouteImport } from './routes/_authenticated/_admin/producciones.filmografia'
 import { Route as AuthenticatedAdminProduccionesActivasRouteImport } from './routes/_authenticated/_admin/producciones.activas'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
+import { Route as AuthenticatedAdminPartnersPartnerIdRouteImport } from './routes/_authenticated/_admin/partners.$partnerId'
 import { Route as AuthenticatedAdminPaperworkPresupuestosRouteImport } from './routes/_authenticated/_admin/paperwork.presupuestos'
 import { Route as AuthenticatedAdminPaperworkOtrosRouteImport } from './routes/_authenticated/_admin/paperwork.otros'
 import { Route as AuthenticatedAdminPaperworkDealMemosRouteImport } from './routes/_authenticated/_admin/paperwork.deal-memos'
@@ -425,6 +426,12 @@ const AuthenticatedAdminPeoplePersonIdRoute =
     path: '/people/$personId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPartnersPartnerIdRoute =
+  AuthenticatedAdminPartnersPartnerIdRouteImport.update({
+    id: '/partners/$partnerId',
+    path: '/partners/$partnerId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPaperworkPresupuestosRoute =
   AuthenticatedAdminPaperworkPresupuestosRouteImport.update({
     id: '/paperwork/presupuestos',
@@ -740,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/paperwork/deal-memos': typeof AuthenticatedAdminPaperworkDealMemosRoute
   '/paperwork/otros': typeof AuthenticatedAdminPaperworkOtrosRoute
   '/paperwork/presupuestos': typeof AuthenticatedAdminPaperworkPresupuestosRoute
+  '/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
@@ -835,6 +843,7 @@ export interface FileRoutesByTo {
   '/paperwork/deal-memos': typeof AuthenticatedAdminPaperworkDealMemosRoute
   '/paperwork/otros': typeof AuthenticatedAdminPaperworkOtrosRoute
   '/paperwork/presupuestos': typeof AuthenticatedAdminPaperworkPresupuestosRoute
+  '/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
@@ -935,6 +944,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/paperwork/deal-memos': typeof AuthenticatedAdminPaperworkDealMemosRoute
   '/_authenticated/_admin/paperwork/otros': typeof AuthenticatedAdminPaperworkOtrosRoute
   '/_authenticated/_admin/paperwork/presupuestos': typeof AuthenticatedAdminPaperworkPresupuestosRoute
+  '/_authenticated/_admin/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/producciones/activas': typeof AuthenticatedAdminProduccionesActivasRoute
   '/_authenticated/_admin/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
@@ -1034,6 +1044,7 @@ export interface FileRouteTypes {
     | '/paperwork/deal-memos'
     | '/paperwork/otros'
     | '/paperwork/presupuestos'
+    | '/partners/$partnerId'
     | '/people/$personId'
     | '/producciones/activas'
     | '/producciones/filmografia'
@@ -1129,6 +1140,7 @@ export interface FileRouteTypes {
     | '/paperwork/deal-memos'
     | '/paperwork/otros'
     | '/paperwork/presupuestos'
+    | '/partners/$partnerId'
     | '/people/$personId'
     | '/producciones/activas'
     | '/producciones/filmografia'
@@ -1228,6 +1240,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/paperwork/deal-memos'
     | '/_authenticated/_admin/paperwork/otros'
     | '/_authenticated/_admin/paperwork/presupuestos'
+    | '/_authenticated/_admin/partners/$partnerId'
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/producciones/activas'
     | '/_authenticated/_admin/producciones/filmografia'
@@ -1663,6 +1676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeoplePersonIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/partners/$partnerId': {
+      id: '/_authenticated/_admin/partners/$partnerId'
+      path: '/partners/$partnerId'
+      fullPath: '/partners/$partnerId'
+      preLoaderRoute: typeof AuthenticatedAdminPartnersPartnerIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/paperwork/presupuestos': {
       id: '/_authenticated/_admin/paperwork/presupuestos'
       path: '/paperwork/presupuestos'
@@ -2024,6 +2044,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPaperworkDealMemosRoute: typeof AuthenticatedAdminPaperworkDealMemosRoute
   AuthenticatedAdminPaperworkOtrosRoute: typeof AuthenticatedAdminPaperworkOtrosRoute
   AuthenticatedAdminPaperworkPresupuestosRoute: typeof AuthenticatedAdminPaperworkPresupuestosRoute
+  AuthenticatedAdminPartnersPartnerIdRoute: typeof AuthenticatedAdminPartnersPartnerIdRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProduccionesActivasRoute: typeof AuthenticatedAdminProduccionesActivasRoute
   AuthenticatedAdminProduccionesFilmografiaRoute: typeof AuthenticatedAdminProduccionesFilmografiaRoute
@@ -2119,6 +2140,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPaperworkOtrosRoute: AuthenticatedAdminPaperworkOtrosRoute,
   AuthenticatedAdminPaperworkPresupuestosRoute:
     AuthenticatedAdminPaperworkPresupuestosRoute,
+  AuthenticatedAdminPartnersPartnerIdRoute:
+    AuthenticatedAdminPartnersPartnerIdRoute,
   AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,
   AuthenticatedAdminProduccionesActivasRoute:
     AuthenticatedAdminProduccionesActivasRoute,
