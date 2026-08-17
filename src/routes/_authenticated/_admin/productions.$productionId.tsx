@@ -308,7 +308,11 @@ function ProductionEdit() {
                 placeholder="Escribe cualquier partner (del CRM o no vinculado)"
                 options={partnerOptions}
                 onChange={(v, picked) =>
-                  setForm({ ...form, partner: v, partner_company_id: picked?.id ?? "" })
+                  setForm({
+                    ...form,
+                    partner: v,
+                    partner_company_id: picked && !picked.id.startsWith("free:") ? picked.id : "",
+                  })
                 }
               />
             </div>
