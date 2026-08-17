@@ -1,4 +1,5 @@
 import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, FileSignature } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import {
   CONTRACT_STATUS_LABEL,
@@ -172,7 +173,11 @@ function ContractsIndex() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !rows.length ? (
-        <p className="text-sm text-muted-foreground">Sin contratos.</p>
+        q ? (
+          <EmptyState variant="filtered" title="Ningún resultado" description="Ningún contrato coincide con la búsqueda actual." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
+        ) : (
+          <EmptyState icon={FileSignature} title="Sin contratos" description="Crea el primer contrato desde el formulario de arriba para hacer seguimiento de firmas y vencimientos." />
+        )
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="w-full text-sm">

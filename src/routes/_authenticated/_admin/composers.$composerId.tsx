@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +22,7 @@ import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { ComposerChat } from "@/components/composer-chat";
 import { toast } from "sonner";
-import { Trash2, Copy, ExternalLink } from "lucide-react";
+import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { CurrentLocationEditor } from "@/components/current-location-editor";
 import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
@@ -434,7 +435,7 @@ function Inner({
       {/* Proyectos activos */}
       <Section title="Proyectos activos">
         {activeProductions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin proyectos activos este año.</p>
+          <EmptyState variant="inline" icon={Clapperboard} title="Sin proyectos activos este año" description="Vincula una producción en curso para verla aquí y en el dashboard de empresa." />
         ) : (
           <ul className="space-y-2">
             {activeProductions.map((p: any) => (
@@ -461,7 +462,7 @@ function Inner({
       {/* Oportunidades y relaciones */}
       <Section title="Oportunidades">
         {candidacies.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aún no figura como candidato en ninguna oportunidad.</p>
+          <EmptyState variant="inline" icon={Target} title="Sin candidaturas a oportunidades" description="Propón esta ficha desde una oportunidad para que aparezca aquí." action={{ label: "Ver oportunidades", to: "/opportunities" }} />
         ) : (
           <ul className="space-y-2">
             {candidacies.map((c: any) => (
@@ -486,7 +487,7 @@ function Inner({
 
       <Section title="Producciones">
         {productionsRel.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin producciones asociadas.</p>
+          <EmptyState variant="inline" icon={Film} title="Sin producciones asociadas" description="Asigna esta ficha a una producción para llevar el seguimiento." action={{ label: "Ver producciones", to: "/productions" }} />
         ) : (
           <ul className="space-y-2">
             {productionsRel.map((p: any) => (
@@ -513,7 +514,7 @@ function Inner({
 
       <Section title="Contratos">
         {contractsRel.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin contratos.</p>
+          <EmptyState variant="inline" icon={FileSignature} title="Sin contratos" description="Los contratos vinculados a esta ficha aparecerán aquí." action={{ label: "Ir a contratos", to: "/contracts" }} />
         ) : (
           <ul className="space-y-2">
             {contractsRel.map((k: any) => (

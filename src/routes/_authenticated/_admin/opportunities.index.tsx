@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Target } from "lucide-react";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { ExportButton } from "@/components/export-button";
-import { ListSkeleton } from "@/components/list-states";
+import { ListSkeleton, EmptyState } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/")({
   component: OpportunitiesIndex,
@@ -207,7 +207,11 @@ function OpportunitiesIndex() {
       {isLoading ? (
         <ListSkeleton rows={6} />
       ) : !rows.length ? (
-        <p className="text-sm text-muted-foreground">Sin oportunidades aún.</p>
+        q ? (
+          <EmptyState variant="filtered" title="Ningún resultado" description="Ninguna oportunidad coincide con la búsqueda actual." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
+        ) : (
+          <EmptyState icon={Target} title="Sin oportunidades" description="Registra la primera oportunidad detectada con el formulario de arriba: podrás asignarle responsable, candidatos y fecha de cierre." />
+        )
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="w-full text-sm">

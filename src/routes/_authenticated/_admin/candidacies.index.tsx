@@ -10,11 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, ExternalLink, FileText, Paperclip } from "lucide-react";
+import { Plus, Trash2, ExternalLink, FileText, Paperclip, Inbox } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { FileDropzone } from "@/components/file-dropzone";
 import { uploadToBucket, signBucketPath, removeFromBucket } from "@/lib/storage-upload";
-import { ListSkeleton } from "@/components/list-states";
+import { ListSkeleton, EmptyState } from "@/components/list-states";
 
 export const Route = createFileRoute("/_authenticated/_admin/candidacies/")({
   component: CandidaciesIndex,
@@ -293,7 +293,11 @@ function CandidaciesIndex() {
           })}
         </div>
       ) : !filtered.length ? (
-        <p className="text-sm text-muted-foreground">Sin candidaturas.</p>
+        (data ?? []).length ? (
+          <EmptyState variant="filtered" title="Ningún resultado" description="Ninguna candidatura coincide con los filtros actuales." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
+        ) : (
+          <EmptyState icon={Inbox} title="Sin candidaturas" description="Las solicitudes recibidas aparecerán aquí. También puedes registrar una manualmente desde el formulario de arriba." />
+        )
       ) : (
         <ul className="space-y-3">
           {filtered.map((c: any) => {
@@ -570,7 +574,7 @@ function CandidacyDetailSheet({
                 hint="o haz clic para seleccionarlos"
               />
               {(!files || files.length === 0) ? (
-                <p className="text-xs text-muted-foreground">Sin documentos aún.</p>
+                <EmptyState variant="inline" icon={FileText} title="Sin documentos" description="Arrastra aquí el material recibido con esta candidatura." />
               ) : (
                 <ul className="space-y-1">
                   {files.map((f: any) => (
