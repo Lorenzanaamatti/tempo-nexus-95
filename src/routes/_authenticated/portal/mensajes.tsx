@@ -1,20 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
-import {
-  MessageSquare,
-  Film,
-  Target,
-  Receipt,
-  ScrollText,
-  FileSignature,
-  CalendarDays,
-  Folder,
-  ArrowUpRight,
-  Paperclip,
-} from "lucide-react";
+import { MessageSquare, Film, Target, Receipt, ScrollText, FileSignature, CalendarDays, Folder, ArrowUpRight, Paperclip } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 
 export const Route = createFileRoute("/_authenticated/portal/mensajes")({
@@ -182,7 +172,7 @@ function Mensajes() {
                       </p>
                     </>
                   ) : (
-                    <p className="text-sm italic text-foreground/40">Sin mensajes todavía.</p>
+                    <EmptyState variant="inline" icon={MessageSquare} title="Sin mensajes" description="Escribe el primer mensaje para empezar la conversación." />
                   )}
                 </div>
                 <div className="mt-auto flex items-center justify-between text-xs text-foreground/55">
@@ -208,7 +198,7 @@ function Mensajes() {
           </div>
         </div>
         {!docsQ.data?.length ? (
-          <p className="portal-card p-5 text-sm text-foreground/60">Aún no hay materiales compartidos.</p>
+          <EmptyState variant="inline" icon={Paperclip} title="Sin materiales compartidos" description="Los archivos que comparta el equipo aparecerán aquí." />
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {docsQ.data.map((d) => (

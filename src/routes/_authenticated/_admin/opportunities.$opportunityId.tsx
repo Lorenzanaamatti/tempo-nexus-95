@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, Check } from "lucide-react";
+import { Trash2, Plus, Check, Users } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
@@ -337,7 +338,7 @@ function OpportunityDetail() {
           <Button onClick={addCandidate} disabled={!newCandidate}><Plus className="mr-1 h-4 w-4" /> Añadir</Button>
         </div>
         {!candidates.length ? (
-          <p className="text-sm text-muted-foreground">Sin candidatos aún.</p>
+          <EmptyState variant="inline" icon={Users} title="Sin candidatos" description="Propón fichas del roster para esta oportunidad." />
         ) : (
           <ul className="divide-y divide-border rounded-sm border border-border">
             {candidates.map((c: any) => (

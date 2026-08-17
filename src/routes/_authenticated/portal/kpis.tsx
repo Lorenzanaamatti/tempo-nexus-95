@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BarChart3 } from "lucide-react";
+import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
@@ -96,7 +98,7 @@ function Kpis() {
       <section>
         <h3 className="mb-3 font-display text-xl">Evolución por año</h3>
         {!data?.years.length ? (
-          <p className="text-sm text-muted-foreground">Sin datos suficientes.</p>
+          <EmptyState variant="inline" icon={BarChart3} title="Sin datos suficientes" description="Necesitamos algo más de actividad para calcular tus indicadores." />
         ) : (
           <div className="overflow-x-auto rounded-sm border border-border">
             <table className="w-full text-sm">
