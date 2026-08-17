@@ -168,10 +168,16 @@ function ProduccionesEspanolas() {
             CRM de mercado: cine y series españolas, participe o no Interesante Compañía. Inteligencia de mercado y prospección.
           </p>
         </div>
-        <Button variant="outline" onClick={runSync} disabled={syncing}>
-          {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
-          Sincronizar con TMDb
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => runBulkImport(2020)} disabled={bulk.running}>
+            {bulk.running ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Download className="mr-1 h-4 w-4" />}
+            {bulk.running ? `Importando… ${bulk.label}` : "Importar catálogo 2020–hoy"}
+          </Button>
+          <Button variant="outline" onClick={runSync} disabled={syncing || bulk.running}>
+            {syncing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+            Sincronizar
+          </Button>
+        </div>
       </div>
 
       <div className="sticky top-0 z-10 -mx-2 mt-6 flex flex-wrap items-center gap-2 bg-background/95 px-2 py-3 backdrop-blur">
@@ -185,14 +191,25 @@ function ProduccionesEspanolas() {
         <FilterSelect value={platform} onChange={setPlatform} allLabel="Todas las plataformas" options={platforms.map((p) => ({ value: p, label: p }))} />
         <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="Todos"
           options={[{ value: "si", label: "IC participó" }]} />
+        <div className="ml-auto flex items-center gap-1 rounded-sm border border-border p-0.5">
+          <Button size="sm" variant={view === "lista" ? "secondary" : "ghost"} onClick={() => setView("lista")}>
+            <ListIcon className="mr-1 h-4 w-4" /> Lista
+          </Button>
+          <Button size="sm" variant={view === "fichas" ? "secondary" : "ghost"} onClick={() => setView("fichas")}>
+            <LayoutGrid className="mr-1 h-4 w-4" /> Fichas
+          </Button>
+        </div>
+        <span className="font-mono text-xs text-muted-foreground">{rows.length} títulos</span>
       </div>
 
       {rowsQ.isLoading ? (
         <ListSkeleton rows={8} variant="grid" />
-      ) : rows.length ? (
+      ) : rows.length && view === "fichas" ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {rows.map((r) => <FilmCard key={r.id} row={r} onEdit={() => setEditing(r)} />)}
         </div>
+      ) : rows.length ? (
+        <YearTable rows={rows} onEdit={setEditing} />
       ) : (
         <div className="mt-6">
           <EmptyState
