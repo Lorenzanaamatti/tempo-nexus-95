@@ -1,9 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { formatDateEs } from "@/lib/dates";
 import { extractVariables, optionLabel, TEMPLATE_IDIOMAS, TEMPLATE_TIPOS } from "@/lib/comunicacion-model";
 import { EmptyState } from "@/components/list-states";
@@ -18,6 +23,9 @@ export const Route = createFileRoute("/_authenticated/_admin/templates/$template
 function TemplateDetail() {
   const { templateId } = Route.useParams();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [form, setForm] = useState({ nombre: "", descripcion: "", contenido: "" });
+  const [saving, setSaving] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ["template", templateId],
     queryFn: async () => {
@@ -26,6 +34,38 @@ function TemplateDetail() {
       return data as Record<string, any> | null;
     },
   });
+
+  useEffect(() => {
+    if (!data) return;
+    setForm({
+      nombre: data.nombre ?? "",
+      descripcion: data.descripcion ?? "",
+      contenido: data.contenido ?? "",
+    });
+  }, [data]);
+
+  async function save() {
+    if (!form.nombre.trim()) return toast.error("El nombre es obligatorio");
+    setSaving(true);
+    const { error } = await db.from("templates").update({
+      nombre: form.nombre.trim(),
+      descripcion: form.descripcion.trim() || null,
+      contenido: form.contenido,
+    }).eq("id", templateId);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Plantilla guardada");
+    qc.invalidateQueries({ queryKey: ["template", templateId] });
+    qc.invalidateQueries({ queryKey: ["templates"] });
+  }
+
+  async function remove() {
+    const { error } = await db.from("templates").delete().eq("id", templateId);
+    if (error) return toast.error(error.message);
+    toast.success("Plantilla eliminada");
+    qc.invalidateQueries({ queryKey: ["templates"] });
+    navigate({ to: "/templates" });
+  }
 
   if (isLoading) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
   if (!data) {
@@ -36,7 +76,7 @@ function TemplateDetail() {
     );
   }
 
-  const variables = extractVariables(String(data.contenido ?? ""));
+  const variables = extractVariables(String(form.contenido ?? ""));
 
   function usar() {
     const draft = {
@@ -80,10 +120,19 @@ function TemplateDetail() {
         <div className="flex gap-2">
           <Button variant="outline" asChild><Link to="/templates">Volver</Link></Button>
           <Button onClick={usar}>Usar plantilla</Button>
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title={`¿Eliminar la plantilla "${data.nombre}"?`}
+            description="Se eliminará la plantilla de forma permanente."
+          />
+          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
         </div>
       </div>
 
-      {data.descripcion && <p className="mb-6 text-sm text-muted-foreground">{data.descripcion}</p>}
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <div><Label>Nombre</Label><Input value={form.nombre} onChange={(e) => setForm((p) => ({ ...p, nombre: e.target.value }))} /></div>
+        <div><Label>Descripción</Label><Input value={form.descripcion} onChange={(e) => setForm((p) => ({ ...p, descripcion: e.target.value }))} /></div>
+      </div>
 
       <div className="mb-6">
         <p className="smallcaps mb-2 text-xs text-muted-foreground">Variables detectadas</p>
@@ -95,10 +144,13 @@ function TemplateDetail() {
       </div>
 
       <div>
-        <p className="smallcaps mb-2 text-xs text-muted-foreground">Vista previa</p>
-        <pre className="whitespace-pre-wrap rounded-sm border border-border bg-muted/20 p-4 font-mono text-xs leading-relaxed">
-          {data.contenido || "—"}
-        </pre>
+        <p className="smallcaps mb-2 text-xs text-muted-foreground">Contenido</p>
+        <Textarea
+          value={form.contenido}
+          rows={18}
+          onChange={(e) => setForm((p) => ({ ...p, contenido: e.target.value }))}
+          className="font-mono text-xs leading-relaxed"
+        />
       </div>
     </div>
   );
