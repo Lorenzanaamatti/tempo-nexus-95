@@ -47,6 +47,7 @@ function NewTaskDialog({
 }: { isOpen: boolean; onClose: () => void; initialArea: TaskArea | null }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
+  const [notes, setNotes] = useState("");
   const [area, setArea] = useState<TaskArea | "">(initialArea ?? "");
   const [subarea, setSubarea] = useState("");
   const [assignee, setAssignee] = useState<string>("");
@@ -100,6 +101,7 @@ function NewTaskDialog({
     setSaving(true);
     const { error } = await (supabase as any).from("actions").insert({
       title: title.trim(),
+      notes: notes.trim() || null,
       kind: "tarea",
       area,
       subarea: subarea.trim() || null,
@@ -112,7 +114,8 @@ function NewTaskDialog({
     toast.success("Tarea creada");
     qc.invalidateQueries({ queryKey: ["tasks"] });
     qc.invalidateQueries({ queryKey: ["task-inbox"] });
-    setTitle(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente");
+    setTitle(""); setNotes(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente");
+    qc.invalidateQueries({ queryKey: ["notifications"] });
     setSubmitted(false);
     onClose();
   }
@@ -125,18 +128,26 @@ function NewTaskDialog({
         </DialogHeader>
         <div className="grid gap-3">
           <div>
-            <Label className="text-xs">Descripción</Label>
-            <Textarea
+            <Label className="text-xs">Tarea</Label>
+            <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="¿Qué hay que hacer?"
-              rows={3}
               aria-invalid={!!titleError}
               aria-describedby={titleError ? "task-title-error" : undefined}
             />
             {titleError && (
               <p id="task-title-error" className="mt-1 text-xs text-destructive">{titleError}</p>
             )}
+          </div>
+          <div>
+            <Label className="text-xs">Detalle <span className="text-muted-foreground">(opcional)</span></Label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Contexto, enlaces, criterios de entrega…"
+              rows={3}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
