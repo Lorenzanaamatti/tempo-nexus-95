@@ -2662,6 +2662,271 @@ export type Database = {
           },
         ]
       }
+      oportunidades_festivales: {
+        Row: {
+          ciudad: string | null
+          created_at: string
+          edicion: string | null
+          estado: Database["public"]["Enums"]["festival_estado"]
+          fecha_deadline_inscripcion: string
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          id: string
+          institucion_id: string | null
+          nombre_festival: string
+          notas: string | null
+          pais: string | null
+          produccion_vinculada: string | null
+          representado_vinculado: string | null
+          resultado_notas: string | null
+          tier: Database["public"]["Enums"]["festival_tier"]
+          tipo: Database["public"]["Enums"]["festival_tipo"]
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          ciudad?: string | null
+          created_at?: string
+          edicion?: string | null
+          estado?: Database["public"]["Enums"]["festival_estado"]
+          fecha_deadline_inscripcion: string
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          institucion_id?: string | null
+          nombre_festival: string
+          notas?: string | null
+          pais?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          tier?: Database["public"]["Enums"]["festival_tier"]
+          tipo?: Database["public"]["Enums"]["festival_tipo"]
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          ciudad?: string | null
+          created_at?: string
+          edicion?: string | null
+          estado?: Database["public"]["Enums"]["festival_estado"]
+          fecha_deadline_inscripcion?: string
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          institucion_id?: string | null
+          nombre_festival?: string
+          notas?: string | null
+          pais?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          tier?: Database["public"]["Enums"]["festival_tier"]
+          tipo?: Database["public"]["Enums"]["festival_tipo"]
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_festivales_institucion_id_fkey"
+            columns: ["institucion_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_festivales_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_festivales_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_festivales_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oportunidades_premios: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          edicion: string | null
+          estado: Database["public"]["Enums"]["premio_estado"]
+          fecha_apertura_candidaturas: string | null
+          fecha_gala_fallo: string | null
+          fecha_limite_inscripcion: string
+          id: string
+          institucion_id: string | null
+          nombre_premio: string
+          notas: string | null
+          pais: string | null
+          produccion_vinculada: string | null
+          representado_vinculado: string | null
+          resultado_notas: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          edicion?: string | null
+          estado?: Database["public"]["Enums"]["premio_estado"]
+          fecha_apertura_candidaturas?: string | null
+          fecha_gala_fallo?: string | null
+          fecha_limite_inscripcion: string
+          id?: string
+          institucion_id?: string | null
+          nombre_premio: string
+          notas?: string | null
+          pais?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          edicion?: string | null
+          estado?: Database["public"]["Enums"]["premio_estado"]
+          fecha_apertura_candidaturas?: string | null
+          fecha_gala_fallo?: string | null
+          fecha_limite_inscripcion?: string
+          id?: string
+          institucion_id?: string | null
+          nombre_premio?: string
+          notas?: string | null
+          pais?: string | null
+          produccion_vinculada?: string | null
+          representado_vinculado?: string | null
+          resultado_notas?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_premios_institucion_id_fkey"
+            columns: ["institucion_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_premios_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_premios_produccion_vinculada_fkey"
+            columns: ["produccion_vinculada"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_premios_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oportunidades_subvenciones: {
+        Row: {
+          ambito: Database["public"]["Enums"]["subvencion_ambito"]
+          created_at: string
+          estado: Database["public"]["Enums"]["subvencion_estado"]
+          fecha_apertura: string | null
+          fecha_limite_solicitud: string
+          fecha_resolucion: string | null
+          id: string
+          importe_concedido: number | null
+          importe_maximo: number | null
+          importe_solicitado: number | null
+          institucion_id: string | null
+          institucion_nombre: string | null
+          nombre_convocatoria: string
+          notas: string | null
+          representado_vinculado: string | null
+          requisitos: string | null
+          tipo: Database["public"]["Enums"]["subvencion_tipo"]
+          updated_at: string
+          url_convocatoria: string | null
+        }
+        Insert: {
+          ambito?: Database["public"]["Enums"]["subvencion_ambito"]
+          created_at?: string
+          estado?: Database["public"]["Enums"]["subvencion_estado"]
+          fecha_apertura?: string | null
+          fecha_limite_solicitud: string
+          fecha_resolucion?: string | null
+          id?: string
+          importe_concedido?: number | null
+          importe_maximo?: number | null
+          importe_solicitado?: number | null
+          institucion_id?: string | null
+          institucion_nombre?: string | null
+          nombre_convocatoria: string
+          notas?: string | null
+          representado_vinculado?: string | null
+          requisitos?: string | null
+          tipo?: Database["public"]["Enums"]["subvencion_tipo"]
+          updated_at?: string
+          url_convocatoria?: string | null
+        }
+        Update: {
+          ambito?: Database["public"]["Enums"]["subvencion_ambito"]
+          created_at?: string
+          estado?: Database["public"]["Enums"]["subvencion_estado"]
+          fecha_apertura?: string | null
+          fecha_limite_solicitud?: string
+          fecha_resolucion?: string | null
+          id?: string
+          importe_concedido?: number | null
+          importe_maximo?: number | null
+          importe_solicitado?: number | null
+          institucion_id?: string | null
+          institucion_nombre?: string | null
+          nombre_convocatoria?: string
+          notas?: string | null
+          representado_vinculado?: string | null
+          requisitos?: string | null
+          tipo?: Database["public"]["Enums"]["subvencion_tipo"]
+          updated_at?: string
+          url_convocatoria?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_subvenciones_institucion_id_fkey"
+            columns: ["institucion_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_representado_vinculado_fkey"
+            columns: ["representado_vinculado"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           created_at: string
@@ -2877,6 +3142,69 @@ export type Database = {
           title?: string
           updated_at?: string
           variables?: string[]
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          ambito: Database["public"]["Enums"]["partner_ambito"] | null
+          ciudad: string | null
+          contacto_email: string | null
+          contacto_principal: string | null
+          contacto_telefono: string | null
+          created_at: string
+          id: string
+          nombre: string
+          notas: string | null
+          pais: string | null
+          relacion_ic: string | null
+          source_id: string | null
+          source_table: string | null
+          subtipo: string | null
+          tipo: Database["public"]["Enums"]["partner_tipo"]
+          tipo_apoyo: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          ambito?: Database["public"]["Enums"]["partner_ambito"] | null
+          ciudad?: string | null
+          contacto_email?: string | null
+          contacto_principal?: string | null
+          contacto_telefono?: string | null
+          created_at?: string
+          id?: string
+          nombre: string
+          notas?: string | null
+          pais?: string | null
+          relacion_ic?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          subtipo?: string | null
+          tipo?: Database["public"]["Enums"]["partner_tipo"]
+          tipo_apoyo?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          ambito?: Database["public"]["Enums"]["partner_ambito"] | null
+          ciudad?: string | null
+          contacto_email?: string | null
+          contacto_principal?: string | null
+          contacto_telefono?: string | null
+          created_at?: string
+          id?: string
+          nombre?: string
+          notas?: string | null
+          pais?: string | null
+          relacion_ic?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          subtipo?: string | null
+          tipo?: Database["public"]["Enums"]["partner_tipo"]
+          tipo_apoyo?: string[]
+          updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -4654,6 +4982,7 @@ export type Database = {
       career_plan_composer: { Args: { _plan_id: string }; Returns: string }
       current_user_is_admin: { Args: never; Returns: boolean }
       current_user_is_big_c: { Args: never; Returns: boolean }
+      deadline_owner_person: { Args: { _composer_id: string }; Returns: string }
       ensure_composer_chat_channels: {
         Args: { _composer_id: string }
         Returns: undefined
@@ -4801,6 +5130,22 @@ export type Database = {
         | "reminder_enviado"
         | "cerrado"
       dm_version_origen: "agente_ia" | "correccion_humana"
+      festival_estado:
+        | "Identificado"
+        | "En preparación"
+        | "Inscrito"
+        | "Seleccionado"
+        | "No seleccionado"
+        | "Premio obtenido"
+      festival_tier: "A" | "Internacional" | "Nacional" | "Regional"
+      festival_tipo:
+        | "Competición"
+        | "Mercado"
+        | "Música"
+        | "Documental"
+        | "Cortometraje"
+        | "Animación"
+        | "Otro"
       film_format:
         | "feature"
         | "series"
@@ -4900,6 +5245,8 @@ export type Database = {
         | "nda"
         | "agradecimiento"
         | "otro"
+      partner_ambito: "Local" | "Nacional" | "Internacional"
+      partner_tipo: "Productora" | "Medio" | "Institución"
       person_role:
         | "ic_team"
         | "composer"
@@ -4909,6 +5256,12 @@ export type Database = {
         | "curator"
         | "other"
       platform_status: "Actualizado" | "Desactualizado" | "Sin perfil"
+      premio_estado:
+        | "Identificado"
+        | "Candidatura enviada"
+        | "Nominado"
+        | "Premio obtenido"
+        | "No seleccionado"
       press_kit_scope: "ic_global" | "compositor"
       production_kind:
         | "cine"
@@ -5023,6 +5376,24 @@ export type Database = {
         | "programado"
         | "publicado"
         | "archivado"
+      subvencion_ambito:
+        | "Local"
+        | "Autonómico"
+        | "Nacional"
+        | "Europeo"
+        | "Internacional"
+      subvencion_estado:
+        | "Sin valorar"
+        | "En preparación"
+        | "Solicitada"
+        | "Concedida"
+        | "Denegada"
+      subvencion_tipo:
+        | "Producción musical"
+        | "Internacionalización"
+        | "Formación"
+        | "Investigación"
+        | "Otro"
       target_account_priority: "alta" | "media" | "baja"
       target_account_status:
         | "sin_contacto"
@@ -5299,6 +5670,24 @@ export const Constants = {
         "cerrado",
       ],
       dm_version_origen: ["agente_ia", "correccion_humana"],
+      festival_estado: [
+        "Identificado",
+        "En preparación",
+        "Inscrito",
+        "Seleccionado",
+        "No seleccionado",
+        "Premio obtenido",
+      ],
+      festival_tier: ["A", "Internacional", "Nacional", "Regional"],
+      festival_tipo: [
+        "Competición",
+        "Mercado",
+        "Música",
+        "Documental",
+        "Cortometraje",
+        "Animación",
+        "Otro",
+      ],
       film_format: [
         "feature",
         "series",
@@ -5407,6 +5796,8 @@ export const Constants = {
         "agradecimiento",
         "otro",
       ],
+      partner_ambito: ["Local", "Nacional", "Internacional"],
+      partner_tipo: ["Productora", "Medio", "Institución"],
       person_role: [
         "ic_team",
         "composer",
@@ -5417,6 +5808,13 @@ export const Constants = {
         "other",
       ],
       platform_status: ["Actualizado", "Desactualizado", "Sin perfil"],
+      premio_estado: [
+        "Identificado",
+        "Candidatura enviada",
+        "Nominado",
+        "Premio obtenido",
+        "No seleccionado",
+      ],
       press_kit_scope: ["ic_global", "compositor"],
       production_kind: [
         "cine",
@@ -5539,6 +5937,27 @@ export const Constants = {
         "programado",
         "publicado",
         "archivado",
+      ],
+      subvencion_ambito: [
+        "Local",
+        "Autonómico",
+        "Nacional",
+        "Europeo",
+        "Internacional",
+      ],
+      subvencion_estado: [
+        "Sin valorar",
+        "En preparación",
+        "Solicitada",
+        "Concedida",
+        "Denegada",
+      ],
+      subvencion_tipo: [
+        "Producción musical",
+        "Internacionalización",
+        "Formación",
+        "Investigación",
+        "Otro",
       ],
       target_account_priority: ["alta", "media", "baja"],
       target_account_status: [
