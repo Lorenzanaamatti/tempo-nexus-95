@@ -610,8 +610,10 @@ function FilmCard({ row, onEdit }: { row: ProduccionEspanola; onEdit: () => void
 
 function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: () => void }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [icParticipo, setIc] = useState(false);
+  const [equipo, setEquipo] = useState<Record<string, string>>({});
   const [produccion, setProduccion] = useState<string>("");
   const [reps, setReps] = useState<string[]>([]);
   const [estado, setEstado] = useState<ProspeccionEstado>("sin_valorar");
@@ -639,6 +641,12 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
     setEstado(row.estado_prospeccion);
     setOportunidad(row.oportunidad_vinculada ?? "");
     setNotas(row.notas ?? "");
+    setEquipo({
+      mezclador: (row as any).mezclador ?? "",
+      orquestador: (row as any).orquestador ?? "",
+      orquesta: (row as any).orquesta ?? "",
+      director_orquesta: (row as any).director_orquesta ?? "",
+    });
   }
 
   async function save() {
@@ -651,6 +659,10 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
       estado_prospeccion: estado,
       oportunidad_vinculada: oportunidad || null,
       notas: notas || null,
+      mezclador: equipo.mezclador?.trim() || null,
+      orquestador: equipo.orquestador?.trim() || null,
+      orquesta: equipo.orquesta?.trim() || null,
+      director_orquesta: equipo.director_orquesta?.trim() || null,
     }).eq("id", row.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -662,9 +674,49 @@ function ICDialog({ row, onClose }: { row: ProduccionEspanola | null; onClose: (
 
   return (
     <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader><DialogTitle>{row?.title_es ?? row?.title}</DialogTitle></DialogHeader>
         <div className="grid gap-3">
+          <div className="grid gap-3 rounded-sm border border-border p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Equipo musical · oportunidades de fichaje
+            </p>
+            {ROLES_FICHAJE.map((rol) => (
+              <div key={rol.key} className="grid gap-1.5">
+                <Label>{rol.label}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={equipo[rol.key] ?? ""}
+                    onChange={(e) => setEquipo({ ...equipo, [rol.key]: e.target.value })}
+                    placeholder={`Nombre del ${rol.label.toLowerCase()}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!(equipo[rol.key] ?? "").trim()}
+                    onClick={async () => {
+                      const nombre = (equipo[rol.key] ?? "").trim();
+                      if (!row) return;
+                      await db.from("producciones_espanolas").update({ [rol.key]: nombre }).eq("id", row.id);
+                      const id = await addProspectFichaje(
+                        nombre,
+                        `${rol.label} de ${row.title_es ?? row.title} (${row.year ?? "—"})`,
+                        rol.label,
+                      );
+                      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+                      if (id) {
+                        onClose();
+                        navigate({ to: "/oportunidades/prospect/$prospectId", params: { prospectId: id } });
+                      }
+                    }}
+                  >
+                    Ficha
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={icParticipo} onChange={(e) => setIc(e.target.checked)} />
             IC participó en esta producción
