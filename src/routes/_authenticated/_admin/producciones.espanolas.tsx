@@ -432,7 +432,22 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           ]}
                         />
                         {r.ic_participo && (
-                          <Badge className="ml-2 rounded-sm bg-emerald-600 text-[10px] text-white hover:bg-emerald-600">IC</Badge>
+                          <Badge
+                            className="ml-2 rounded-sm bg-emerald-600 text-[10px] text-white hover:bg-emerald-600"
+                            title={(r.ic_personas ?? []).join(", ") || "IC participa"}
+                          >
+                            IC
+                          </Badge>
+                        )}
+                        {r.origen && r.origen !== "tmdb" && (
+                          <Badge variant="outline" className="ml-1 rounded-sm text-[10px]">
+                            {r.origen === "produccion_ic" ? "Producción IC" : "Oportunidad"}
+                          </Badge>
+                        )}
+                        {(r.ic_personas ?? []).length > 0 && (
+                          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-emerald-600">
+                            {(r.ic_personas ?? []).join(" · ")}
+                          </p>
                         )}
                       </td>
                       <td className="py-2 pr-3 text-muted-foreground">{r.title_original ?? "—"}</td>
