@@ -72,16 +72,21 @@ export async function fetchDetail(tmdbId: number, mediaType: "movie" | "tv") {
   };
 }
 
-/** Lista una página de películas españolas de un año concreto (TMDb discover). */
-export async function discoverEspanolas(year: number, page: number) {
-  const json = await tmdbFetch("/discover/movie", {
+/** Lista una página de producciones españolas (cine o series) de un año concreto. */
+export async function discoverEspanolas(year: number, page: number, mediaType: "movie" | "tv" = "movie") {
+  const params: Record<string, string> = {
     with_origin_country: "ES",
-    primary_release_year: String(year),
     sort_by: "popularity.desc",
     language: "es-ES",
-    include_adult: "false",
     page: String(page),
-  });
+  };
+  if (mediaType === "movie") {
+    params['primary_release_year'] = String(year);
+    params['include_adult'] = "false";
+  } else {
+    params['first_air_date_year'] = String(year);
+  }
+  const json = await tmdbFetch(`/discover/${mediaType}`, params);
   return {
     results: (json.results ?? []) as any[],
     ids: ((json.results ?? []) as any[]).map((r) => r.id as number),
@@ -94,27 +99,32 @@ export async function discoverEspanolas(year: number, page: number) {
  * Importa una página del catálogo con los datos básicos del listado (rápido).
  * Los créditos musicales y la taquilla se completan después con `enrichPending`.
  */
-export async function importYearPageLite(admin: any, year: number, page: number) {
-  const { results, totalPages, totalResults } = await discoverEspanolas(year, page);
+export async function importYearPageLite(
+  admin: any,
+  year: number,
+  page: number,
+  mediaType: "movie" | "tv" = "movie",
+) {
+  const { results, totalPages, totalResults } = await discoverEspanolas(year, page, mediaType);
   if (!results.length) return { saved: 0, totalPages, totalResults };
 
   const rows = results.map((r) => ({
     tmdb_id: r.id as number,
-    media_type: "movie",
-    title: (r.title ?? r.original_title ?? "") as string,
-    title_es: (r.title ?? null) as string | null,
-    title_original: (r.original_title ?? null) as string | null,
-    year: r.release_date ? Number(String(r.release_date).slice(0, 4)) || year : year,
-    release_date: (r.release_date || null) as string | null,
+    media_type: mediaType,
+    title: (r.title ?? r.name ?? r.original_title ?? r.original_name ?? "") as string,
+    title_es: (r.title ?? r.name ?? null) as string | null,
+    title_original: (r.original_title ?? r.original_name ?? null) as string | null,
+    year: Number(String(r.release_date ?? r.first_air_date ?? "").slice(0, 4)) || year,
+    release_date: ((r.release_date ?? r.first_air_date) || null) as string | null,
     poster_path: (r.poster_path ?? null) as string | null,
     backdrop_path: (r.backdrop_path ?? null) as string | null,
     synopsis: (r.overview ?? null) as string | null,
-    tmdb_url: `https://www.themoviedb.org/movie/${r.id}`,
+    tmdb_url: `https://www.themoviedb.org/${mediaType}/${r.id}`,
   }));
 
   const { error } = await admin
     .from("producciones_espanolas")
-    .upsert(rows, { onConflict: "tmdb_id", ignoreDuplicates: false });
+    .upsert(rows, { onConflict: "tmdb_id,media_type", ignoreDuplicates: false });
   if (error) throw new Error(error.message);
   return { saved: rows.length, totalPages, totalResults };
 }
@@ -163,13 +173,18 @@ export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) =>
 }
 
 /** Importa (upsert) una página completa de un año. */
-export async function importYearPage(admin: any, year: number, page: number) {
-  const { ids, totalPages, totalResults } = await discoverEspanolas(year, page);
+export async function importYearPage(
+  admin: any,
+  year: number,
+  page: number,
+  mediaType: "movie" | "tv" = "movie",
+) {
+  const { ids, totalPages, totalResults } = await discoverEspanolas(year, page, mediaType);
   if (!ids.length) return { saved: 0, totalPages, totalResults };
 
   const rows = (await mapLimit(ids, 5, async (id) => {
     try {
-      return await fetchDetail(id, "movie");
+      return await fetchDetail(id, mediaType);
     } catch {
       return null;
     }
@@ -179,7 +194,7 @@ export async function importYearPage(admin: any, year: number, page: number) {
 
   const { error } = await admin
     .from("producciones_espanolas")
-    .upsert(rows, { onConflict: "tmdb_id", ignoreDuplicates: false });
+    .upsert(rows, { onConflict: "tmdb_id,media_type", ignoreDuplicates: false });
   if (error) throw new Error(error.message);
   return { saved: rows.length, totalPages, totalResults };
 }
