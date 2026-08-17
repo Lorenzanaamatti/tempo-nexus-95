@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { FileDropzone } from "@/components/file-dropzone";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { uploadToBucket, signBucketPath } from "@/lib/storage-upload";
 
 export const Route = createFileRoute("/_authenticated/_admin/deal-memos/plantillas/$plantillaId")({
@@ -47,6 +48,14 @@ function PlantillaEditor() {
     if (error) return toast.error(error.message);
     toast.success("Plantilla guardada");
     qc.invalidateQueries({ queryKey: ["dm-plantillas"] });
+  }
+
+  async function remove() {
+    const { error } = await supabase.from("dm_plantillas").delete().eq("id", plantillaId);
+    if (error) return toast.error(error.message);
+    toast.success("Plantilla eliminada");
+    qc.invalidateQueries({ queryKey: ["dm-plantillas"] });
+    navigate({ to: "/deal-memos/plantillas" });
   }
 
   async function handleFile(file: File) {
@@ -115,7 +124,12 @@ function PlantillaEditor() {
           <Textarea rows={6} value={form.instrucciones_para_agente} onChange={(e) => setForm({ ...form, instrucciones_para_agente: e.target.value })} />
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex items-center justify-end gap-2">
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title={`¿Eliminar la plantilla "${form.nombre}"?`}
+            description="Se eliminará la plantilla de deal memo de forma permanente."
+          />
           <Button variant="outline" onClick={() => navigate({ to: "/deal-memos/plantillas" })}>Cancelar</Button>
           <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
         </div>

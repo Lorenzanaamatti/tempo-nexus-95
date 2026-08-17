@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PersonPhotoUploader } from "@/components/person-photo-uploader";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { CONTRATO_TIPOS, IC_ROLES } from "@/lib/comunicacion-model";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ const EMPTY = {
 };
 
 function EquipoDetail() {
+  const navigate = useNavigate();
   const { personId } = Route.useParams();
   const { isBigC, loading } = useCurrentRole();
   const [form, setForm] = useState<Record<string, string>>(EMPTY);
@@ -103,6 +105,13 @@ function EquipoDetail() {
     refetch();
   }
 
+  async function remove() {
+    const { error } = await db.from("people").delete().eq("id", personId);
+    if (error) return toast.error(error.message);
+    toast.success("Ficha eliminada");
+    navigate({ to: "/empresa/equipo" });
+  }
+
   if (loading) return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
   if (!isBigC) {
     return <div className="mx-auto max-w-4xl px-6 py-10"><EmptyState title="Sin acceso" description="Esta sección solo está disponible para BIG C." /></div>;
@@ -131,7 +140,12 @@ function EquipoDetail() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild><Link to="/people/$personId" params={{ personId }}>Funciones y agenda</Link></Button>
-          <Button onClick={save} disabled={saving}>Guardar</Button>
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title="¿Eliminar esta ficha del equipo?"
+            description="Se eliminará la persona del equipo IC. Esta acción no se puede deshacer."
+          />
+          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
         </div>
       </div>
 

@@ -3,10 +3,13 @@ import { Clapperboard } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { toast } from "sonner";
 import { formatDateEs } from "@/lib/dates";
 import { RelatedWorks } from "@/components/related-works";
@@ -21,6 +24,8 @@ function CompanyDetail() {
   const { companyId } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
   const companyQ = useQuery({
     queryKey: ["production-company", companyId],
@@ -50,6 +55,44 @@ function CompanyDetail() {
     else qc.invalidateQueries({ queryKey: ["production-company", companyId] });
   }
 
+  const cData: any = companyQ.data;
+  useEffect(() => {
+    if (!cData) return;
+    setForm({
+      name: cData.name ?? "", legal_name: cData.legal_name ?? "", cif: cData.cif ?? "",
+      website: cData.website ?? "", address: cData.address ?? "", city: cData.city ?? "",
+      country: cData.country ?? "", contact_name: cData.contact_name ?? "", email: cData.email ?? "",
+      phone: cData.phone ?? "", area_managers: cData.area_managers ?? "",
+      contract_notes: cData.contract_notes ?? "", notes: cData.notes ?? "",
+    });
+  }, [cData]);
+
+  function set(key: string, value: string) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function save() {
+    if (!form["name"]?.trim()) return toast.error("El nombre es obligatorio");
+    setSaving(true);
+    const v = (k: string) => (form[k]?.trim() ? form[k]!.trim() : null);
+    await update({
+      name: form["name"]!.trim(), legal_name: v("legal_name"), cif: v("cif"), website: v("website"),
+      address: v("address"), city: v("city"), country: v("country"), contact_name: v("contact_name"),
+      email: v("email"), phone: v("phone"), area_managers: v("area_managers"),
+      contract_notes: v("contract_notes"), notes: v("notes"),
+    });
+    setSaving(false);
+    toast.success("Ficha guardada");
+  }
+
+  async function remove() {
+    const { error } = await supabase.from("production_companies").delete().eq("id", companyId);
+    if (error) return toast.error(error.message);
+    toast.success("Productora eliminada");
+    qc.invalidateQueries({ queryKey: ["production-companies"] });
+    navigate({ to: "/production-companies" });
+  }
+
   if (companyQ.isLoading || !companyQ.data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
   const c: any = companyQ.data;
 
@@ -60,6 +103,7 @@ function CompanyDetail() {
           <PageCrumb label={c.name} />
           <h1 className="mt-1 font-display text-4xl">{c.name}</h1>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
         <CrmTransferMenu
           actions={[
             {
@@ -80,38 +124,45 @@ function CompanyDetail() {
             },
           ]}
         />
+          <ConfirmDeleteButton
+            onConfirm={remove}
+            title={`¿Eliminar ${c.name}?`}
+            description="Se eliminará la ficha de la productora. Las producciones vinculadas se mantienen."
+          />
+          <Button onClick={save} disabled={saving}>{saving ? "Guardando…" : "Guardar"}</Button>
+        </div>
       </div>
 
       <section className="space-y-4">
         <h2 className="font-display text-2xl">Datos generales</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div><Label>Nombre comercial</Label><Input defaultValue={c.name} onBlur={(e) => e.target.value !== c.name && update({ name: e.target.value })} /></div>
-          <div><Label>Razón social</Label><Input defaultValue={c.legal_name ?? ""} onBlur={(e) => update({ legal_name: e.target.value || null })} /></div>
-          <div><Label>CIF / NIF</Label><Input defaultValue={c.cif ?? ""} onBlur={(e) => update({ cif: e.target.value || null })} /></div>
-          <div><Label>Web</Label><Input defaultValue={c.website ?? ""} onBlur={(e) => update({ website: e.target.value || null })} /></div>
-          <div className="sm:col-span-2"><Label>Dirección fiscal</Label><Input defaultValue={c.address ?? ""} onBlur={(e) => update({ address: e.target.value || null })} /></div>
-          <div><Label>Ciudad</Label><Input defaultValue={c.city ?? ""} onBlur={(e) => update({ city: e.target.value || null })} /></div>
-          <div><Label>País</Label><Input defaultValue={c.country ?? ""} onBlur={(e) => update({ country: e.target.value || null })} /></div>
+          <div><Label>Nombre comercial</Label><Input value={form["name"] ?? ""} onChange={(e) => set("name", e.target.value)} /></div>
+          <div><Label>Razón social</Label><Input value={form["legal_name"] ?? ""} onChange={(e) => set("legal_name", e.target.value)} /></div>
+          <div><Label>CIF / NIF</Label><Input value={form["cif"] ?? ""} onChange={(e) => set("cif", e.target.value)} /></div>
+          <div><Label>Web</Label><Input value={form["website"] ?? ""} onChange={(e) => set("website", e.target.value)} /></div>
+          <div className="sm:col-span-2"><Label>Dirección fiscal</Label><Input value={form["address"] ?? ""} onChange={(e) => set("address", e.target.value)} /></div>
+          <div><Label>Ciudad</Label><Input value={form["city"] ?? ""} onChange={(e) => set("city", e.target.value)} /></div>
+          <div><Label>País</Label><Input value={form["country"] ?? ""} onChange={(e) => set("country", e.target.value)} /></div>
         </div>
       </section>
 
       <section className="mt-10 space-y-4">
         <h2 className="font-display text-2xl">Contacto principal</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div><Label>Contacto</Label><Input defaultValue={c.contact_name ?? ""} onBlur={(e) => update({ contact_name: e.target.value || null })} /></div>
-          <div><Label>Email</Label><Input defaultValue={c.email ?? ""} onBlur={(e) => update({ email: e.target.value || null })} /></div>
-          <div><Label>Teléfono</Label><Input defaultValue={c.phone ?? ""} onBlur={(e) => update({ phone: e.target.value || null })} /></div>
+          <div><Label>Contacto</Label><Input value={form["contact_name"] ?? ""} onChange={(e) => set("contact_name", e.target.value)} /></div>
+          <div><Label>Email</Label><Input value={form["email"] ?? ""} onChange={(e) => set("email", e.target.value)} /></div>
+          <div><Label>Teléfono</Label><Input value={form["phone"] ?? ""} onChange={(e) => set("phone", e.target.value)} /></div>
         </div>
         <div>
           <Label>Responsables de área</Label>
-          <Textarea defaultValue={c.area_managers ?? ""} rows={3} placeholder="Producción ejecutiva: … · Postproducción: … · Música: …" onBlur={(e) => update({ area_managers: e.target.value || null })} />
+          <Textarea value={form["area_managers"] ?? ""} rows={3} placeholder="Producción ejecutiva: … · Postproducción: … · Música: …" onChange={(e) => set("area_managers", e.target.value)} />
         </div>
       </section>
 
       <section className="mt-10 space-y-4">
         <h2 className="font-display text-2xl">Datos contractuales</h2>
-        <Textarea defaultValue={c.contract_notes ?? ""} rows={4} placeholder="Condiciones marco, NDA, cuentas bancarias, etc." onBlur={(e) => update({ contract_notes: e.target.value || null })} />
-        <Textarea defaultValue={c.notes ?? ""} rows={3} placeholder="Notas internas" onBlur={(e) => update({ notes: e.target.value || null })} />
+        <Textarea value={form["contract_notes"] ?? ""} rows={4} placeholder="Condiciones marco, NDA, cuentas bancarias, etc." onChange={(e) => set("contract_notes", e.target.value)} />
+        <Textarea value={form["notes"] ?? ""} rows={3} placeholder="Notas internas" onChange={(e) => set("notes", e.target.value)} />
       </section>
 
       <section className="mt-10">
