@@ -1,3 +1,4 @@
+import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,7 +87,7 @@ function DirectorDetail() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 border-b border-border pb-4">
-        <Link to="/directors" className="smallcaps text-xs text-muted-foreground hover:underline">← Directores</Link>
+        <PageCrumb label={d.full_name} />
         <h1 className="mt-1 font-display text-4xl">{d.full_name}</h1>
       </div>
 

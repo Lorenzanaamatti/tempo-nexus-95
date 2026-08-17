@@ -1,3 +1,4 @@
+import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -117,7 +118,7 @@ function PersonEdit() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
-          <Link to="/people" className="smallcaps text-xs text-muted-foreground hover:underline">← Personas</Link>
+          <PageCrumb label={p?.full_name} />
           <h1 className="mt-1 flex items-center gap-3 font-display text-4xl">
             {form.full_name || "—"}
             {data.is_virtual_assistant && (

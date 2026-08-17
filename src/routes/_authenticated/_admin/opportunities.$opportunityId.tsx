@@ -1,3 +1,4 @@
+import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -187,7 +188,7 @@ function OpportunityDetail() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
-          <Link to="/opportunities" className="smallcaps text-xs text-muted-foreground hover:underline">← Oportunidades</Link>
+          <PageCrumb label={form.title} />
           <h1 className="mt-1 font-display text-4xl">{form.title || "—"}</h1>
         </div>
         <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
