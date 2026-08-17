@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Receipt, BarChart3 } from "lucide-react";
+import { Receipt, BarChart3, FileText } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,6 +66,39 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
       return data ?? [];
     },
   });
+
+  const dealMemosQ = useQuery({
+    queryKey: ["finance-deal-memos"],
+    enabled: !composerId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("deal_memos")
+        .select("id, referencia, obra, estado, importe_propuesto, moneda, created_at, fecha_envio")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const dealMemos = (dealMemosQ.data ?? []) as Array<{
+    id: string; referencia: string; obra: string; estado: string;
+    importe_propuesto: number | null; created_at: string; fecha_envio: string | null;
+  }>;
+
+  const dmTotals = useMemo(() => {
+    const openStates = new Set(["borrador", "generando", "revision_interna", "corrigiendo", "revision_final"]);
+    const sentStates = new Set(["enviado", "respondido"]);
+    const acc = { total: 0, enCurso: 0, enviado: 0, cerrado: 0 };
+    for (const d of dealMemos) {
+      const a = Number(d.importe_propuesto) || 0;
+      if (d.estado === "cancelado") continue;
+      acc.total += a;
+      if (openStates.has(d.estado)) acc.enCurso += a;
+      else if (sentStates.has(d.estado)) acc.enviado += a;
+      else if (d.estado === "cerrado") acc.cerrado += a;
+    }
+    return acc;
+  }, [dealMemos]);
 
   const budgets = useMemo(() => {
     const list = (productionsQ.data ?? []) as any[];
@@ -231,6 +264,46 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
         <KPI label="Cobrado" value={formatEUR(totals.cobrado)} accent="success" />
         <KPI label="Vencido sin facturar" value={formatEUR(overdueTotal)} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
       </div>
+
+      {!composerId && (
+        <section className="space-y-2">
+          <h3 className="font-display text-xl">Presupuestos (deal memos)</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <KPI label="Total propuesto" value={formatEUR(dmTotals.total)} accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
+            <KPI label="En preparación / revisión" value={formatEUR(dmTotals.enCurso)} accent="muted" />
+            <KPI label="Enviados" value={formatEUR(dmTotals.enviado)} accent="warn" />
+            <KPI label="Cerrados" value={formatEUR(dmTotals.cerrado)} accent="success" />
+          </div>
+          {dealMemos.length === 0 ? (
+            <EmptyState variant="inline" icon={FileText} title="Sin presupuestos" description="Los deal memos que crees aparecerán aquí con su importe propuesto." />
+          ) : (
+            <div className="overflow-x-auto rounded-sm border border-border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2">Referencia</th>
+                    <th className="px-3 py-2">Obra</th>
+                    <th className="px-3 py-2">Estado</th>
+                    <th className="px-3 py-2">Fecha</th>
+                    <th className="px-3 py-2 text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dealMemos.map((d) => (
+                    <tr key={d.id} className="border-t border-border">
+                      <td className="px-3 py-2 font-mono text-xs">{d.referencia}</td>
+                      <td className="px-3 py-2">{d.obra}</td>
+                      <td className="px-3 py-2 text-xs uppercase text-muted-foreground">{d.estado.replace(/_/g, " ")}</td>
+                      <td className="px-3 py-2 tabular-nums">{formatDateEs(d.fecha_envio ?? d.created_at)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{formatEUR(d.importe_propuesto)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="overflow-x-auto rounded-sm border border-border">
         <table className="min-w-full text-sm">
