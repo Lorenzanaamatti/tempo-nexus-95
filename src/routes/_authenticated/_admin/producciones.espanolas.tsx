@@ -603,6 +603,14 @@ function FilmCard({ row, onEdit }: { row: ProduccionEspanola; onEdit: () => void
           {row.ic_participo && (
             <Badge className="rounded-sm bg-emerald-600 text-[10px] text-white hover:bg-emerald-600">IC participó</Badge>
           )}
+          {row.origen && row.origen !== "tmdb" && (
+            <Badge variant="outline" className="rounded-sm text-[10px]">
+              {row.origen === "produccion_ic" ? "Producción IC" : "Oportunidad"}
+            </Badge>
+          )}
+          {(row.ic_personas ?? []).map((p) => (
+            <Badge key={p} variant="outline" className="rounded-sm border-emerald-600 text-[10px] text-emerald-700">{p}</Badge>
+          ))}
           {seguimiento && (
             <Badge variant="outline" className="rounded-sm text-[10px]">En seguimiento</Badge>
           )}
