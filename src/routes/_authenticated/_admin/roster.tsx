@@ -32,6 +32,7 @@ function fmtDate(d: string | null | undefined) {
 
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
+  const [onlyIncomplete, setOnlyIncomplete] = usePersistedState("roster-all:incomplete", false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v2"],
@@ -79,8 +80,17 @@ function RosterAll() {
       .map((c) => ({ ...c, open: openByComposer.get(c.id) ?? 0 }));
   }, [data, term]);
 
-  const actual = rows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
-  const prospeccion = rows.filter((c) => c.representation_status === "en_negociacion");
+  const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
+    variant === "active"
+      ? !c.representation_start_date || !c.renewal_date
+      : !c.prospect_next_action_date || !c.prospect_target_date;
+
+  const actualAll = rows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
+  const prospeccionAll = rows.filter((c) => c.representation_status === "en_negociacion");
+  const actual = onlyIncomplete ? actualAll.filter((c) => isIncomplete(c, "active")) : actualAll;
+  const prospeccion = onlyIncomplete ? prospeccionAll.filter((c) => isIncomplete(c, "prospect")) : prospeccionAll;
+  const actualMissing = actualAll.filter((c) => isIncomplete(c, "active")).length;
+  const prospeccionMissing = prospeccionAll.filter((c) => isIncomplete(c, "prospect")).length;
   const objetivo = (data?.targets ?? []).filter((t) => !term || t.name.toLowerCase().includes(term));
 
   const filmografia = useMemo(() => {
@@ -138,13 +148,30 @@ function RosterAll() {
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Estos son nuestros clientes y clientas seleccionados según su sector de actividad profesional.
           </p>
+          <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+            «Pendiente» en una fecha significa que el dato falta por completar en la ficha del representado, no que no exista contrato.
+          </p>
         </div>
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nombre…"
-          className="w-72 rounded-sm"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setOnlyIncomplete(!onlyIncomplete)}
+            aria-pressed={onlyIncomplete}
+            className={
+              onlyIncomplete
+                ? "smallcaps rounded-sm bg-primary px-3 py-2 text-xs text-primary-foreground"
+                : "smallcaps rounded-sm border border-border px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
+            }
+          >
+            Solo incompletas
+          </button>
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre…"
+            className="w-72 rounded-sm"
+          />
+        </div>
       </div>
 
       {error ? (
@@ -153,8 +180,8 @@ function RosterAll() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-14">
-          <RosterSection title="Roster actual" rows={actual} variant="active" />
-          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" />
+          <RosterSection title="Roster actual" rows={actual} variant="active" missing={actualMissing} />
+          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" missing={prospeccionMissing} />
 
           <section>
             <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl title-caps">Roster objetivo</h2>
@@ -242,12 +269,29 @@ type Row = {
   open: number;
 };
 
-function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; variant: "active" | "prospect" }) {
+function DateCell({ value, composerId }: { value: string | null; composerId: string }) {
+  if (value) return <>{value}</>;
+  return (
+    <Link
+      to="/composers/$composerId"
+      params={{ composerId }}
+      className="smallcaps rounded-sm border border-dashed border-border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:border-primary hover:text-primary"
+      title="Dato por completar en la ficha"
+    >
+      Pendiente
+    </Link>
+  );
+}
+
+function RosterSection({ title, rows, variant, missing = 0 }: { title: string; rows: Row[]; variant: "active" | "prospect"; missing?: number }) {
   return (
     <section>
       <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
         <h2 className="font-display text-3xl title-caps">{title}</h2>
-        <span className="font-mono text-xs text-muted-foreground">{rows.length}</span>
+        <span className="flex items-center gap-3 font-mono text-xs text-muted-foreground">
+          {missing > 0 && <span className="smallcaps">{missing} sin fechas</span>}
+          <span>{rows.length}</span>
+        </span>
       </div>
       {!rows.length ? (
         <EmptyState icon={Users} title="Sin fichas en esta categoría" description="Crea una ficha nueva o revisa las otras categorías del roster." action={{ label: "Añadir ficha", to: "/composers/new" }} />
@@ -297,13 +341,21 @@ function RosterSection({ title, rows, variant }: { title: string; rows: Row[]; v
                   </td>
                   {variant === "prospect" ? (
                     <>
-                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_next_action_date)}</td>
-                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.prospect_target_date)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        <DateCell value={c.prospect_next_action_date ? fmtDate(c.prospect_next_action_date) : null} composerId={c.id} />
+                      </td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        <DateCell value={c.prospect_target_date ? fmtDate(c.prospect_target_date) : null} composerId={c.id} />
+                      </td>
                     </>
                   ) : (
                     <>
-                      <td className="px-3 py-2 font-mono text-xs">{year(c.representation_start_date) ?? "—"}</td>
-                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(c.renewal_date)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        <DateCell value={year(c.representation_start_date)?.toString() ?? null} composerId={c.id} />
+                      </td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        <DateCell value={c.renewal_date ? fmtDate(c.renewal_date) : null} composerId={c.id} />
+                      </td>
                     </>
                   )}
                   <td className="px-3 py-2 font-mono text-xs">{c.open}</td>
