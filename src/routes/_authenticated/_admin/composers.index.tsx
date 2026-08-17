@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { formatLocation, matchesLocation } from "@/lib/geo";
 import { usePersistedState } from "@/lib/use-persisted-filters";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -112,7 +113,7 @@ function ComposersIndex() {
   const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
   const [viewMode, setViewMode] = usePersistedState<"list" | "cards">("roster.viewMode", "list");
   const { data, isLoading } = useQuery({
-    queryKey: ["composers", "roster", genero, pais, ciudad, q],
+    queryKey: ["composers", "roster", genero, q],
     queryFn: async () => {
       let query = supabase
         .from("composers")
@@ -122,8 +123,6 @@ function ComposersIndex() {
         .neq("roster_role", "ic_company")
         .order("full_name", { ascending: true });
       if (genero) query = query.eq("genero", genero);
-      if (pais) query = query.eq("pais_origen", pais);
-      if (ciudad) query = query.ilike("ciudad_origen", `%${ciudad}%`);
       if (q.trim()) {
         const term = q.trim().replace(/[%,]/g, " ");
         const like = `%${term}%`;
@@ -137,15 +136,20 @@ function ComposersIndex() {
     },
   });
 
-  const base = (data ?? []) as any[];
+  const raw = (data ?? []) as any[];
+  // El área geográfica combina residencia (city/country) y origen (ciudad_origen/pais_origen).
+  const base = raw.filter(
+    (c) =>
+      matchesLocation(pais, c.country, c.pais_origen) && matchesLocation(ciudad, c.city, c.ciudad_origen),
+  );
   const roleCounts = ROLE_TABS.reduce<Record<string, number>>((acc, t) => {
     acc[t.value] = t.value === "todos" ? base.length : base.filter((c) => c.roster_role === t.value).length;
     return acc;
   }, {});
   const byRole = role === "todos" ? base : base.filter((c) => c.roster_role === role);
-  const paises = [...new Set(base.map((c) => (c.pais_origen ?? "").trim()).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, "es"),
-  );
+  const paises = [
+    ...new Set(raw.flatMap((c) => [c.country, c.pais_origen]).map((p) => (p ?? "").trim()).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b, "es"));
   const activeFilters = [
     role !== "todos" ? { key: "role", label: ROLE_TABS.find((t) => t.value === role)?.label ?? role } : null,
     genero ? { key: "genero", label: GENERO_LABEL[genero] ?? genero } : null,
@@ -355,25 +359,23 @@ function ComposersIndex() {
           <input
             list="roster-paises"
             value={pais}
-            onChange={(e) => setSearch({ pais: e.target.value || undefined, ciudad: undefined })}
+            onChange={(e) => setSearch({ pais: e.target.value || undefined })}
             placeholder="Todos los países"
             className="h-9 w-48 rounded-sm border border-border bg-background px-2 text-xs"
-            aria-label="Filtrar por país de origen"
+            aria-label="Filtrar por país (residencia u origen)"
           />
           <datalist id="roster-paises">
             {paises.map((p) => (
               <option key={p} value={p} />
             ))}
           </datalist>
-          {pais && (
-            <input
-              value={ciudad}
-              onChange={(e) => setSearch({ ciudad: e.target.value || undefined })}
-              placeholder="Ciudad de origen"
-              className="h-9 w-40 rounded-sm border border-border bg-background px-2 text-xs"
-              aria-label="Filtrar por ciudad de origen"
-            />
-          )}
+          <input
+            value={ciudad}
+            onChange={(e) => setSearch({ ciudad: e.target.value || undefined })}
+            placeholder="Ciudad"
+            className="h-9 w-40 rounded-sm border border-border bg-background px-2 text-xs"
+            aria-label="Filtrar por ciudad (residencia u origen)"
+          />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -505,7 +507,7 @@ function ComposersIndex() {
                       <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
                       <Badge variant="outline" className="shrink-0 rounded-sm font-mono">{c.tier ?? "—"}</Badge>
                     </div>
-                    <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+                    <p className="min-h-[1rem] text-xs text-muted-foreground">{formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "\u00A0"}</p>
                     <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
                       {(c.tags ?? []).slice(0, 4).map((t: string) => (
                         <Badge key={t} variant="outline" className="rounded-sm">{t}</Badge>
@@ -580,7 +582,7 @@ function RosterList({ items, role }: { items: any[]; role: RosterRole }) {
                   <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{c.tier ?? "—"}</td>
                 )}
                 <td className="hidden px-3 py-2 text-xs text-muted-foreground sm:table-cell">
-                  {[c.city, c.country].filter(Boolean).join(" · ") || "—"}
+                  {formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "—"}
                 </td>
                 <td className="hidden px-3 py-2 md:table-cell">
                   <div className="flex flex-wrap gap-1">
@@ -644,7 +646,7 @@ function SpecialistCard({ c, role }: { c: any; role: RosterRole }) {
             </div>
           )}
           <h3 className="font-display text-2xl leading-tight">{c.full_name}</h3>
-          <p className="min-h-[1rem] text-xs text-muted-foreground">{[c.city, c.country].filter(Boolean).join(" · ") || "\u00A0"}</p>
+          <p className="min-h-[1rem] text-xs text-muted-foreground">{formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "\u00A0"}</p>
           {role !== "specialist" && (
             <div className="mt-3 flex min-h-[1.5rem] flex-wrap gap-1.5">
               {tags.slice(0, 4).map((t) => (

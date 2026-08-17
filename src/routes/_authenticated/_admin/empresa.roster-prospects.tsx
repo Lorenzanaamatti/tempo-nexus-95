@@ -12,6 +12,7 @@ import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { formatDateEs } from "@/lib/dates";
 import { useCurrentRole } from "@/lib/use-role";
+import { formatLocation, matchesLocation } from "@/lib/geo";
 import {
   ROSTER_PROSPECT_ESTADOS,
   ROSTER_PROSPECT_ESTADO_LABEL,
@@ -32,6 +33,9 @@ function RosterProspectsPage() {
   const [fecha, setFecha] = useState(today());
   const [estado, setEstado] = useState<RosterProspectEstado>("contactado");
   const [notas, setNotas] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [pais, setPais] = useState("");
+  const [locFilter, setLocFilter] = useState("");
   const [saving, setSaving] = useState(false);
 
   const { data: rows, isLoading } = useQuery({
@@ -46,6 +50,8 @@ function RosterProspectsPage() {
       return (data ?? []) as any[];
     },
   });
+
+  const filtered = (rows ?? []).filter((r: any) => matchesLocation(locFilter, r.ciudad, r.pais));
 
   if (loading) return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
   if (!isBigC) {
@@ -63,11 +69,13 @@ function RosterProspectsPage() {
       nombre: nombre.trim(),
       fecha_primer_contacto: fecha || today(),
       estado,
+      ciudad: ciudad.trim() || null,
+      pais: pais.trim() || null,
       notas: notas.trim() || null,
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    setNombre(""); setNotas(""); setEstado("contactado"); setFecha(today());
+    setNombre(""); setNotas(""); setCiudad(""); setPais(""); setEstado("contactado"); setFecha(today());
     qc.invalidateQueries({ queryKey: ["roster-prospects"] });
     qc.invalidateQueries({ queryKey: ["empresa-kpis"] });
     toast.success("Prospect añadido");
@@ -95,8 +103,10 @@ function RosterProspectsPage() {
         </Button>
       </div>
 
-      <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[2fr_1fr_1.2fr_2fr_auto]">
+      <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[2fr_1fr_1fr_1fr_1.2fr_2fr_auto]">
         <Input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        <Input placeholder="Ciudad" value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
+        <Input placeholder="País" value={pais} onChange={(e) => setPais(e.target.value)} />
         <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         <Select value={estado} onValueChange={(v) => setEstado(v as RosterProspectEstado)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
@@ -110,9 +120,22 @@ function RosterProspectsPage() {
         <Button onClick={create} disabled={saving}><Plus className="mr-1 h-4 w-4" /> Añadir</Button>
       </div>
 
+      <div className="mb-4 flex items-center gap-2">
+        <Input
+          className="h-9 w-64"
+          placeholder="Filtrar por ubicación…"
+          aria-label="Filtrar por área geográfica"
+          value={locFilter}
+          onChange={(e) => setLocFilter(e.target.value)}
+        />
+        {locFilter && (
+          <Button variant="ghost" size="sm" onClick={() => setLocFilter("")}>Limpiar</Button>
+        )}
+      </div>
+
       {isLoading ? (
         <ListSkeleton rows={5} />
-      ) : !rows?.length ? (
+      ) : !filtered.length ? (
         <EmptyState icon={UserPlus} title="Sin prospects" description="Añade el primer candidato para empezar a medir el embudo de fichajes." />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
@@ -120,6 +143,7 @@ function RosterProspectsPage() {
             <thead className="bg-muted/30 text-left">
               <tr>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Nombre</th>
+                <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Ubicación</th>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Primer contacto</th>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Estado</th>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Decisión</th>
@@ -128,9 +152,30 @@ function RosterProspectsPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {filtered.map((r) => (
                 <tr key={r.id} className="border-t border-border align-top">
-                  <td className="px-3 py-2 font-display">{r.nombre}</td>
+                  <td className="px-3 py-2 font-display">
+                    {r.nombre}
+                    <span className="block text-xs font-sans text-muted-foreground">
+                      {formatLocation(r.ciudad, r.pais) || "Sin ubicación"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex gap-1">
+                      <Input
+                        className="h-8 w-28"
+                        placeholder="Ciudad"
+                        defaultValue={r.ciudad ?? ""}
+                        onBlur={(e) => patch(r.id, { ciudad: e.target.value || null })}
+                      />
+                      <Input
+                        className="h-8 w-28"
+                        placeholder="País"
+                        defaultValue={r.pais ?? ""}
+                        onBlur={(e) => patch(r.id, { pais: e.target.value || null })}
+                      />
+                    </div>
+                  </td>
                   <td className="px-3 py-2 whitespace-nowrap">{formatDateEs(r.fecha_primer_contacto)}</td>
                   <td className="px-3 py-2">
                     <Select value={r.estado} onValueChange={(v) => patch(r.id, { estado: v })}>

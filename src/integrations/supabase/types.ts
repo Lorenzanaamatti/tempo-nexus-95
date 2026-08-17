@@ -4764,6 +4764,7 @@ export type Database = {
       }
       roster_prospects: {
         Row: {
+          ciudad: string | null
           created_at: string
           estado: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision: string | null
@@ -4771,9 +4772,11 @@ export type Database = {
           id: string
           nombre: string
           notas: string | null
+          pais: string | null
           updated_at: string
         }
         Insert: {
+          ciudad?: string | null
           created_at?: string
           estado?: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision?: string | null
@@ -4781,9 +4784,11 @@ export type Database = {
           id?: string
           nombre: string
           notas?: string | null
+          pais?: string | null
           updated_at?: string
         }
         Update: {
+          ciudad?: string | null
           created_at?: string
           estado?: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision?: string | null
@@ -4791,6 +4796,7 @@ export type Database = {
           id?: string
           nombre?: string
           notas?: string | null
+          pais?: string | null
           updated_at?: string
         }
         Relationships: []

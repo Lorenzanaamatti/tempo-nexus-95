@@ -8,6 +8,7 @@ import { ComposerThumb } from "@/components/composer-thumb";
 import { ListSkeleton, EmptyState, ErrorState } from "@/components/list-states";
 import { usePersistedState } from "@/lib/use-persisted-filters";
 import { isOpenProduction } from "@/lib/production-progress";
+import { formatLocation, matchesLocation } from "@/lib/geo";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -24,6 +25,7 @@ function fmtDate(d: string | null | undefined) {
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
   const [onlyIncomplete, setOnlyIncomplete] = usePersistedState("roster-all:incomplete", false);
+  const [loc, setLoc] = usePersistedState("roster-all:loc", "");
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v2"],
@@ -32,7 +34,7 @@ function RosterAll() {
         supabase
           .from("composers")
           .select(
-            "id, full_name, artistic_name, city, country, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
+            "id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
           )
           .order("full_name"),
         supabase
@@ -65,6 +67,7 @@ function RosterAll() {
   });
 
   const term = q.trim().toLowerCase();
+  const locTerm = loc.trim();
 
   const rows = useMemo(() => {
     const list = (data?.composers ?? []).filter((c) => c.roster_role !== "ic_company");
@@ -91,8 +94,9 @@ function RosterAll() {
     }
     return list
       .filter((c) => !term || (c.full_name ?? "").toLowerCase().includes(term) || (c.artistic_name ?? "").toLowerCase().includes(term))
+      .filter((c) => matchesLocation(locTerm, (c as any).city, (c as any).country, (c as any).ciudad_origen, (c as any).pais_origen))
       .map((c) => ({ ...c, open: openIdsByComposer.get(c.id)?.size ?? 0 }));
-  }, [data, term]);
+  }, [data, term, locTerm]);
 
   const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
     variant === "active"
@@ -180,6 +184,13 @@ function RosterAll() {
             Solo incompletas
           </button>
           <Input
+            value={loc}
+            onChange={(e) => setLoc(e.target.value)}
+            placeholder="Filtrar por ubicación…"
+            aria-label="Filtrar por área geográfica"
+            className="w-56 rounded-sm"
+          />
+          <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar por nombre…"
@@ -254,6 +265,8 @@ type Row = {
   artistic_name: string | null;
   city: string | null;
   country: string | null;
+  ciudad_origen?: string | null;
+  pais_origen?: string | null;
   photo_path: string | null;
   representation_start_date: string | null;
   renewal_date: string | null;
@@ -327,7 +340,7 @@ function RosterSection({ title, rows, variant, missing = 0 }: { title: string; r
                       <span className="min-w-0">
                         <span className="block font-display text-base leading-tight hover:text-primary">{c.full_name}</span>
                         <span className="block truncate text-xs text-muted-foreground">
-                          {[c.city, c.country].filter(Boolean).join(" · ") || "—"}
+                          {formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "—"}
                         </span>
                       </span>
                     </Link>
