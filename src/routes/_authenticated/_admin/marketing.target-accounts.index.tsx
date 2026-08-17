@@ -166,7 +166,7 @@ function TargetAccountsIndex() {
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Marketing y Ventas</p>
-          <h1 className="mt-1 font-display text-5xl">Cuentas objetivo</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">Cuentas objetivo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Empresas, plataformas y marcas en las que IC quiere entrar. Cada cuenta tiene estado, responsable interno y próximo paso. Cuando aparece un encargo concreto, se convierte en una Oportunidad.
           </p>

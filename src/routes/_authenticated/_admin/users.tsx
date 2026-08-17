@@ -40,7 +40,7 @@ function UsersPage() {
     return (
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="smallcaps text-muted-foreground">Acceso restringido</p>
-        <h1 className="mt-2 font-display text-4xl">Solo BIG C</h1>
+        <h1 className="mt-2 font-display text-4xl title-caps">Solo BIG C</h1>
       </div>
     );
   }
@@ -64,7 +64,7 @@ function UsersPage() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8 border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Acceso</p>
-        <h1 className="font-display text-5xl">Usuarios y permisos</h1>
+        <h1 className="font-display text-5xl title-caps">Usuarios y permisos</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Aprueba nuevas solicitudes y asigna roles. Tres niveles disponibles:{" "}
           <strong>BIG C</strong> (todo), <strong>TEAM</strong> (todo menos económico) y{" "}

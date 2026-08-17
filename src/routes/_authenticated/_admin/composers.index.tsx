@@ -146,7 +146,7 @@ function ComposersIndex() {
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
-          <h1 className="mt-1 font-display text-5xl">{meta.title}</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">{meta.title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{meta.intro}</p>
           {role === "specialist" && (
             <div className="mt-4 space-y-3">
@@ -242,7 +242,7 @@ function ComposersIndex() {
               <section key={tag}>
                 <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-3">
                   <div className="flex items-baseline gap-3">
-                    <h2 className="font-display text-3xl">#{tag}</h2>
+                    <h2 className="font-display text-3xl title-caps">#{tag}</h2>
                     <span className="smallcaps text-muted-foreground">{items.length}</span>
                   </div>
                 </div>
@@ -269,7 +269,7 @@ function ComposersIndex() {
             <section key={tier}>
               <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-3">
                 <div className="flex items-baseline gap-3">
-                  <h2 className="font-display text-3xl">{TIER_LABEL[tier]}</h2>
+                  <h2 className="font-display text-3xl title-caps">{TIER_LABEL[tier]}</h2>
                   <span className="smallcaps text-muted-foreground">{items.length}</span>
                 </div>
                 <p className="hidden max-w-md text-right text-xs text-muted-foreground sm:block">{TIER_HINT[tier]}</p>

@@ -65,7 +65,7 @@ function AgentActionsPage() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 border-b border-border pb-4">
-        <h1 className="flex items-center gap-3 font-display text-4xl">
+        <h1 className="flex items-center gap-3 font-display text-4xl title-caps">
           <Sparkles className="h-7 w-7 text-primary" />
           Acciones de agentes
         </h1>

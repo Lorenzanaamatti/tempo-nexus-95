@@ -31,6 +31,10 @@ import type { TaskArea } from "@/lib/task-areas";
 import { setSessionView, type SessionView, SESSION_VIEW_LABEL } from "@/lib/session-view";
 import { RefreshCw, Home as HomeIcon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { NAV_GROUPS, isItemActive, findNavLocation, type NavGroup, type NavItem } from "@/lib/nav-tree";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessionView?: SessionView | null }) {
   const { state } = useSidebar();
@@ -76,94 +80,16 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
     },
   });
 
-  const composerActive = pathname.startsWith("/composers");
-  const composersRole = composerActive ? (search?.role ?? "composer") : null;
-
-  type NavItem = {
-    title: string;
-    to: string;
-    search?: Record<string, string>;
-    icon: typeof Music;
-    active: boolean;
-  };
-  // 1. ROSTER
-  const rosterItems: NavItem[] = [
-    { title: "Roster completo", to: "/roster", icon: LibraryBig, active: pathname.startsWith("/roster") },
-    { title: "Compositores",        to: "/composers", search: { role: "composer" },   icon: Music,            active: composersRole === "composer" },
-    { title: "Artistas",            to: "/composers", search: { role: "artist" },     icon: Mic2,             active: composersRole === "artist" },
-    { title: "Supervisores musicales", to: "/composers", search: { role: "supervisor" }, icon: Headphones,    active: composersRole === "supervisor" },
-    { title: "Especialistas",       to: "/composers", search: { role: "specialist" }, icon: Sparkles,         active: composersRole === "specialist" },
-    { title: "Curadores musicales", to: "/composers", search: { role: "curator" },    icon: ListMusic,        active: composersRole === "curator" },
-    { title: "Interesante Compañía", to: "/ic", icon: Building2,                       active: pathname.startsWith("/ic") },
-  ];
-
-  // 2. PARTNERS
-  const partnersItems: NavItem[] = [
-    { title: "Productoras", to: "/production-companies", icon: Building2, active: pathname.startsWith("/production-companies") },
-    { title: "Plataformas", to: "/platforms", icon: Tv, active: pathname.startsWith("/platforms") },
-    { title: "Directores", to: "/directors", icon: Clapperboard, active: pathname.startsWith("/directors") },
-    { title: "Otros partners", to: "/providers", icon: Briefcase, active: pathname.startsWith("/providers") },
-  ];
-
-  // 3. OPORTUNIDADES
-  const opportunitiesItems: NavItem[] = [
-    { title: "Oportunidades", to: "/opportunities", icon: Target, active: pathname.startsWith("/opportunities") },
-    { title: "Cuentas objetivo", to: "/marketing/target-accounts", icon: Crosshair, active: pathname.startsWith("/marketing/target-accounts") },
-    { title: "Candidaturas", to: "/candidacies", icon: Inbox, active: pathname.startsWith("/candidacies") },
-  ];
-
-  // 4. EMPRESA
-  const empresaItems: NavItem[] = [
-    { title: "Producciones en curso", to: "/productions", icon: Film, active: pathname.startsWith("/productions") },
-    { title: "Dashboard económico", to: "/finance", icon: LineChart, active: pathname.startsWith("/finance") || pathname.startsWith("/budget") },
-    { title: "Pipeline de facturación", to: "/billing", icon: Receipt, active: pathname.startsWith("/billing") },
-  ];
-
-  // 5. LEGAL
-  const legalItems: NavItem[] = [
-    { title: "Templates contrato", to: "/legal/templates-contrato", icon: ScrollText, active: pathname.startsWith("/legal/templates-contrato") },
-    { title: "Templates deal memo", to: "/legal/templates-deal-memo", icon: FileSignature, active: pathname.startsWith("/legal/templates-deal-memo") },
-    { title: "Templates presupuesto", to: "/legal/templates-presupuesto", icon: Receipt, active: pathname.startsWith("/legal/templates-presupuesto") },
-    { title: "Deal memos", to: "/deal-memos", icon: KanbanSquare, active: pathname === "/deal-memos" || pathname.startsWith("/deal-memos/lista") || pathname.startsWith("/deal-memos/configuracion") },
-    { title: "Personal · Equipo IC", to: "/people", icon: Users, active: pathname.startsWith("/people") },
-    { title: "Personal IA · Equipo agentes IC", to: "/agent-actions", icon: Sparkles, active: pathname.startsWith("/agent-actions") },
-    { title: "Contratos firmados", to: "/legal/contratos-firmados", icon: FileSignature, active: pathname.startsWith("/legal/contratos-firmados") || pathname.startsWith("/contracts") },
-  ];
-
-  // 6. MKTG
-  const marketingItems: NavItem[] = [
-    { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette, active: pathname.startsWith("/marketing/brand") },
-    { title: "Ventas", to: "/marketing/ventas", icon: Presentation, active: pathname.startsWith("/marketing/ventas") },
-    { title: "Comunicación", to: "/marketing/comunicacion", icon: Share2, active: pathname.startsWith("/marketing/comunicacion") },
-    { title: "Templates", to: "/marketing/templates", icon: Mail, active: pathname.startsWith("/marketing/templates") },
-  ];
-
-  // 7. CALENDARIOS — una sola entrada; las vistas se eligen dentro de /calendar
-  const calendarItems: NavItem[] = [
-    { title: "Calendarios", to: "/calendar", icon: CalendarDays, active: pathname.startsWith("/calendar") },
-  ];
-
-  const adminGroups: { label: string; icon: typeof Music; items: NavItem[] }[] = [
-    { label: "Clientes",      icon: LibraryBig,  items: rosterItems },
-    { label: "Partners",      icon: Handshake,   items: partnersItems },
-    { label: "Oportunidades", icon: Target,      items: opportunitiesItems },
-    { label: "Empresa",       icon: Wallet,      items: empresaItems },
-    { label: "Legal",         icon: Scale,       items: legalItems },
-    { label: "Marketing",     icon: Megaphone,   items: marketingItems },
-    { label: "Calendarios",   icon: CalendarDays, items: calendarItems },
-  ];
-
-  // In TEAM view, hide the pure-admin surfaces: Económico dashboard, agentes IA,
-  // "Usuarios y permisos" no aparece aquí (vive en /users). Deja el resto operativo.
-  const teamGroups = adminGroups
-    .filter((g) => g.label !== "Empresa")
+  const groups = NAV_GROUPS
+    .filter((g) => !(g.bigCOnly && isTeamView))
     .map((g) =>
-      g.label === "Legal"
+      isTeamView && g.label === "Legal"
         ? { ...g, items: g.items.filter((i) => i.to !== "/agent-actions") }
         : g,
     );
 
-  const visibleAdminGroups = isTeamView ? teamGroups : adminGroups;
+  const visibleAdminGroups = groups;
+
 
   return (
     <Sidebar collapsible="icon">
@@ -218,37 +144,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               </SidebarGroupContent>
             </SidebarGroup>
             {visibleAdminGroups.map((group) => (
-              <SidebarGroup key={group.label}>
-                {!collapsed && (
-                  <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]">
-                    <group.icon className="h-3 w-3" />
-                    <span className="flex-1">{group.label}</span>
-                  </SidebarGroupLabel>
-                )}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={item.active}>
-                          <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                            <item.icon className="h-4 w-4" />
-                            {!collapsed && (
-                              <span className="flex flex-1 items-center justify-between gap-2">
-                                <span>{item.title}</span>
-                                {item.to === "/agent-actions" && (pendingAgentActions ?? 0) > 0 && (
-                                  <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
-                                    {pendingAgentActions}
-                                  </span>
-                                )}
-                              </span>
-                            )}
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+              <NavGroupSection
+                key={group.label}
+                group={group}
+                collapsed={collapsed}
+                pathname={pathname}
+                search={search}
+                pendingAgentActions={pendingAgentActions ?? 0}
+              />
             ))}
           </>
         ) : (
@@ -355,5 +258,111 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+const OPEN_KEY = "ic:sidebar-open-groups";
+
+function readOpenGroups(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(OPEN_KEY) ?? "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+function NavGroupSection({
+  group,
+  collapsed,
+  pathname,
+  search,
+  pendingAgentActions,
+}: {
+  group: NavGroup;
+  collapsed: boolean;
+  pathname: string;
+  search: { role?: string };
+  pendingAgentActions: number;
+}) {
+  const active = findNavLocation(pathname, search)?.group.label === group.label;
+  const [open, setOpen] = useState(active);
+
+  // Abre automáticamente el grupo de la ruta actual; el resto recuerda su estado.
+  useEffect(() => {
+    if (active) {
+      setOpen(true);
+      return;
+    }
+    setOpen(readOpenGroups()[group.label] ?? false);
+  }, [active, group.label]);
+
+  function toggle(next: boolean) {
+    setOpen(next);
+    if (typeof window === "undefined") return;
+    const stored = readOpenGroups();
+    stored[group.label] = next;
+    try {
+      window.localStorage.setItem(OPEN_KEY, JSON.stringify(stored));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }
+
+  if (collapsed) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {group.items.map((item: NavItem) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)} tooltip={item.title}>
+                  <Link to={item.to} search={item.search as never}>
+                    <item.icon className="h-4 w-4" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    );
+  }
+
+  return (
+    <Collapsible open={open} onOpenChange={toggle}>
+      <SidebarGroup>
+        <CollapsibleTrigger className="w-full">
+          <SidebarGroupLabel className="flex w-full items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] hover:text-sidebar-accent-foreground">
+            <group.icon className="h-3 w-3" />
+            <span className="flex-1 text-left">{group.label}</span>
+            <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
+          </SidebarGroupLabel>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {group.items.map((item: NavItem) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)}>
+                    <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span className="flex flex-1 items-center justify-between gap-2">
+                        <span>{item.title}</span>
+                        {item.to === "/agent-actions" && pendingAgentActions > 0 && (
+                          <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+                            {pendingAgentActions}
+                          </span>
+                        )}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
   );
 }

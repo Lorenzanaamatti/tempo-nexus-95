@@ -47,7 +47,7 @@ function FinancePage() {
     return (
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="smallcaps text-muted-foreground">Acceso restringido</p>
-        <h1 className="mt-2 font-display text-4xl">Solo BIG C</h1>
+        <h1 className="mt-2 font-display text-4xl title-caps">Solo BIG C</h1>
         <p className="mt-3 text-sm text-muted-foreground">
           El módulo económico contiene datos financieros sensibles y solo está disponible para usuarios con rol BIG C.
         </p>
@@ -67,7 +67,7 @@ function FinancePage() {
     <div className="mx-auto max-w-6xl px-6 py-10">
       <header className="mb-8">
         <p className="smallcaps text-muted-foreground">{eyebrow}</p>
-        <h1 className="font-display text-5xl">{title}</h1>
+        <h1 className="font-display text-5xl title-caps">{title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </header>
 

@@ -1,3 +1,4 @@
+import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -286,6 +287,7 @@ function Inner({
         </div>
       </div>
 
+      <PageCrumb label={c.artistic_name ?? c.full_name} />
       <header className="mb-10 border-b border-border pb-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>

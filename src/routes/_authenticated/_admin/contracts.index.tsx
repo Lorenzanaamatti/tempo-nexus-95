@@ -103,7 +103,7 @@ function ContractsIndex() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Repositorio</p>
-          <h1 className="mt-1 font-display text-5xl">CONTRATOS</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">Contratos</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Todos los contratos asociados a IC. Ordena por tipo, firmante, fechas, estado de firma o idioma.
           </p>

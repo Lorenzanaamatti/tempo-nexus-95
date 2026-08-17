@@ -102,7 +102,7 @@ function TareasPage() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="smallcaps text-muted-foreground">Tareas</p>
-          <h1 className="font-display text-4xl">Qué hay que hacer</h1>
+          <h1 className="font-display text-4xl title-caps">Qué hay que hacer</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Área, responsable, fecha de entrada, fecha de entrega y estado en una sola lista.
           </p>

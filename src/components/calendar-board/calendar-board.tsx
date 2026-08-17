@@ -136,7 +136,7 @@ export function CalendarBoard({
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <div className="mb-1">{eyebrow ?? <BrandLogo variant="auto" className="h-5 w-auto" />}</div>
-          <h1 className="mt-1 font-display text-5xl">{title}</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">{title}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             {description ?? (
               <>

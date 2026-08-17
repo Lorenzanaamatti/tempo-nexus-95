@@ -12,7 +12,7 @@ function DealMemosLayout() {
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5">
           <div>
             <p className="smallcaps text-[10px] tracking-wider text-muted-foreground">Interesante Compañía SL</p>
-            <h1 className="mt-0.5 font-display text-3xl">Deal Memos</h1>
+            <h1 className="mt-0.5 font-display text-3xl title-caps">Deal Memos</h1>
           </div>
         </div>
       </header>

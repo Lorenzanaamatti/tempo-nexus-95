@@ -164,7 +164,7 @@ function CandidaciesIndex() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Oportunidades</p>
-          <h1 className="mt-1 font-display text-5xl">CANDIDATURAS</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">CANDIDATURAS</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Solicitudes recibidas de compositores y respuestas a job posts publicados en redes.
           </p>
