@@ -254,7 +254,7 @@ function KpisPage() {
               </div>
               <Panel
                 title={`Prospects de fichaje ${year}`}
-                action={<Button variant="outline" size="sm" asChild><Link to="/empresa/roster-prospects">Gestionar prospects</Link></Button>}
+                action={<Button variant="outline" size="sm" asChild><Link to="/oportunidades/prospects-fichaje">Gestionar prospects</Link></Button>}
               >
                 {!k.roster.funnel[0].value ? (
                   <EmptyState variant="inline" icon={Users} title="Sin prospects" description="Añade candidatos para ver el embudo de fichajes." />
