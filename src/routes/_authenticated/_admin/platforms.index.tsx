@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CatalogIndex } from "@/components/catalog-index";
+import { IntegratedInPartnersNotice } from "@/components/integrated-notice";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -9,7 +10,9 @@ export const Route = createFileRoute("/_authenticated/_admin/platforms/")({
 
 function PlatformsIndex() {
   return (
-    <CatalogIndex
+    <>
+      <IntegratedInPartnersNotice />
+      <CatalogIndex
       table="platforms"
       nameColumn="name"
       queryKey="platforms"
@@ -44,6 +47,7 @@ function PlatformsIndex() {
           <Textarea defaultValue={p.notes ?? ""} placeholder="Notas" rows={2} className="mt-2" onBlur={(e) => update({ notes: e.target.value || null })} />
         </>
       )}
-    />
+      />
+    </>
   );
 }
