@@ -45,6 +45,7 @@ function ProduccionesActivas() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ProductionSearch value={q} onChange={setQ} />
+          <ExportRowsButton rows={rows} filename="producciones-activas" sheetName="Activas" />
           <Button onClick={() => setOpen(true)}><Plus className="mr-1 h-4 w-4" /> Nueva producción</Button>
         </div>
       </div>
