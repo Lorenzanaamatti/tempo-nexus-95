@@ -121,6 +121,11 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
               <span className="rounded-sm bg-muted px-1.5 py-0.5 text-[10px] smallcaps">
                 {REPRESENTADO_ROLE_LABEL[r.role_in_project ?? ""] ?? r.role_in_project ?? "Sin rol"}
               </span>
+              {r.composers?.roster_role && (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {ROSTER_ROLE_LABEL[r.composers.roster_role] ?? r.composers.roster_role}
+                </span>
+              )}
               <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="text-xs text-muted-foreground hover:underline">
                 ver ficha →
               </Link>
@@ -136,6 +141,18 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
         <DialogContent>
           <DialogHeader><DialogTitle>Vincular representado</DialogTitle></DialogHeader>
           <div className="grid gap-3">
+            <div className="flex flex-wrap gap-1">
+              {rosterTabs.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setRosterFilter(t.value)}
+                  className={`rounded-sm border border-border px-2 py-0.5 text-[11px] uppercase tracking-wide ${rosterFilter === t.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
             <div>
               <Label className="text-xs">Buscar en el roster</Label>
               <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nombre…" />
@@ -146,9 +163,12 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
                   key={c.id}
                   type="button"
                   onClick={() => setPicked(c.id)}
-                  className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-muted ${picked === c.id ? "bg-muted" : ""}`}
+                  className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted ${picked === c.id ? "bg-muted" : ""}`}
                 >
-                  {c.artistic_name || c.full_name}
+                  <span>{c.artistic_name || c.full_name}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {ROSTER_ROLE_LABEL[c.roster_role ?? "other"] ?? c.roster_role}
+                  </span>
                 </button>
               ))}
               {!candidates.length && <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados.</p>}
@@ -158,9 +178,12 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {REPRESENTADO_ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+                  {ALL_REPRESENTADO_ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {role === "otro" && (
+                <Input className="mt-2" value={customRole} onChange={(e) => setCustomRole(e.target.value)} placeholder="Escribe el rol…" />
+              )}
             </div>
           </div>
           <DialogFooter>
