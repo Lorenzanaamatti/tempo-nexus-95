@@ -45,6 +45,22 @@ export const TARGET_ACCOUNT_PRIORITY_TONE: Record<TargetAccountPriority, string>
   baja: "bg-muted text-muted-foreground border-border",
 };
 
+/**
+ * Indicador no cromático de prioridad: además del color, cada nivel tiene un
+ * glifo y un texto propios para usuarios con daltonismo o pantallas mal calibradas.
+ */
+export const TARGET_ACCOUNT_PRIORITY_MARK: Record<TargetAccountPriority, string> = {
+  alta: "!!!",
+  media: "!!",
+  baja: "!",
+};
+
+export const TARGET_ACCOUNT_PRIORITY_LONG: Record<TargetAccountPriority, string> = {
+  alta: "Prioridad alta",
+  media: "Prioridad media",
+  baja: "Prioridad baja",
+};
+
 export const TARGET_ACCOUNT_TYPES = [
   "roster",
   "productora",
