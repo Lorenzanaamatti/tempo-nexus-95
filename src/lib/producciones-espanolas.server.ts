@@ -83,10 +83,69 @@ export async function discoverEspanolas(year: number, page: number) {
     page: String(page),
   });
   return {
+    results: (json.results ?? []) as any[],
     ids: ((json.results ?? []) as any[]).map((r) => r.id as number),
-    totalPages: Math.min(Number(json.total_pages ?? 1), 25),
+    totalPages: Math.min(Number(json.total_pages ?? 1), 500),
     totalResults: Number(json.total_results ?? 0),
   };
+}
+
+/**
+ * Importa una página del catálogo con los datos básicos del listado (rápido).
+ * Los créditos musicales y la taquilla se completan después con `enrichPending`.
+ */
+export async function importYearPageLite(admin: any, year: number, page: number) {
+  const { results, totalPages, totalResults } = await discoverEspanolas(year, page);
+  if (!results.length) return { saved: 0, totalPages, totalResults };
+
+  const rows = results.map((r) => ({
+    tmdb_id: r.id as number,
+    media_type: "movie",
+    title: (r.title ?? r.original_title ?? "") as string,
+    title_es: (r.title ?? null) as string | null,
+    title_original: (r.original_title ?? null) as string | null,
+    year: r.release_date ? Number(String(r.release_date).slice(0, 4)) || year : year,
+    release_date: (r.release_date || null) as string | null,
+    poster_path: (r.poster_path ?? null) as string | null,
+    backdrop_path: (r.backdrop_path ?? null) as string | null,
+    synopsis: (r.overview ?? null) as string | null,
+    tmdb_url: `https://www.themoviedb.org/movie/${r.id}`,
+  }));
+
+  const { error } = await admin
+    .from("producciones_espanolas")
+    .upsert(rows, { onConflict: "tmdb_id", ignoreDuplicates: false });
+  if (error) throw new Error(error.message);
+  return { saved: rows.length, totalPages, totalResults };
+}
+
+/** Completa créditos (compositor, supervisor, productoras, plataforma, taquilla) de fichas sin sincronizar. */
+export async function enrichPending(admin: any, limit: number) {
+  const { data, error } = await admin
+    .from("producciones_espanolas")
+    .select("id, tmdb_id, media_type")
+    .is("last_synced_at", null)
+    .not("tmdb_id", "is", null)
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as any[];
+  if (!rows.length) return { enriched: 0, remaining: 0 };
+
+  await mapLimit(rows, 8, async (r) => {
+    try {
+      const detail = await fetchDetail(r.tmdb_id, r.media_type === "tv" ? "tv" : "movie");
+      const { id: _omit, tmdb_id: _t, media_type: _m, ...patch } = detail as any;
+      await admin.from("producciones_espanolas").update(patch).eq("id", r.id);
+    } catch {
+      /* ignora fallos puntuales de la API */
+    }
+  });
+
+  const { count } = await admin
+    .from("producciones_espanolas")
+    .select("id", { count: "exact", head: true })
+    .is("last_synced_at", null);
+  return { enriched: rows.length, remaining: Number(count ?? 0) };
 }
 
 /** Ejecuta trabajos en paralelo con concurrencia limitada. */
