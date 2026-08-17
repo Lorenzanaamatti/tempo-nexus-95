@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Film, Plus } from "lucide-react";
+import { Film, Plus, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { STAGE_DEFAULT_STATUS } from "@/lib/production-lifecycle";
 import { posterUrl } from "@/lib/producciones-espanolas";
+import { formatEUR } from "@/lib/money";
 
 const db = supabase as any;
 const ALL = "__all__";
@@ -34,6 +35,8 @@ type Entry = {
   director: string | null;
   credits: Credit[];
   source: "Producción IC" | "Externo" | "Producción española";
+  budget: number | null;
+  commission: number | null;
   to?: { path: string; id: string };
 };
 
@@ -42,7 +45,7 @@ function useFilmografia() {
     queryKey: ["filmografia-ic"],
     queryFn: async () => {
       const [prods, assigns, composers, externals, espanolas, companies, directors] = await Promise.all([
-        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id"),
+        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id, partner, fee_amount, ic_commission, ic_commission_pct"),
         db.from("production_assignments").select("production_id, composer_id, role_in_project"),
         db.from("composers").select("id, full_name, artistic_name, roster_role"),
         db.from("composer_filmography").select("id, composer_id, title, year, format, production_company, director, production_id"),
@@ -87,6 +90,13 @@ function useFilmografia() {
           director: p.director ?? directorById.get(p.director_id) ?? null,
           credits,
           source: "Producción IC",
+          budget: p.fee_amount == null ? null : Number(p.fee_amount),
+          commission:
+            p.ic_commission != null
+              ? Number(p.ic_commission)
+              : p.fee_amount != null && p.ic_commission_pct != null
+                ? (Number(p.fee_amount) * Number(p.ic_commission_pct)) / 100
+                : null,
           to: { path: "/producciones/$productionId", id: p.id },
         });
       }
@@ -104,6 +114,8 @@ function useFilmografia() {
           director: f.director ?? null,
           credits: name ? [{ composerId: f.composer_id, name, role: "Crédito externo" }] : [],
           source: "Externo",
+          budget: null,
+          commission: null,
         });
       }
 
@@ -121,6 +133,8 @@ function useFilmografia() {
             composerId: id, name: nameOf(id) ?? "—", role: "Participante",
           })),
           source: "Producción española",
+          budget: null,
+          commission: null,
         });
       }
 
