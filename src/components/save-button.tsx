@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   onClick: () => void;
@@ -76,7 +82,7 @@ export function SaveButton({
       ? "bg-muted text-muted-foreground hover:bg-muted"
       : "bg-primary text-primary-foreground hover:bg-primary/90";
 
-  return (
+  const button = (
     <button
       type="button"
       onClick={onClick}
@@ -101,5 +107,19 @@ export function SaveButton({
         <span aria-hidden className="ml-1 h-2 w-2 rounded-full bg-primary-foreground/80" />
       )}
     </button>
+  );
+
+  if (floating) return button;
+
+  // Variante icónica: siempre acompañada de tooltip visible + etiqueta accesible.
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">{button}</span>
+        </TooltipTrigger>
+        <TooltipContent side="top">{title ?? currentLabel}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

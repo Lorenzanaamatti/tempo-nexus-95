@@ -14,13 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Check, ChevronsUp, ChevronUp, Minus } from "lucide-react";
 import {
   TARGET_ACCOUNT_STATUSES,
   TARGET_ACCOUNT_STATUS_LABEL,
   TARGET_ACCOUNT_STATUS_TONE,
   TARGET_ACCOUNT_PRIORITY_LABEL,
   TARGET_ACCOUNT_PRIORITY_TONE,
+  TARGET_ACCOUNT_PRIORITY_MARK,
+  TARGET_ACCOUNT_PRIORITY_LONG,
   type TargetAccountStatus,
   type TargetAccountPriority,
   TARGET_ACCOUNT_TYPES,
@@ -37,6 +39,19 @@ export const Route = createFileRoute("/_authenticated/_admin/marketing/target-ac
 
 import { formatDateEs as fmtDate } from "@/lib/dates";
 import { ListSkeleton } from "@/components/list-states";
+
+const PRIORITY_ICON: Record<TargetAccountPriority, typeof ChevronUp> = {
+  alta: ChevronsUp,
+  media: ChevronUp,
+  baja: Minus,
+};
+
+const chipCls = (active: boolean, inactiveTone: string) =>
+  `inline-flex items-center gap-1 rounded-sm border px-2.5 py-1 text-xs transition ${
+    active
+      ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/40"
+      : `${inactiveTone} font-normal hover:border-primary/60`
+  }`;
 
 function TargetAccountsIndex() {
   const qc = useQueryClient();
@@ -221,8 +236,10 @@ function TargetAccountsIndex() {
         <button
           type="button"
           onClick={() => setTypeFilter("all")}
-          className={`rounded-sm border px-2.5 py-1 text-xs transition ${typeFilter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border bg-card/40 hover:border-primary/60"}`}
+          aria-pressed={typeFilter === "all"}
+          className={chipCls(typeFilter === "all", "border-border bg-card/40")}
         >
+          {typeFilter === "all" && <Check aria-hidden className="h-3 w-3" />}
           Todas <span className="ml-1 text-muted-foreground">{searched.length}</span>
         </button>
         {TARGET_ACCOUNT_TYPES.map((t) => (
@@ -230,8 +247,10 @@ function TargetAccountsIndex() {
             key={t}
             type="button"
             onClick={() => setTypeFilter(typeFilter === t ? "all" : t)}
-            className={`rounded-sm border px-2.5 py-1 text-xs transition ${typeFilter === t ? "border-primary bg-primary/10 text-primary" : `${TARGET_ACCOUNT_TYPE_TONE[t]} hover:border-primary/60`}`}
+            aria-pressed={typeFilter === t}
+            className={chipCls(typeFilter === t, TARGET_ACCOUNT_TYPE_TONE[t])}
           >
+            {typeFilter === t && <Check aria-hidden className="h-3 w-3" />}
             {TARGET_ACCOUNT_TYPE_LABEL[t]} <span className="ml-1 opacity-70">{typeCounts.get(t) ?? 0}</span>
           </button>
         ))}
@@ -242,8 +261,10 @@ function TargetAccountsIndex() {
         <button
           type="button"
           onClick={() => setStatusFilter("all")}
-          className={`rounded-sm border px-2.5 py-1 text-xs transition ${statusFilter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border bg-card/40 hover:border-primary/60"}`}
+          aria-pressed={statusFilter === "all"}
+          className={chipCls(statusFilter === "all", "border-border bg-card/40")}
         >
+          {statusFilter === "all" && <Check aria-hidden className="h-3 w-3" />}
           Todos <span className="ml-1 text-muted-foreground">{searched.length}</span>
         </button>
         {TARGET_ACCOUNT_STATUSES.map((s) => (
@@ -251,8 +272,10 @@ function TargetAccountsIndex() {
             key={s}
             type="button"
             onClick={() => setStatusFilter(statusFilter === s ? "all" : s)}
-            className={`rounded-sm border px-2.5 py-1 text-xs transition ${statusFilter === s ? "border-primary bg-primary/10 text-primary" : `${TARGET_ACCOUNT_STATUS_TONE[s]} hover:border-primary/60`}`}
+            aria-pressed={statusFilter === s}
+            className={chipCls(statusFilter === s, TARGET_ACCOUNT_STATUS_TONE[s])}
           >
+            {statusFilter === s && <Check aria-hidden className="h-3 w-3" />}
             {TARGET_ACCOUNT_STATUS_LABEL[s]} <span className="ml-1 opacity-70">{statusCounts.get(s) ?? 0}</span>
           </button>
         ))}
@@ -316,9 +339,22 @@ function TargetAccountsIndex() {
                                 <p className="truncate text-xs text-muted-foreground">{a.production_company.name}</p>
                               )}
                             </div>
-                            <Badge variant="outline" className={`shrink-0 rounded-sm text-[10px] ${TARGET_ACCOUNT_PRIORITY_TONE[a.priority as TargetAccountPriority]}`}>
-                              {TARGET_ACCOUNT_PRIORITY_LABEL[a.priority as TargetAccountPriority]}
-                            </Badge>
+                            {(() => {
+                              const prio = (a.priority ?? "media") as TargetAccountPriority;
+                              const Icon = PRIORITY_ICON[prio];
+                              return (
+                                <Badge
+                                  variant="outline"
+                                  title={TARGET_ACCOUNT_PRIORITY_LONG[prio]}
+                                  aria-label={TARGET_ACCOUNT_PRIORITY_LONG[prio]}
+                                  className={`shrink-0 gap-1 rounded-sm text-[10px] ${prio === "alta" ? "font-bold uppercase tracking-wide" : "font-normal"} ${TARGET_ACCOUNT_PRIORITY_TONE[prio]}`}
+                                >
+                                  <Icon aria-hidden className="h-3 w-3" />
+                                  {TARGET_ACCOUNT_PRIORITY_LABEL[prio]}
+                                  <span aria-hidden className="opacity-70">{TARGET_ACCOUNT_PRIORITY_MARK[prio]}</span>
+                                </Badge>
+                              );
+                            })()}
                           </div>
                           <div className="mt-2 flex flex-wrap gap-1">
                             <Badge variant="outline" className={`rounded-sm text-[10px] ${TARGET_ACCOUNT_TYPE_TONE[(a.account_type ?? "productora") as TargetAccountType]}`}>

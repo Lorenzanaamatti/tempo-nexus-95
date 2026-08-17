@@ -42,6 +42,25 @@ export function Breadcrumbs() {
 
   const { group, item } = location;
   const isDetail = pathname !== item.to && Boolean(detail);
+  // En la página índice, el título de la propia página ya aparece como H1:
+  // no repetimos el nombre en la barra superior.
+  if (!isDetail) {
+    return (
+      <Breadcrumb className="min-w-0">
+        <BreadcrumbList className="flex-nowrap">
+          <BreadcrumbItem className="hidden sm:block">
+            <BreadcrumbLink asChild>
+              <Link to="/" className="smallcaps">Inicio</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="hidden sm:block" />
+          <BreadcrumbItem className="min-w-0">
+            <BreadcrumbPage className="smallcaps truncate">{group.label}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }
 
   return (
     <Breadcrumb className="min-w-0">
