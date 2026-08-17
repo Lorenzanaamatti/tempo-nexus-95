@@ -1,6 +1,6 @@
 import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
 import { EmptyState } from "@/components/list-states";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
