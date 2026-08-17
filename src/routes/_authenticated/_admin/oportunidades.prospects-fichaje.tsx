@@ -107,13 +107,16 @@ function ProspectsFichajePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
-      <div className="mb-8 border-b border-border pb-6">
-        <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
-        <h1 className="mt-1 font-display text-5xl title-caps">PROSPECTS DE FICHAJE</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Todo el embudo de incorporación al roster en una sola pantalla: candidatos contactados,
-          representados en prospección y roster objetivo procedente de cuentas objetivo.
-        </p>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
+          <h1 className="mt-1 font-display text-5xl title-caps">PROSPECTS DE FICHAJE</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Todo el embudo de incorporación al roster en una sola pantalla: candidatos contactados,
+            representados en prospección y roster objetivo procedente de cuentas objetivo.
+          </p>
+        </div>
+        <ExportRowsButton rows={filtered} filename="prospects-fichaje" sheetName="Prospects" />
       </div>
 
       <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[2fr_1fr_1fr_1fr_1.2fr_2fr_auto]">
