@@ -144,10 +144,8 @@ function ProduccionesEspanolas() {
         <FilterSelect value={year} onChange={setYear} allLabel="Todos los años" options={years.map((y) => ({ value: String(y), label: String(y) }))} />
         <FilterSelect value={genre} onChange={setGenre} allLabel="Todos los géneros" options={genres.map((g) => ({ value: g, label: g }))} />
         <FilterSelect value={platform} onChange={setPlatform} allLabel="Todas las plataformas" options={platforms.map((p) => ({ value: p, label: p }))} />
-        <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="IC participó: todos"
-          options={[{ value: "si", label: "IC participó" }, { value: "no", label: "Sin participación IC" }]} />
-        <FilterSelect value={estado} onChange={setEstado} allLabel="Toda la prospección"
-          options={PROSPECCION_ESTADOS.map((e) => ({ value: e.value, label: e.label }))} />
+        <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="Todos"
+          options={[{ value: "si", label: "IC participó" }]} />
       </div>
 
       {rowsQ.isLoading ? (
