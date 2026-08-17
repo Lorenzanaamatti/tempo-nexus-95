@@ -177,28 +177,8 @@ function Inner({
     setDirty(false);
   }
 
-  // "Proyectos activos" = producciones con estado >= contrato_firmado,
-  // hasta 10 días naturales después del comunicado de estreno (premiere_date).
-  const ACTIVE_PRODUCTION_STATUSES = new Set([
-    "contrato_firmado",
-    "visuales_entregados",
-    "en_composicion",
-    "en_produccion",
-    "en_mezclas",
-    "entrega_parcial",
-    "entrega_total",
-    "entregables_completados",
-    "finalizada",
-    "estrenada",
-    "comunicado_estreno",
-  ]);
-  const todayMs = Date.now();
-  const activeProductions = productionsRel.filter((p: any) => {
-    if (!ACTIVE_PRODUCTION_STATUSES.has(p.status)) return false;
-    if (!p.premiere_date) return true;
-    const cutoff = new Date(p.premiere_date).getTime() + 10 * 24 * 60 * 60 * 1000;
-    return todayMs <= cutoff;
-  });
+  // Mismo criterio que la columna "Proyectos en curso" del Roster completo.
+  const activeProductions = productionsRel.filter((p: any) => isOpenProduction(p));
   const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
   const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
   const portalLink = c.portal_url
