@@ -1,44 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const TMDB_BASE = "https://api.themoviedb.org/3";
-
-function normalize(s: string | null | undefined): string {
-  if (!s) return "";
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-async function tmdbFetch(path: string, params: Record<string, string> = {}) {
-  const token = process.env.TMDB_READ_TOKEN;
-  if (!token) throw new Error("TMDB_READ_TOKEN no configurado");
-  const url = new URL(TMDB_BASE + path);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${token}`, accept: "application/json" },
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`TMDb ${res.status}: ${body.slice(0, 200)}`);
-  }
-  return res.json();
-}
-
-type TmdbCrew = { job: string; department: string; name: string };
-type TmdbProvider = { provider_name: string };
-
-async function adminCheck(userId: string) {
-  const { supabase } = await import("@/integrations/supabase/client.server").then(
-    async (m) => ({ supabase: m.supabaseAdmin }),
-  );
-  const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-  if (error) throw error;
-  if (!data) throw new Error("Solo administradores");
-}
+import { adminCheck, normalize, tmdbFetch, type TmdbCrew, type TmdbProvider } from "@/lib/spanish-films.server";
 
 /**
  * Importa las películas españolas de un año desde TMDb y las guarda (upsert por tmdb_id).
