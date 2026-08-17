@@ -2,8 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
+  enrichPending,
   fetchDetail,
-  importYearPage,
+  importYearPageLite,
   requireAdmin,
   runSync,
   searchInput,
@@ -80,9 +81,20 @@ export const syncProduccionesEspanolas = createServerFn({ method: "POST" })
 export const importEspanolasYearPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ year: z.number().int().min(1900).max(2100), page: z.number().int().min(1).max(25) }).parse(input),
+    z.object({ year: z.number().int().min(1900).max(2100), page: z.number().int().min(1).max(500) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const admin = await requireAdmin(context.userId);
-    return importYearPage(admin, data.year, data.page);
+    return importYearPageLite(admin, data.year, data.page);
+  });
+
+/** Completa por lotes los créditos musicales y la taquilla de las fichas importadas. */
+export const enrichEspanolas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(40).default(24) }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await requireAdmin(context.userId);
+    return enrichPending(admin, data.limit);
   });
