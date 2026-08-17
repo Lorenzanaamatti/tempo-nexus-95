@@ -55,7 +55,6 @@ function ProduccionesEspanolas() {
   const [genre, setGenre] = useState(ALL);
   const [platform, setPlatform] = useState(ALL);
   const [icFilter, setIcFilter] = useState(ALL);
-  const [estado, setEstado] = useState(ALL);
   const [tmdbResults, setTmdbResults] = useState<any[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [syncing, setSyncing] = useState(false);
