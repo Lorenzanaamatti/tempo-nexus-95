@@ -159,6 +159,8 @@ function RosterProspectsPage() {
                   </td>
                   <td className="px-3 py-2 text-right">
                     <ConfirmDeleteButton
+                      iconOnly
+                      title={`¿Eliminar "${r.nombre}"?`}
                       onConfirm={async () => {
                         const { error } = await db.from("roster_prospects").delete().eq("id", r.id);
                         if (error) return toast.error(error.message);
