@@ -66,6 +66,7 @@ export const importProduccionEspanola = createServerFn({ method: "POST" })
 /** Refresca los campos mutables (estreno, plataforma, estado) de las fichas importadas. */
 export const syncProduccionesEspanolas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({}).passthrough().optional().parse(input ?? {}))
   .handler(async ({ context }) => {
     const admin = await requireAdmin(context.userId);
     return runSync(admin);
