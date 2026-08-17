@@ -201,7 +201,17 @@ function ProspectsFichajePage() {
                         <Input type="date" className="h-8 w-[150px]" defaultValue={r.fecha_decision ?? ""} onBlur={(e) => patch(r.id, { fecha_decision: e.target.value || null })} />
                       </td>
                       <td className="px-3 py-2">
-                        <Input className="h-8" defaultValue={r.notas ?? ""} onBlur={(e) => patch(r.id, { notas: e.target.value || null })} />
+                        <span
+                          title={r.notas ?? "Sin notas"}
+                          className={
+                            "inline-block rounded-sm px-2 py-0.5 smallcaps text-[10px] " +
+                            (r.notas?.trim()
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-muted text-muted-foreground")
+                          }
+                        >
+                          {r.notas?.trim() ? "Sí" : "No"}
+                        </span>
                       </td>
                       <td className="px-3 py-2 text-right">
                         <ConfirmDeleteButton
