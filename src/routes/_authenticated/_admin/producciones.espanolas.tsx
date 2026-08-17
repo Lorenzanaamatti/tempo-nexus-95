@@ -55,7 +55,6 @@ function ProduccionesEspanolas() {
   const [genre, setGenre] = useState(ALL);
   const [platform, setPlatform] = useState(ALL);
   const [icFilter, setIcFilter] = useState(ALL);
-  const [estado, setEstado] = useState(ALL);
   const [tmdbResults, setTmdbResults] = useState<any[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -73,13 +72,12 @@ function ProduccionesEspanolas() {
       if (year !== ALL && String(r.year ?? "") !== year) return false;
       if (genre !== ALL && !(r.genres ?? []).includes(genre)) return false;
       if (platform !== ALL && r.platform !== platform) return false;
-      if (icFilter !== ALL && r.ic_participo !== (icFilter === "si")) return false;
-      if (estado !== ALL && r.estado_prospeccion !== estado) return false;
+      if (icFilter !== ALL && r.ic_participo !== true) return false;
       if (!needle) return true;
       return [r.title, r.title_original, r.title_es, ...(r.directors ?? []), ...(r.production_companies ?? [])]
         .filter(Boolean).some((v) => String(v).toLowerCase().includes(needle));
     });
-  }, [all, q, year, genre, platform, icFilter, estado]);
+  }, [all, q, year, genre, platform, icFilter]);
 
   async function runTmdbSearch() {
     setSearching(true);
@@ -146,10 +144,8 @@ function ProduccionesEspanolas() {
         <FilterSelect value={year} onChange={setYear} allLabel="Todos los años" options={years.map((y) => ({ value: String(y), label: String(y) }))} />
         <FilterSelect value={genre} onChange={setGenre} allLabel="Todos los géneros" options={genres.map((g) => ({ value: g, label: g }))} />
         <FilterSelect value={platform} onChange={setPlatform} allLabel="Todas las plataformas" options={platforms.map((p) => ({ value: p, label: p }))} />
-        <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="IC participó: todos"
-          options={[{ value: "si", label: "IC participó" }, { value: "no", label: "Sin participación IC" }]} />
-        <FilterSelect value={estado} onChange={setEstado} allLabel="Toda la prospección"
-          options={PROSPECCION_ESTADOS.map((e) => ({ value: e.value, label: e.label }))} />
+        <FilterSelect value={icFilter} onChange={setIcFilter} allLabel="Todos"
+          options={[{ value: "si", label: "IC participó" }]} />
       </div>
 
       {rowsQ.isLoading ? (
