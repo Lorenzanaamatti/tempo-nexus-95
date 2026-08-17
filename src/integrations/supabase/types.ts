@@ -709,6 +709,7 @@ export type Database = {
           id: string
           metrica: Database["public"]["Enums"]["career_metric"]
           valor_objetivo: number | null
+          valor_real: number | null
         }
         Insert: {
           año: number
@@ -716,6 +717,7 @@ export type Database = {
           id?: string
           metrica: Database["public"]["Enums"]["career_metric"]
           valor_objetivo?: number | null
+          valor_real?: number | null
         }
         Update: {
           año?: number
@@ -723,6 +725,7 @@ export type Database = {
           id?: string
           metrica?: Database["public"]["Enums"]["career_metric"]
           valor_objetivo?: number | null
+          valor_real?: number | null
         }
         Relationships: [
           {
