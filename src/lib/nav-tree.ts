@@ -34,7 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Actividad internacional", to: "/empresa/actividad-internacional", icon: Handshake },
       { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
       { title: "Plan de facturación", to: "/billing", icon: Receipt },
-      { title: "Equipo IC", to: "/people", icon: Users },
+      { title: "Equipo IC", to: "/empresa/equipo", match: ["/people"], icon: Users },
       { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, match: ["/agent-actions"] },
     ],
   },

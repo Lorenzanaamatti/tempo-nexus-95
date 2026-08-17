@@ -1,21 +1,51 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { RecordTable } from "@/components/record-table";
+import {
+  TEMPLATE_TIPOS, TEMPLATE_IDIOMAS, AGENTE_OPTIONS,
+} from "@/lib/comunicacion-model";
 
 export const Route = createFileRoute("/_authenticated/_admin/templates/")({
-  component: StubPage,
+  component: TemplatesIndex,
 });
 
-function StubPage() {
+function TemplatesIndex() {
+  const navigate = useNavigate();
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">TEMPLATES DOCUMENTOS</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Templates de documentos y emails</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Plantillas disponibles para el equipo y los agentes IA. Organizadas por tipo de documento y tipo de comunicación.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
+    <RecordTable
+      table="templates"
+      kicker="Templates documentos"
+      title="Plantillas de documentos y emails"
+      description="Biblioteca de plantillas reutilizables por el equipo y por los agentes IA. Usa variables con el formato {{nombre_cliente}}."
+      newLabel="Nueva plantilla"
+      searchKey="nombre"
+      orderBy="nombre"
+      ascending
+      onRowClick={(r) => navigate({ to: "/templates/$templateId", params: { templateId: r.id } })}
+      filters={[
+        { key: "tipo", label: "Tipo", options: TEMPLATE_TIPOS },
+        { key: "idioma", label: "Idioma", options: TEMPLATE_IDIOMAS },
+      ]}
+      columns={[
+        { key: "nombre", label: "Nombre" },
+        { key: "tipo", label: "Tipo", options: TEMPLATE_TIPOS },
+        { key: "idioma", label: "Idioma", options: TEMPLATE_IDIOMAS },
+        { key: "uso_agentes", label: "Uso agentes", type: "boolean" },
+        { key: "agente_autorizado", label: "Agentes", type: "tags" },
+        { key: "activo", label: "Activa", type: "boolean" },
+      ]}
+      fields={[
+        { key: "nombre", label: "Nombre", type: "text", required: true, full: true },
+        { key: "tipo", label: "Tipo", type: "select", options: TEMPLATE_TIPOS, required: true },
+        { key: "idioma", label: "Idioma", type: "select", options: TEMPLATE_IDIOMAS, required: true },
+        { key: "descripcion", label: "Descripción", type: "textarea", full: true },
+        { key: "contenido", label: "Contenido (usa {{variables}})", type: "richtext", full: true },
+        { key: "uso_agentes", label: "Autorizada para agentes IA", type: "boolean" },
+        { key: "activo", label: "Activa", type: "boolean" },
+        {
+          key: "agente_autorizado", label: "Agentes autorizados", type: "multiselect",
+          options: AGENTE_OPTIONS, full: true, visible: (f) => !!f.uso_agentes,
+        },
+      ]}
+    />
   );
 }
