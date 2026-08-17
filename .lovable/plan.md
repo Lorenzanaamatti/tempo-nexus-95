@@ -1,57 +1,22 @@
-# Propuestas de optimización (solo análisis, sin cambios)
+# Unificar la tipografía de títulos: MAYÚSCULAS
 
-Lista priorizada de mejoras detectadas al revisar la app. Nada se implementa hasta que elijas.
+Ahora conviven tres convenciones sin criterio: `CONTRATOS` / `PRODUCCIONES EN CURSO` en mayúsculas, y `Roster completo`, `Cuentas objetivo`, `Otros partners`, `Qué hay que hacer` en mixed case. Se adopta **una sola norma: mayúsculas completas** para títulos de pantalla (H1) y subtítulos de sección (H2).
 
-## A. Rendimiento percibido (impacto alto, riesgo bajo)
+## Regla
 
-1. **Caché de datos mal configurada.** El cliente de datos se crea sin tiempos de caché: cada vez que vuelves a una pantalla se recarga todo desde cero. Fijar 30-60 s de "frescura" y desactivar la recarga al enfocar la ventana elimina la mayoría de parpadeos y llamadas repetidas.
-2. **Favicon de 785 KB.** Se descarga en cada visita. Debería pesar <20 KB (versión 64x64 optimizada).
-3. **Librería de Excel cargada siempre.** La exportación a hoja de cálculo (~400 KB) entra en el paquete inicial aunque no exportes nada. Cargarla solo al pulsar "Exportar".
-4. **Consultas que piden todas las columnas.** Pantallas como compositores, redes sociales, deal memos y marketing traen columnas que no muestran (textos largos, notas). Pedir solo lo que se pinta acelera listados grandes.
-5. **Sin paginación real** en listados que crecerán (CRM Películas ES, Identidad corporativa, Candidaturas, Roster). Conviene paginar o cargar por scroll a partir de ~100 fichas.
-6. **Sondeos cada 30 s** en barra lateral y campana de avisos. Se pueden unificar en una sola consulta de contadores o pasar a tiempo real.
+- H1 de pantalla y H2 de sección: texto en mayúsculas.
+- Se aplica visualmente con una clase de utilidad (`uppercase` + interletraje ligero) en lugar de reescribir cada cadena a mano, para que los títulos dinámicos (nombres de vistas, catálogos, marketing) también queden alineados sin duplicar textos.
+- **Excepciones que NO se transforman:** nombres propios de personas y fichas de detalle (compositor, director, contrato, producción, cuenta objetivo), porque son datos, no títulos de sección. También se respetan siglas y hashtags existentes.
+- El eyebrow superior (`smallcaps`) y los encabezados de tabla se quedan como están.
 
-## B. Mantenibilidad del código
+## Pantallas afectadas
 
-7. **Pantallas gigantes.** Ficha de compositor (1.200 líneas), CRM Películas (1.140), Calendario (850), Deal memo (840). Dividirlas en pestañas/bloques reduce errores y tiempos de carga por ruta.
-8. **Tipos de base de datos desactualizados.** Hay ~150 puntos donde el código "apaga" el tipado para poder consultar tablas nuevas. Regenerar los tipos devuelve autocompletado y detección de errores antes de publicar.
-9. **Subida de archivos duplicada 6 veces** (fotos, vídeos, candidaturas, marketing, plantillas). Un único componente de subida con arrastrar-y-soltar unificaría comportamiento y mensajes de error.
-10. **Editores de fichas repetidos.** Filmografía, premios, demos, fases, contrapartes… comparten estructura; ya existe un editor genérico (`RelationListEditor`) infrautilizado.
-11. **Fase 3 pendiente de la simplificación anterior:** unificar las herramientas del chat interno y las de los agentes externos en un único catálogo.
+- Listados: Contratos, Oportunidades, Cuentas objetivo, Candidaturas, Roster completo, Compositores/Artistas/Supervisores/Especialistas/Curadores, Productoras, Plataformas, Directores, Otros partners, CRM Películas ES, Producciones en curso, Deal memos, Tareas ("Qué hay que hacer"), Usuarios y permisos, Facturación, Finanzas.
+- Componentes con título parametrizado: `catalog-index.tsx`, `marketing-library.tsx`, `calendar-board.tsx`, `page-header.tsx`.
+- Subtítulos H2: Roster actual / En prospección / Objetivo, Interesante Filmografía, secciones de Interesante Compañía, agrupaciones por tier y por hashtag, bloques del portal.
 
-## C. Experiencia de uso
+## Detalles técnicos
 
-12. **Estados de carga inconsistentes:** unas pantallas muestran esqueleto, otras se quedan en blanco. Unificar carga, vacío y error.
-13. **Búsqueda global ausente.** Un buscador único (roster, cuentas, películas, deal memos) ahorraría muchos clics en el árbol.
-14. **Filtros que no se recuerdan** al volver atrás en Roster, Cuentas objetivo y Candidaturas.
-15. **Ediciones sin confirmación visual** en varios formularios (se guarda al salir del campo sin aviso claro).
-16. **Uso en móvil:** las vistas Kanban y calendario no están adaptadas a pantalla pequeña.
-
-## D. Datos y seguridad
-
-17. **Índices de base de datos**: revisar los campos por los que se filtra y ordena a diario (responsable, estado, fechas) para que los listados no se degraden al crecer.
-18. **Duplicados de personas y empresas**: no hay control de nombres repetidos al crear desde CRM Películas; conviene detección de duplicados al escribir.
-19. **Auditoría de cambios**: hoy no queda registro de quién modificó qué en fichas críticas (deal memos, contratos).
-
-## Estado
-
-- Bloque 1: hecho (caché, favicon, Excel bajo demanda, sondeos).
-- Bloque 2: hecho (paginación y orden en servidor con métricas de latencia, índices de base de datos, columnas reducidas en catálogos).
-- Bloque 3: en curso — subidas de archivos unificadas en toda la app (`FileDropzone` + `src/lib/storage-upload.ts`): fotos de personas y compositores, vídeos, marketing, candidaturas y plantillas de deal memo. Catálogo único de herramientas chat + agentes externos hecho (`src/lib/tool-catalog.ts`). Ficha de compositor dividida: 1.200 → 875 líneas, con `src/components/composer-detail/*` y `src/lib/composer-relations.ts`. CRM Películas ES dividido: 1.172 → 363 líneas, con `src/components/peliculas-es/*` (tabla, ficha, editor de entidades, menú CRM) y `src/lib/spanish-films-crm.ts`. Calendario dividido: 850 → 42 líneas de ruta, con `src/components/calendar-board/*` (tablero, hook de datos, filtros) y `src/lib/calendar-board.ts` (constantes + proyección pura de eventos). Ficha de deal memo dividida: 843 → 53 líneas de ruta, con `src/components/deal-memos/detail/*` (cabecera y acciones, documento, formulario, versiones, log, notas, campos reutilizables) y `src/lib/deal-memos-detail.ts` (carga y resolución de cliente/contraparte/validadores). Pendiente: regenerar tipos y reutilizar el editor genérico de fichas.
-
-- Bloque 4: hecho (búsqueda global con Ctrl/Cmd+K, filtros recordados en Roster/Cuentas objetivo/Candidaturas, confirmación visual "Guardado" en editores en línea vía `src/lib/saved-feedback.ts`, estados de carga/vacío/error unificados en `src/components/list-states.tsx`, calendario y tablas con desplazamiento horizontal en móvil, detección de duplicados al crear desde CRM Películas, auditoría de cambios en deal memos y contratos con `public.audit_log` + `src/components/audit-trail.tsx`).
-
-## Orden recomendado
-
-Bloque 1 (rápido, se nota enseguida): 1, 2, 3, 4, 12.
-Bloque 2 (escalabilidad): 5, 6, 17, 8.
-Bloque 3 (limpieza): 7, 9, 10, 11.
-Bloque 4 (producto): 13, 14, 15, 16, 18, 19.
-
-## Detalle técnico
-
-- QueryClient en `src/router.tsx` sin `defaultOptions` → añadir `staleTime`, `gcTime`, `refetchOnWindowFocus: false`.
-- `src/components/export-button.tsx` importa `xlsx` estáticamente → `await import("xlsx")` dentro del handler.
-- `select("*")` en 20 archivos; `supabase as any` en ~40 archivos → regenerar `src/integrations/supabase/types.ts`.
-- Subidas: `photo-uploader`, `video-gallery`, `person-photo-uploader`, `marketing-upload`, candidaturas y plantillas DM → un `FileDropzone` + hook `useStorageUpload`.
-- Rutas admin: 45 archivos en `_admin`; los mayores se benefician de división en subcomponentes por pestaña.
+- Añadir en `src/styles.css` una utilidad `.title-caps` (uppercase + `letter-spacing` corto) sobre la familia display.
+- Aplicarla en los H1/H2 de las rutas y componentes listados, y **eliminar** las cadenas que ya están escritas a mano en mayúsculas (`CONTRATOS`, `PRODUCCIONES EN CURSO`) para dejarlas en mixed case en el código: la mayúscula pasa a ser presentación, no contenido. Así el texto sigue siendo legible para búsqueda y accesibilidad.
+- No se tocan datos, consultas ni lógica de negocio; el cambio es puramente de presentación.
