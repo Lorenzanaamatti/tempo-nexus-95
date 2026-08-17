@@ -252,7 +252,6 @@ function Inner({
   }
 
   async function deleteComposer() {
-    if (!confirm(`¿Eliminar la ficha de ${c.full_name}? Esta acción no se puede deshacer.`)) return;
     const { error } = await supabase.from("composers").delete().eq("id", c.id);
     if (error) return toast.error(error.message);
     toast.success("Ficha eliminada");
@@ -278,13 +277,35 @@ function Inner({
         <p className="smallcaps text-muted-foreground">
           <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha
         </p>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link to="/finance" search={{ composerId: c.id }}>Dashboard económico</Link>
           </Button>
-          <Button size="sm" variant="ghost" onClick={deleteComposer}>
-            <Trash2 className="mr-1 h-3 w-3" /> Eliminar
-          </Button>
+          <span aria-hidden className="mx-2 h-5 w-px bg-border" />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                <Trash2 className="mr-1 h-3 w-3" /> Eliminar
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar la ficha de {c.full_name}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Se borrarán los datos de esta ficha de forma permanente. Esta acción no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={deleteComposer}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Eliminar ficha
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
@@ -891,7 +912,7 @@ function Inner({
         />
       </Section>
 
-      <SaveButton floating onClick={saveCore} saving={saving} title={dirty ? "Guardar cambios" : "Guardar ficha"} />
+      <SaveButton floating onClick={saveCore} saving={saving} dirty={dirty} />
     </div>
   );
 }
