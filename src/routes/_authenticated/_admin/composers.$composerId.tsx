@@ -146,6 +146,9 @@ function Inner({
         roster_role: ((c as { roster_role?: "composer" | "artist" | "supervisor" | "specialist" | "curator" | "ic_company" }).roster_role) ?? "composer",
         city: c.city,
         country: c.country,
+        genero: (c as { genero?: string | null }).genero ?? null,
+        pais_origen: (c as { pais_origen?: string | null }).pais_origen ?? null,
+        ciudad_origen: (c as { ciudad_origen?: string | null }).ciudad_origen ?? null,
         birth_year: c.birth_year,
         bio_short: c.bio_short,
         bio_long: c.bio_long,
@@ -719,6 +722,33 @@ function Inner({
           </Field>
           <Field label="País">
             <Input value={c.country ?? ""} onChange={(e) => field("country", e.target.value || null)} />
+          </Field>
+          <Field label="Género">
+            <select
+              className="h-9 w-full rounded-sm border border-border bg-background px-2 text-sm"
+              value={(c as { genero?: string | null }).genero ?? ""}
+              onChange={(e) => field("genero", e.target.value || null)}
+            >
+              <option value="">Sin indicar</option>
+              <option value="mujer">Mujer</option>
+              <option value="hombre">Hombre</option>
+              <option value="no_binario">No binario</option>
+              <option value="no_indica">Prefiero no indicar</option>
+            </select>
+          </Field>
+          <Field label="País de origen">
+            <Input
+              value={(c as { pais_origen?: string | null }).pais_origen ?? ""}
+              onChange={(e) => field("pais_origen", e.target.value || null)}
+              placeholder="España"
+            />
+          </Field>
+          <Field label="Ciudad de origen">
+            <Input
+              value={(c as { ciudad_origen?: string | null }).ciudad_origen ?? ""}
+              onChange={(e) => field("ciudad_origen", e.target.value || null)}
+              placeholder="Barcelona"
+            />
           </Field>
         </div>
       </Section>
