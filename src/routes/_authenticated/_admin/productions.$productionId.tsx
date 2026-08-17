@@ -18,6 +18,7 @@ import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { SuggestInput } from "@/components/suggest-input";
 import { SaveButton } from "@/components/save-button";
+import { useDirtyForm } from "@/lib/use-dirty-form";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
 
@@ -68,6 +69,7 @@ function ProductionEdit() {
     project_type_note: "",
   });
   const [saving, setSaving] = useState(false);
+  const { dirty, markClean } = useDirtyForm(form);
 
   const composersQ = useQuery({
     queryKey: ["composers-mini"],
@@ -130,7 +132,7 @@ function ProductionEdit() {
   useEffect(() => {
     if (data) {
       const d = data as any;
-      setForm({
+      const hydrated = {
         title: d.title ?? "",
         kind: d.kind ?? "",
         year: d.year ?? "",
@@ -163,8 +165,11 @@ function ProductionEdit() {
         imdb_url: d.imdb_url ?? "",
         external_composer: d.external_composer ?? "",
         project_type_note: (d as any).project_type_note ?? "",
-      });
+      };
+      setForm(hydrated);
+      markClean(hydrated as typeof form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   async function save() {
@@ -206,6 +211,7 @@ function ProductionEdit() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
+    markClean(form);
     refetch();
   }
 
@@ -478,7 +484,7 @@ function ProductionEdit() {
         <h2 className="mb-3 font-display text-2xl">Actividad en redes sociales</h2>
         <SocialActivityPanel productionId={productionId} />
       </div>
-      <SaveButton floating onClick={save} saving={saving} />
+      <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
     </div>
   );
 }

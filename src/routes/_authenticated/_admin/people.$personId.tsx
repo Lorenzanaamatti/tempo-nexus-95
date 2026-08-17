@@ -13,6 +13,7 @@ import { Trash2 } from "lucide-react";
 import { PersonEventsEditor } from "@/components/person-events-editor";
 import { PersonAssignmentsEditor } from "@/components/person-assignments-editor";
 import { SaveButton } from "@/components/save-button";
+import { useDirtyForm } from "@/lib/use-dirty-form";
 import { AssistantChat } from "@/components/assistant-chat";
 import { PersonIcFunctionsEditor } from "@/components/person-ic-functions-editor";
 import { IC_FUNCTION_GROUPS, IC_FUNCTION_LABEL, type IcTeamFunction } from "@/components/person-ic-functions-editor";
@@ -50,6 +51,7 @@ function PersonEdit() {
 
   const [form, setForm] = useState({ full_name: "", role: "ic_team" as PersonRole, email: "", phone: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const { dirty, markClean } = useDirtyForm(form);
   const [fnPicker, setFnPicker] = useState<string>("");
   const [isVirtual, setIsVirtual] = useState(false);
   const [photoPath, setPhotoPath] = useState<string | null>(null);
@@ -70,13 +72,15 @@ function PersonEdit() {
 
   useEffect(() => {
     if (data) {
-      setForm({
+      const hydrated = {
         full_name: data.full_name ?? "",
         role: data.role as PersonRole,
         email: data.email ?? "",
         phone: data.phone ?? "",
         notes: data.notes ?? "",
-      });
+      };
+      setForm(hydrated);
+      markClean(hydrated as typeof form);
       setIsVirtual(!!data.is_virtual_assistant);
       setPhotoPath(((data as any).photo_path as string | null) ?? null);
       setAssistantModel((data as any).assistant_model || "claude-sonnet-4-5-20250929");
@@ -102,6 +106,7 @@ function PersonEdit() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
+    markClean(form);
     refetch();
   }
 
@@ -324,7 +329,7 @@ function PersonEdit() {
           <AssistantChat personId={personId} name={form.full_name || "Asistente"} />
         </div>
       )}
-      <SaveButton floating onClick={save} saving={saving} />
+      <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
     </div>
   );
 }

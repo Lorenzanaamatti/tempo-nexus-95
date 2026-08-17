@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Trash2, Plus, Check, Users } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
+import { useDirtyForm } from "@/lib/use-dirty-form";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { EntityActionsEditor } from "@/components/entity-actions-editor";
@@ -100,11 +101,12 @@ function OpportunityDetail() {
     last_contact_date: "" as string,
   });
   const [saving, setSaving] = useState(false);
+  const { dirty, markClean } = useDirtyForm(form);
 
   useEffect(() => {
     if (oppQ.data) {
       const d: any = oppQ.data;
-      setForm({
+      const hydrated = {
         title: d.title ?? "",
         kind: (d.kind ?? "pitch") as OpportunityKind,
         target_production_id: d.target_production_id ?? "",
@@ -119,8 +121,11 @@ function OpportunityDetail() {
         detected_date: d.detected_date ?? "",
         expected_close_date: d.expected_close_date ?? "",
         last_contact_date: d.last_contact_date ?? "",
-      });
+      };
+      setForm(hydrated);
+      markClean(hydrated as typeof form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oppQ.data]);
 
   async function save() {
@@ -144,6 +149,7 @@ function OpportunityDetail() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
+    markClean(form);
     qc.invalidateQueries({ queryKey: ["opportunity", opportunityId] });
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
@@ -363,7 +369,7 @@ function OpportunityDetail() {
       <section className="mt-10">
         <EntityDocumentsEditor subjectType="opportunity" subjectId={opportunityId} />
       </section>
-      <SaveButton floating onClick={save} saving={saving} />
+      <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
     </div>
   );
 }

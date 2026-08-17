@@ -53,9 +53,15 @@ function NewTaskDialog({
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState<string>("pendiente");
   const [saving, setSaving] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const titleError = submitted && !title.trim() ? "Escribe qué hay que hacer." : null;
+  const areaError = submitted && !area ? "Elige el área a la que pertenece la tarea." : null;
 
   useEffect(() => {
-    if (isOpen) setArea(initialArea ?? "");
+    if (isOpen) {
+      setArea(initialArea ?? "");
+      setSubmitted(false);
+    }
   }, [isOpen, initialArea]);
 
   const peopleQ = useQuery({
@@ -89,8 +95,8 @@ function NewTaskDialog({
   });
 
   async function save() {
-    if (!title.trim()) { toast.error("Pon una descripción de la tarea"); return; }
-    if (!area) { toast.error("Elige un área"); return; }
+    setSubmitted(true);
+    if (!title.trim() || !area) return;
     setSaving(true);
     const { error } = await (supabase as any).from("actions").insert({
       title: title.trim(),
@@ -107,6 +113,7 @@ function NewTaskDialog({
     qc.invalidateQueries({ queryKey: ["tasks"] });
     qc.invalidateQueries({ queryKey: ["task-inbox"] });
     setTitle(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente");
+    setSubmitted(false);
     onClose();
   }
 
@@ -119,19 +126,34 @@ function NewTaskDialog({
         <div className="grid gap-3">
           <div>
             <Label className="text-xs">Descripción</Label>
-            <Textarea value={title} onChange={(e) => setTitle(e.target.value)} placeholder="¿Qué hay que hacer?" rows={3} />
+            <Textarea
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="¿Qué hay que hacer?"
+              rows={3}
+              aria-invalid={!!titleError}
+              aria-describedby={titleError ? "task-title-error" : undefined}
+            />
+            {titleError && (
+              <p id="task-title-error" className="mt-1 text-xs text-destructive">{titleError}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Área</Label>
               <Select value={area || undefined} onValueChange={(v) => setArea(v as TaskArea)}>
-                <SelectTrigger><SelectValue placeholder="Elige un área" /></SelectTrigger>
+                <SelectTrigger aria-invalid={!!areaError} aria-describedby={areaError ? "task-area-error" : undefined}>
+                  <SelectValue placeholder="Elige un área" />
+                </SelectTrigger>
                 <SelectContent>
                   {TASK_AREAS.map((a) => (
                     <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {areaError && (
+                <p id="task-area-error" className="mt-1 text-xs text-destructive">{areaError}</p>
+              )}
             </div>
             <div>
               <Label className="text-xs">Subárea</Label>
