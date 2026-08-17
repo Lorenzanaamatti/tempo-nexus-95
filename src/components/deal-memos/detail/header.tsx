@@ -11,11 +11,13 @@ import { formatDateEs } from "@/lib/dates";
 import { buildNextReference, type DealMemoEstado } from "@/lib/deal-memo-constants";
 import { EstadoBadge } from "@/components/deal-memos/estado-badge";
 import { generateDealMemoVersion } from "@/lib/deal-memos.functions";
+import { SendEmailDialog } from "@/components/deal-memos/detail/send-email-dialog";
 
 export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void }) {
   const qc = useQueryClient();
   const generate = useServerFn(generateDealMemoVersion);
   const [busy, setBusy] = useState(false);
+  const [emailMode, setEmailMode] = useState<"reenvio" | "reminder" | null>(null);
 
   const allRefsQ = useQuery({
     queryKey: ["dm-refs-min"],
@@ -96,7 +98,7 @@ export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <ContextualActions dm={dm} busy={busy} onAiGenerate={aiGenerate} />
+            <ContextualActions dm={dm} busy={busy} onAiGenerate={aiGenerate} onEmail={setEmailMode} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 w-9 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
@@ -110,11 +112,21 @@ export function DealMemoHeader({ dm, onChange }: { dm: any; onChange: () => void
           </div>
         </div>
       </div>
+      <SendEmailDialog
+        dm={dm}
+        mode={emailMode ?? "reenvio"}
+        open={!!emailMode}
+        onOpenChange={(o) => !o && setEmailMode(null)}
+        onSent={() => {
+          qc.invalidateQueries({ queryKey: ["dm-events", dm.id] });
+          onChange();
+        }}
+      />
     </div>
   );
 }
 
-function ContextualActions({ dm, busy, onAiGenerate }: { dm: any; busy: boolean; onAiGenerate: () => void }) {
+function ContextualActions({ dm, busy, onAiGenerate, onEmail }: { dm: any; busy: boolean; onAiGenerate: () => void; onEmail: (m: "reenvio" | "reminder") => void }) {
   const estado = dm.estado as DealMemoEstado;
   if (estado === "borrador") {
     return (
