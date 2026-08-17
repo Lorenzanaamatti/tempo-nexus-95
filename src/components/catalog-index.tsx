@@ -165,7 +165,6 @@ export function CatalogIndex(props: CatalogIndexProps) {
             </div>
           ))}
         </div>
-        <PaginationBar latencyMs={pg.lastLatencyMs} page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       ) : (
         <>
@@ -187,7 +186,6 @@ export function CatalogIndex(props: CatalogIndexProps) {
             );
           })}
         </div>
-        <PaginationBar latencyMs={pg.lastLatencyMs} page={pg.page} pageCount={pg.pageCountOf(total)} pageSize={pg.pageSize} total={total} onPageChange={pg.setPage} onPageSizeChange={pg.setPageSize} label="registros" />
         </>
       )}
     </div>
