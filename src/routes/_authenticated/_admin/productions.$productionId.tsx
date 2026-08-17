@@ -242,7 +242,7 @@ function ProductionEdit() {
     ...(companiesQ.data ?? []).map((c: any) => ({ id: c.id, label: c.name as string, hint: "Productora (CRM)" })),
     ...(partnersQ.data ?? [])
       .filter((p: any) => !(companiesQ.data ?? []).some((c: any) => c.id === p.id))
-      .map((p: any) => ({ id: p.id, label: p.nombre as string, hint: p.tipo as string })),
+      .map((p: any) => ({ id: `free:${p.id}`, label: p.nombre as string, hint: p.tipo as string })),
   ];
   const selectedPartnerName =
     (companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? "";
