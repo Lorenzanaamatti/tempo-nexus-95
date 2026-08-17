@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreatableSelect } from "@/components/creatable-select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -255,36 +256,57 @@ function ProduccionDetalle() {
           </div>
           <div>
             <Label>Cliente / Productora</Label>
-            <Select value={form.partner_company_id || undefined} onValueChange={(v) => setForm({ ...form, partner_company_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
-              <SelectContent>
-                {(companiesQ.data ?? []).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <CreatableSelect
+              value={(companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? ""}
+              options={(companiesQ.data ?? []).map((c: any) => ({ id: c.id, label: c.name }))}
+              placeholder="Escribe o selecciona productora…"
+              onPick={(id) => setForm({ ...form, partner_company_id: id })}
+              onCreate={async (label) => {
+                const { data, error } = await (supabase as any)
+                  .from("production_companies").insert({ name: label }).select("id").single();
+                if (error) { toast.error(error.message); return null; }
+                qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
+                toast.success("Productora creada en el CRM");
+                return data.id as string;
+              }}
+              createLabel="Crear productora"
+            />
           </div>
           <div>
             <Label>Plataforma</Label>
-            <Select value={form.platform_id || undefined} onValueChange={(v) => setForm({ ...form, platform_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
-              <SelectContent>
-                {(platformsQ.data ?? []).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <CreatableSelect
+              value={(platformsQ.data ?? []).find((p: any) => p.id === form.platform_id)?.name ?? ""}
+              options={(platformsQ.data ?? []).map((p: any) => ({ id: p.id, label: p.name }))}
+              placeholder="Escribe o selecciona plataforma…"
+              onPick={(id) => setForm({ ...form, platform_id: id })}
+              onCreate={async (label) => {
+                const { data, error } = await (supabase as any)
+                  .from("platforms").insert({ name: label }).select("id").single();
+                if (error) { toast.error(error.message); return null; }
+                qc.invalidateQueries({ queryKey: ["platforms-mini"] });
+                toast.success("Plataforma creada en el CRM");
+                return data.id as string;
+              }}
+              createLabel="Crear plataforma"
+            />
           </div>
           <div>
             <Label>Director</Label>
-            <Select
-              value={form.director_id || undefined}
-              onValueChange={(v) => {
-                const d = (directorsQ.data ?? []).find((x: any) => x.id === v);
-                setForm({ ...form, director_id: v, director: d?.full_name ?? form.director });
+            <CreatableSelect
+              value={(directorsQ.data ?? []).find((d: any) => d.id === form.director_id)?.full_name ?? form.director}
+              options={(directorsQ.data ?? []).map((d: any) => ({ id: d.id, label: d.full_name }))}
+              placeholder="Escribe o selecciona director…"
+              onPick={(id, label) => setForm({ ...form, director_id: id, director: label })}
+              onCreate={async (label) => {
+                const { data, error } = await (supabase as any)
+                  .from("directors").insert({ full_name: label }).select("id").single();
+                if (error) { toast.error(error.message); return null; }
+                qc.invalidateQueries({ queryKey: ["directors-mini"] });
+                toast.success("Director creado en el CRM");
+                return data.id as string;
               }}
-            >
-              <SelectTrigger><SelectValue placeholder={form.director || "Selecciona…"} /></SelectTrigger>
-              <SelectContent>
-                {(directorsQ.data ?? []).map((d: any) => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+              createLabel="Crear director"
+            />
           </div>
           <div><Label>País de producción</Label><Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></div>
           <div><Label>Idioma original</Label><Input value={form.original_language} onChange={(e) => setForm({ ...form, original_language: e.target.value })} /></div>
