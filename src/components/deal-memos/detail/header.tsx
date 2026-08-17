@@ -143,7 +143,7 @@ function ContextualActions({ dm, busy, onAiGenerate, onEmail }: { dm: any; busy:
     return (
       <div className="flex items-center gap-2">
         <span className="rounded-sm bg-muted px-2 py-1 text-xs text-muted-foreground">⏳ Esperando revisión de {dm.validador_interno?.nombre ?? "—"}</span>
-        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
+        <Button variant="outline" size="sm" onClick={() => onEmail("reenvio")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
       </div>
     );
   }
@@ -154,7 +154,7 @@ function ContextualActions({ dm, busy, onAiGenerate, onEmail }: { dm: any; busy:
     return (
       <div className="flex items-center gap-2">
         <span className="rounded-sm bg-muted px-2 py-1 text-xs text-muted-foreground">⏳ Esperando aprobación de {dm.validador_final?.nombre ?? "—"}</span>
-        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
+        <Button variant="outline" size="sm" onClick={() => onEmail("reenvio")}><Mail className="mr-1 h-4 w-4" />Reenviar email</Button>
       </div>
     );
   }
@@ -164,7 +164,7 @@ function ContextualActions({ dm, busy, onAiGenerate, onEmail }: { dm: any; busy:
         <span className="text-xs text-muted-foreground">
           Enviado el {formatDateEs(dm.fecha_envio)} · Plazo: {formatDateEs(dm.fecha_limite_respuesta)}
         </span>
-        <Button variant="outline" size="sm" onClick={() => toast("Función disponible en Bloque 6")}><Send className="mr-1 h-4 w-4" />Enviar reminder</Button>
+        <Button variant="outline" size="sm" onClick={() => onEmail("reminder")}><Send className="mr-1 h-4 w-4" />Enviar reminder</Button>
       </div>
     );
   }

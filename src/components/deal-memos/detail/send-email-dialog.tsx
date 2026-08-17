@@ -46,7 +46,7 @@ export function SendEmailDialog({
       });
   }, [open, dm.id, dm.referencia, dm.obra, dm.destinatario_final_email, mode]);
 
-  async function logEvent(tipo: string) {
+  async function logEvent(tipo: "reminder_enviado" | "enviado_a_destinatario") {
     await supabase.from("deal_memo_eventos").insert({
       deal_memo_id: dm.id,
       tipo_evento: tipo,
@@ -58,7 +58,7 @@ export function SendEmailDialog({
   async function copyAll() {
     await navigator.clipboard.writeText(`Para: ${to}\nAsunto: ${asunto}\n\n${cuerpo}`);
     toast.success("Email copiado al portapapeles");
-    await logEvent("email_copiado");
+    await logEvent(mode === "reminder" ? "reminder_enviado" : "enviado_a_destinatario");
   }
 
   async function openMail() {
@@ -66,7 +66,7 @@ export function SendEmailDialog({
     const href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     window.open(href, "_blank");
     toast.success("Abriendo tu cliente de correo");
-    await logEvent(mode === "reminder" ? "reminder_enviado" : "email_reenviado");
+    await logEvent(mode === "reminder" ? "reminder_enviado" : "enviado_a_destinatario");
   }
 
   return (
