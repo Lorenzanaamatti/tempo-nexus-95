@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { usePersistedState } from "@/lib/use-persisted-filters";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposerThumb } from "@/components/composer-thumb";
-import { Plus, LayoutGrid, Rows3 } from "lucide-react";
+import { Plus, LayoutGrid, Rows3, X } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import { ListSkeleton } from "@/components/list-states";
 
@@ -38,6 +38,23 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
   curator:    { title: "Curadores musicales",  singular: "curador musical",    intro: "Curadores y selectores musicales." },
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
+type RoleFilter = RosterRole | "todos";
+const ROLE_TABS: Array<{ value: RoleFilter; label: string }> = [
+  { value: "todos", label: "Todos" },
+  { value: "composer", label: "Compositor" },
+  { value: "artist", label: "Artista" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "specialist", label: "Especialista" },
+  { value: "curator", label: "Curador" },
+  { value: "other", label: "Otro" },
+];
+type Genero = "mujer" | "hombre" | "no_binario";
+const GENERO_LABEL: Record<string, string> = {
+  mujer: "Mujer",
+  hombre: "Hombre",
+  no_binario: "No binario",
+  no_indica: "Prefiero no indicar",
+};
 
 /** Iniciales para el avatar generado cuando no hay foto. */
 function initials(name?: string | null) {
@@ -48,27 +65,53 @@ function initials(name?: string | null) {
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/")({
   component: ComposersIndex,
-  validateSearch: (s: { role?: unknown }): { role: RosterRole } => {
-    const v = typeof s.role === "string" ? s.role : "composer";
-    return { role: (ALL_ROLES.includes(v as RosterRole) ? v : "composer") as RosterRole };
+  validateSearch: (s: Record<string, unknown>) => {
+    const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
+    const r = str(s.role) || "composer";
+    const role = (r === "todos" || r === "other" || ALL_ROLES.includes(r as RosterRole)
+      ? r
+      : "composer") as RoleFilter;
+    const g = str(s.genero);
+    return {
+      role,
+      genero: (["mujer", "hombre", "no_binario"].includes(g) ? g : "") as Genero | "",
+      pais: str(s.pais),
+      ciudad: str(s.ciudad),
+      q: str(s.q),
+    };
   },
 });
 
 function ComposersIndex() {
-  const { role } = Route.useSearch() as { role: RosterRole };
-  const meta = ROLE_TITLE[role];
-  const [q, setQ] = usePersistedState("roster.q", "");
+  const { role, genero, pais, ciudad, q } = Route.useSearch();
+  const navigate = useNavigate({ from: "/composers" });
+  const setSearch = (patch: Record<string, string>) =>
+    navigate({ to: ".", search: (prev) => ({ ...prev, ...patch }) });
+  const setQ = (v: string) => setSearch({ q: v });
+  const meta =
+    role === "todos" || role === "other"
+      ? {
+          title: role === "todos" ? "Roster completo" : "Otros",
+          singular: "representado",
+          intro: "Todas las personas y entidades representadas por INTERESANTE COMPAÑÍA.",
+        }
+      : ROLE_TITLE[role];
   const [tagFilter, setTagFilter] = usePersistedState<string | null>("roster.tag", null);
   const [groupByTag, setGroupByTag] = usePersistedState("roster.groupByTag", false);
   const [viewMode, setViewMode] = usePersistedState<"list" | "cards">("roster.viewMode", "list");
   const { data, isLoading } = useQuery({
-    queryKey: ["composers", role, q],
+    queryKey: ["composers", "roster", genero, pais, ciudad, q],
     queryFn: async () => {
       let query = supabase
         .from("composers")
-        .select("id, full_name, city, country, availability, tags, specialist_tags, specialist_subtype, photo_path, roster_role, tier")
-        .eq("roster_role", role)
+        .select(
+          "id, full_name, city, country, availability, tags, specialist_tags, specialist_subtype, photo_path, roster_role, tier, genero, pais_origen, ciudad_origen",
+        )
+        .neq("roster_role", "ic_company")
         .order("full_name", { ascending: true });
+      if (genero) query = query.eq("genero", genero);
+      if (pais) query = query.eq("pais_origen", pais);
+      if (ciudad) query = query.ilike("ciudad_origen", `%${ciudad}%`);
       if (q.trim()) {
         const term = q.trim().replace(/[%,]/g, " ");
         const like = `%${term}%`;
@@ -82,10 +125,27 @@ function ComposersIndex() {
     },
   });
 
+  const base = (data ?? []) as any[];
+  const roleCounts = ROLE_TABS.reduce<Record<string, number>>((acc, t) => {
+    acc[t.value] = t.value === "todos" ? base.length : base.filter((c) => c.roster_role === t.value).length;
+    return acc;
+  }, {});
+  const byRole = role === "todos" ? base : base.filter((c) => c.roster_role === role);
+  const paises = [...new Set(base.map((c) => (c.pais_origen ?? "").trim()).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, "es"),
+  );
+  const activeFilters = [
+    role !== "todos" ? { key: "role", label: ROLE_TABS.find((t) => t.value === role)?.label ?? role } : null,
+    genero ? { key: "genero", label: GENERO_LABEL[genero] ?? genero } : null,
+    pais ? { key: "pais", label: pais } : null,
+    ciudad ? { key: "ciudad", label: ciudad } : null,
+    q ? { key: "q", label: `“${q}”` } : null,
+  ].filter(Boolean) as Array<{ key: string; label: string }>;
+
   const allSpecialistTagsWithCount = (() => {
     if (role !== "specialist") return [] as Array<{ tag: string; count: number }>;
     const counts = new Map<string, number>();
-    for (const c of (data ?? []) as any[]) {
+    for (const c of byRole) {
       const set = new Set<string>();
       for (const t of (c.tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
       for (const t of (c.specialist_tags ?? []) as string[]) if (t?.trim()) set.add(t.trim());
@@ -96,7 +156,7 @@ function ComposersIndex() {
       .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, "es"));
   })();
 
-  const filtered = (data ?? []).filter((c: any) => {
+  const filtered = byRole.filter((c: any) => {
     if (role !== "specialist" || !tagFilter) return true;
     const pool = new Set<string>();
     for (const t of (c.tags ?? []) as string[]) if (t?.trim()) pool.add(t.trim());
