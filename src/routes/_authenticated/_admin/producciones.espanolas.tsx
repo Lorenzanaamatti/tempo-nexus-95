@@ -243,6 +243,7 @@ function ProduccionesEspanolas() {
             <LayoutGrid className="mr-1 h-4 w-4" /> Fichas
           </Button>
         </div>
+        <ExportRowsButton rows={rows} filename="producciones-espanolas" sheetName="Producciones ES" />
         <span className="font-mono text-xs text-muted-foreground">{rows.length} títulos</span>
       </div>
 
