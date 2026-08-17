@@ -54,6 +54,7 @@ function ProduccionesEspanolas() {
   const searchFn = useServerFn(searchTmdbEspanolas);
   const importFn = useServerFn(importProduccionEspanola);
   const syncFn = useServerFn(syncProduccionesEspanolas);
+  const yearFn = useServerFn(importEspanolasYearPage);
 
   const [q, setQ] = useState("");
   const [year, setYear] = useState(ALL);
@@ -65,6 +66,10 @@ function ProduccionesEspanolas() {
   const [syncing, setSyncing] = useState(false);
   const [importingId, setImportingId] = useState<number | null>(null);
   const [editing, setEditing] = useState<ProduccionEspanola | null>(null);
+  const [view, setView] = useState<"lista" | "fichas">("lista");
+  const [bulk, setBulk] = useState<{ running: boolean; label: string; done: number }>({
+    running: false, label: "", done: 0,
+  });
 
   const all = rowsQ.data ?? [];
   const years = useMemo(() => [...new Set(all.map((r) => r.year).filter(Boolean))].sort((a, b) => (b as number) - (a as number)), [all]);
@@ -121,6 +126,35 @@ function ProduccionesEspanolas() {
       toast.error(e?.message ?? "Error al sincronizar");
     } finally {
       setSyncing(false);
+    }
+  }
+
+  /** Importa el catálogo completo de cine español desde `desde` hasta el año en curso. */
+  async function runBulkImport(desde = 2020) {
+    const hasta = new Date().getFullYear();
+    setBulk({ running: true, label: `Preparando ${desde}–${hasta}…`, done: 0 });
+    let total = 0;
+    try {
+      for (let y = hasta; y >= desde; y--) {
+        let page = 1;
+        let totalPages = 1;
+        do {
+          const res = (await yearFn({ data: { year: y, page } })) as {
+            saved: number; totalPages: number; totalResults: number;
+          };
+          totalPages = Math.min(res.totalPages, 10);
+          total += res.saved;
+          setBulk({ running: true, label: `${y} · página ${page}/${totalPages}`, done: total });
+          page++;
+        } while (page <= totalPages);
+        qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
+      }
+      toast.success(`Catálogo importado: ${total} títulos entre ${desde} y ${hasta}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al importar el catálogo");
+    } finally {
+      setBulk({ running: false, label: "", done: total });
+      qc.invalidateQueries({ queryKey: ["producciones-espanolas"] });
     }
   }
 
