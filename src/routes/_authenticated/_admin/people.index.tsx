@@ -211,10 +211,31 @@ function PeopleIndex() {
                 </div>
                 <IcFunctionTags fns={(p.fns ?? []) as IcTeamFunction[]} />
               </div>
-              <div className="shrink-0 text-right text-xs leading-relaxed text-muted-foreground">
-                {p.email && <div className="truncate">{p.email}</div>}
-                {p.phone && <div className="truncate">{p.phone}</div>}
-              </div>
+              {(p.email || p.phone) && (
+                <div className="shrink-0 space-y-1 text-right text-xs leading-relaxed">
+                  <div className="smallcaps text-[9px] leading-none text-muted-foreground/70">Contacto</div>
+                  {p.email && (
+                    <a
+                      href={`mailto:${p.email}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="block truncate text-primary underline underline-offset-2 hover:opacity-80"
+                      title={`Escribir a ${p.email}`}
+                    >
+                      {p.email}
+                    </a>
+                  )}
+                  {p.phone && (
+                    <a
+                      href={`tel:${p.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="block truncate text-primary underline underline-offset-2 hover:opacity-80"
+                      title={`Llamar a ${p.phone}`}
+                    >
+                      {p.phone}
+                    </a>
+                  )}
+                </div>
+              )}
             </Link>
           ))}
         </div>
