@@ -10,6 +10,8 @@ type Props = {
   floating?: boolean;
   /** Optional label, only shown on hover for floating; inline always shows it. */
   label?: string;
+  /** Si se indica, el botón refleja si hay cambios sin guardar. */
+  dirty?: boolean;
   className?: string;
   size?: "sm" | "md" | "lg";
   title?: string;
@@ -26,6 +28,7 @@ export function SaveButton({
   disabled = false,
   floating = false,
   label = "Guardar",
+  dirty,
   className,
   size = "lg",
   title,
@@ -44,7 +47,16 @@ export function SaveButton({
     wasSaving.current = saving;
   }, [saving]);
 
-  const currentLabel = saving ? "Guardando…" : justSaved ? "Guardado" : label;
+  const noChanges = dirty === false && !saving && !justSaved;
+  const currentLabel = saving
+    ? "Guardando…"
+    : justSaved
+      ? "Guardado"
+      : noChanges
+        ? "Sin cambios"
+        : dirty
+          ? "Guardar cambios"
+          : label;
 
   const shapeCls = floating
     ? size === "sm"
@@ -60,14 +72,16 @@ export function SaveButton({
 
   const colorCls = justSaved
     ? "bg-success text-success-foreground hover:bg-success"
-    : "bg-primary text-primary-foreground hover:bg-primary/90";
+    : noChanges
+      ? "bg-muted text-muted-foreground hover:bg-muted"
+      : "bg-primary text-primary-foreground hover:bg-primary/90";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled || saving}
-      title={title ?? currentLabel}
+      disabled={disabled || saving || noChanges}
+      title={title ?? (noChanges ? "No hay cambios pendientes de guardar" : currentLabel)}
       aria-label={currentLabel}
       aria-live="polite"
       className={cn(
@@ -83,6 +97,9 @@ export function SaveButton({
     >
       {saving ? <Loader2 className={cn(iconCls, "animate-spin")} /> : <Check className={iconCls} />}
       {floating && <span>{currentLabel}</span>}
+      {floating && dirty && !saving && !justSaved && (
+        <span aria-hidden className="ml-1 h-2 w-2 rounded-full bg-primary-foreground/80" />
+      )}
     </button>
   );
 }
