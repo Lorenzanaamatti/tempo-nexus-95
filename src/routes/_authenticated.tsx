@@ -84,7 +84,7 @@ function Shell() {
             <SidebarTrigger />
             <div className="min-w-0 flex-1"><Breadcrumbs /></div>
             <GlobalSearch />
-            {role === "admin" && <TaskInboxBell />}
+            <TaskInboxBell />
           </header>
           <main className="flex-1">
             <Outlet />

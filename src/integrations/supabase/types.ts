@@ -16,8 +16,12 @@ export type Database = {
     Tables: {
       actions: {
         Row: {
+          accepted_at: string | null
           area: Database["public"]["Enums"]["action_area"] | null
+          assigned_at: string | null
           assignee_person_id: string | null
+          assignment_note: string | null
+          assignment_status: string
           created_at: string
           done: boolean
           done_at: string | null
@@ -38,8 +42,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepted_at?: string | null
           area?: Database["public"]["Enums"]["action_area"] | null
+          assigned_at?: string | null
           assignee_person_id?: string | null
+          assignment_note?: string | null
+          assignment_status?: string
           created_at?: string
           done?: boolean
           done_at?: string | null
@@ -60,8 +68,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepted_at?: string | null
           area?: Database["public"]["Enums"]["action_area"] | null
+          assigned_at?: string | null
           assignee_person_id?: string | null
+          assignment_note?: string | null
+          assignment_status?: string
           created_at?: string
           done?: boolean
           done_at?: string | null
@@ -2185,6 +2197,50 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          action_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       opportunities: {
         Row: {

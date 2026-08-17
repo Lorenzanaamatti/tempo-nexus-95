@@ -1,115 +1,121 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { Bell, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useMemo } from "react";
-import { TASK_AREA_LABEL, type TaskArea } from "@/lib/task-areas";
+import { Button } from "@/components/ui/button";
+import { useMyPersonId } from "@/lib/use-my-tasks";
+import {
+  useNotifications,
+  useMarkNotificationsRead,
+  usePendingAssignments,
+  useRespondAssignment,
+} from "@/lib/use-notifications";
+import { cn } from "@/lib/utils";
 
-function lastSeenKey(userId: string) {
-  return `tasks-last-seen-${userId}`;
+function relative(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return `hace ${Math.max(mins, 1)} min`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  return new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
 }
 
 export function TaskInboxBell() {
-  const { user } = useAuth();
+  const personId = useMyPersonId().data ?? null;
+  const notifQ = useNotifications();
+  const pendingQ = usePendingAssignments(personId);
+  const markRead = useMarkNotificationsRead();
+  const respond = useRespondAssignment();
 
-  // Find the person row linked to this user (via people.user_id or via composer)
-  const personQ = useQuery({
-    queryKey: ["my-person-id", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const { data: byUser } = await (supabase as any)
-        .from("people").select("id").eq("user_id", user!.id).maybeSingle();
-      if (byUser?.id) return byUser.id as string;
-      // fallback via composer
-      const { data: prof } = await supabase
-        .from("profiles").select("composer_id").eq("id", user!.id).maybeSingle();
-      if (!prof?.composer_id) return null;
-      const { data: byComp } = await (supabase as any)
-        .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
-      return (byComp?.id as string) ?? null;
-    },
-  });
-  const personId = personQ.data;
+  const notifications = notifQ.data ?? [];
+  const pending = pendingQ.data ?? [];
+  const unread = notifications.filter((n) => !n.read_at);
+  const count = unread.length + pending.length;
 
-  const lastSeen = useMemo(() => {
-    if (!user?.id) return null;
-    try { return localStorage.getItem(lastSeenKey(user.id)); } catch { return null; }
-  }, [user?.id]);
-
-  const inboxQ = useQuery({
-    queryKey: ["task-inbox", personId],
-    enabled: !!personId,
-    refetchInterval: 120_000,
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("actions")
-        .select("id, title, area, subarea, created_at, due_date")
-        .eq("assignee_person_id", personId)
-        .eq("done", false)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const newOnes = useMemo(() => {
-    if (!inboxQ.data) return [];
-    if (!lastSeen) return inboxQ.data;
-    return inboxQ.data.filter((t: any) => t.created_at > lastSeen);
-  }, [inboxQ.data, lastSeen]);
-
-  const count = newOnes.length;
-
-  function markSeen() {
-    if (!user?.id) return;
-    try { localStorage.setItem(lastSeenKey(user.id), new Date().toISOString()); } catch {}
-    inboxQ.refetch();
+  async function answer(actionId: string, accept: boolean) {
+    try {
+      await respond.mutateAsync({ actionId, accept });
+      toast.success(accept ? "Tarea aceptada" : "Tarea rechazada");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo registrar la respuesta");
+    }
   }
 
-  if (!personId) return null;
-
   return (
-    <Popover onOpenChange={(o) => { if (!o) markSeen(); }}>
+    <Popover
+      onOpenChange={(open) => {
+        if (!open && unread.length) markRead.mutate(unread.map((n) => n.id));
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           className="relative inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          aria-label="Buzón de tareas"
+          aria-label={count ? `Notificaciones: ${count} sin leer` : "Notificaciones"}
         >
           <Bell className="h-4 w-4" />
           {count > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-medium text-white">
+            <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
               {count}
             </span>
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent align="end" className="w-96 p-0">
         <div className="border-b border-border px-3 py-2">
-          <p className="font-display text-sm">Tareas asignadas a mí</p>
+          <p className="font-display text-sm">Notificaciones</p>
           <p className="text-[11px] text-muted-foreground">
-            {count > 0 ? `${count} nueva${count === 1 ? "" : "s"} desde tu última visita` : "Todo al día"}
+            {count > 0 ? `${count} sin atender` : "Todo al día"}
           </p>
         </div>
-        <ul className="max-h-80 divide-y divide-border overflow-auto">
-          {(inboxQ.data ?? []).slice(0, 8).map((t: any) => (
-            <li key={t.id} className="px-3 py-2 text-sm">
-              <p className="line-clamp-2">{t.title}</p>
-              <div className="mt-0.5 flex gap-2 smallcaps text-[10px] text-muted-foreground">
-                {t.area && <span>{TASK_AREA_LABEL[t.area as TaskArea]}</span>}
-                {t.subarea && <span>· {t.subarea}</span>}
-                {t.due_date && <span>· vence {t.due_date}</span>}
-              </div>
+
+        {pending.length > 0 && (
+          <div className="border-b border-border bg-primary/5">
+            <p className="px-3 pt-2 smallcaps text-[10px] text-muted-foreground">
+              Pendientes de aceptar
+            </p>
+            <ul className="divide-y divide-border">
+              {pending.map((t) => (
+                <li key={t.id} className="px-3 py-2">
+                  <p className="text-sm">{t.title}</p>
+                  <p className="mt-0.5 smallcaps text-[10px] text-muted-foreground">
+                    {[t.subarea, t.due_date ? `entrega ${t.due_date}` : null].filter(Boolean).join(" · ")}
+                  </p>
+                  <div className="mt-2 flex gap-2">
+                    <Button size="sm" className="h-7" disabled={respond.isPending} onClick={() => answer(t.id, true)}>
+                      <Check className="mr-1 h-3 w-3" /> Aceptar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7"
+                      disabled={respond.isPending}
+                      onClick={() => answer(t.id, false)}
+                    >
+                      <X className="mr-1 h-3 w-3" /> Rechazar
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <ul className="max-h-72 divide-y divide-border overflow-auto">
+          {notifications.slice(0, 12).map((n) => (
+            <li key={n.id} className={cn("px-3 py-2 text-sm", !n.read_at && "bg-muted/40")}>
+              <p className={cn(!n.read_at && "font-medium")}>{n.title}</p>
+              {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>}
+              <p className="mt-0.5 smallcaps text-[10px] text-muted-foreground">{relative(n.created_at)}</p>
             </li>
           ))}
-          {(!inboxQ.data || inboxQ.data.length === 0) && (
-            <li className="px-3 py-4 text-sm text-muted-foreground">No tienes tareas pendientes.</li>
+          {notifications.length === 0 && pending.length === 0 && (
+            <li className="px-3 py-4 text-sm text-muted-foreground">No tienes notificaciones.</li>
           )}
         </ul>
+
         <div className="border-t border-border px-3 py-2 text-right">
-          <Link to="/tareas" className="text-xs underline">Ver todas</Link>
+          <Link to="/tareas" className="text-xs underline">Ver tareas</Link>
         </div>
       </PopoverContent>
     </Popover>

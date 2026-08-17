@@ -49,6 +49,22 @@ export function FilmographyEditor({
     Array<{ id: string; label: string; person_id: string | null }>
   >([]);
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+
+  const years = useMemo(
+    () => [...new Set(rows.map((r) => r.year).filter((y): y is number => !!y))].sort((a, b) => b - a),
+    [rows],
+  );
+  const visibleRows = useMemo(() => {
+    const needle = normalize(query);
+    return rows.filter((r) => {
+      if (yearFilter !== "all" && String(r.year ?? "") !== yearFilter) return false;
+      if (!needle) return true;
+      return [r.title, r.director, r.production_company, r.platform]
+        .some((v) => v && normalize(v).includes(needle));
+    });
+  }, [rows, query, yearFilter]);
 
   useEffect(() => {
     (async () => {
@@ -129,11 +145,35 @@ export function FilmographyEditor({
         Cada Director, Productora, Plataforma y Supervisor se vinculan al CRM. Si no existen,
         usa "+ Crear nuevo" para añadirlos al instante.
       </p>
+      {rows.length > 3 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por título, director, plataforma…"
+            className="h-9 max-w-xs"
+          />
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            className="h-9 rounded-sm border border-border bg-background px-2 text-sm"
+            aria-label="Filtrar por año"
+          >
+            <option value="all">Todos los años</option>
+            {years.map((y) => <option key={y} value={String(y)}>{y}</option>)}
+          </select>
+          <span className="smallcaps text-[10px] text-muted-foreground">
+            {visibleRows.length} de {rows.length} obras
+          </span>
+        </div>
+      )}
       {rows.length === 0 ? (
         <EmptyState variant="inline" icon={Film} title="Sin filmografía" description="Añade la primera obra con el buscador de arriba." />
+      ) : visibleRows.length === 0 ? (
+        <EmptyState variant="filtered" icon={Film} title="Sin resultados" description="Ninguna obra coincide con la búsqueda o el año seleccionado." />
       ) : (
         <ul className="space-y-3">
-          {rows.map((r) => (
+          {visibleRows.map((r) => (
             <li key={r.id} className="rounded-sm border border-border bg-card/50 p-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>

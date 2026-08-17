@@ -7,20 +7,11 @@ import { Input } from "@/components/ui/input";
 import { ComposerThumb } from "@/components/composer-thumb";
 import { ListSkeleton, EmptyState, ErrorState } from "@/components/list-states";
 import { usePersistedState } from "@/lib/use-persisted-filters";
+import { isOpenProduction } from "@/lib/production-progress";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
 });
-
-const CLOSED_STATUS = new Set([
-  "finalizada",
-  "estrenada",
-  "cobrado",
-  "facturado",
-  "entregables_completados",
-  "compositor_descartado",
-  "comunicado_estreno",
-]);
 
 function year(d: string | null | undefined) {
   return d ? new Date(d).getFullYear() : null;
@@ -72,7 +63,7 @@ function RosterAll() {
     const openByComposer = new Map<string, number>();
     for (const p of data?.productions ?? []) {
       if (!p.composer_id) continue;
-      if (CLOSED_STATUS.has(String(p.status))) continue;
+      if (!isOpenProduction(p)) continue;
       openByComposer.set(p.composer_id, (openByComposer.get(p.composer_id) ?? 0) + 1);
     }
     return list
