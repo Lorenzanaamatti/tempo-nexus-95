@@ -57,7 +57,7 @@ export function ComposerBilling({ productions, composerId }: { productions: any[
         </div>
         <div className="rounded-sm border border-amber-500/40 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">− Comisión IC</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">−<Money value={totals.comision.previsto} compact /></div>
+          <div className="mt-1 font-display text-2xl tabular-nums"><Money value={-totals.comision.previsto} compact /></div>
           <div className="mt-1 text-xs text-muted-foreground">Facturada <Money value={totals.comision.fact} compact /> · Cobrada <Money value={totals.comision.cob} compact /></div>
         </div>
         <div className="rounded-sm border border-emerald-500/40 bg-card p-3">

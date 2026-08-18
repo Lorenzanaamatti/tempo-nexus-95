@@ -243,7 +243,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
           </div>
           <div className="rounded-sm border border-amber-500/40 bg-card p-4">
             <div className="smallcaps text-xs text-muted-foreground">Comisión IC (IC factura al representado)</div>
-            <div className="mt-1 font-display text-3xl tabular-nums">−<Money value={budgets.comm} /></div>
+            <div className="mt-1 font-display text-3xl tabular-nums"><Money value={-budgets.comm} /></div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
               <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums"><Money value={splitTotals.comision.facturado} /></span></div>
               <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums"><Money value={splitTotals.comision.cobrado} /></span></div>
