@@ -33,10 +33,12 @@ export function PartnersView({
   tipo,
   title,
   description,
+  actions,
 }: {
   tipo?: PartnerTipo;
   title: string;
   description: string;
+  actions?: React.ReactNode;
 }) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -73,6 +75,7 @@ export function PartnersView({
         <div className="flex flex-wrap items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar partner…" className="w-56 rounded-sm" />
           <ExportRowsButton rows={rows} filename="partners" sheetName="Partners" />
+          {actions}
           <Select value={ambito} onValueChange={setAmbito}>
             <SelectTrigger className="w-40 rounded-sm"><SelectValue placeholder="Ámbito" /></SelectTrigger>
             <SelectContent>
