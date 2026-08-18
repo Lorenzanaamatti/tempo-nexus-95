@@ -40,6 +40,8 @@ type Entry = {
   budget: number | null;
   commission: number | null;
   to?: { path: string; id: string };
+  externalId?: string;
+  espanolaId?: string;
 };
 
 function useFilmografia() {
@@ -118,6 +120,7 @@ function useFilmografia() {
           source: "Externo",
           budget: null,
           commission: null,
+          externalId: f.id,
         });
       }
 
@@ -137,6 +140,7 @@ function useFilmografia() {
           source: "Producción española",
           budget: null,
           commission: null,
+          espanolaId: e.id,
         });
       }
 
@@ -149,6 +153,31 @@ function useFilmografia() {
   });
 }
 
+function EntryTitle({ e, onExternal }: { e: Entry; onExternal: (e: Entry) => void }) {
+  if (e.to) {
+    return (
+      <Link to="/producciones/$productionId" params={{ productionId: e.to.id }} className="hover:underline">
+        {e.title}
+      </Link>
+    );
+  }
+  if (e.externalId) {
+    return (
+      <button type="button" className="text-left hover:underline" onClick={() => onExternal(e)}>
+        {e.title}
+      </button>
+    );
+  }
+  if (e.espanolaId) {
+    return (
+      <Link to="/producciones/espanolas" search={{ q: e.title } as any} className="hover:underline">
+        {e.title}
+      </Link>
+    );
+  }
+  return <>{e.title}</>;
+}
+
 function FilmografiaIC() {
   const q = useFilmografia();
   const [year, setYear] = useState(ALL);
@@ -156,6 +185,7 @@ function FilmografiaIC() {
   const [rep, setRep] = useState(ALL);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("list");
+  const [external, setExternal] = useState<Entry | null>(null);
 
   const entries = q.data?.entries ?? [];
   const years = useMemo(() => [...new Set(entries.map((e) => e.year))].sort((a, b) => (a < b ? 1 : -1)), [entries]);
@@ -249,9 +279,7 @@ function FilmografiaIC() {
                   <tr key={e.key} className="border-b border-border/60 last:border-0 align-top">
                     <td className="px-3 py-2">
                       <span className="font-display">
-                        {e.to ? (
-                          <Link to="/producciones/$productionId" params={{ productionId: e.to.id }} className="hover:underline">{e.title}</Link>
-                        ) : e.title}
+                        <EntryTitle e={e} onExternal={setExternal} />
                       </span>
                       <span className="ml-2 text-xs text-muted-foreground">{e.kind}</span>
                       {e.source !== "Producción IC" && (
@@ -298,9 +326,7 @@ function FilmografiaIC() {
                 )}
                 <div className="space-y-2 p-3">
                   <p className="font-display leading-tight">
-                    {e.to ? (
-                      <Link to="/producciones/$productionId" params={{ productionId: e.to.id }} className="hover:underline">{e.title}</Link>
-                    ) : e.title}
+                    <EntryTitle e={e} onExternal={setExternal} />
                   </p>
                   <p className="text-xs text-muted-foreground">{e.year} · {e.kind}</p>
                   <p className="text-xs text-muted-foreground">{[e.company, e.director].filter(Boolean).join(" · ") || "—"}</p>
@@ -322,6 +348,7 @@ function FilmografiaIC() {
       </div>
 
       <HistoricalDialog open={open} onOpenChange={setOpen} />
+      <ExternalCreditDialog entry={external} onOpenChange={(v) => !v && setExternal(null)} />
     </div>
   );
 }
