@@ -274,9 +274,74 @@ function compute(year: number, raw: any) {
       .sort((a, b) => b.value - a.value)
       .slice(0, n);
 
+  // ---------- DETALLE DE NOMBRES POR MÉTRICA (para tooltips) ----------
+  const names = (rows: any[], pick: (r: any) => any) =>
+    rows.map((r) => String(pick(r) ?? "").trim()).filter(Boolean);
+  const composerName = (c: any) => c?.artistic_name || c?.full_name || "Sin nombre";
+  const composerById = new Map(composers.map((c) => [c.id, c]));
+  const accountName = (a: any) => a.name || "Cuenta sin nombre";
+
+  const detalles: Record<string, string[]> = {
+    deal_memos_enviados: names(dmYear.filter((d) => d.estado !== "borrador"), (d) => d.obra || d.referencia),
+    deal_memos_aceptados: names(
+      dmYear.filter((d) => d.estado === "cerrado" || d.estado === "respondido"),
+      (d) => d.obra || d.referencia,
+    ),
+    pitchs_presentados: names(pitchsYear, (o) => o.title),
+    pitchs_composers: names(candidates, (c) => composerName(composerById.get(c.composer_id))),
+    vinculos_inter_ic: [
+      ...names(
+        productions.filter((p) => p.referido_por_composer_id && yearOf(p.created_at) === year),
+        (p) => `${p.title} · ref. ${composerName(composerById.get(p.referido_por_composer_id))}`,
+      ),
+      ...names(
+        oppsYear.filter((o) => o.referido_por_composer_id),
+        (o) => `${o.title} · ref. ${composerName(composerById.get(o.referido_por_composer_id))}`,
+      ),
+    ],
+    cuentas_contactadas: names(
+      accounts.filter((a) => a.status !== "sin_contacto" && yearOf(a.last_contact_date ?? a.updated_at) === year),
+      accountName,
+    ),
+    reuniones_partners: names(
+      accounts.filter((a) => a.status === "reunion" && yearOf(a.last_contact_date ?? a.updated_at) === year),
+      accountName,
+    ),
+    aliados_nuevos: names(accounts.filter((a) => yearOf(a.created_at) === year), accountName),
+    artistas_contactados: [
+      ...names((raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year), (p) => p.nombre),
+      ...names(
+        composers.filter((c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year),
+        composerName,
+      ),
+    ],
+    fichajes: names(fichajes, composerName),
+    reuniones_internacionales: intl
+      .filter((p) => num(p.reuniones_mantenidas) > 0)
+      .map((p) => `${p.nombre_empresa}${p.pais ? ` (${p.pais})` : ""} · ${num(p.reuniones_mantenidas)}`),
+    propuestas_internacionales: names(
+      intl.filter((p) => p.estado_propuesta !== "sin_propuesta"),
+      (p) => p.nombre_empresa,
+    ),
+    representados_activos: names(activos, composerName),
+    representados_con_produccion: names(activos.filter((c) => activeProdComposers.has(c.id)), composerName),
+    subvenciones_solicitadas: names(subvenciones.filter((s: any) => s.estado !== "Sin valorar"), (s) => s.nombre_convocatoria),
+    subvenciones_concedidas: names(subvenciones.filter((s: any) => s.estado === "Concedida"), (s) => s.nombre_convocatoria),
+    festivales_inscritos: names(festivales.filter((f: any) => f.estado !== "Identificado"), (f) => f.nombre_festival),
+    premios_candidaturas: names(premios.filter((p: any) => p.estado !== "Identificado"), (p) => p.nombre_premio),
+    apariciones_prensa: names(prensa.filter((p: any) => p.estado === "Publicada" || p.url), (p) => p.nombre),
+    campanas_lanzadas: names(campaigns, (c) => c.nombre),
+    publicaciones_realizadas: names(
+      publicaciones.filter((p: any) => p.estado === "publicado"),
+      (p) => p.contenido_resumen || p.canal,
+    ),
+    obligaciones_cumplidas: names(obligaciones.filter((o: any) => o.estado === "completada"), (o) => o.descripcion),
+  };
+
   return {
     objetivos,
     actuales,
+    detalles,
     economico: {
       facturacionAnual,
       monthly: byMonth.map((v, i) => ({ month: i, value: v, prev: byMonthPrev[i] })),
@@ -345,26 +410,26 @@ export function useEmpresaKpis(year: number) {
             .select(
               "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers!composer_id(full_name, artistic_name))",
             ),
-          db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date, referido_por_composer_id"),
+          db.from("opportunities").select("id, title, kind, statuses, estimated_value, created_at, updated_at, expected_close_date, referido_por_composer_id"),
           db
             .from("productions")
             .select(
               "id, title, kind, status, year, composer_id, platform, production_company, created_at, updated_at, delivery_date, actual_delivery_date, premiere_date, source_opportunity_id, referido_por_composer_id",
             ),
           db.from("composers").select("id, full_name, artistic_name, representation_status, representation_start_date, created_at, updated_at"),
-          db.from("target_accounts").select("id, status, last_contact_date, created_at, updated_at"),
+          db.from("target_accounts").select("id, name, status, last_contact_date, created_at, updated_at"),
           db.from("roster_prospects").select("id, nombre, estado, fecha_primer_contacto, fecha_decision"),
           db.from("international_prospects").select("id, nombre_empresa, pais, tipo, reuniones_mantenidas, estado_propuesta, fecha_primer_contacto"),
           db.from("marketing_campaigns").select("*"),
           db.from("empresa_objetivos").select("metrica, valor_objetivo").eq("anio", year),
-          db.from("deal_memos").select("id, estado, fecha_envio, created_at, importe_propuesto"),
+          db.from("deal_memos").select("id, referencia, obra, estado, fecha_envio, created_at, importe_propuesto"),
           db.from("opportunity_candidates").select("opportunity_id, composer_id"),
-          db.from("oportunidades_subvenciones").select("id, estado, fecha_limite_solicitud, importe_concedido, created_at"),
-          db.from("oportunidades_festivales").select("id, estado, fecha_deadline_inscripcion, created_at"),
-          db.from("oportunidades_premios").select("id, estado, fecha_limite_inscripcion, created_at"),
-          db.from("oportunidades_prensa").select("id, estado, url, fecha_publicacion_prevista, created_at"),
-          db.from("publicaciones").select("id, estado, fecha"),
-          db.from("obligaciones_comunicacion").select("id, estado, fecha_limite"),
+          db.from("oportunidades_subvenciones").select("id, nombre_convocatoria, estado, fecha_limite_solicitud, importe_concedido, created_at"),
+          db.from("oportunidades_festivales").select("id, nombre_festival, estado, fecha_deadline_inscripcion, created_at"),
+          db.from("oportunidades_premios").select("id, nombre_premio, estado, fecha_limite_inscripcion, created_at"),
+          db.from("oportunidades_prensa").select("id, nombre, estado, url, fecha_publicacion_prevista, created_at"),
+          db.from("publicaciones").select("id, contenido_resumen, canal, estado, fecha"),
+          db.from("obligaciones_comunicacion").select("id, descripcion, estado, fecha_limite"),
         ]);
       const first = [
         sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos,
