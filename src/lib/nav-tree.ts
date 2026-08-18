@@ -1,7 +1,7 @@
 import {
   CalendarDays, Film, Music, Sparkles, LibraryBig, FileSignature, Building2,
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
-  KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, Clapperboard,
+  KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
   Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen,
 } from "lucide-react";
 
