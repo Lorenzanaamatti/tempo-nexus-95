@@ -1,11 +1,75 @@
 /** Constantes del cuadro de mando de empresa (/empresa/kpis). */
 
-export const OBJETIVO_METRICAS = [
-  { key: "facturacion_anual", label: "Facturación anual", unit: "€" },
-  { key: "fichajes", label: "Fichajes", unit: "nº" },
-  { key: "reuniones_partners", label: "Reuniones con partners nacionales", unit: "nº" },
-  { key: "reuniones_internacionales", label: "Reuniones internacionales", unit: "nº" },
-  { key: "inversion_marketing", label: "Inversión en marketing", unit: "€" },
+export const OBJETIVO_GRUPOS = [
+  "Financiero",
+  "Comercial nacional",
+  "Internacional",
+  "Roster",
+  "Convocatorias",
+  "Marketing y comunicación",
+] as const;
+export type ObjetivoGrupo = (typeof OBJETIVO_GRUPOS)[number];
+
+export type ObjetivoMetricaDef = {
+  key: string;
+  label: string;
+  unit: "€" | "nº" | "días";
+  group: ObjetivoGrupo;
+  /** Cuando el objetivo se cumple bajando (p. ej. días de cobro). */
+  lowerIsBetter?: boolean;
+  hint?: string;
+};
+
+export const OBJETIVO_METRICAS: readonly ObjetivoMetricaDef[] = [
+  // Financiero
+  { key: "facturacion_anual", label: "Facturación anual", unit: "€", group: "Financiero" },
+  { key: "comisiones_ic", label: "Comisiones IC facturadas", unit: "€", group: "Financiero" },
+  { key: "deal_memos_enviados", label: "Deal memos enviados", unit: "nº", group: "Financiero" },
+  { key: "deal_memos_aceptados", label: "Deal memos cerrados / aceptados", unit: "nº", group: "Financiero" },
+  { key: "dias_cobro", label: "Días medios de cobro", unit: "días", group: "Financiero", lowerIsBetter: true },
+  // Comercial nacional
+  { key: "pitchs_presentados", label: "Pitchs presentados (total)", unit: "nº", group: "Comercial nacional" },
+  { key: "pitchs_composers", label: "Pitchs de representados presentados", unit: "nº", group: "Comercial nacional" },
+  {
+    key: "pitchs_por_composer",
+    label: "Mínimo de pitchs por representado",
+    unit: "nº",
+    group: "Comercial nacional",
+    hint: "Se mide sobre el representado con menos pitchs del año.",
+  },
+  {
+    key: "vinculos_inter_ic",
+    label: "Vínculos inter-IC (un representado trae trabajo a otro)",
+    unit: "nº",
+    group: "Comercial nacional",
+  },
+  { key: "cuentas_contactadas", label: "Cuentas objetivo contactadas", unit: "nº", group: "Comercial nacional" },
+  { key: "reuniones_partners", label: "Reuniones con partners nacionales", unit: "nº", group: "Comercial nacional" },
+  { key: "aliados_nuevos", label: "Nuevos potenciales aliados contactados", unit: "nº", group: "Comercial nacional" },
+  { key: "artistas_contactados", label: "Artistas contactados (prospección)", unit: "nº", group: "Comercial nacional" },
+  { key: "fichajes", label: "Artistas fichados", unit: "nº", group: "Comercial nacional" },
+  // Internacional
+  { key: "reuniones_internacionales", label: "Reuniones internacionales", unit: "nº", group: "Internacional" },
+  { key: "propuestas_internacionales", label: "Propuestas internacionales enviadas", unit: "nº", group: "Internacional" },
+  // Roster
+  { key: "representados_activos", label: "Representados activos", unit: "nº", group: "Roster" },
+  { key: "representados_con_produccion", label: "Representados con producción activa", unit: "nº", group: "Roster" },
+  // Convocatorias
+  { key: "subvenciones_solicitadas", label: "Subvenciones solicitadas", unit: "nº", group: "Convocatorias" },
+  { key: "subvenciones_concedidas", label: "Subvenciones concedidas", unit: "nº", group: "Convocatorias" },
+  { key: "festivales_inscritos", label: "Festivales con inscripción", unit: "nº", group: "Convocatorias" },
+  { key: "premios_candidaturas", label: "Candidaturas a premios", unit: "nº", group: "Convocatorias" },
+  { key: "apariciones_prensa", label: "Apariciones en prensa", unit: "nº", group: "Convocatorias" },
+  // Marketing y comunicación
+  { key: "inversion_marketing", label: "Inversión en marketing", unit: "€", group: "Marketing y comunicación" },
+  { key: "campanas_lanzadas", label: "Campañas lanzadas", unit: "nº", group: "Marketing y comunicación" },
+  { key: "publicaciones_realizadas", label: "Publicaciones realizadas", unit: "nº", group: "Marketing y comunicación" },
+  {
+    key: "obligaciones_cumplidas",
+    label: "Obligaciones de comunicación cumplidas",
+    unit: "nº",
+    group: "Marketing y comunicación",
+  },
 ] as const;
 
 export type ObjetivoMetrica = (typeof OBJETIVO_METRICAS)[number]["key"];

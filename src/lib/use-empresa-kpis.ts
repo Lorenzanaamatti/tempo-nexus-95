@@ -201,6 +201,73 @@ function compute(year: number, raw: any) {
   const objetivos: Record<string, number> = {};
   for (const o of raw.objetivos ?? []) objetivos[o.metrica] = Number(o.valor_objetivo);
 
+  // ---------- REALES POR MÉTRICA DE OBJETIVO ----------
+  const dealMemos: any[] = raw.dealMemos ?? [];
+  const dmYear = dealMemos.filter((d) => yearOf(d.fecha_envio ?? d.created_at) === year);
+  const comisionesIc = invoiced
+    .filter((s) => s.kind === "comision" && yearOf(invDate(s)) === year)
+    .reduce((t, s) => t + num(s.amount), 0);
+
+  const oppsYear = opportunities.filter((o) => yearOf(o.created_at) === year);
+  const pitchsYear = oppsYear.filter((o) => o.kind === "pitch");
+  const pitchIds = new Set(pitchsYear.map((o) => o.id));
+  const candidates: any[] = (raw.oppCandidates ?? []).filter((c: any) => pitchIds.has(c.opportunity_id));
+  const pitchsPorComposer = new Map<string, number>();
+  for (const c of candidates)
+    pitchsPorComposer.set(c.composer_id, (pitchsPorComposer.get(c.composer_id) ?? 0) + 1);
+  const minPitchsPorRepresentado = activos.length
+    ? Math.min(...activos.map((c) => pitchsPorComposer.get(c.id) ?? 0))
+    : 0;
+
+  const vinculosInterIc =
+    productions.filter((p) => p.referido_por_composer_id && yearOf(p.created_at) === year).length +
+    oppsYear.filter((o) => o.referido_por_composer_id).length;
+
+  const aliadosNuevos = accounts.filter((a) => yearOf(a.created_at) === year).length;
+  const artistasContactados =
+    (raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year).length +
+    composers.filter(
+      (c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year,
+    ).length;
+
+  const inYear = (rows: any[], field: string) => rows.filter((r) => yearOf(r[field] ?? r.created_at) === year);
+  const subvenciones = inYear(raw.subvenciones ?? [], "fecha_limite_solicitud");
+  const festivales = inYear(raw.festivales ?? [], "fecha_deadline_inscripcion");
+  const premios = inYear(raw.premios ?? [], "fecha_limite_inscripcion");
+  const prensa = inYear(raw.prensa ?? [], "fecha_publicacion_prevista");
+  const publicaciones = (raw.publicaciones ?? []).filter((p: any) => yearOf(p.fecha) === year);
+  const obligaciones = (raw.obligaciones ?? []).filter((o: any) => yearOf(o.fecha_limite) === year);
+
+  const actuales: Record<string, number> = {
+    facturacion_anual: facturacionAnual,
+    comisiones_ic: comisionesIc,
+    deal_memos_enviados: dmYear.filter((d) => d.estado !== "borrador").length,
+    deal_memos_aceptados: dmYear.filter((d) => d.estado === "cerrado" || d.estado === "respondido").length,
+    dias_cobro: avgCollectionDays(year) ?? 0,
+    pitchs_presentados: pitchsYear.length,
+    pitchs_composers: candidates.length,
+    pitchs_por_composer: minPitchsPorRepresentado,
+    vinculos_inter_ic: vinculosInterIc,
+    cuentas_contactadas: contactadas,
+    reuniones_partners: reunionesPartners,
+    aliados_nuevos: aliadosNuevos,
+    artistas_contactados: artistasContactados,
+    fichajes: fichajes.length,
+    reuniones_internacionales: intlReuniones,
+    propuestas_internacionales: intlPropuestas,
+    representados_activos: activos.length,
+    representados_con_produccion: activos.filter((c) => activeProdComposers.has(c.id)).length,
+    subvenciones_solicitadas: subvenciones.filter((s: any) => s.estado !== "Sin valorar").length,
+    subvenciones_concedidas: subvenciones.filter((s: any) => s.estado === "Concedida").length,
+    festivales_inscritos: festivales.filter((f: any) => f.estado !== "Identificado").length,
+    premios_candidaturas: premios.filter((p: any) => p.estado !== "Identificado").length,
+    apariciones_prensa: prensa.filter((p: any) => p.estado === "Publicada" || p.url).length,
+    inversion_marketing: gastoReal,
+    campanas_lanzadas: campaigns.length,
+    publicaciones_realizadas: publicaciones.filter((p: any) => p.estado === "publicado").length,
+    obligaciones_cumplidas: obligaciones.filter((o: any) => o.estado === "completada").length,
+  };
+
   const top = (m: Map<string, number>, n: number) =>
     Array.from(m.entries())
       .map(([name, value]) => ({ name, value }))
@@ -209,6 +276,7 @@ function compute(year: number, raw: any) {
 
   return {
     objetivos,
+    actuales,
     economico: {
       facturacionAnual,
       monthly: byMonth.map((v, i) => ({ month: i, value: v, prev: byMonthPrev[i] })),
@@ -267,29 +335,41 @@ export function useEmpresaKpis(year: number) {
   return useQuery({
     queryKey: ["empresa-kpis", year],
     queryFn: async () => {
-      const [sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos] =
+      const [
+        sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos,
+        dealMemos, oppCandidates, subvenciones, festivales, premios, prensa, publicaciones, obligaciones,
+      ] =
         await Promise.all([
           db
             .from("production_billing_sprints")
             .select(
-              "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers(full_name, artistic_name))",
+              "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers!composer_id(full_name, artistic_name))",
             ),
-          db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date"),
+          db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date, referido_por_composer_id"),
           db
             .from("productions")
             .select(
-              "id, title, kind, status, year, composer_id, platform, production_company, created_at, updated_at, delivery_date, actual_delivery_date, premiere_date, source_opportunity_id",
+              "id, title, kind, status, year, composer_id, platform, production_company, created_at, updated_at, delivery_date, actual_delivery_date, premiere_date, source_opportunity_id, referido_por_composer_id",
             ),
           db.from("composers").select("id, full_name, artistic_name, representation_status, representation_start_date, created_at, updated_at"),
-          db.from("target_accounts").select("id, status, last_contact_date, updated_at"),
+          db.from("target_accounts").select("id, status, last_contact_date, created_at, updated_at"),
           db.from("roster_prospects").select("id, nombre, estado, fecha_primer_contacto, fecha_decision"),
           db.from("international_prospects").select("id, nombre_empresa, pais, tipo, reuniones_mantenidas, estado_propuesta, fecha_primer_contacto"),
           db.from("marketing_campaigns").select("*"),
           db.from("empresa_objetivos").select("metrica, valor_objetivo").eq("anio", year),
+          db.from("deal_memos").select("id, estado, fecha_envio, created_at, importe_propuesto"),
+          db.from("opportunity_candidates").select("opportunity_id, composer_id"),
+          db.from("oportunidades_subvenciones").select("id, estado, fecha_limite_solicitud, importe_concedido, created_at"),
+          db.from("oportunidades_festivales").select("id, estado, fecha_deadline_inscripcion, created_at"),
+          db.from("oportunidades_premios").select("id, estado, fecha_limite_inscripcion, created_at"),
+          db.from("oportunidades_prensa").select("id, estado, url, fecha_publicacion_prevista, created_at"),
+          db.from("publicaciones").select("id, estado, fecha"),
+          db.from("obligaciones_comunicacion").select("id, estado, fecha_limite"),
         ]);
-      const first = [sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos].find(
-        (r: any) => r.error,
-      ) as any;
+      const first = [
+        sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos,
+        dealMemos, oppCandidates, subvenciones, festivales, premios, prensa, publicaciones, obligaciones,
+      ].find((r: any) => r.error) as any;
       if (first?.error) throw first.error;
       return {
         computed: compute(year, {
@@ -302,6 +382,14 @@ export function useEmpresaKpis(year: number) {
           intlProspects: intlProspects.data,
           campaigns: campaigns.data,
           objetivos: objetivos.data,
+          dealMemos: dealMemos.data,
+          oppCandidates: oppCandidates.data,
+          subvenciones: subvenciones.data,
+          festivales: festivales.data,
+          premios: premios.data,
+          prensa: prensa.data,
+          publicaciones: publicaciones.data,
+          obligaciones: obligaciones.data,
         }),
         fetchedAt: new Date(),
       };

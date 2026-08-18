@@ -3257,6 +3257,7 @@ export type Database = {
           partner_company_id: string | null
           partner_name: string | null
           probability_pct: number | null
+          referido_por_composer_id: string | null
           responsible_person_id: string | null
           statuses: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id: string | null
@@ -3276,6 +3277,7 @@ export type Database = {
           partner_company_id?: string | null
           partner_name?: string | null
           probability_pct?: number | null
+          referido_por_composer_id?: string | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id?: string | null
@@ -3295,6 +3297,7 @@ export type Database = {
           partner_company_id?: string | null
           partner_name?: string | null
           probability_pct?: number | null
+          referido_por_composer_id?: string | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id?: string | null
@@ -3308,6 +3311,13 @@ export type Database = {
             columns: ["partner_company_id"]
             isOneToOne: false
             referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_referido_por_composer_id_fkey"
+            columns: ["referido_por_composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
           {
@@ -4419,6 +4429,7 @@ export type Database = {
           production_director_person_id: string | null
           project_type: Database["public"]["Enums"]["production_kind"] | null
           project_type_note: string | null
+          referido_por_composer_id: string | null
           source_opportunity_id: string | null
           spanish_film_id: string | null
           start_date: string | null
@@ -4465,6 +4476,7 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          referido_por_composer_id?: string | null
           source_opportunity_id?: string | null
           spanish_film_id?: string | null
           start_date?: string | null
@@ -4511,6 +4523,7 @@ export type Database = {
           production_director_person_id?: string | null
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
+          referido_por_composer_id?: string | null
           source_opportunity_id?: string | null
           spanish_film_id?: string | null
           start_date?: string | null
@@ -4609,6 +4622,13 @@ export type Database = {
             columns: ["production_director_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productions_referido_por_composer_id_fkey"
+            columns: ["referido_por_composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
             referencedColumns: ["id"]
           },
           {

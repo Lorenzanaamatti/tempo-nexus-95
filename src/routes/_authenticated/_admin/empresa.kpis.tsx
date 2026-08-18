@@ -20,7 +20,7 @@ import { useEmpresaKpis } from "@/lib/use-empresa-kpis";
 import { formatEUR0, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs, formatShortDateTimeEs } from "@/lib/dates";
 import {
-  CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_METRICAS, yearOptions,
+  CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_GRUPOS, OBJETIVO_METRICAS, yearOptions,
   type CampaignCanal,
 } from "@/lib/kpi-constants";
 
@@ -79,6 +79,14 @@ function KpisPage() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-12">
+          {/* OBJETIVOS VS REAL */}
+          <Section
+            title={`Objetivos ${year} vs. real`}
+            action={<Button variant="outline" size="sm" onClick={() => setTargetsOpen(true)}>Editar objetivos</Button>}
+          >
+            <ObjetivosGrid objetivos={k.objetivos} actuales={k.actuales} />
+          </Section>
+
           {/* ECONÓMICO */}
           <Section title="Económico">
             <div className="grid gap-4 lg:grid-cols-3">
@@ -502,6 +510,60 @@ function Goal({ actual, target, money }: { actual: number; target?: number; mone
   );
 }
 
+function ObjetivosGrid({
+  objetivos, actuales,
+}: { objetivos: Record<string, number>; actuales: Record<string, number> }) {
+  const withTarget = OBJETIVO_METRICAS.filter((m) => objetivos[m.key] != null && objetivos[m.key] > 0);
+  if (!withTarget.length) {
+    return (
+      <p className="rounded-sm border border-dashed border-border p-6 text-sm text-muted-foreground">
+        Todavía no hay objetivos definidos para este año. Pulsa «Editar objetivos» para fijarlos.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-6">
+      {OBJETIVO_GRUPOS.map((g) => {
+        const rows = withTarget.filter((m) => m.group === g);
+        if (!rows.length) return null;
+        return (
+          <div key={g}>
+            <p className="smallcaps mb-2 text-xs text-muted-foreground">{g}</p>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {rows.map((m) => {
+                const target = objetivos[m.key];
+                const actual = actuales[m.key] ?? 0;
+                const pct = m.lowerIsBetter
+                  ? actual > 0
+                    ? Math.min(100, Math.round((target / actual) * 100))
+                    : 100
+                  : Math.min(100, Math.round((actual / target) * 100));
+                const fmt = (v: number) => (m.unit === "€" ? eur(v) : formatNumberEs(v));
+                const ok = m.lowerIsBetter ? actual > 0 && actual <= target : actual >= target;
+                return (
+                  <div key={m.key} className="rounded-sm border border-border bg-card/40 p-4">
+                    <p className="smallcaps text-xs text-muted-foreground">{m.label}</p>
+                    <p className={`mt-1 font-display text-3xl ${ok ? "" : "text-primary"}`}>
+                      {fmt(actual)}
+                      {m.unit === "días" ? " d" : ""}
+                    </p>
+                    <Progress className="mt-3" value={pct} />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {pct}% · objetivo {fmt(target)}
+                      {m.unit === "días" ? " d" : ""}
+                    </p>
+                    {m.hint && <p className="mt-1 text-[11px] text-muted-foreground/80">{m.hint}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function TargetsDialog({
   open, onOpenChange, year, current,
 }: { open: boolean; onOpenChange: (v: boolean) => void; year: number; current: Record<string, number> }) {
@@ -530,23 +592,35 @@ function TargetsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Establecer objetivos {year}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3">
-          {OBJETIVO_METRICAS.map((m) => (
-            <div key={m.key}>
-              <Label htmlFor={`obj-${m.key}`}>{m.label} ({m.unit})</Label>
-              <Input
-                id={`obj-${m.key}`}
-                inputMode="decimal"
-                value={valueFor(m.key)}
-                onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
-                placeholder="0"
-              />
-            </div>
-          ))}
+        <div className="space-y-6">
+          {OBJETIVO_GRUPOS.map((g) => {
+            const rows = OBJETIVO_METRICAS.filter((m) => m.group === g);
+            if (!rows.length) return null;
+            return (
+              <div key={g}>
+                <p className="smallcaps mb-2 border-b border-border pb-1 text-xs text-muted-foreground">{g}</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {rows.map((m) => (
+                    <div key={m.key}>
+                      <Label htmlFor={`obj-${m.key}`}>{m.label} ({m.unit})</Label>
+                      <Input
+                        id={`obj-${m.key}`}
+                        inputMode="decimal"
+                        value={valueFor(m.key)}
+                        onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
+                        placeholder="0"
+                      />
+                      {m.hint && <p className="mt-1 text-[11px] text-muted-foreground">{m.hint}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
