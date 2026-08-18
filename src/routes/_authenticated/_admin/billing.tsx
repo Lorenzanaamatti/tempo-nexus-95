@@ -121,10 +121,10 @@ function BillingPlan() {
       </header>
 
       <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Total filtrado" value=<Money value={totals.total} /> />
-        <Kpi label="Facturado" value=<Money value={totals.fact} /> accent="primary" />
-        <Kpi label="Cobrado" value=<Money value={totals.cob} /> accent="success" />
-        <Kpi label="Vencido sin facturar" value=<Money value={totals.vencido} /> accent="warn" />
+        <Kpi label="Total filtrado" value={<Money value={totals.total} />} />
+        <Kpi label="Facturado" value={<Money value={totals.fact} />} accent="primary" />
+        <Kpi label="Cobrado" value={<Money value={totals.cob} />} accent="success" />
+        <Kpi label="Vencido sin facturar" value={<Money value={totals.vencido} />} accent="warn" />
       </section>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">

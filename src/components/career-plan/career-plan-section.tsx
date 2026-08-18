@@ -561,7 +561,7 @@ export function ActionsLog({
           id: `fact-${p.id}`,
           fecha: `${p.year ?? new Date().getFullYear()}-12-31`,
           tipo: "Facturación",
-          descripcion: `${p.title ?? "Producción"} — $<Money value={p.fee_amount} compact />`,
+          descripcion: `${p.title ?? "Producción"} — ${formatEUR0(p.fee_amount)}`,
           resultado: null,
         });
       }

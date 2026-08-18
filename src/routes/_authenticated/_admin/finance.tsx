@@ -170,12 +170,12 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Mini label="Fee presupuestado" value=<Money value={totals.feeBudget} /> />
-        <Mini label="Trabajo facturado" value=<Money value={totals.workInv} /> hint={`Cobrado: $<Money value={totals.workPaid} />`} />
-        <Mini label="Trabajo pendiente" value=<Money value={totals.feeBudget - totals.workInv} /> />
-        <Mini label="Comisión IC presupuestada" value=<Money value={totals.commBudget} /> />
-        <Mini label="Comisión IC facturada" value=<Money value={totals.commInv} /> hint={`Cobrada: $<Money value={totals.commPaid} />`} />
-        <Mini label="Comisión IC pendiente" value=<Money value={totals.commBudget - totals.commInv} /> />
+        <Mini label="Fee presupuestado" value={<Money value={totals.feeBudget} />} />
+        <Mini label="Trabajo facturado" value={<Money value={totals.workInv} />} hint={`Cobrado: ${formatEUR(totals.workPaid)}`} />
+        <Mini label="Trabajo pendiente" value={<Money value={totals.feeBudget - totals.workInv} />} />
+        <Mini label="Comisión IC presupuestada" value={<Money value={totals.commBudget} />} />
+        <Mini label="Comisión IC facturada" value={<Money value={totals.commInv} />} hint={`Cobrada: ${formatEUR(totals.commPaid)}`} />
+        <Mini label="Comisión IC pendiente" value={<Money value={totals.commBudget - totals.commInv} />} />
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -327,10 +327,10 @@ function BusinessPlanPanel() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Mini label="Ingresos previstos" value=<Money value={totalBudgetIncome} /> hint={`Real: $<Money value={totalActualIncome} />`} />
-        <Mini label="Gastos previstos" value=<Money value={totalBudgetExpense} /> hint={`Real: $<Money value={totalActualExpense} />`} />
-        <Mini label="Margen previsto" value=<Money value={totalBudgetIncome - totalBudgetExpense} /> />
-        <Mini label="Margen real" value=<Money value={totalActualIncome - totalActualExpense} /> hint={`Desv.: $<Money value={(totalActualIncome - totalActualExpense) - (totalBudgetIncome - totalBudgetExpense)} />`} />
+        <Mini label="Ingresos previstos" value={<Money value={totalBudgetIncome} />} hint={`Real: ${formatEUR(totalActualIncome)}`} />
+        <Mini label="Gastos previstos" value={<Money value={totalBudgetExpense} />} hint={`Real: ${formatEUR(totalActualExpense)}`} />
+        <Mini label="Margen previsto" value={<Money value={totalBudgetIncome - totalBudgetExpense} />} />
+        <Mini label="Margen real" value={<Money value={totalActualIncome - totalActualExpense} />} hint={`Desv.: ${formatEUR((totalActualIncome - totalActualExpense) - (totalBudgetIncome - totalBudgetExpense))}`} />
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">

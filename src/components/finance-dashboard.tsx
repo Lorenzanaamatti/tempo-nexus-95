@@ -261,20 +261,20 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Previsto (sprints)" value=<Money value={totals.previsto} /> accent="muted" />
-        <KPI label="Facturado" value=<Money value={totals.facturado} /> accent="primary" />
-        <KPI label="Cobrado" value=<Money value={totals.cobrado} /> accent="success" />
-        <KPI label="Vencido sin facturar" value=<Money value={overdueTotal} /> accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
+        <KPI label="Previsto (sprints)" value={<Money value={totals.previsto} />} accent="muted" />
+        <KPI label="Facturado" value={<Money value={totals.facturado} />} accent="primary" />
+        <KPI label="Cobrado" value={<Money value={totals.cobrado} />} accent="success" />
+        <KPI label="Vencido sin facturar" value={<Money value={overdueTotal} />} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
       </div>
 
       {!composerId && (
         <section className="space-y-2">
           <h3 className="font-display text-xl">Presupuestos (deal memos)</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <KPI label="Total propuesto" value=<Money value={dmTotals.total} /> accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
-            <KPI label="En preparación / revisión" value=<Money value={dmTotals.enCurso} /> accent="muted" />
-            <KPI label="Enviados" value=<Money value={dmTotals.enviado} /> accent="warn" />
-            <KPI label="Cerrados" value=<Money value={dmTotals.cerrado} /> accent="success" />
+            <KPI label="Total propuesto" value={<Money value={dmTotals.total} />} accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
+            <KPI label="En preparación / revisión" value={<Money value={dmTotals.enCurso} />} accent="muted" />
+            <KPI label="Enviados" value={<Money value={dmTotals.enviado} />} accent="warn" />
+            <KPI label="Cerrados" value={<Money value={dmTotals.cerrado} />} accent="success" />
           </div>
           {dealMemos.length === 0 ? (
             <EmptyState variant="inline" icon={FileText} title="Sin presupuestos" description="Los deal memos que crees aparecerán aquí con su importe propuesto." />
