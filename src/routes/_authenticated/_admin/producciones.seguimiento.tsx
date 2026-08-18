@@ -36,7 +36,7 @@ function useSeguimiento() {
         db
           .from("productions")
           .select(
-            "id, title, status, start_date, created_at, updated_at, fee_amount, composer_id, partner_company_id, production_company, composers:composer_id(id, full_name), partner:partner_company_id(id, nombre)",
+            "id, title, status, start_date, created_at, updated_at, fee_amount, composer_id, partner_company_id, production_company, composers:composer_id(id, full_name), partner_company:production_companies(id, name)",
           ),
         db.from("production_billing_sprints").select("production_id, amount, invoiced_date, paid_date, status"),
         db.from("deal_memos").select("id, production_id"),
@@ -89,7 +89,7 @@ function useSeguimiento() {
           return {
             id: p.id,
             title: p.title as string,
-            cliente: p.partner?.nombre ?? p.production_company ?? null,
+            cliente: p.partner_company?.name ?? p.production_company ?? null,
             representado: p.composers?.full_name ?? null,
             stage: stageOf(p.status),
             hasPresupuesto,
