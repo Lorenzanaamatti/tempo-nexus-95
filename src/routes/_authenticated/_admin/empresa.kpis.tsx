@@ -17,7 +17,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
 import { useEmpresaKpis } from "@/lib/use-empresa-kpis";
-import { formatEUR, formatEUR0, formatNumberEs, parseAmount } from "@/lib/money";
+import { formatEUR, formatEUR0, formatIntEs, parseAmount } from "@/lib/money";
+import { Tooltip as UiTooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDateEs, formatShortDateTimeEs } from "@/lib/dates";
 import {
   CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_GRUPOS, OBJETIVO_METRICAS, yearOptions,
@@ -83,7 +84,7 @@ function KpisPage() {
             title={`Objetivos ${year} vs. real`}
             action={<Button variant="outline" size="sm" onClick={() => setTargetsOpen(true)}>Editar objetivos</Button>}
           >
-            <ObjetivosGrid objetivos={k.objetivos} actuales={k.actuales} />
+            <ObjetivosGrid objetivos={k.objetivos} actuales={k.actuales} detalles={k.detalles} />
           </Section>
 
           {/* ECONÓMICO */}
@@ -503,15 +504,32 @@ function Goal({ actual, target, money }: { actual: number; target?: number; mone
     <div className="mt-3">
       <Progress value={pct} />
       <p className="mt-1 text-xs text-muted-foreground">
-        {pct}% del objetivo · {money ? eur(target) : formatNumberEs(target)}
+        {pct}% del objetivo · {money ? eur(target) : formatIntEs(target)}
       </p>
     </div>
   );
 }
 
+function NamesTooltip({ names, children }: { names?: string[]; children: ReactNode }) {
+  if (!names || !names.length) return <>{children}</>;
+  return (
+    <UiTooltip>
+      <TooltipTrigger asChild>
+        <span className="cursor-help underline decoration-dotted underline-offset-4">{children}</span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">
+        <ul className="space-y-0.5 text-xs">
+          {names.slice(0, 15).map((n, i) => <li key={`${n}-${i}`}>{n}</li>)}
+          {names.length > 15 && <li className="opacity-70">y {names.length - 15} más…</li>}
+        </ul>
+      </TooltipContent>
+    </UiTooltip>
+  );
+}
+
 function ObjetivosGrid({
-  objetivos, actuales,
-}: { objetivos: Record<string, number>; actuales: Record<string, number> }) {
+  objetivos, actuales, detalles,
+}: { objetivos: Record<string, number>; actuales: Record<string, number>; detalles?: Record<string, string[]> }) {
   const withTarget = OBJETIVO_METRICAS.filter((m) => objetivos[m.key] != null && objetivos[m.key] > 0);
   if (!withTarget.length) {
     return (
@@ -537,14 +555,16 @@ function ObjetivosGrid({
                     ? Math.min(100, Math.round((target / actual) * 100))
                     : 100
                   : Math.min(100, Math.round((actual / target) * 100));
-                const fmt = (v: number) => (m.unit === "€" ? eur(v) : formatNumberEs(v));
+                const fmt = (v: number) => (m.unit === "€" ? eur(v) : formatIntEs(v));
                 const ok = m.lowerIsBetter ? actual > 0 && actual <= target : actual >= target;
                 return (
                   <div key={m.key} className="rounded-sm border border-border bg-card/40 p-4">
                     <p className="smallcaps text-xs text-muted-foreground">{m.label}</p>
                     <p className={`mt-1 font-display text-3xl ${ok ? "" : "text-primary"}`}>
-                      {fmt(actual)}
-                      {m.unit === "días" ? " d" : ""}
+                      <NamesTooltip names={detalles?.[m.key]}>
+                        {fmt(actual)}
+                        {m.unit === "días" ? " d" : ""}
+                      </NamesTooltip>
                     </p>
                     <Progress className="mt-3" value={pct} />
                     <p className="mt-1 text-xs text-muted-foreground">
