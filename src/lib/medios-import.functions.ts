@@ -5,18 +5,18 @@ import {
   domainOf,
   importInput,
   normalize,
-  queryWikidata,
   searchInput,
+  searchMediosWeb,
   type MedioCandidato,
 } from "@/lib/medios-import.server";
 
-/** Busca medios de comunicación en Wikidata y marca los que ya existen en Partners. */
-export const searchWikidataMedios = createServerFn({ method: "POST" })
+/** Busca medios de comunicación en la web en vivo y marca los que ya existen en Partners. */
+export const searchMedios = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => searchInput.parse(input))
   .handler(async ({ data, context }) => {
     const admin = await requireAdmin(context.userId);
-    const candidatos = await queryWikidata(data.pais, data.tipos as any, data.limit);
+    const candidatos = await searchMediosWeb(data);
 
     const { data: existing, error } = await admin
       .from("partners")
@@ -85,6 +85,7 @@ export const importMedios = createServerFn({ method: "POST" })
         website: item.website ?? null,
         contacto_principal: item.contacto_principal ?? null,
         contacto_email: item.contacto_email ?? null,
+        notas: item.notas ?? null,
         ambito: normalize(item.pais ?? "") === "espana" ? "Nacional" : "Internacional",
         fuente_externa_id: item.fuente_externa_id ?? null,
       };
