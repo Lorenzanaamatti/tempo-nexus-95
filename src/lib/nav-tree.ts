@@ -73,6 +73,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "A Producciones", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "A Partners", to: "/oportunidades/partners", icon: Building2 },
       { title: "A Roster", to: "/oportunidades/roster", icon: Music },
+      { title: "Pitches", to: "/oportunidades/pitches", icon: Sparkles },
       { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
       { title: "Festivales", to: "/oportunidades/festivales", icon: Sparkles },
       { title: "Premios", to: "/oportunidades/premios", icon: Target },
@@ -85,6 +86,7 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: Film,
     items: [
       { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
+      { title: "Seguimiento", to: "/producciones/seguimiento", icon: KanbanSquare },
       { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
       { title: "Producciones españolas", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
     ],
