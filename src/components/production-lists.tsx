@@ -156,6 +156,46 @@ export function StageBadge({ status }: { status: string | null }) {
   );
 }
 
+function EntryTitle({ p }: { p: ProductionRecord }) {
+  const cls = "font-display hover:underline";
+  if (p.source === "ficha") {
+    return p.composer_id ? (
+      <Link to="/composers/$composerId" params={{ composerId: p.composer_id }} className={cls}>
+        {p.title}
+      </Link>
+    ) : (
+      <span className="font-display">{p.title}</span>
+    );
+  }
+  if (p.source === "espanola") {
+    return (
+      <Link to="/producciones/espanolas" className={cls}>
+        {p.title}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/producciones/$productionId" params={{ productionId: p.id }} className={cls}>
+      {p.title}
+    </Link>
+  );
+}
+
+const SOURCE_LABEL: Record<NonNullable<ProductionRecord["source"]>, string> = {
+  ic: "IC",
+  ficha: "Ficha representado",
+  espanola: "CRM españolas",
+};
+
+function SourceBadge({ source }: { source: ProductionRecord["source"] }) {
+  if (!source || source === "ic") return null;
+  return (
+    <span className="ml-2 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] smallcaps text-muted-foreground">
+      {SOURCE_LABEL[source]}
+    </span>
+  );
+}
+
 export function ProductionsTable({ rows, showFinishDate = false }: { rows: ProductionRecord[]; showFinishDate?: boolean }) {
   return (
     <div className="overflow-x-auto rounded-sm border border-border">
@@ -175,8 +215,9 @@ export function ProductionsTable({ rows, showFinishDate = false }: { rows: Produ
           {rows.map((p) => (
             <tr key={p.id} className="hover:bg-muted/30">
               <td className="px-3 py-2">
-                <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
+                <EntryTitle p={p} />
                 {p.project_type && <span className="ml-2 text-xs text-muted-foreground">{PRODUCTION_KIND_LABEL[p.project_type]}</span>}
+                <SourceBadge source={p.source} />
               </td>
               <td className="px-3 py-2 text-muted-foreground">{composerName(p)}</td>
               <td className="px-3 py-2 text-muted-foreground">{clientName(p)}</td>
