@@ -198,7 +198,7 @@ function PitchDetail() {
       </div>
 
       <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
-        <ConfirmDeleteButton onConfirm={remove} label="Eliminar pitch" />
+        <ConfirmDeleteButton onConfirm={remove} title="Eliminar pitch" label="Eliminar pitch" />
         <Button onClick={save} disabled={saving}>Guardar</Button>
       </div>
     </div>
