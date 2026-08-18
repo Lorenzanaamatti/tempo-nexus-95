@@ -23,6 +23,13 @@ Hoy la pantalla solo permite fijar 5 objetivos (facturación, fichajes, reunione
 - Reuniones con partners nacionales (nº) — ya existe
 - Clientes activos nuevos (nº)
 - Oportunidades abiertas de producción (nº)
+- Pitchs presentados: total (nº)
+- Pitchs presentados de representados/composers (nº)
+- Mínimo de pitchs por representado (nº) — objetivo por cabeza; el cuadro señala quién está por debajo
+- Vínculos inter-IC (un representado da trabajo a otro) (nº)
+- Artistas fichados (nº)
+- Artistas contactados (nº)
+- Nuevos potenciales aliados contactados (nº)
 
 **Internacional**
 - Prospects internacionales contactados (nº)
