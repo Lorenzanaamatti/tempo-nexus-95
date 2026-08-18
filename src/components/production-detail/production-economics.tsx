@@ -1,9 +1,10 @@
+import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Money } from "@/components/money";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
 
-function Kpi({ label, value }: { label: string; value: string }) {
+function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-sm border border-border p-3">
       <div className="smallcaps text-[10px] text-muted-foreground">{label}</div>

@@ -1,3 +1,4 @@
+import type React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
@@ -218,7 +219,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
   );
 }
 
-function Mini({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Mini({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
     <div className="rounded-sm border border-border bg-card/40 p-4">
       <p className="smallcaps text-xs text-muted-foreground">{label}</p>

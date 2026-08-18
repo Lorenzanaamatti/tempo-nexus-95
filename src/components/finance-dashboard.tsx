@@ -1,3 +1,4 @@
+import type React from "react";
 import { useMemo, useState } from "react";
 import { Money } from "@/components/money";
 import { Receipt, BarChart3, FileText } from "lucide-react";
@@ -378,7 +379,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
   );
 }
 
-function KPI({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: "primary" | "success" | "warn" | "muted" }) {
+function KPI({ label, value, sub, accent }: { label: string; value: React.ReactNode; sub?: string; accent?: "primary" | "success" | "warn" | "muted" }) {
   const ring = accent === "primary" ? "border-primary/40" : accent === "success" ? "border-emerald-500/40" : accent === "warn" ? "border-amber-500/50" : "border-border";
   return (
     <div className={`rounded-sm border ${ring} bg-card p-3`}>

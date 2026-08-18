@@ -1,3 +1,4 @@
+import type React from "react";
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { Money } from "@/components/money";
 import { useMemo, useState } from "react";
@@ -228,7 +229,7 @@ function BillingPlan() {
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: string; accent?: "primary" | "success" | "warn" }) {
+function Kpi({ label, value, accent }: { label: string; value: React.ReactNode; accent?: "primary" | "success" | "warn" }) {
   const ring = accent === "primary" ? "border-primary/40" : accent === "success" ? "border-emerald-500/40" : accent === "warn" ? "border-amber-500/50" : "border-border";
   return (
     <div className={`rounded-sm border ${ring} bg-card p-3`}>
