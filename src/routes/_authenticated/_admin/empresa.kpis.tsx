@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
 import { useEmpresaKpis } from "@/lib/use-empresa-kpis";
 import { formatEUR, formatEUR0, formatIntEs, parseAmount } from "@/lib/money";
-import { Tooltip as UiTooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDateEs, formatShortDateTimeEs } from "@/lib/dates";
 import {
   CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_GRUPOS, OBJETIVO_METRICAS, yearOptions,
@@ -539,6 +539,7 @@ function ObjetivosGrid({
     );
   }
   return (
+    <TooltipProvider delayDuration={100}>
     <div className="space-y-6">
       {OBJETIVO_GRUPOS.map((g) => {
         const rows = withTarget.filter((m) => m.group === g);
@@ -580,6 +581,7 @@ function ObjetivosGrid({
         );
       })}
     </div>
+    </TooltipProvider>
   );
 }
 
