@@ -553,7 +553,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           titulo={r.platform ?? ""}
                           acciones={[
                             { label: "Añadir a Plataformas CRM", run: () => addPlatformToCrm(r.platform!) },
-                            { label: "Añadir a Partners (Medio)", run: () => addPartner(r.platform!, "Medio") },
+                            { label: "Añadir a Partners (Plataforma)", run: () => addPartner(r.platform!, "Plataforma") },
                             { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.platform!, account_type: "plataforma" }) },
                           ]}
                         />

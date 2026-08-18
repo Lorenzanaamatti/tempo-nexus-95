@@ -71,6 +71,7 @@ import { Route as AuthenticatedAdminProduccionesActivasRouteImport } from './rou
 import { Route as AuthenticatedAdminProduccionesProductionIdRouteImport } from './routes/_authenticated/_admin/producciones.$productionId'
 import { Route as AuthenticatedAdminPeoplePersonIdRouteImport } from './routes/_authenticated/_admin/people.$personId'
 import { Route as AuthenticatedAdminPartnersProductorasRouteImport } from './routes/_authenticated/_admin/partners.productoras'
+import { Route as AuthenticatedAdminPartnersPlataformasRouteImport } from './routes/_authenticated/_admin/partners.plataformas'
 import { Route as AuthenticatedAdminPartnersMediosRouteImport } from './routes/_authenticated/_admin/partners.medios'
 import { Route as AuthenticatedAdminPartnersInstitucionesRouteImport } from './routes/_authenticated/_admin/partners.instituciones'
 import { Route as AuthenticatedAdminPartnersPartnerIdRouteImport } from './routes/_authenticated/_admin/partners.$partnerId'
@@ -481,6 +482,12 @@ const AuthenticatedAdminPartnersProductorasRoute =
   AuthenticatedAdminPartnersProductorasRouteImport.update({
     id: '/partners/productoras',
     path: '/partners/productoras',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPartnersPlataformasRoute =
+  AuthenticatedAdminPartnersPlataformasRouteImport.update({
+    id: '/partners/plataformas',
+    path: '/partners/plataformas',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminPartnersMediosRoute =
@@ -914,6 +921,7 @@ export interface FileRoutesByFullPath {
   '/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/partners/instituciones': typeof AuthenticatedAdminPartnersInstitucionesRoute
   '/partners/medios': typeof AuthenticatedAdminPartnersMediosRoute
+  '/partners/plataformas': typeof AuthenticatedAdminPartnersPlataformasRoute
   '/partners/productoras': typeof AuthenticatedAdminPartnersProductorasRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
@@ -1032,6 +1040,7 @@ export interface FileRoutesByTo {
   '/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/partners/instituciones': typeof AuthenticatedAdminPartnersInstitucionesRoute
   '/partners/medios': typeof AuthenticatedAdminPartnersMediosRoute
+  '/partners/plataformas': typeof AuthenticatedAdminPartnersPlataformasRoute
   '/partners/productoras': typeof AuthenticatedAdminPartnersProductorasRoute
   '/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
@@ -1155,6 +1164,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/partners/$partnerId': typeof AuthenticatedAdminPartnersPartnerIdRoute
   '/_authenticated/_admin/partners/instituciones': typeof AuthenticatedAdminPartnersInstitucionesRoute
   '/_authenticated/_admin/partners/medios': typeof AuthenticatedAdminPartnersMediosRoute
+  '/_authenticated/_admin/partners/plataformas': typeof AuthenticatedAdminPartnersPlataformasRoute
   '/_authenticated/_admin/partners/productoras': typeof AuthenticatedAdminPartnersProductorasRoute
   '/_authenticated/_admin/people/$personId': typeof AuthenticatedAdminPeoplePersonIdRoute
   '/_authenticated/_admin/producciones/$productionId': typeof AuthenticatedAdminProduccionesProductionIdRoute
@@ -1277,6 +1287,7 @@ export interface FileRouteTypes {
     | '/partners/$partnerId'
     | '/partners/instituciones'
     | '/partners/medios'
+    | '/partners/plataformas'
     | '/partners/productoras'
     | '/people/$personId'
     | '/producciones/$productionId'
@@ -1395,6 +1406,7 @@ export interface FileRouteTypes {
     | '/partners/$partnerId'
     | '/partners/instituciones'
     | '/partners/medios'
+    | '/partners/plataformas'
     | '/partners/productoras'
     | '/people/$personId'
     | '/producciones/$productionId'
@@ -1517,6 +1529,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/partners/$partnerId'
     | '/_authenticated/_admin/partners/instituciones'
     | '/_authenticated/_admin/partners/medios'
+    | '/_authenticated/_admin/partners/plataformas'
     | '/_authenticated/_admin/partners/productoras'
     | '/_authenticated/_admin/people/$personId'
     | '/_authenticated/_admin/producciones/$productionId'
@@ -2002,6 +2015,13 @@ declare module '@tanstack/react-router' {
       path: '/partners/productoras'
       fullPath: '/partners/productoras'
       preLoaderRoute: typeof AuthenticatedAdminPartnersProductorasRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/partners/plataformas': {
+      id: '/_authenticated/_admin/partners/plataformas'
+      path: '/partners/plataformas'
+      fullPath: '/partners/plataformas'
+      preLoaderRoute: typeof AuthenticatedAdminPartnersPlataformasRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/partners/medios': {
@@ -2512,6 +2532,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPartnersPartnerIdRoute: typeof AuthenticatedAdminPartnersPartnerIdRoute
   AuthenticatedAdminPartnersInstitucionesRoute: typeof AuthenticatedAdminPartnersInstitucionesRoute
   AuthenticatedAdminPartnersMediosRoute: typeof AuthenticatedAdminPartnersMediosRoute
+  AuthenticatedAdminPartnersPlataformasRoute: typeof AuthenticatedAdminPartnersPlataformasRoute
   AuthenticatedAdminPartnersProductorasRoute: typeof AuthenticatedAdminPartnersProductorasRoute
   AuthenticatedAdminPeoplePersonIdRoute: typeof AuthenticatedAdminPeoplePersonIdRoute
   AuthenticatedAdminProduccionesProductionIdRoute: typeof AuthenticatedAdminProduccionesProductionIdRoute
@@ -2640,6 +2661,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPartnersInstitucionesRoute:
     AuthenticatedAdminPartnersInstitucionesRoute,
   AuthenticatedAdminPartnersMediosRoute: AuthenticatedAdminPartnersMediosRoute,
+  AuthenticatedAdminPartnersPlataformasRoute:
+    AuthenticatedAdminPartnersPlataformasRoute,
   AuthenticatedAdminPartnersProductorasRoute:
     AuthenticatedAdminPartnersProductorasRoute,
   AuthenticatedAdminPeoplePersonIdRoute: AuthenticatedAdminPeoplePersonIdRoute,

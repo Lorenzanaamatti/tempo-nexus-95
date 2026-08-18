@@ -76,7 +76,7 @@ export async function addProspectFichaje(nombre: string, notas?: string | null, 
 }
 
 /** Crea (o reutiliza) un partner del CRM unificado. */
-export async function addPartner(nombre: string, tipo: "Productora" | "Medio" | "Institución") {
+export async function addPartner(nombre: string, tipo: "Productora" | "Plataforma" | "Medio" | "Institución") {
   const n = nombre.trim();
   if (!n) return null;
   const { data: existing } = await db.from("partners").select("id").ilike("nombre", n).maybeSingle();

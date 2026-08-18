@@ -1,7 +1,7 @@
 import {
   CalendarDays, Film, Music, Sparkles, LibraryBig, FileSignature, Building2,
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
-  KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, Clapperboard,
+  KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
   Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen,
 } from "lucide-react";
 
@@ -61,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
         match: ["/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
       },
       { title: "Productoras", to: "/partners/productoras", icon: Building2 },
+      { title: "Plataformas", to: "/partners/plataformas", icon: MonitorPlay },
       { title: "Medios", to: "/partners/medios", icon: Newspaper },
       { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
     ],
