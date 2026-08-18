@@ -592,23 +592,35 @@ function TargetsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Establecer objetivos {year}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3">
-          {OBJETIVO_METRICAS.map((m) => (
-            <div key={m.key}>
-              <Label htmlFor={`obj-${m.key}`}>{m.label} ({m.unit})</Label>
-              <Input
-                id={`obj-${m.key}`}
-                inputMode="decimal"
-                value={valueFor(m.key)}
-                onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
-                placeholder="0"
-              />
-            </div>
-          ))}
+        <div className="space-y-6">
+          {OBJETIVO_GRUPOS.map((g) => {
+            const rows = OBJETIVO_METRICAS.filter((m) => m.group === g);
+            if (!rows.length) return null;
+            return (
+              <div key={g}>
+                <p className="smallcaps mb-2 border-b border-border pb-1 text-xs text-muted-foreground">{g}</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {rows.map((m) => (
+                    <div key={m.key}>
+                      <Label htmlFor={`obj-${m.key}`}>{m.label} ({m.unit})</Label>
+                      <Input
+                        id={`obj-${m.key}`}
+                        inputMode="decimal"
+                        value={valueFor(m.key)}
+                        onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
+                        placeholder="0"
+                      />
+                      {m.hint && <p className="mt-1 text-[11px] text-muted-foreground">{m.hint}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
