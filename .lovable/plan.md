@@ -23,6 +23,13 @@ Hoy la pantalla solo permite fijar 5 objetivos (facturación, fichajes, reunione
 - Reuniones con partners nacionales (nº) — ya existe
 - Clientes activos nuevos (nº)
 - Oportunidades abiertas de producción (nº)
+- Pitchs presentados: total (nº)
+- Pitchs presentados de representados/composers (nº)
+- Mínimo de pitchs por representado (nº) — objetivo por cabeza; el cuadro señala quién está por debajo
+- Vínculos inter-IC (un representado da trabajo a otro) (nº)
+- Artistas fichados (nº)
+- Artistas contactados (nº)
+- Nuevos potenciales aliados contactados (nº)
 
 **Internacional**
 - Prospects internacionales contactados (nº)
@@ -55,6 +62,12 @@ Todos son valores anuales; cada uno muestra objetivo, real acumulado, % de cumpl
 - El resto del cuadro de mando actual se mantiene; solo se enriquecen las tarjetas que ahora tendrán objetivo asociado.
 
 ## Detalles técnicos
+
+Notas de datos para los KPIs comerciales nuevos:
+- Pitchs: se cuentan desde `opportunities` de tipo pitch (total, y las que tienen representado asociado). El mínimo por representado se evalúa cabeza por cabeza sobre el roster activo.
+- Vínculos inter-IC: hoy no existe un campo que lo registre; se añadirá `referido_por_composer_id` en `productions`/`opportunities` para poder contarlos.
+- Artistas fichados / contactados: se distinguen de los compositores por el rol del representado o prospect.
+- Nuevos potenciales aliados: cuentas objetivo y partners creados y contactados por primera vez dentro del año.
 
 - `empresa_objetivos` ya es genérica (`anio`, `metrica`, `valor_objetivo`), así que no hace falta migración: solo ampliar `OBJETIVO_METRICAS` en `src/lib/kpi-constants.ts` con clave, etiqueta, unidad, grupo y dirección (mayor mejor / menor mejor).
 - `src/lib/use-empresa-kpis.ts`: añadir consultas a `deal_memos`, `candidacies`, `oportunidades_subvenciones`, `oportunidades_festivales`, `oportunidades_premios`, `oportunidades_prensa`, `publicaciones` y `obligaciones_comunicacion`, y devolver un mapa `actuals[metrica] = valor` para que la sección de objetivos sea genérica.
