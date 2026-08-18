@@ -48,23 +48,31 @@ function PartnerDetail() {
 
   async function save() {
     setSaving(true);
-    const { error } = await db.from("partners").update({
+    const { data: updated, error } = await db.from("partners").update({
       tipo: form.tipo, subtipo: form.subtipo || null, tipo_apoyo: form.tipo_apoyo ?? [], ambito: form.ambito || null,
       nombre: (form.nombre ?? "").trim(), pais: form.pais || null, ciudad: form.ciudad || null,
       contacto_principal: form.contacto_principal || null, contacto_email: form.contacto_email || null,
       contacto_telefono: form.contacto_telefono || null, website: form.website || null,
       relacion_ic: form.relacion_ic || null, notas: form.notas || null,
-    }).eq("id", partnerId);
+    }).eq("id", partnerId).select("id");
     setSaving(false);
     if (error) return toast.error(error.message);
+    if (!updated || updated.length === 0) {
+      return toast.error("No se guardó ningún cambio: no tienes permisos de edición sobre este partner.");
+    }
     toast.success("Partner actualizado");
-    qc.invalidateQueries({ queryKey: ["partners"] });
-    qc.invalidateQueries({ queryKey: ["partner-detail", partnerId] });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["partners"] }),
+      qc.invalidateQueries({ queryKey: ["partner-detail", partnerId] }),
+    ]);
   }
 
   async function remove() {
-    const { error } = await db.from("partners").delete().eq("id", partnerId);
+    const { data: removed, error } = await db.from("partners").delete().eq("id", partnerId).select("id");
     if (error) return toast.error(error.message);
+    if (!removed || removed.length === 0) {
+      return toast.error("No se eliminó: no tienes permisos sobre este partner.");
+    }
     toast.success("Partner eliminado");
     qc.invalidateQueries({ queryKey: ["partners"] });
     navigate({ to: "/partners" });
