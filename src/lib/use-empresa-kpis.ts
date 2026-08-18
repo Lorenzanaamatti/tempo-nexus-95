@@ -272,7 +272,7 @@ export function useEmpresaKpis(year: number) {
           db
             .from("production_billing_sprints")
             .select(
-              "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers!productions_composer_id_fkey(full_name, artistic_name))",
+              "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers!composer_id(full_name, artistic_name))",
             ),
           db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date"),
           db
