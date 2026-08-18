@@ -2379,6 +2379,7 @@ export type Database = {
           created_at: string
           id: string
           metrica: string
+          nota: string | null
           updated_at: string
           valor_objetivo: number
         }
@@ -2387,6 +2388,7 @@ export type Database = {
           created_at?: string
           id?: string
           metrica: string
+          nota?: string | null
           updated_at?: string
           valor_objetivo?: number
         }
@@ -2395,6 +2397,7 @@ export type Database = {
           created_at?: string
           id?: string
           metrica?: string
+          nota?: string | null
           updated_at?: string
           valor_objetivo?: number
         }
@@ -2981,6 +2984,123 @@ export type Database = {
             columns: ["representado_vinculado"]
             isOneToOne: false
             referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oportunidades_pitch_composers: {
+        Row: {
+          composer_id: string
+          pitch_id: string
+        }
+        Insert: {
+          composer_id: string
+          pitch_id: string
+        }
+        Update: {
+          composer_id?: string
+          pitch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_pitch_composers_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_pitch_composers_pitch_id_fkey"
+            columns: ["pitch_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_pitches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oportunidades_pitches: {
+        Row: {
+          created_at: string
+          estado: string
+          fecha_pitch: string | null
+          fecha_seguimiento: string | null
+          id: string
+          notas: string | null
+          partner_destinatario: string | null
+          presupuesto_estimado: number | null
+          produccion_id: string | null
+          proyecto_vinculado: string | null
+          responsable_id: string | null
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: string
+          fecha_pitch?: string | null
+          fecha_seguimiento?: string | null
+          id?: string
+          notas?: string | null
+          partner_destinatario?: string | null
+          presupuesto_estimado?: number | null
+          produccion_id?: string | null
+          proyecto_vinculado?: string | null
+          responsable_id?: string | null
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: string
+          fecha_pitch?: string | null
+          fecha_seguimiento?: string | null
+          id?: string
+          notas?: string | null
+          partner_destinatario?: string | null
+          presupuesto_estimado?: number | null
+          produccion_id?: string | null
+          proyecto_vinculado?: string | null
+          responsable_id?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_pitches_partner_destinatario_fkey"
+            columns: ["partner_destinatario"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_pitches_produccion_id_fkey"
+            columns: ["produccion_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_pitches_produccion_id_fkey"
+            columns: ["produccion_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_pitches_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_pitches_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -4226,6 +4346,117 @@ export type Database = {
             foreignKeyName: "production_billing_sprints_production_id_fkey"
             columns: ["production_id"]
             isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_closures: {
+        Row: {
+          contrato_id: string | null
+          contrato_ok: boolean
+          created_at: string
+          cue_sheet_enviada_a: string | null
+          cue_sheet_fecha_envio: string | null
+          cue_sheet_ok: boolean
+          cue_sheet_storage_path: string | null
+          cue_sheet_temas: Json
+          deal_memo_id: string | null
+          deal_memo_ok: boolean
+          derechos_concedidos: string | null
+          documento_cierre_id: string | null
+          documento_cierre_ok: boolean
+          entregables_descripcion: string | null
+          entregables_fecha: string | null
+          entregables_ok: boolean
+          honorarios_finales: number | null
+          notas_internas: string | null
+          presupuesto_documento_id: string | null
+          presupuesto_ok: boolean
+          production_id: string
+          updated_at: string
+        }
+        Insert: {
+          contrato_id?: string | null
+          contrato_ok?: boolean
+          created_at?: string
+          cue_sheet_enviada_a?: string | null
+          cue_sheet_fecha_envio?: string | null
+          cue_sheet_ok?: boolean
+          cue_sheet_storage_path?: string | null
+          cue_sheet_temas?: Json
+          deal_memo_id?: string | null
+          deal_memo_ok?: boolean
+          derechos_concedidos?: string | null
+          documento_cierre_id?: string | null
+          documento_cierre_ok?: boolean
+          entregables_descripcion?: string | null
+          entregables_fecha?: string | null
+          entregables_ok?: boolean
+          honorarios_finales?: number | null
+          notas_internas?: string | null
+          presupuesto_documento_id?: string | null
+          presupuesto_ok?: boolean
+          production_id: string
+          updated_at?: string
+        }
+        Update: {
+          contrato_id?: string | null
+          contrato_ok?: boolean
+          created_at?: string
+          cue_sheet_enviada_a?: string | null
+          cue_sheet_fecha_envio?: string | null
+          cue_sheet_ok?: boolean
+          cue_sheet_storage_path?: string | null
+          cue_sheet_temas?: Json
+          deal_memo_id?: string | null
+          deal_memo_ok?: boolean
+          derechos_concedidos?: string | null
+          documento_cierre_id?: string | null
+          documento_cierre_ok?: boolean
+          entregables_descripcion?: string | null
+          entregables_fecha?: string | null
+          entregables_ok?: boolean
+          honorarios_finales?: number | null
+          notas_internas?: string | null
+          presupuesto_documento_id?: string | null
+          presupuesto_ok?: boolean
+          production_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_closures_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_closures_deal_memo_id_fkey"
+            columns: ["deal_memo_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_closures_documento_cierre_id_fkey"
+            columns: ["documento_cierre_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_closures_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: true
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_closures_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: true
             referencedRelation: "productions_roster_view"
             referencedColumns: ["id"]
           },

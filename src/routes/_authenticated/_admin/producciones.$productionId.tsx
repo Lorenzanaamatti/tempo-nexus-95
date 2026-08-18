@@ -27,6 +27,9 @@ import { ProductionMilestonesEditor } from "@/components/production-detail/miles
 import { ProductionLinkedDocuments } from "@/components/production-detail/linked-documents";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
+import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/components/production-detail/closure-panel";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useCurrentRole } from "@/lib/use-role";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/$productionId")({
@@ -111,7 +114,10 @@ function ProduccionDetalle() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [confirmFinalize, setConfirmFinalize] = useState(false);
+  const [closureGate, setClosureGate] = useState<ProductionStage | null>(null);
   const { dirty, markClean } = useDirtyForm(form);
+  const closureQ = useClosure(productionId);
+  const closureReady = isClosureComplete(closureQ.data);
 
   const data = prodQ.data;
   const stage: ProductionStage = stageOf(data?.status);
@@ -223,8 +229,13 @@ function ProduccionDetalle() {
               value={stage}
               onValueChange={(v) => {
                 const next = v as ProductionStage;
-                if (next === "finalizada") setConfirmFinalize(true);
-                else applyStage(next);
+                if (next === stage) return;
+                if (next === "entrega" || next === "finalizada") {
+                  if (!isClosureComplete(closureQ.data)) return setClosureGate(next);
+                  if (next === "finalizada") return setConfirmFinalize(true);
+                  return void applyStage(next);
+                }
+                applyStage(next);
               }}
             >
               <SelectTrigger className="h-7 w-[190px] text-xs"><SelectValue /></SelectTrigger>
@@ -352,6 +363,13 @@ function ProduccionDetalle() {
         <ProductionTasks productionId={productionId} productionTitle={form.title} />
       </Section>
 
+      <Section
+        title="Cierre"
+        description="Checklist obligatorio para pasar la producción a «En entrega» o «Finalizada». Puedes completarlo en cualquier momento."
+      >
+        <ProductionClosurePanel productionId={productionId} productionTitle={form.title} stage={stage} isBigC={isBigC} />
+      </Section>
+
       {isBigC && (
         <Section title="Económico" description="Resumen de solo lectura calculado a partir de PAPERWORK y los sprints de facturación.">
           <ProductionEconomics productionId={productionId} feeAmount={data.fee_amount} commission={data.ic_commission} />
@@ -359,6 +377,32 @@ function ProduccionDetalle() {
       )}
 
       <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
+
+      <Dialog open={closureGate != null} onOpenChange={(v) => !v && setClosureGate(null)}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cierre de producción</DialogTitle>
+            <DialogDescription>
+              Completa y guarda los 6 ítems del checklist para pasar la producción a «
+              {closureGate ? PRODUCTION_STAGE_LABEL[closureGate] : ""}».
+            </DialogDescription>
+          </DialogHeader>
+          <ProductionClosurePanel productionId={productionId} productionTitle={form.title} stage={stage} isBigC={isBigC} compact />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setClosureGate(null)}>Cancelar</Button>
+            <Button
+              disabled={!closureReady}
+              onClick={() => {
+                const next = closureGate;
+                setClosureGate(null);
+                if (next) applyStage(next);
+              }}
+            >
+              {closureReady ? "Confirmar cambio de estado" : "Checklist incompleto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmFinalize} onOpenChange={setConfirmFinalize}>
         <AlertDialogContent>
