@@ -82,31 +82,51 @@ export type MedioCandidato = {
 export async function queryWikidata(pais: string, tipos: MedioTipo[], limit: number): Promise<MedioCandidato[]> {
   const countryQid = COUNTRY_QID[normalize(pais)] ?? "Q29";
   const out: MedioCandidato[] = [];
+  const errores: string[] = [];
 
   for (const tipo of tipos) {
     const classes = QIDS[tipo].map((q) => `wd:${q}`).join(" ");
+    const perTipo = Math.min(200, Math.max(20, Math.floor(limit / tipos.length)));
+    // Consulta ligera: P31 directo (sin recorrer P279*) para evitar timeouts del endpoint público.
     const sparql = `SELECT ?item ?itemLabel ?web ?ciudadLabel WHERE {
   VALUES ?cls { ${classes} }
-  ?item wdt:P31/wdt:P279* ?cls ;
+  ?item wdt:P31 ?cls ;
         wdt:P17 wd:${countryQid} .
   OPTIONAL { ?item wdt:P856 ?web }
   OPTIONAL { ?item wdt:P159 ?ciudad }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "es,en". }
-} LIMIT ${Math.max(20, Math.floor(limit / tipos.length))}`;
+} LIMIT ${perTipo}`;
 
-    const res = await fetch("https://query.wikidata.org/sparql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/sparql-results+json",
-        "User-Agent": "InteresanteCompania-CRM/1.0 (contacto@interesante.app)",
-      },
-      body: new URLSearchParams({ query: sparql }).toString(),
-    });
-    if (!res.ok) {
-      throw new Error(`Wikidata devolvió ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    let json: any = null;
+    for (let intento = 0; intento < 3 && !json; intento++) {
+      try {
+        const res = await fetch("https://query.wikidata.org/sparql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/sparql-results+json",
+            "User-Agent": "InteresanteCompania-CRM/1.0 (contacto@interesante.app)",
+          },
+          body: new URLSearchParams({ query: sparql }).toString(),
+          signal: AbortSignal.timeout(55_000),
+        });
+        if (res.ok) {
+          json = await res.json();
+          break;
+        }
+        if (res.status !== 429 && res.status !== 500 && res.status !== 502 && res.status !== 503 && res.status !== 504) {
+          errores.push(`${tipo}: ${res.status}`);
+          break;
+        }
+      } catch {
+        // timeout de red: reintentamos
+      }
+      await new Promise((r) => setTimeout(r, 1500 * (intento + 1)));
     }
-    const json = (await res.json()) as any;
+    if (!json) {
+      errores.push(`${tipo}: sin respuesta`);
+      continue;
+    }
     for (const b of json.results?.bindings ?? []) {
       const uri: string = b.item?.value ?? "";
       const qid = uri.split("/").pop() ?? "";
@@ -125,6 +145,11 @@ export async function queryWikidata(pais: string, tipos: MedioTipo[], limit: num
   }
 
   const seen = new Set<string>();
+  if (!out.length && errores.length) {
+    throw new Error(
+      `Wikidata no respondió a tiempo (${errores.join(", ")}). Vuelve a intentarlo en unos segundos o selecciona menos tipos.`,
+    );
+  }
   return out
     .filter((c) => (seen.has(c.fuente_externa_id) ? false : (seen.add(c.fuente_externa_id), true)))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
