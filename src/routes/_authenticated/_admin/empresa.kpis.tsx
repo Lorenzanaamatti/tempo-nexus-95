@@ -367,6 +367,36 @@ function KpisPage() {
           </Section>
 
           {/* MARKETING */}
+          <Section title="Oportunidades">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <Card
+                label="Subvenciones"
+                value={String(k.oportunidades.subvenciones.solicitadas)}
+                hint={`${k.oportunidades.subvenciones.concedidas} concedidas · ${eur(k.oportunidades.subvenciones.importeConcedido)}`}
+              />
+              <Card
+                label="Festivales"
+                value={String(k.oportunidades.festivales.inscritos)}
+                hint={`${k.oportunidades.festivales.total} identificados`}
+              />
+              <Card
+                label="Premios"
+                value={String(k.oportunidades.premios.candidaturas)}
+                hint={`${k.oportunidades.premios.total} identificados`}
+              />
+              <Card
+                label="Prensa"
+                value={String(k.oportunidades.prensa.publicadas)}
+                hint={`${k.oportunidades.prensa.total} acciones en ${year}`}
+              />
+              <Card
+                label="Pitches"
+                value={String(k.oportunidades.pitches.total)}
+                hint={`${k.oportunidades.pitches.representados} representados presentados`}
+              />
+            </div>
+          </Section>
+
           <Section
             title="Marketing"
             action={<Button variant="outline" size="sm" asChild><Link to="/marketing/campanas">Gestionar campañas</Link></Button>}
