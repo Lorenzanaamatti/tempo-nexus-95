@@ -22,6 +22,7 @@ export const PARTNER_SUBTIPOS: Record<PartnerTipo, string[]> = {
     "Cadena de televisión",
     "Radio",
     "Prensa escrita",
+    "Revista",
     "Medio digital",
     "Podcast",
   ],
