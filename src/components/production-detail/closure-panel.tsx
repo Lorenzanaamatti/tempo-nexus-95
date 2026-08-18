@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { uploadToBucket } from "@/lib/storage-upload";
 import { cn } from "@/lib/utils";
 import { FileText, Plus, Trash2 } from "lucide-react";
 
@@ -406,12 +407,15 @@ function CueSheetUpload({
           const file = e.target.files?.[0];
           if (!file) return;
           setBusy(true);
-          const key = `${productionId}/cue-sheet-${Date.now()}-${file.name}`;
-          const { error } = await supabase.storage.from("documents").upload(key, file, { upsert: true });
-          setBusy(false);
-          if (error) return toast.error(error.message);
-          onUploaded(key);
-          toast.success("PDF subido");
+          try {
+            const key = await uploadToBucket("production-docs", `${productionId}/cue-sheets`, file);
+            onUploaded(key);
+            toast.success("PDF subido");
+          } catch (err: any) {
+            toast.error(err?.message ?? "No se pudo subir el archivo");
+          } finally {
+            setBusy(false);
+          }
         }}
       />
       {path && <span className="truncate text-xs text-muted-foreground">{path.split("/").pop()}</span>}
