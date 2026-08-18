@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-export const MEDIO_TIPOS = ["Prensa escrita", "Medio digital", "Radio", "Cadena de televisión", "Revista"] as const;
-export type MedioTipo = (typeof MEDIO_TIPOS)[number];
+import { MEDIO_TIPOS, type MedioTipo } from "@/lib/medios-model";
+export { MEDIO_TIPOS };
+export type { MedioTipo };
 
 const QIDS: Record<MedioTipo, string[]> = {
   "Prensa escrita": ["Q11032"],

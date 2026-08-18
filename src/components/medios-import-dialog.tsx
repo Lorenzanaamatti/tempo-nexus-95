@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { searchWikidataMedios, importMedios } from "@/lib/medios-import.functions";
-import { MEDIO_TIPOS, type MedioTipo } from "@/lib/medios-import.server";
+import { MEDIO_TIPOS, type MedioTipo } from "@/lib/medios-model";
 
 type Candidato = {
   fuente_externa_id: string;
