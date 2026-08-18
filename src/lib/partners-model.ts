@@ -1,4 +1,4 @@
-export const PARTNER_TIPOS = ["Productora", "Medio", "Institución"] as const;
+export const PARTNER_TIPOS = ["Productora", "Plataforma", "Medio", "Institución"] as const;
 export type PartnerTipo = (typeof PARTNER_TIPOS)[number];
 
 export const PARTNER_SUBTIPOS: Record<PartnerTipo, string[]> = {
@@ -10,8 +10,15 @@ export const PARTNER_SUBTIPOS: Record<PartnerTipo, string[]> = {
     "Productora de documental",
     "Productora internacional",
   ],
+  Plataforma: [
+    "Plataforma de streaming",
+    "Cadena de televisión",
+    "Plataforma internacional",
+    "Plataforma local",
+    "AVOD / FAST",
+    "Otra plataforma",
+  ],
   Medio: [
-    "Plataforma streaming",
     "Cadena de televisión",
     "Radio",
     "Prensa escrita",
@@ -45,6 +52,7 @@ export type PartnerAmbito = (typeof PARTNER_AMBITOS)[number];
 
 export const PARTNER_TIPO_TONE: Record<PartnerTipo, string> = {
   Productora: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+  Plataforma: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
   Medio: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
   Institución: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
 };
