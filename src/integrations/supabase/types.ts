@@ -5692,6 +5692,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      ic_composer_ids: { Args: { _names: string[] }; Returns: string[] }
       link_composer_to_user: {
         Args: { _composer_id: string }
         Returns: undefined
