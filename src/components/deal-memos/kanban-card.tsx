@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Money } from "@/components/money";
 import { ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -48,7 +49,7 @@ export function KanbanCard({ data }: { data: KanbanCardData }) {
         <span className="truncate">{data.contraparte_nombre ?? "—"}</span>
       </div>
       <p className="mt-2 text-sm font-medium tabular-nums">
-        {formatMoneyEs(data.importe_propuesto, data.moneda ?? "EUR")}
+        <Money value={data.importe_propuesto} moneda={data.moneda ?? "EUR"} />
       </p>
       <p className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
         {formatDistanceToNow(new Date(data.updated_at), { locale: es, addSuffix: true })}

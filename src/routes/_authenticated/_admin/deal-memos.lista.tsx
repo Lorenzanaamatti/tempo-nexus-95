@@ -1,4 +1,5 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
+import { Money } from "@/components/money";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -166,7 +167,7 @@ function ListaDealMemos() {
                   <td className="px-3 py-2">{r.obra}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{r.cliente_nombre ?? "—"}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{r.contraparte_nombre ?? "—"}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatMoneyEs(r.importe_propuesto, r.moneda)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={r.importe_propuesto} moneda={r.moneda} /></td>
                   <td className="px-3 py-2"><EstadoBadge estado={r.estado} /></td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{r.validador_final_nombre ?? "—"}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{formatDateEs(r.fecha_limite_respuesta)}</td>

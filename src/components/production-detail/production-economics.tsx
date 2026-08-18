@@ -1,8 +1,10 @@
+import type React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Money } from "@/components/money";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
 
-function Kpi({ label, value }: { label: string; value: string }) {
+function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-sm border border-border p-3">
       <div className="smallcaps text-[10px] text-muted-foreground">{label}</div>
@@ -42,9 +44,9 @@ export function ProductionEconomics({
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <Kpi label="Presupuesto aprobado" value={formatEUR(approved)} />
-      <Kpi label="Facturado" value={formatEUR(invoiced)} />
-      <Kpi label="Cobrado" value={formatEUR(paid)} />
+      <Kpi label="Presupuesto aprobado" value={<Money value={approved} />} />
+      <Kpi label="Facturado" value={<Money value={invoiced} />} />
+      <Kpi label="Cobrado" value={<Money value={paid} />} />
       <Kpi label="Margen estimado" value={margin == null ? "—" : `${margin.toFixed(1)} %`} />
     </div>
   );

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Money } from "@/components/money";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

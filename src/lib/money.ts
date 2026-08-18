@@ -1,10 +1,10 @@
-const EUR = new Intl.NumberFormat("de-DE", {
+const EUR = new Intl.NumberFormat("es-ES", {
   style: "currency",
   currency: "EUR",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
-const NUM = new Intl.NumberFormat("de-DE", {
+const NUM = new Intl.NumberFormat("es-ES", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });

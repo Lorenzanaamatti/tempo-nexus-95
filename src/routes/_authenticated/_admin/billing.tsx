@@ -1,4 +1,6 @@
+import type React from "react";
 import { ExportRowsButton } from "@/components/export-rows-button";
+import { Money } from "@/components/money";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -119,10 +121,10 @@ function BillingPlan() {
       </header>
 
       <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Total filtrado" value={formatEUR(totals.total)} />
-        <Kpi label="Facturado" value={formatEUR(totals.fact)} accent="primary" />
-        <Kpi label="Cobrado" value={formatEUR(totals.cob)} accent="success" />
-        <Kpi label="Vencido sin facturar" value={formatEUR(totals.vencido)} accent="warn" />
+        <Kpi label="Total filtrado" value={<Money value={totals.total} />} />
+        <Kpi label="Facturado" value={<Money value={totals.fact} />} accent="primary" />
+        <Kpi label="Cobrado" value={<Money value={totals.cob} />} accent="success" />
+        <Kpi label="Vencido sin facturar" value={<Money value={totals.vencido} />} accent="warn" />
       </section>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -182,7 +184,7 @@ function BillingPlan() {
                       )}
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">#{r.sprint_number}{r.label ? ` · ${r.label}` : ""}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatEUR(r.amount)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums"><Money value={r.amount} /></td>
                     <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(r.due_date)}</td>
                     <td className="px-3 py-2">{formatDateEs(r.invoiced_date)}</td>
                     <td className="px-3 py-2">{formatDateEs(r.paid_date)}</td>
@@ -227,7 +229,7 @@ function BillingPlan() {
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: string; accent?: "primary" | "success" | "warn" }) {
+function Kpi({ label, value, accent }: { label: string; value: React.ReactNode; accent?: "primary" | "success" | "warn" }) {
   const ring = accent === "primary" ? "border-primary/40" : accent === "success" ? "border-emerald-500/40" : accent === "warn" ? "border-amber-500/50" : "border-border";
   return (
     <div className={`rounded-sm border ${ring} bg-card p-3`}>

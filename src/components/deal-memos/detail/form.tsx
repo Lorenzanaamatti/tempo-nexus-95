@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Money } from "@/components/money";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -139,7 +140,7 @@ export function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) 
           <ImporteInput value={form.importe_propuesto} onChange={(v) => setForm({ ...form, importe_propuesto: v })} disabled={!editable} />
           {form.importe_propuesto !== "" && (
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {formatMoneyEs(Number(String(form.importe_propuesto).replace(/\./g, "").replace(",", ".")), form.moneda)}
+              <Money value={Number(String(form.importe_propuesto).replace(/\./g, "").replace(",", "."))} moneda={form.moneda} />
             </p>
           )}
         </Field>

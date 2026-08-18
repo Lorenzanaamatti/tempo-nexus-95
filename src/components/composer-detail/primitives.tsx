@@ -1,3 +1,4 @@
+import type React from "react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
@@ -15,7 +16,7 @@ export function Section({ title, children }: { title?: string; children: React.R
   );
 }
 
-export function KPI({ label, value }: { label: string; value: string }) {
+export function KPI({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-sm border border-border bg-card/50 px-4 py-3">
       <div className="smallcaps text-xs text-muted-foreground">{label}</div>

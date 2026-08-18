@@ -1,3 +1,4 @@
+import { formatEUR0 } from "@/lib/money";
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -351,7 +352,7 @@ function Accionable({ text, titulo, acciones, className }: {
 
 const eur = (n: number | null | undefined) =>
   typeof n === "number" && n > 0
-    ? new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n)
+    ? formatEUR0(n)
     : "—";
 
 /** Listado por años con todos los datos accionables uno a uno. */

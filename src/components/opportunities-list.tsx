@@ -1,4 +1,5 @@
 import { PaginationBar, SortTh, useServerPagination } from "@/components/pagination-bar";
+import { Money } from "@/components/money";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -274,7 +275,7 @@ export function OpportunitiesList({
                     </div>
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR(o.estimated_value)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>

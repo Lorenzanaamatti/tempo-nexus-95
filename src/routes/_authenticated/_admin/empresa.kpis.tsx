@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentRole } from "@/lib/use-role";
 import { useEmpresaKpis } from "@/lib/use-empresa-kpis";
-import { formatEUR0, formatNumberEs, parseAmount } from "@/lib/money";
+import { formatEUR, formatEUR0, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs, formatShortDateTimeEs } from "@/lib/dates";
 import {
   CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_GRUPOS, OBJETIVO_METRICAS, yearOptions,
@@ -29,8 +29,7 @@ export const Route = createFileRoute("/_authenticated/_admin/empresa/kpis")({
 });
 
 const db = supabase as any;
-const eur = (v: number) =>
-  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2 }).format(v || 0);
+const eur = (v: number) => formatEUR(v || 0);
 
 function KpisPage() {
   const { isBigC, loading } = useCurrentRole();

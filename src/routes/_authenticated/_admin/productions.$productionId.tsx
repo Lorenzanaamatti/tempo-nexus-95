@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { Money } from "@/components/money";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -357,7 +358,7 @@ function ProductionEdit() {
               setForm({ ...form, fee_amount: v == null ? "" : v });
             }}
           />
-          {feeNum != null && <p className="mt-1 text-xs text-muted-foreground">{formatEUR(feeNum)}</p>}
+          {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
         </div>
         <div>
           <Label>Comisión IC (%)</Label>
@@ -388,7 +389,7 @@ function ProductionEdit() {
             }}
           />
           {computedCommission != null && (
-            <p className="mt-1 text-xs text-muted-foreground">Calculado: {formatEUR(computedCommission)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Calculado: <Money value={computedCommission} /></p>
           )}
         </div>
         <div><Label>Fecha de entrega</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>

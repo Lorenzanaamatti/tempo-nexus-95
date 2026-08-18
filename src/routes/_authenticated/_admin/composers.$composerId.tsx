@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -374,8 +375,8 @@ function Inner({
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KPI label="Proyectos en curso" value={String(activeProductions.length)} />
         <KPI label="Producciones totales" value={String(productionsRel.length)} />
-        <KPI label="Facturación histórica" value={formatEUR0(totalRevenue)} />
-        <KPI label="Margen neto" value={formatEUR0(totalMargin)} />
+        <KPI label="Facturación histórica" value={<Money value={totalRevenue} compact />} />
+        <KPI label="Margen neto" value={<Money value={totalMargin} compact />} />
       </section>
 
       {/* Plan de carrera */}
@@ -496,7 +497,7 @@ function Inner({
                   </div>
                 </div>
                 {p.fee_amount != null && (
-                  <div className="text-sm text-muted-foreground">{formatEUR0(Number(p.fee_amount))}</div>
+                  <div className="text-sm text-muted-foreground"><Money value={Number(p.fee_amount)} compact /></div>
                 )}
               </li>
             ))}
@@ -522,7 +523,7 @@ function Inner({
                   {c.note && <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>}
                 </div>
                 {c.opportunity?.estimated_value != null && (
-                  <div className="text-sm text-muted-foreground whitespace-nowrap">{formatEUR0(Number(c.opportunity.estimated_value))}</div>
+                  <div className="text-sm text-muted-foreground whitespace-nowrap"><Money value={Number(c.opportunity.estimated_value)} compact /></div>
                 )}
               </li>
             ))}

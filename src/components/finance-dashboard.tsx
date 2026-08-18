@@ -1,4 +1,6 @@
+import type React from "react";
 import { useMemo, useState } from "react";
+import { Money } from "@/components/money";
 import { Receipt, BarChart3, FileText } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
@@ -233,46 +235,46 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-sm border border-primary/30 bg-card p-4">
             <div className="smallcaps text-xs text-muted-foreground">Facturación bruta (lo que el representado factura a su cliente · incluye comisión IC)</div>
-            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.fee)}</div>
+            <div className="mt-1 font-display text-3xl tabular-nums"><Money value={budgets.fee} /></div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.facturado)}</span></div>
-              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.cobrado)}</span></div>
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums"><Money value={splitTotals.trabajo.facturado} /></span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums"><Money value={splitTotals.trabajo.cobrado} /></span></div>
             </div>
           </div>
           <div className="rounded-sm border border-amber-500/40 bg-card p-4">
             <div className="smallcaps text-xs text-muted-foreground">Comisión IC (IC factura al representado)</div>
-            <div className="mt-1 font-display text-3xl tabular-nums">−{formatEUR(budgets.comm)}</div>
+            <div className="mt-1 font-display text-3xl tabular-nums"><Money value={-budgets.comm} /></div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.facturado)}</span></div>
-              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.comision.cobrado)}</span></div>
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums"><Money value={splitTotals.comision.facturado} /></span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums"><Money value={splitTotals.comision.cobrado} /></span></div>
             </div>
           </div>
           <div className="rounded-sm border border-emerald-500/40 bg-card p-4">
             <div className="smallcaps text-xs text-muted-foreground">Neto representado (bruto − comisión IC)</div>
-            <div className="mt-1 font-display text-3xl tabular-nums">{formatEUR(budgets.fee - budgets.comm)}</div>
+            <div className="mt-1 font-display text-3xl tabular-nums"><Money value={budgets.fee - budgets.comm} /></div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.facturado - splitTotals.comision.facturado)}</span></div>
-              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums">{formatEUR(splitTotals.trabajo.cobrado - splitTotals.comision.cobrado)}</span></div>
+              <div><span className="text-muted-foreground">Facturado: </span><span className="tabular-nums"><Money value={splitTotals.trabajo.facturado - splitTotals.comision.facturado} /></span></div>
+              <div><span className="text-muted-foreground">Cobrado: </span><span className="tabular-nums"><Money value={splitTotals.trabajo.cobrado - splitTotals.comision.cobrado} /></span></div>
             </div>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KPI label="Previsto (sprints)" value={formatEUR(totals.previsto)} accent="muted" />
-        <KPI label="Facturado" value={formatEUR(totals.facturado)} accent="primary" />
-        <KPI label="Cobrado" value={formatEUR(totals.cobrado)} accent="success" />
-        <KPI label="Vencido sin facturar" value={formatEUR(overdueTotal)} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
+        <KPI label="Previsto (sprints)" value={<Money value={totals.previsto} />} accent="muted" />
+        <KPI label="Facturado" value={<Money value={totals.facturado} />} accent="primary" />
+        <KPI label="Cobrado" value={<Money value={totals.cobrado} />} accent="success" />
+        <KPI label="Vencido sin facturar" value={<Money value={overdueTotal} />} accent="warn" sub={`${overdue.length} sprint${overdue.length === 1 ? "" : "s"}`} />
       </div>
 
       {!composerId && (
         <section className="space-y-2">
           <h3 className="font-display text-xl">Presupuestos (deal memos)</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <KPI label="Total propuesto" value={formatEUR(dmTotals.total)} accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
-            <KPI label="En preparación / revisión" value={formatEUR(dmTotals.enCurso)} accent="muted" />
-            <KPI label="Enviados" value={formatEUR(dmTotals.enviado)} accent="warn" />
-            <KPI label="Cerrados" value={formatEUR(dmTotals.cerrado)} accent="success" />
+            <KPI label="Total propuesto" value={<Money value={dmTotals.total} />} accent="primary" sub={`${dealMemos.length} presupuesto${dealMemos.length === 1 ? "" : "s"}`} />
+            <KPI label="En preparación / revisión" value={<Money value={dmTotals.enCurso} />} accent="muted" />
+            <KPI label="Enviados" value={<Money value={dmTotals.enviado} />} accent="warn" />
+            <KPI label="Cerrados" value={<Money value={dmTotals.cerrado} />} accent="success" />
           </div>
           {dealMemos.length === 0 ? (
             <EmptyState variant="inline" icon={FileText} title="Sin presupuestos" description="Los deal memos que crees aparecerán aquí con su importe propuesto." />
@@ -295,7 +297,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
                       <td className="px-3 py-2">{d.obra}</td>
                       <td className="px-3 py-2 text-xs uppercase text-muted-foreground">{d.estado.replace(/_/g, " ")}</td>
                       <td className="px-3 py-2 tabular-nums">{formatDateEs(d.fecha_envio ?? d.created_at)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatEUR(d.importe_propuesto)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums"><Money value={d.importe_propuesto} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -323,9 +325,9 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
               buckets.map((b) => (
                 <tr key={b.key} className="border-t border-border">
                   <td className="px-3 py-2 font-display">{b.label}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{formatEUR(b.previsto)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR(b.facturado)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR(b.cobrado)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground"><Money value={b.previsto} /></td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={b.facturado} /></td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={b.cobrado} /></td>
                   <td className="px-3 py-2">
                     <div className="space-y-1">
                       <Bar value={b.previsto} max={max} className="bg-muted-foreground/30" />
@@ -364,7 +366,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
                       <td className="px-3 py-2 text-xs text-muted-foreground">
                         {s.kind === "comision" ? "Comisión IC" : "Trabajo"}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatEUR(s.amount)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums"><Money value={s.amount} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -377,7 +379,7 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
   );
 }
 
-function KPI({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: "primary" | "success" | "warn" | "muted" }) {
+function KPI({ label, value, sub, accent }: { label: string; value: React.ReactNode; sub?: string; accent?: "primary" | "success" | "warn" | "muted" }) {
   const ring = accent === "primary" ? "border-primary/40" : accent === "success" ? "border-emerald-500/40" : accent === "warn" ? "border-amber-500/50" : "border-border";
   return (
     <div className={`rounded-sm border ${ring} bg-card p-3`}>
