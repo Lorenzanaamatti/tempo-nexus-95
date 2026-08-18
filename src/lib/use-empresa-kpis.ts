@@ -249,7 +249,7 @@ function compute(year: number, raw: any) {
     pitchs_por_composer: minPitchsPorRepresentado,
     vinculos_inter_ic: vinculosInterIc,
     cuentas_contactadas: contactadas,
-    cuentas_convertidas: clientesActivos.length,
+    cuentas_convertidas: clientesActivos,
     reuniones_partners: reunionesPartners,
     aliados_nuevos: aliadosNuevos,
     artistas_contactados: artistasContactados,
@@ -311,7 +311,10 @@ function compute(year: number, raw: any) {
       accounts.filter((a) => a.status === "reunion" && yearOf(a.last_contact_date ?? a.updated_at) === year),
       accountName,
     ),
-    cuentas_convertidas: names(clientesActivos, accountName),
+    cuentas_convertidas: names(
+      accounts.filter((a) => a.status === "cliente_activo" && yearOf(a.updated_at) === year),
+      accountName,
+    ),
     aliados_nuevos: names(accounts.filter((a) => yearOf(a.created_at) === year), accountName),
     artistas_contactados: [
       ...names((raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year), (p) => p.nombre),
