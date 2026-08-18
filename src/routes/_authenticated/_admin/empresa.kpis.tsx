@@ -417,7 +417,7 @@ function KpisPage() {
                           <td className="px-3 py-2 font-display">{c.nombre}</td>
                           <td className="px-3 py-2">{CAMPAIGN_CANAL_LABEL[c.canal as CampaignCanal] ?? c.canal}</td>
                           <td className="px-3 py-2 tabular-nums">{eur(Number(c.gasto_real ?? 0))}</td>
-                          <td className="px-3 py-2 tabular-nums">{formatNumberEs(c.alcance ?? 0)}</td>
+                          <td className="px-3 py-2 tabular-nums">{formatIntEs(c.alcance ?? 0)}</td>
                           <td className="px-3 py-2 tabular-nums">{c.leads_generados ?? 0}</td>
                           <td className="px-3 py-2 tabular-nums">{c.conversiones ?? 0}</td>
                         </tr>
