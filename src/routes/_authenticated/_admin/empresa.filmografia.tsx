@@ -170,7 +170,7 @@ function EntryTitle({ e, onExternal }: { e: Entry; onExternal: (e: Entry) => voi
   }
   if (e.espanolaId) {
     return (
-      <Link to="/producciones/espanolas" search={{ q: e.title } as any} className="hover:underline">
+      <Link to="/producciones/espanolas" className="hover:underline">
         {e.title}
       </Link>
     );
@@ -510,6 +510,126 @@ function HistoricalDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={save} disabled={saving || !form.title.trim()}>Crear ficha y abrir</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+/** Edita un crédito externo del roster y permite convertirlo en producción IC. */
+function ExternalCreditDialog({
+  entry, onOpenChange,
+}: { entry: Entry | null; onOpenChange: (v: boolean) => void }) {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title: "", year: "", format: "", production_company: "", director: "" });
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
+
+  if (entry && loadedFor !== entry.externalId) {
+    setLoadedFor(entry.externalId ?? null);
+    setForm({
+      title: entry.title,
+      year: entry.year === "Sin año" ? "" : entry.year,
+      format: entry.kind === "Otro" ? "" : entry.kind,
+      production_company: entry.company ?? "",
+      director: entry.director ?? "",
+    });
+  }
+
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["filmografia-ic"] });
+    qc.invalidateQueries({ queryKey: ["composer"] });
+  };
+
+  async function save() {
+    if (!entry?.externalId) return;
+    setSaving(true);
+    const { error } = await db
+      .from("composer_filmography")
+      .update({
+        title: form.title.trim(),
+        year: form.year ? Number(form.year) : null,
+        format: form.format || null,
+        production_company: form.production_company || null,
+        director: form.director || null,
+      })
+      .eq("id", entry.externalId);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Crédito actualizado");
+    refresh();
+    onOpenChange(false);
+  }
+
+  async function remove() {
+    if (!entry?.externalId) return;
+    if (!confirm("¿Eliminar este crédito externo?")) return;
+    setSaving(true);
+    const { error } = await db.from("composer_filmography").delete().eq("id", entry.externalId);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Crédito eliminado");
+    refresh();
+    onOpenChange(false);
+  }
+
+  /** Crea una ficha de producción IC completa a partir del crédito externo. */
+  async function promote() {
+    if (!entry?.externalId) return;
+    setSaving(true);
+    const { data, error } = await db
+      .from("productions")
+      .insert({
+        title: form.title.trim(),
+        kind: form.format || "Otro",
+        year: form.year ? Number(form.year) : null,
+        production_company: form.production_company || null,
+        director: form.director || null,
+        composer_id: entry.credits[0]?.composerId ?? null,
+        is_historical: true,
+        status: STAGE_DEFAULT_STATUS.finalizada,
+      })
+      .select("id")
+      .single();
+    if (error || !data) {
+      setSaving(false);
+      return toast.error(error?.message ?? "No se pudo crear la ficha");
+    }
+    const id = (data as any).id as string;
+    await db.from("composer_filmography").update({ production_id: id }).eq("id", entry.externalId);
+    setSaving(false);
+    toast.success("Ficha de producción creada");
+    refresh();
+    onOpenChange(false);
+    void navigate({ to: "/producciones/$productionId", params: { productionId: id } });
+  }
+
+  return (
+    <Dialog open={!!entry} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader><DialogTitle>Crédito externo · {entry?.title}</DialogTitle></DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Esta entrada procede de la filmografía de {entry?.credits[0]?.name ?? "un representado"} y no tenía ficha de
+          producción propia. Corrige los datos aquí o conviértela en producción IC para gestionar créditos completos.
+        </p>
+        <div className="grid gap-3">
+          <div className="grid gap-1.5"><Label>Título</Label><Input value={form.title} onChange={(e) => set({ title: e.target.value })} /></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Año</Label><Input type="number" value={form.year} onChange={(e) => set({ year: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Formato</Label><Input value={form.format} onChange={(e) => set({ format: e.target.value })} /></div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Productora</Label><Input value={form.production_company} onChange={(e) => set({ production_company: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>Director/a</Label><Input value={form.director} onChange={(e) => set({ director: e.target.value })} /></div>
+          </div>
+        </div>
+        <DialogFooter className="flex-wrap gap-2">
+          <Button variant="ghost" onClick={remove} disabled={saving}>Eliminar</Button>
+          <Button variant="outline" onClick={promote} disabled={saving || !form.title.trim()}>Convertir en producción IC</Button>
+          <Button onClick={save} disabled={saving || !form.title.trim()}>Guardar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
