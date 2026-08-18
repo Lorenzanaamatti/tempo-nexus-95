@@ -50,6 +50,16 @@ export function formatMoneyEs(
   }).format(n)} ${symbol}`;
 }
 
+const INT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
+
+/** Número entero con separador de miles: "1.234". Para contadores y KPIs de unidades. */
+export function formatIntEs(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "—";
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return INT.format(Math.round(n));
+}
+
 export function formatNumberEs(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const n = typeof value === "number" ? value : Number(value);
