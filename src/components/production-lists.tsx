@@ -27,24 +27,117 @@ export type ProductionRecord = {
   platform: string | null;
   composers?: { full_name: string | null; artistic_name: string | null } | null;
   partner_company?: { name: string | null } | null;
+  /** Origen del registro: producción IC, crédito de la ficha del representado o CRM de producciones españolas. */
+  source?: "ic" | "ficha" | "espanola";
+  /** Id del compositor (para créditos que vienen de una ficha). */
+  composer_id?: string | null;
+  /** Nombre del representado o profesional acreditado cuando no hay ficha vinculada. */
+  credited_name?: string | null;
 };
 
+const normalize = (v: string | null | undefined) =>
+  (v ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const keyOf = (title: string | null | undefined, year: number | string | null | undefined) =>
+  `${normalize(title)}::${year ?? ""}`;
+
+/**
+ * Producciones consolidadas: registros propios de IC + créditos de las fichas de
+ * los representados que aún no tienen producción + producciones españolas con
+ * representados vinculados. Se deduplica por título y año.
+ */
 export function useProductions() {
   return useQuery({
     queryKey: ["productions-lifecycle"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("productions")
-        .select(PRODUCTION_SELECT)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as ProductionRecord[];
+      const db = supabase as any;
+      const [prodRes, filmoRes, espRes, composersRes] = await Promise.all([
+        db.from("productions").select(PRODUCTION_SELECT).order("created_at", { ascending: false }),
+        db
+          .from("composer_filmography")
+          .select("id, composer_id, title, year, format, production_company, director, platform, production_id, created_at"),
+        db
+          .from("producciones_espanolas")
+          .select(
+            "id, title, title_es, year, media_type, release_date, platform, production_companies, composer, ic_participo, produccion_ic_vinculada, created_at",
+          )
+          .eq("ic_participo", true),
+        db.from("composers").select("id, full_name, artistic_name"),
+      ]);
+      if (prodRes.error) throw prodRes.error;
+
+      const base = (prodRes.data ?? []) as ProductionRecord[];
+      const rows: ProductionRecord[] = base.map((p) => ({ ...p, source: "ic" as const }));
+      const seen = new Set(rows.map((p) => keyOf(p.title, p.year)));
+      const composerById = new Map<string, { full_name: string | null; artistic_name: string | null }>(
+        ((composersRes.data ?? []) as any[]).map((c) => [c.id, { full_name: c.full_name, artistic_name: c.artistic_name }]),
+      );
+      const currentYear = new Date().getFullYear();
+
+      // Créditos de las fichas de representados sin producción IC vinculada.
+      for (const f of (filmoRes.data ?? []) as any[]) {
+        if (f.production_id) continue;
+        const k = keyOf(f.title, f.year);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        rows.push({
+          id: `ficha:${f.id}`,
+          title: f.title ?? "Sin título",
+          project_type: null,
+          kind: f.format ?? null,
+          status: f.year && Number(f.year) > currentYear ? "en_produccion" : "finalizada",
+          year: f.year ? Number(f.year) : null,
+          delivery_date: null,
+          premiere_date: null,
+          created_at: f.created_at ?? new Date().toISOString(),
+          partner: null,
+          production_company: f.production_company ?? null,
+          platform: f.platform ?? null,
+          composers: f.composer_id ? composerById.get(f.composer_id) ?? null : null,
+          composer_id: f.composer_id ?? null,
+          source: "ficha",
+        });
+      }
+
+      // Producciones españolas con participación IC que aún no tienen ficha propia.
+      for (const e of (espRes.data ?? []) as any[]) {
+        if (e.produccion_ic_vinculada) continue;
+        const title = e.title_es || e.title;
+        const k = keyOf(title, e.year);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        const companies: string[] = Array.isArray(e.production_companies) ? e.production_companies : [];
+        rows.push({
+          id: `espanola:${e.id}`,
+          title: title ?? "Sin título",
+          project_type: null,
+          kind: e.media_type === "tv" ? "Serie" : "Cine",
+          status: e.year && Number(e.year) > currentYear ? "en_produccion" : "finalizada",
+          year: e.year ? Number(e.year) : null,
+          delivery_date: null,
+          premiere_date: e.release_date ?? null,
+          created_at: e.created_at ?? new Date().toISOString(),
+          partner: null,
+          production_company: companies[0] ?? null,
+          platform: e.platform ?? null,
+          composers: null,
+          credited_name: e.composer ?? null,
+          source: "espanola",
+        });
+      }
+
+      return rows;
     },
   });
 }
 
 export function composerName(p: ProductionRecord) {
-  return p.composers?.artistic_name || p.composers?.full_name || "—";
+  return p.composers?.artistic_name || p.composers?.full_name || p.credited_name || "—";
 }
 
 export function clientName(p: ProductionRecord) {
