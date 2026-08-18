@@ -274,9 +274,74 @@ function compute(year: number, raw: any) {
       .sort((a, b) => b.value - a.value)
       .slice(0, n);
 
+  // ---------- DETALLE DE NOMBRES POR MÉTRICA (para tooltips) ----------
+  const names = (rows: any[], pick: (r: any) => any) =>
+    rows.map((r) => String(pick(r) ?? "").trim()).filter(Boolean);
+  const composerName = (c: any) => c?.artistic_name || c?.full_name || "Sin nombre";
+  const composerById = new Map(composers.map((c) => [c.id, c]));
+  const accountName = (a: any) => a.name || "Cuenta sin nombre";
+
+  const detalles: Record<string, string[]> = {
+    deal_memos_enviados: names(dmYear.filter((d) => d.estado !== "borrador"), (d) => d.obra || d.referencia),
+    deal_memos_aceptados: names(
+      dmYear.filter((d) => d.estado === "cerrado" || d.estado === "respondido"),
+      (d) => d.obra || d.referencia,
+    ),
+    pitchs_presentados: names(pitchsYear, (o) => o.title),
+    pitchs_composers: names(candidates, (c) => composerName(composerById.get(c.composer_id))),
+    vinculos_inter_ic: [
+      ...names(
+        productions.filter((p) => p.referido_por_composer_id && yearOf(p.created_at) === year),
+        (p) => `${p.title} · ref. ${composerName(composerById.get(p.referido_por_composer_id))}`,
+      ),
+      ...names(
+        oppsYear.filter((o) => o.referido_por_composer_id),
+        (o) => `${o.title} · ref. ${composerName(composerById.get(o.referido_por_composer_id))}`,
+      ),
+    ],
+    cuentas_contactadas: names(
+      accounts.filter((a) => a.status !== "sin_contacto" && yearOf(a.last_contact_date ?? a.updated_at) === year),
+      accountName,
+    ),
+    reuniones_partners: names(
+      accounts.filter((a) => a.status === "reunion" && yearOf(a.last_contact_date ?? a.updated_at) === year),
+      accountName,
+    ),
+    aliados_nuevos: names(accounts.filter((a) => yearOf(a.created_at) === year), accountName),
+    artistas_contactados: [
+      ...names((raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year), (p) => p.nombre),
+      ...names(
+        composers.filter((c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year),
+        composerName,
+      ),
+    ],
+    fichajes: names(fichajes, composerName),
+    reuniones_internacionales: intl
+      .filter((p) => num(p.reuniones_mantenidas) > 0)
+      .map((p) => `${p.nombre_empresa}${p.pais ? ` (${p.pais})` : ""} · ${num(p.reuniones_mantenidas)}`),
+    propuestas_internacionales: names(
+      intl.filter((p) => p.estado_propuesta !== "sin_propuesta"),
+      (p) => p.nombre_empresa,
+    ),
+    representados_activos: names(activos, composerName),
+    representados_con_produccion: names(activos.filter((c) => activeProdComposers.has(c.id)), composerName),
+    subvenciones_solicitadas: names(subvenciones.filter((s: any) => s.estado !== "Sin valorar"), (s) => s.nombre_convocatoria),
+    subvenciones_concedidas: names(subvenciones.filter((s: any) => s.estado === "Concedida"), (s) => s.nombre_convocatoria),
+    festivales_inscritos: names(festivales.filter((f: any) => f.estado !== "Identificado"), (f) => f.nombre_festival),
+    premios_candidaturas: names(premios.filter((p: any) => p.estado !== "Identificado"), (p) => p.nombre_premio),
+    apariciones_prensa: names(prensa.filter((p: any) => p.estado === "Publicada" || p.url), (p) => p.nombre),
+    campanas_lanzadas: names(campaigns, (c) => c.nombre),
+    publicaciones_realizadas: names(
+      publicaciones.filter((p: any) => p.estado === "publicado"),
+      (p) => p.contenido_resumen || p.canal,
+    ),
+    obligaciones_cumplidas: names(obligaciones.filter((o: any) => o.estado === "completada"), (o) => o.descripcion),
+  };
+
   return {
     objetivos,
     actuales,
+    detalles,
     economico: {
       facturacionAnual,
       monthly: byMonth.map((v, i) => ({ month: i, value: v, prev: byMonthPrev[i] })),
