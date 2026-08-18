@@ -201,6 +201,73 @@ function compute(year: number, raw: any) {
   const objetivos: Record<string, number> = {};
   for (const o of raw.objetivos ?? []) objetivos[o.metrica] = Number(o.valor_objetivo);
 
+  // ---------- REALES POR MÉTRICA DE OBJETIVO ----------
+  const dealMemos: any[] = raw.dealMemos ?? [];
+  const dmYear = dealMemos.filter((d) => yearOf(d.fecha_envio ?? d.created_at) === year);
+  const comisionesIc = invoiced
+    .filter((s) => s.kind === "comision" && yearOf(invDate(s)) === year)
+    .reduce((t, s) => t + num(s.amount), 0);
+
+  const oppsYear = opportunities.filter((o) => yearOf(o.created_at) === year);
+  const pitchsYear = oppsYear.filter((o) => o.kind === "pitch");
+  const pitchIds = new Set(pitchsYear.map((o) => o.id));
+  const candidates: any[] = (raw.oppCandidates ?? []).filter((c: any) => pitchIds.has(c.opportunity_id));
+  const pitchsPorComposer = new Map<string, number>();
+  for (const c of candidates)
+    pitchsPorComposer.set(c.composer_id, (pitchsPorComposer.get(c.composer_id) ?? 0) + 1);
+  const minPitchsPorRepresentado = activos.length
+    ? Math.min(...activos.map((c) => pitchsPorComposer.get(c.id) ?? 0))
+    : 0;
+
+  const vinculosInterIc =
+    productions.filter((p) => p.referido_por_composer_id && yearOf(p.created_at) === year).length +
+    oppsYear.filter((o) => o.referido_por_composer_id).length;
+
+  const aliadosNuevos = accounts.filter((a) => yearOf(a.created_at) === year).length;
+  const artistasContactados =
+    (raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year).length +
+    composers.filter(
+      (c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year,
+    ).length;
+
+  const inYear = (rows: any[], field: string) => rows.filter((r) => yearOf(r[field] ?? r.created_at) === year);
+  const subvenciones = inYear(raw.subvenciones ?? [], "fecha_limite_solicitud");
+  const festivales = inYear(raw.festivales ?? [], "fecha_deadline_inscripcion");
+  const premios = inYear(raw.premios ?? [], "fecha_limite_inscripcion");
+  const prensa = inYear(raw.prensa ?? [], "fecha_publicacion_prevista");
+  const publicaciones = (raw.publicaciones ?? []).filter((p: any) => yearOf(p.fecha) === year);
+  const obligaciones = (raw.obligaciones ?? []).filter((o: any) => yearOf(o.fecha_limite) === year);
+
+  const actuales: Record<string, number> = {
+    facturacion_anual: facturacionAnual,
+    comisiones_ic: comisionesIc,
+    deal_memos_enviados: dmYear.filter((d) => d.estado !== "borrador").length,
+    deal_memos_aceptados: dmYear.filter((d) => d.estado === "cerrado" || d.estado === "respondido").length,
+    dias_cobro: avgCollectionDays(year) ?? 0,
+    pitchs_presentados: pitchsYear.length,
+    pitchs_composers: candidates.length,
+    pitchs_por_composer: minPitchsPorRepresentado,
+    vinculos_inter_ic: vinculosInterIc,
+    cuentas_contactadas: contactadas,
+    reuniones_partners: reunionesPartners,
+    aliados_nuevos: aliadosNuevos,
+    artistas_contactados: artistasContactados,
+    fichajes: fichajes.length,
+    reuniones_internacionales: intlReuniones,
+    propuestas_internacionales: intlPropuestas,
+    representados_activos: activos.length,
+    representados_con_produccion: activos.filter((c) => activeProdComposers.has(c.id)).length,
+    subvenciones_solicitadas: subvenciones.filter((s: any) => s.estado !== "Sin valorar").length,
+    subvenciones_concedidas: subvenciones.filter((s: any) => s.estado === "Concedida").length,
+    festivales_inscritos: festivales.filter((f: any) => f.estado !== "Identificado").length,
+    premios_candidaturas: premios.filter((p: any) => p.estado !== "Identificado").length,
+    apariciones_prensa: prensa.filter((p: any) => p.estado === "Publicada" || p.url).length,
+    inversion_marketing: gastoReal,
+    campanas_lanzadas: campaigns.length,
+    publicaciones_realizadas: publicaciones.filter((p: any) => p.estado === "publicado").length,
+    obligaciones_cumplidas: obligaciones.filter((o: any) => o.estado === "completada").length,
+  };
+
   const top = (m: Map<string, number>, n: number) =>
     Array.from(m.entries())
       .map(([name, value]) => ({ name, value }))
@@ -209,6 +276,7 @@ function compute(year: number, raw: any) {
 
   return {
     objetivos,
+    actuales,
     economico: {
       facturacionAnual,
       monthly: byMonth.map((v, i) => ({ month: i, value: v, prev: byMonthPrev[i] })),
