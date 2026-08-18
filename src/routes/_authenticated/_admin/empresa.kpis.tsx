@@ -117,7 +117,7 @@ function KpisPage() {
             </div>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <Panel title="Facturación por representado (top 10)">
-                {!k.economico.porRepresentado.length ? <NoData /> : (
+                {!k.economico.porRepresentado.length ? <NoData message={`No hay facturación registrada en ${year}.`} /> : (
                   <ChartBox height={320}>
                     <BarChart layout="vertical" data={k.economico.porRepresentado}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -130,7 +130,7 @@ function KpisPage() {
                 )}
               </Panel>
               <Panel title="Facturación por tipo de producción">
-                {!k.economico.porTipo.length ? <NoData /> : (
+                {!k.economico.porTipo.length ? <NoData message={`No hay facturación registrada en ${year}.`} /> : (
                   <ChartBox height={320}>
                     <PieChart>
                       <Pie data={k.economico.porTipo} dataKey="value" nameKey="name" innerRadius={65} outerRadius={110}>
@@ -245,7 +245,7 @@ function KpisPage() {
                 </button>
                 {showInactive && (
                   <div className="rounded-sm border border-border bg-card/40 p-4 sm:col-span-2">
-                    {!k.roster.inactivos.length ? <NoData /> : (
+                    {!k.roster.inactivos.length ? <NoData message="No hay representados sin actividad reciente." /> : (
                       <ul className="space-y-1 text-sm">
                         {k.roster.inactivos.map((c) => (
                           <li key={c.id} className="flex items-center justify-between gap-3">
@@ -351,7 +351,7 @@ function KpisPage() {
                 </div>
               </div>
               <Panel title="Top 5 clientes por producciones">
-                {!k.producciones.topClientes.length ? <NoData /> : (
+                {!k.producciones.topClientes.length ? <NoData message={`No hay producciones registradas en ${year}.`} /> : (
                   <ChartBox height={220}>
                     <BarChart layout="vertical" data={k.producciones.topClientes}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -379,7 +379,7 @@ function KpisPage() {
                 <Goal actual={k.marketing.gastoReal} target={k.objetivos.inversion_marketing || k.marketing.presupuesto} money />
               </div>
               <Panel title="Inversión por canal">
-                {!k.marketing.porCanal.length ? <NoData /> : (
+                {!k.marketing.porCanal.length ? <NoData message={`No hay campañas con inversión registrada en ${year}.`} /> : (
                   <ChartBox height={260}>
                     <PieChart>
                       <Pie
@@ -475,8 +475,8 @@ function ChartBox({ children, height = 260 }: { children: ReactNode; height?: nu
   );
 }
 
-function NoData() {
-  return <p className="py-8 text-center text-sm text-muted-foreground">Sin datos para este periodo.</p>;
+function NoData({ message }: { message: string }) {
+  return <p className="py-8 text-center text-sm text-muted-foreground">{message}</p>;
 }
 
 function Card({
