@@ -3,7 +3,10 @@ import { useMemo, useState } from "react";
 import { Money } from "@/components/money";
 import { Receipt, BarChart3, FileText } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
@@ -42,6 +45,18 @@ function bucketLabel(key: string, g: Granularity): string {
 export function FinanceDashboard({ composerId }: { composerId?: string | null }) {
   const [granularity, setGranularity] = useState<Granularity>("month");
   const [kindFilter, setKindFilter] = useState<"all" | "comision" | "trabajo">("all");
+  const queryClient = useQueryClient();
+
+  async function deleteDealMemo(id: string, referencia: string) {
+    const { error } = await supabase.from("deal_memos").delete().eq("id", id);
+    if (error) {
+      toast.error(`No se pudo eliminar ${referencia}: ${error.message}`);
+      return;
+    }
+    toast.success(`Deal memo ${referencia} eliminado`);
+    void queryClient.invalidateQueries({ queryKey: ["finance-deal-memos"] });
+    void queryClient.invalidateQueries({ queryKey: ["deal-memos"] });
+  }
 
   const sprintsQ = useQuery({
     queryKey: ["finance-sprints", composerId ?? null],
@@ -288,16 +303,33 @@ export function FinanceDashboard({ composerId }: { composerId?: string | null })
                     <th className="px-3 py-2">Estado</th>
                     <th className="px-3 py-2">Fecha</th>
                     <th className="px-3 py-2 text-right">Importe</th>
+                    <th className="px-3 py-2 w-10 text-right"><span className="sr-only">Acciones</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {dealMemos.map((d) => (
                     <tr key={d.id} className="border-t border-border">
-                      <td className="px-3 py-2 font-mono text-xs">{d.referencia}</td>
-                      <td className="px-3 py-2">{d.obra}</td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        <Link to="/deal-memos/$dealMemoId" params={{ dealMemoId: d.id }} className="underline-offset-2 hover:underline">
+                          {d.referencia}
+                        </Link>
+                      </td>
+                      <td className="px-3 py-2">
+                        <Link to="/deal-memos/$dealMemoId" params={{ dealMemoId: d.id }} className="underline-offset-2 hover:underline">
+                          {d.obra}
+                        </Link>
+                      </td>
                       <td className="px-3 py-2 text-xs uppercase text-muted-foreground">{d.estado.replace(/_/g, " ")}</td>
                       <td className="px-3 py-2 tabular-nums">{formatDateEs(d.fecha_envio ?? d.created_at)}</td>
                       <td className="px-3 py-2 text-right tabular-nums"><Money value={d.importe_propuesto} /></td>
+                      <td className="px-3 py-2 text-right">
+                        <ConfirmDeleteButton
+                          iconOnly
+                          onConfirm={() => deleteDealMemo(d.id, d.referencia)}
+                          title={`¿Eliminar el deal memo ${d.referencia}?`}
+                          description="Se eliminará el presupuesto y su historial asociado. Esta acción no se puede deshacer."
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
