@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -168,12 +169,12 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Mini label="Fee presupuestado" value={formatEUR(totals.feeBudget)} />
-        <Mini label="Trabajo facturado" value={formatEUR(totals.workInv)} hint={`Cobrado: ${formatEUR(totals.workPaid)}`} />
-        <Mini label="Trabajo pendiente" value={formatEUR(totals.feeBudget - totals.workInv)} />
-        <Mini label="Comisión IC presupuestada" value={formatEUR(totals.commBudget)} />
-        <Mini label="Comisión IC facturada" value={formatEUR(totals.commInv)} hint={`Cobrada: ${formatEUR(totals.commPaid)}`} />
-        <Mini label="Comisión IC pendiente" value={formatEUR(totals.commBudget - totals.commInv)} />
+        <Mini label="Fee presupuestado" value=<Money value={totals.feeBudget} /> />
+        <Mini label="Trabajo facturado" value=<Money value={totals.workInv} /> hint={`Cobrado: $<Money value={totals.workPaid} />`} />
+        <Mini label="Trabajo pendiente" value=<Money value={totals.feeBudget - totals.workInv} /> />
+        <Mini label="Comisión IC presupuestada" value=<Money value={totals.commBudget} /> />
+        <Mini label="Comisión IC facturada" value=<Money value={totals.commInv} /> hint={`Cobrada: $<Money value={totals.commPaid} />`} />
+        <Mini label="Comisión IC pendiente" value=<Money value={totals.commBudget - totals.commInv} /> />
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -199,12 +200,12 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
                   <Link to="/productions/$productionId" params={{ productionId: r.id }} className="font-display hover:underline">{r.title}</Link>
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">{r.composers?.artistic_name || r.composers?.full_name || "—"}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.fee_amount)}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.agg.workInv)}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.agg.workPaid)}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.ic_commission)}{r.ic_commission_pct != null && <span className="ml-1 text-xs text-muted-foreground">({r.ic_commission_pct}%)</span>}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.agg.commInv)}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(r.agg.commPaid)}</td>
+                <td className="px-3 py-2 text-right"><Money value={r.fee_amount} /></td>
+                <td className="px-3 py-2 text-right"><Money value={r.agg.workInv} /></td>
+                <td className="px-3 py-2 text-right"><Money value={r.agg.workPaid} /></td>
+                <td className="px-3 py-2 text-right"><Money value={r.ic_commission} />{r.ic_commission_pct != null && <span className="ml-1 text-xs text-muted-foreground">({r.ic_commission_pct}%)</span>}</td>
+                <td className="px-3 py-2 text-right"><Money value={r.agg.commInv} /></td>
+                <td className="px-3 py-2 text-right"><Money value={r.agg.commPaid} /></td>
               </tr>
             ))}
             {!rows.length && (
@@ -325,10 +326,10 @@ function BusinessPlanPanel() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Mini label="Ingresos previstos" value={formatEUR(totalBudgetIncome)} hint={`Real: ${formatEUR(totalActualIncome)}`} />
-        <Mini label="Gastos previstos" value={formatEUR(totalBudgetExpense)} hint={`Real: ${formatEUR(totalActualExpense)}`} />
-        <Mini label="Margen previsto" value={formatEUR(totalBudgetIncome - totalBudgetExpense)} />
-        <Mini label="Margen real" value={formatEUR(totalActualIncome - totalActualExpense)} hint={`Desv.: ${formatEUR((totalActualIncome - totalActualExpense) - (totalBudgetIncome - totalBudgetExpense))}`} />
+        <Mini label="Ingresos previstos" value=<Money value={totalBudgetIncome} /> hint={`Real: $<Money value={totalActualIncome} />`} />
+        <Mini label="Gastos previstos" value=<Money value={totalBudgetExpense} /> hint={`Real: $<Money value={totalActualExpense} />`} />
+        <Mini label="Margen previsto" value=<Money value={totalBudgetIncome - totalBudgetExpense} /> />
+        <Mini label="Margen real" value=<Money value={totalActualIncome - totalActualExpense} /> hint={`Desv.: $<Money value={(totalActualIncome - totalActualExpense) - (totalBudgetIncome - totalBudgetExpense)} />`} />
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -363,7 +364,7 @@ function BusinessPlanPanel() {
                         />
                       </td>
                     ))}
-                    <td className="px-2 py-1.5 text-right font-medium">{formatEUR(sumRow(bud))}</td>
+                    <td className="px-2 py-1.5 text-right font-medium"><Money value={sumRow(bud)} /></td>
                   </tr>
                   <tr key={c.key + "-act"}>
                     <td className="px-2 py-1.5 text-muted-foreground">Real</td>
@@ -378,7 +379,7 @@ function BusinessPlanPanel() {
                         </td>
                       );
                     })}
-                    <td className="px-2 py-1.5 text-right font-medium">{formatEUR(sumRow(act))}</td>
+                    <td className="px-2 py-1.5 text-right font-medium"><Money value={sumRow(act)} /></td>
                   </tr>
                 </>
               );
@@ -416,7 +417,7 @@ function IcExpensesPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Total registrado: <strong>{formatEUR(total)}</strong></p>
+        <p className="text-sm text-muted-foreground">Total registrado: <strong><Money value={total} /></strong></p>
         <Button size="sm" onClick={() => setEditing({ expense_date: new Date().toISOString().slice(0, 10), category: "gasto_operativo" })}>
           <Plus className="mr-1 h-4 w-4" />Nuevo gasto
         </Button>
@@ -442,7 +443,7 @@ function IcExpensesPanel() {
                 <td className="px-3 py-2">{e.concept}</td>
                 <td className="px-3 py-2 text-muted-foreground">{CAT_LABEL[e.category]}</td>
                 <td className="px-3 py-2 text-muted-foreground">{e.providers?.name ?? "—"}</td>
-                <td className="px-3 py-2 text-right">{formatEUR(e.amount)}</td>
+                <td className="px-3 py-2 text-right"><Money value={e.amount} /></td>
                 <td className="px-3 py-2 text-muted-foreground">{e.paid_date ?? "—"}</td>
                 <td className="px-3 py-2"><Button size="sm" variant="ghost" onClick={() => setEditing(e)}><Pencil className="h-3 w-3" /></Button></td>
               </tr>

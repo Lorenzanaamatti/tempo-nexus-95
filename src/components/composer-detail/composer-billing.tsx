@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Money } from "@/components/money";
 import { formatEUR0 } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 
@@ -51,23 +52,23 @@ export function ComposerBilling({ productions, composerId }: { productions: any[
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-sm border border-primary/30 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">Bruto (lo que factura el representado)</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(totals.trabajo.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(totals.trabajo.fact)} · Cobrado {formatEUR0(totals.trabajo.cob)}</div>
+          <div className="mt-1 font-display text-2xl tabular-nums"><Money value={totals.trabajo.previsto} compact /></div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado <Money value={totals.trabajo.fact} compact /> · Cobrado <Money value={totals.trabajo.cob} compact /></div>
         </div>
         <div className="rounded-sm border border-amber-500/40 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">− Comisión IC</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">−{formatEUR0(totals.comision.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturada {formatEUR0(totals.comision.fact)} · Cobrada {formatEUR0(totals.comision.cob)}</div>
+          <div className="mt-1 font-display text-2xl tabular-nums">−<Money value={totals.comision.previsto} compact /></div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturada <Money value={totals.comision.fact} compact /> · Cobrada <Money value={totals.comision.cob} compact /></div>
         </div>
         <div className="rounded-sm border border-emerald-500/40 bg-card p-3">
           <div className="smallcaps text-xs text-muted-foreground">Neto representado</div>
-          <div className="mt-1 font-display text-2xl tabular-nums">{formatEUR0(neto.previsto)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">Facturado {formatEUR0(neto.fact)} · Cobrado {formatEUR0(neto.cob)}</div>
+          <div className="mt-1 font-display text-2xl tabular-nums"><Money value={neto.previsto} compact /></div>
+          <div className="mt-1 text-xs text-muted-foreground">Facturado <Money value={neto.fact} compact /> · Cobrado <Money value={neto.cob} compact /></div>
         </div>
       </div>
       {totals.trabajo.venc > 0 && (
         <p className="text-xs text-amber-600 dark:text-amber-400">
-          Vencido sin facturar (trabajo): {formatEUR0(totals.trabajo.venc)}
+          Vencido sin facturar (trabajo): <Money value={totals.trabajo.venc} compact />
         </p>
       )}
       <div className="overflow-x-auto rounded-sm border border-border">
@@ -95,7 +96,7 @@ export function ComposerBilling({ productions, composerId }: { productions: any[
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">#{s.sprint_number}{s.label ? ` · ${s.label}` : ""}</td>
                   <td className="px-3 py-2 text-xs">{s.kind === "comision" ? "Comisión IC" : s.kind === "trabajo" ? "Trabajo" : s.kind}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{formatEUR0(Number(s.amount ?? 0))}</td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={Number(s.amount ?? 0)} compact /></td>
                   <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(s.due_date)}</td>
                   <td className="px-3 py-2 text-xs">{s.status}</td>
                   <td className="px-3 py-2 text-xs">
@@ -127,7 +128,7 @@ export function ProductionFeeSummary({ productions }: { productions: any[] }) {
     <ul className="space-y-1 text-xs text-muted-foreground">
       {withFee.map((p) => (
         <li key={p.id}>
-          <span className="text-foreground">{p.title}</span> · Fee {formatEUR0(Number(p.fee_amount ?? 0))} · Comisión IC {formatEUR0(Number(p.ic_commission ?? 0))}
+          <span className="text-foreground">{p.title}</span> · Fee <Money value={Number(p.fee_amount ?? 0)} compact /> · Comisión IC <Money value={Number(p.ic_commission ?? 0)} compact />
         </li>
       ))}
     </ul>

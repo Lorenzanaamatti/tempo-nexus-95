@@ -1,4 +1,5 @@
 import { PageCrumb } from "@/components/breadcrumbs";
+import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -308,7 +309,7 @@ function OpportunityDetail() {
               setForm({ ...form, estimated_value: v == null ? "" : v });
             }}
           />
-          {form.estimated_value !== "" && <p className="mt-1 text-xs text-muted-foreground">{formatEUR(Number(form.estimated_value))}</p>}
+          {form.estimated_value !== "" && <p className="mt-1 text-xs text-muted-foreground"><Money value={Number(form.estimated_value)} /></p>}
         </div>
         <div className="sm:col-span-2">
           <Label>Responsable</Label>

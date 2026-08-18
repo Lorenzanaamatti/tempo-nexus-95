@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Money } from "@/components/money";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,7 +68,7 @@ function AprobarPage() {
             <h1 className="mt-1 font-display text-2xl">{MOCK.obra}</h1>
             <div className="mt-2 grid gap-1 text-sm md:grid-cols-2">
               <div><span className="text-[10px] uppercase tracking-wider text-muted-foreground">Cliente: </span>{MOCK.cliente}</div>
-              <div><span className="text-[10px] uppercase tracking-wider text-muted-foreground">Importe: </span><span className="font-medium">{formatMoneyEs(MOCK.importe, MOCK.moneda)}</span></div>
+              <div><span className="text-[10px] uppercase tracking-wider text-muted-foreground">Importe: </span><span className="font-medium"><Money value={MOCK.importe} moneda={MOCK.moneda} /></span></div>
             </div>
           </div>
 

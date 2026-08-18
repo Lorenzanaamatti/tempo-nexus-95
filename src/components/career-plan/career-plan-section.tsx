@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Money } from "@/components/money";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -560,7 +561,7 @@ export function ActionsLog({
           id: `fact-${p.id}`,
           fecha: `${p.year ?? new Date().getFullYear()}-12-31`,
           tipo: "Facturación",
-          descripcion: `${p.title ?? "Producción"} — ${formatEUR0(p.fee_amount)}`,
+          descripcion: `${p.title ?? "Producción"} — $<Money value={p.fee_amount} compact />`,
           resultado: null,
         });
       }

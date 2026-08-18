@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -85,11 +86,11 @@ export function BillingSprintsEditor({
         <div>
           <h3 className="font-display text-xl">{title}</h3>
           <p className="text-xs text-muted-foreground">
-            Total presupuestado: <strong>{formatEUR(sum)}</strong> ·
-            Facturado: <strong>{formatEUR(sumInvoiced)}</strong> ·
-            Cobrado: <strong>{formatEUR(sumPaid)}</strong>
+            Total presupuestado: <strong><Money value={sum} /></strong> ·
+            Facturado: <strong><Money value={sumInvoiced} /></strong> ·
+            Cobrado: <strong><Money value={sumPaid} /></strong>
             {typeof totalReference === "number" && (
-              <> · Referencia: <strong>{formatEUR(totalReference)}</strong></>
+              <> · Referencia: <strong><Money value={totalReference} /></strong></>
             )}
           </p>
         </div>

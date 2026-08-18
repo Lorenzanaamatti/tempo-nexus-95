@@ -1,4 +1,5 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
+import { Money } from "@/components/money";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -278,8 +279,8 @@ function FilmografiaIC() {
               <tfoot>
                 <tr className="border-t border-border bg-muted/30 font-mono text-xs">
                   <td className="px-3 py-2" colSpan={4}>{rows.length} registros</td>
-                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.budget ?? 0), 0))}</td>
-                  <td className="px-3 py-2 text-right">{formatEUR(rows.reduce((s, e) => s + (e.commission ?? 0), 0))}</td>
+                  <td className="px-3 py-2 text-right"><Money value={rows.reduce((s, e) => s + (e.budget ?? 0), 0)} /></td>
+                  <td className="px-3 py-2 text-right"><Money value={rows.reduce((s, e) => s + (e.commission ?? 0), 0)} /></td>
                 </tr>
               </tfoot>
             </table>
