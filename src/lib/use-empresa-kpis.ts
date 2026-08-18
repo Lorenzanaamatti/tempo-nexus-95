@@ -335,29 +335,41 @@ export function useEmpresaKpis(year: number) {
   return useQuery({
     queryKey: ["empresa-kpis", year],
     queryFn: async () => {
-      const [sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos] =
+      const [
+        sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos,
+        dealMemos, oppCandidates, subvenciones, festivales, premios, prensa, publicaciones, obligaciones,
+      ] =
         await Promise.all([
           db
             .from("production_billing_sprints")
             .select(
               "id, amount, due_date, invoiced_date, paid_date, status, kind, productions(kind, composer_id, composers!composer_id(full_name, artistic_name))",
             ),
-          db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date"),
+          db.from("opportunities").select("id, kind, statuses, estimated_value, created_at, updated_at, expected_close_date, referido_por_composer_id"),
           db
             .from("productions")
             .select(
-              "id, title, kind, status, year, composer_id, platform, production_company, created_at, updated_at, delivery_date, actual_delivery_date, premiere_date, source_opportunity_id",
+              "id, title, kind, status, year, composer_id, platform, production_company, created_at, updated_at, delivery_date, actual_delivery_date, premiere_date, source_opportunity_id, referido_por_composer_id",
             ),
           db.from("composers").select("id, full_name, artistic_name, representation_status, representation_start_date, created_at, updated_at"),
-          db.from("target_accounts").select("id, status, last_contact_date, updated_at"),
+          db.from("target_accounts").select("id, status, last_contact_date, created_at, updated_at"),
           db.from("roster_prospects").select("id, nombre, estado, fecha_primer_contacto, fecha_decision"),
           db.from("international_prospects").select("id, nombre_empresa, pais, tipo, reuniones_mantenidas, estado_propuesta, fecha_primer_contacto"),
           db.from("marketing_campaigns").select("*"),
           db.from("empresa_objetivos").select("metrica, valor_objetivo").eq("anio", year),
+          db.from("deal_memos").select("id, estado, fecha_envio, created_at, importe_propuesto"),
+          db.from("opportunity_candidates").select("opportunity_id, composer_id"),
+          db.from("oportunidades_subvenciones").select("id, estado, fecha_limite_solicitud, importe_concedido, created_at"),
+          db.from("oportunidades_festivales").select("id, estado, fecha_deadline_inscripcion, created_at"),
+          db.from("oportunidades_premios").select("id, estado, fecha_limite_inscripcion, created_at"),
+          db.from("oportunidades_prensa").select("id, estado, url, fecha_publicacion_prevista, created_at"),
+          db.from("publicaciones").select("id, estado, fecha"),
+          db.from("obligaciones_comunicacion").select("id, estado, fecha_limite"),
         ]);
-      const first = [sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos].find(
-        (r: any) => r.error,
-      ) as any;
+      const first = [
+        sprints, opportunities, productions, composers, targetAccounts, rosterProspects, intlProspects, campaigns, objetivos,
+        dealMemos, oppCandidates, subvenciones, festivales, premios, prensa, publicaciones, obligaciones,
+      ].find((r: any) => r.error) as any;
       if (first?.error) throw first.error;
       return {
         computed: compute(year, {
@@ -370,6 +382,14 @@ export function useEmpresaKpis(year: number) {
           intlProspects: intlProspects.data,
           campaigns: campaigns.data,
           objetivos: objetivos.data,
+          dealMemos: dealMemos.data,
+          oppCandidates: oppCandidates.data,
+          subvenciones: subvenciones.data,
+          festivales: festivales.data,
+          premios: premios.data,
+          prensa: prensa.data,
+          publicaciones: publicaciones.data,
+          obligaciones: obligaciones.data,
         }),
         fetchedAt: new Date(),
       };
