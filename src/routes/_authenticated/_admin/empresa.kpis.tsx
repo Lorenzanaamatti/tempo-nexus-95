@@ -510,6 +510,60 @@ function Goal({ actual, target, money }: { actual: number; target?: number; mone
   );
 }
 
+function ObjetivosGrid({
+  objetivos, actuales,
+}: { objetivos: Record<string, number>; actuales: Record<string, number> }) {
+  const withTarget = OBJETIVO_METRICAS.filter((m) => objetivos[m.key] != null && objetivos[m.key] > 0);
+  if (!withTarget.length) {
+    return (
+      <p className="rounded-sm border border-dashed border-border p-6 text-sm text-muted-foreground">
+        Todavía no hay objetivos definidos para este año. Pulsa «Editar objetivos» para fijarlos.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-6">
+      {OBJETIVO_GRUPOS.map((g) => {
+        const rows = withTarget.filter((m) => m.group === g);
+        if (!rows.length) return null;
+        return (
+          <div key={g}>
+            <p className="smallcaps mb-2 text-xs text-muted-foreground">{g}</p>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {rows.map((m) => {
+                const target = objetivos[m.key];
+                const actual = actuales[m.key] ?? 0;
+                const pct = m.lowerIsBetter
+                  ? actual > 0
+                    ? Math.min(100, Math.round((target / actual) * 100))
+                    : 100
+                  : Math.min(100, Math.round((actual / target) * 100));
+                const fmt = (v: number) => (m.unit === "€" ? eur(v) : formatNumberEs(v));
+                const ok = m.lowerIsBetter ? actual > 0 && actual <= target : actual >= target;
+                return (
+                  <div key={m.key} className="rounded-sm border border-border bg-card/40 p-4">
+                    <p className="smallcaps text-xs text-muted-foreground">{m.label}</p>
+                    <p className={`mt-1 font-display text-3xl ${ok ? "" : "text-primary"}`}>
+                      {fmt(actual)}
+                      {m.unit === "días" ? " d" : ""}
+                    </p>
+                    <Progress className="mt-3" value={pct} />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {pct}% · objetivo {fmt(target)}
+                      {m.unit === "días" ? " d" : ""}
+                    </p>
+                    {m.hint && <p className="mt-1 text-[11px] text-muted-foreground/80">{m.hint}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function TargetsDialog({
   open, onOpenChange, year, current,
 }: { open: boolean; onOpenChange: (v: boolean) => void; year: number; current: Record<string, number> }) {
