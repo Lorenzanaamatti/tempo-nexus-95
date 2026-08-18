@@ -48,7 +48,7 @@ function BillingPlan() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("production_billing_sprints")
-        .select("id, production_id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url, productions(id, title, composer_id, composers(full_name, artistic_name))")
+        .select("id, production_id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url, productions(id, title, composer_id, composers!productions_composer_id_fkey(full_name, artistic_name))")
         .eq("kind", "comision")
         .order("due_date", { ascending: true, nullsFirst: false });
       if (error) throw error;
