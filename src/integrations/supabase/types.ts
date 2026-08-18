@@ -3480,6 +3480,7 @@ export type Database = {
           contacto_principal: string | null
           contacto_telefono: string | null
           created_at: string
+          fuente_externa_id: string | null
           id: string
           nombre: string
           notas: string | null
@@ -3500,6 +3501,7 @@ export type Database = {
           contacto_principal?: string | null
           contacto_telefono?: string | null
           created_at?: string
+          fuente_externa_id?: string | null
           id?: string
           nombre: string
           notas?: string | null
@@ -3520,6 +3522,7 @@ export type Database = {
           contacto_principal?: string | null
           contacto_telefono?: string | null
           created_at?: string
+          fuente_externa_id?: string | null
           id?: string
           nombre?: string
           notas?: string | null

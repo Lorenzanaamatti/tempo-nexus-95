@@ -1,0 +1,2 @@
+ALTER TABLE public.partners ADD COLUMN IF NOT EXISTS fuente_externa_id text;
+CREATE UNIQUE INDEX IF NOT EXISTS partners_fuente_externa_id_key ON public.partners (fuente_externa_id) WHERE fuente_externa_id IS NOT NULL;
