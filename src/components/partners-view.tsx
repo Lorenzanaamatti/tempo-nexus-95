@@ -131,7 +131,7 @@ export function PartnersView({
               <tr>
                 <th className="px-3 py-2 smallcaps text-xs">Nombre</th>
                 <th className="px-3 py-2 smallcaps text-xs">Tipo</th>
-                <th className="px-3 py-2 smallcaps text-xs">Subtipo</th>
+                {tipo !== "Productora" && <th className="px-3 py-2 smallcaps text-xs">Subtipo</th>}
                 <th className="px-3 py-2 smallcaps text-xs">Ámbito</th>
                 <th className="px-3 py-2 smallcaps text-xs">Ubicación</th>
                 <th className="px-3 py-2 smallcaps text-xs">Contacto</th>
@@ -147,7 +147,7 @@ export function PartnersView({
                   <td className="px-3 py-2">
                     <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${PARTNER_TIPO_TONE[r.tipo]}`}>{r.tipo}</span>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.subtipo || "—"}</td>
+                  {tipo !== "Productora" && <td className="px-3 py-2 text-muted-foreground">{r.subtipo || "—"}</td>}
                   <td className="px-3 py-2 text-muted-foreground">{r.ambito || "—"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{[r.ciudad, r.pais].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{r.contacto_principal || r.contacto_email || "—"}</td>
@@ -229,15 +229,17 @@ function NewPartnerDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-1.5">
-              <Label>Subtipo</Label>
-              <Select value={subtipo} onValueChange={setSubtipo}>
-                <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
-                <SelectContent>
-                  {PARTNER_SUBTIPOS[tipo].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {tipo !== "Productora" && (
+              <div className="grid gap-1.5">
+                <Label>Subtipo</Label>
+                <Select value={subtipo} onValueChange={setSubtipo}>
+                  <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+                  <SelectContent>
+                    {PARTNER_SUBTIPOS[tipo].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <div className="grid gap-1.5">
             <Label>Tipo de apoyo</Label>
