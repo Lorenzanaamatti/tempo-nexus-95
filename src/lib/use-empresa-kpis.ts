@@ -249,6 +249,7 @@ function compute(year: number, raw: any) {
     pitchs_por_composer: minPitchsPorRepresentado,
     vinculos_inter_ic: vinculosInterIc,
     cuentas_contactadas: contactadas,
+    cuentas_convertidas: clientesActivos.length,
     reuniones_partners: reunionesPartners,
     aliados_nuevos: aliadosNuevos,
     artistas_contactados: artistasContactados,
@@ -257,6 +258,9 @@ function compute(year: number, raw: any) {
     propuestas_internacionales: intlPropuestas,
     representados_activos: activos.length,
     representados_con_produccion: activos.filter((c) => activeProdComposers.has(c.id)).length,
+    producciones_finalizadas: finalizadasYear.length,
+    producciones_activas: activasCount,
+    valor_pipeline: pipelineValue,
     subvenciones_solicitadas: subvenciones.filter((s: any) => s.estado !== "Sin valorar").length,
     subvenciones_concedidas: subvenciones.filter((s: any) => s.estado === "Concedida").length,
     festivales_inscritos: festivales.filter((f: any) => f.estado !== "Identificado").length,
@@ -307,6 +311,7 @@ function compute(year: number, raw: any) {
       accounts.filter((a) => a.status === "reunion" && yearOf(a.last_contact_date ?? a.updated_at) === year),
       accountName,
     ),
+    cuentas_convertidas: names(clientesActivos, accountName),
     aliados_nuevos: names(accounts.filter((a) => yearOf(a.created_at) === year), accountName),
     artistas_contactados: [
       ...names((raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year), (p) => p.nombre),
@@ -392,6 +397,30 @@ function compute(year: number, raw: any) {
       presupuesto,
       porCanal: top(byCanal, 10),
       campaigns,
+    },
+    oportunidades: {
+      subvenciones: {
+        total: subvenciones.length,
+        solicitadas: subvenciones.filter((s: any) => s.estado !== "Sin valorar").length,
+        concedidas: subvenciones.filter((s: any) => s.estado === "Concedida").length,
+        importeConcedido: subvenciones.reduce((t: number, s: any) => t + num(s.importe_concedido), 0),
+      },
+      festivales: {
+        total: festivales.length,
+        inscritos: festivales.filter((f: any) => f.estado !== "Identificado").length,
+      },
+      premios: {
+        total: premios.length,
+        candidaturas: premios.filter((p: any) => p.estado !== "Identificado").length,
+      },
+      prensa: {
+        total: prensa.length,
+        publicadas: prensa.filter((p: any) => p.estado === "Publicada" || p.url).length,
+      },
+      pitches: {
+        total: pitchsYear.length,
+        representados: candidates.length,
+      },
     },
   };
 }
