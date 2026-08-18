@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Film, Plus, LayoutGrid, List } from "lucide-react";
+import { Film, Plus, LayoutGrid, List, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-con
 import { STAGE_DEFAULT_STATUS } from "@/lib/production-lifecycle";
 import { posterUrl } from "@/lib/producciones-espanolas";
 import { formatEUR } from "@/lib/money";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { addCuentaObjetivo, addDirector, addPlataforma, addProductora, addProspectFichaje } from "@/lib/crm-quick-add";
 
 const db = supabase as any;
 const ALL = "__all__";
@@ -34,7 +36,9 @@ type Entry = {
   kind: string;
   poster: string | null;
   company: string | null;
+  platform: string | null;
   director: string | null;
+  externalComposer: string | null;
   credits: Credit[];
   source: "Producción IC" | "Externo" | "Producción española";
   budget: number | null;
@@ -49,7 +53,7 @@ function useFilmografia() {
     queryKey: ["filmografia-ic"],
     queryFn: async () => {
       const [prods, assigns, composers, externals, espanolas, companies, directors] = await Promise.all([
-        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id, partner, fee_amount, ic_commission, ic_commission_pct"),
+        db.from("productions").select("id, title, year, kind, project_type, premiere_date, delivery_date, production_company, director, composer_id, partner_company_id, director_id, spanish_film_id, partner, platform, external_composer, fee_amount, ic_commission, ic_commission_pct"),
         db.from("production_assignments").select("production_id, composer_id, role_in_project"),
         db.from("composers").select("id, full_name, artistic_name, roster_role"),
         db.from("composer_filmography").select("id, composer_id, title, year, format, production_company, director, production_id"),
@@ -91,6 +95,8 @@ function useFilmografia() {
           kind: p.project_type ? (PRODUCTION_KIND_LABEL as any)[p.project_type] ?? p.kind ?? "Otro" : p.kind ?? "Otro",
           poster: linked ? posterUrl(linked.poster_path) : null,
           company: p.production_company ?? companyById.get(p.partner_company_id) ?? null,
+          platform: p.platform ?? null,
+          externalComposer: p.external_composer ?? null,
           director: p.director ?? directorById.get(p.director_id) ?? null,
           credits,
           source: "Producción IC",
@@ -115,6 +121,8 @@ function useFilmografia() {
           kind: f.format ?? "Otro",
           poster: null,
           company: f.production_company ?? null,
+          platform: null,
+          externalComposer: null,
           director: f.director ?? null,
           credits: name ? [{ composerId: f.composer_id, name, role: "Crédito externo" }] : [],
           source: "Externo",
@@ -133,6 +141,8 @@ function useFilmografia() {
           kind: e.media_type === "tv" ? "Serie" : "Película",
           poster: posterUrl(e.poster_path),
           company: (e.production_companies ?? [])[0] ?? null,
+          platform: e.platform ?? null,
+          externalComposer: e.composer ?? null,
           director: (e.directors ?? [])[0] ?? null,
           credits: (e.representados_vinculados ?? []).map((id: string) => ({
             composerId: id, name: nameOf(id) ?? "—", role: "Participante",
@@ -151,6 +161,47 @@ function useFilmografia() {
       return { entries, roster };
     },
   });
+}
+
+/** Alta directa de los datos de la fila en el resto de CRMs de la app. */
+function CrmQuickAdd({ e }: { e: Entry }) {
+  const rosterNames = new Set(e.credits.map((c) => c.name.toLowerCase()));
+  const composerExterno =
+    e.externalComposer && !rosterNames.has(e.externalComposer.toLowerCase()) ? e.externalComposer : null;
+  const items: { label: string; run: () => Promise<void> }[] = [];
+  if (e.company) {
+    items.push({ label: `Productora · ${e.company}`, run: () => addProductora(e.company!) });
+    items.push({ label: `Cuenta objetivo · ${e.company}`, run: () => addCuentaObjetivo(e.company!, "productora", `Detectada en «${e.title}» (${e.year})`) });
+  }
+  if (e.platform) {
+    items.push({ label: `Plataforma · ${e.platform}`, run: () => addPlataforma(e.platform!) });
+    items.push({ label: `Cuenta objetivo · ${e.platform}`, run: () => addCuentaObjetivo(e.platform!, "plataforma", `Detectada en «${e.title}» (${e.year})`) });
+  }
+  if (e.director) items.push({ label: `Director/a · ${e.director}`, run: () => addDirector(e.director!) });
+  if (composerExterno)
+    items.push({
+      label: `Prospect de fichaje · ${composerExterno}`,
+      run: () => addProspectFichaje(composerExterno, `Compositor de «${e.title}» (${e.year})`),
+    });
+
+  if (!items.length) return <span className="text-xs text-muted-foreground">—</span>;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Añadir datos de ${e.title} a otros CRM`}>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-72">
+        <DropdownMenuLabel>Añadir a CRM</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {items.map((it, i) => (
+          <DropdownMenuItem key={i} onSelect={() => void it.run()}>{it.label}</DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 function EntryTitle({ e, onExternal }: { e: Entry; onExternal: (e: Entry) => void }) {
@@ -269,9 +320,11 @@ function FilmografiaIC() {
                   <th className="px-3 py-2">Título</th>
                   <th className="px-3 py-2">Roster asociado</th>
                   <th className="px-3 py-2">Productora</th>
+                  <th className="px-3 py-2">Plataforma</th>
                   <th className="px-3 py-2">Año</th>
                   <th className="px-3 py-2 text-right">Presupuesto</th>
                   <th className="px-3 py-2 text-right">Comisión IC</th>
+                  <th className="px-3 py-2 text-right">CRM</th>
                 </tr>
               </thead>
               <tbody>
@@ -298,17 +351,20 @@ function FilmografiaIC() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </td>
                     <td className="px-3 py-2">{e.company ?? "—"}</td>
+                    <td className="px-3 py-2">{e.platform ?? "—"}</td>
                     <td className="px-3 py-2 font-mono text-xs">{e.year}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs">{e.budget != null ? formatEUR(e.budget) : "—"}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs">{e.commission != null ? formatEUR(e.commission) : "—"}</td>
+                    <td className="px-3 py-2 text-right"><CrmQuickAdd e={e} /></td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="border-t border-border bg-muted/30 font-mono text-xs">
-                  <td className="px-3 py-2" colSpan={4}>{rows.length} registros</td>
+                  <td className="px-3 py-2" colSpan={5}>{rows.length} registros</td>
                   <td className="px-3 py-2 text-right"><Money value={rows.reduce((s, e) => s + (e.budget ?? 0), 0)} /></td>
                   <td className="px-3 py-2 text-right"><Money value={rows.reduce((s, e) => s + (e.commission ?? 0), 0)} /></td>
+                  <td className="px-3 py-2" />
                 </tr>
               </tfoot>
             </table>
@@ -329,7 +385,7 @@ function FilmografiaIC() {
                     <EntryTitle e={e} onExternal={setExternal} />
                   </p>
                   <p className="text-xs text-muted-foreground">{e.year} · {e.kind}</p>
-                  <p className="text-xs text-muted-foreground">{[e.company, e.director].filter(Boolean).join(" · ") || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{[e.company, e.platform, e.director].filter(Boolean).join(" · ") || "—"}</p>
                   <div className="flex flex-wrap gap-1">
                     {e.credits.map((c, i) => (
                       <Badge key={`${e.key}-${c.composerId}-${i}`} variant="secondary" className="rounded-sm text-[10px]">
@@ -340,6 +396,7 @@ function FilmografiaIC() {
                       <Badge variant="outline" className="rounded-sm text-[10px]">{e.source === "Externo" ? "Externo" : "Producción española"}</Badge>
                     )}
                   </div>
+                  <CrmQuickAdd e={e} />
                 </div>
               </article>
             ))}
