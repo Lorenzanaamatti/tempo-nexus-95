@@ -5,6 +5,7 @@ export const OBJETIVO_GRUPOS = [
   "Comercial nacional",
   "Internacional",
   "Roster",
+  "Producciones",
   "Convocatorias",
   "Marketing y comunicación",
 ] as const;
@@ -44,6 +45,7 @@ export const OBJETIVO_METRICAS: readonly ObjetivoMetricaDef[] = [
     group: "Comercial nacional",
   },
   { key: "cuentas_contactadas", label: "Cuentas objetivo contactadas", unit: "nº", group: "Comercial nacional" },
+  { key: "cuentas_convertidas", label: "Cuentas objetivo convertidas en cliente", unit: "nº", group: "Comercial nacional" },
   { key: "reuniones_partners", label: "Reuniones con partners nacionales", unit: "nº", group: "Comercial nacional" },
   { key: "aliados_nuevos", label: "Nuevos potenciales aliados contactados", unit: "nº", group: "Comercial nacional" },
   { key: "artistas_contactados", label: "Artistas contactados (prospección)", unit: "nº", group: "Comercial nacional" },
@@ -54,6 +56,10 @@ export const OBJETIVO_METRICAS: readonly ObjetivoMetricaDef[] = [
   // Roster
   { key: "representados_activos", label: "Representados activos", unit: "nº", group: "Roster" },
   { key: "representados_con_produccion", label: "Representados con producción activa", unit: "nº", group: "Roster" },
+  // Producciones
+  { key: "producciones_finalizadas", label: "Producciones finalizadas", unit: "nº", group: "Producciones" },
+  { key: "producciones_activas", label: "Producciones activas", unit: "nº", group: "Producciones" },
+  { key: "valor_pipeline", label: "Valor estimado del pipeline", unit: "€", group: "Producciones" },
   // Convocatorias
   { key: "subvenciones_solicitadas", label: "Subvenciones solicitadas", unit: "nº", group: "Convocatorias" },
   { key: "subvenciones_concedidas", label: "Subvenciones concedidas", unit: "nº", group: "Convocatorias" },
