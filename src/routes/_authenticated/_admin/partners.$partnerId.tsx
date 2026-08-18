@@ -117,13 +117,15 @@ function PartnerDetail() {
               <SelectContent>{PARTNER_TIPOS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="grid gap-1.5">
-            <Label>Subtipo</Label>
-            <Select value={form.subtipo ?? ""} onValueChange={(v) => set("subtipo", v)}>
-              <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
-              <SelectContent>{PARTNER_SUBTIPOS[tipo].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
+          {tipo !== "Productora" && (
+            <div className="grid gap-1.5">
+              <Label>Subtipo</Label>
+              <Select value={form.subtipo ?? ""} onValueChange={(v) => set("subtipo", v)}>
+                <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+                <SelectContent>{PARTNER_SUBTIPOS[tipo].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <div className="grid gap-1.5">
           <Label>Tipo de apoyo</Label>
