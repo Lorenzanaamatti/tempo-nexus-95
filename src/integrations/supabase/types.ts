@@ -5971,7 +5971,7 @@ export type Database = {
         | "agradecimiento"
         | "otro"
       partner_ambito: "Local" | "Nacional" | "Internacional"
-      partner_tipo: "Productora" | "Medio" | "Institución"
+      partner_tipo: "Productora" | "Medio" | "Institución" | "Plataforma"
       person_role:
         | "ic_team"
         | "composer"
@@ -6596,7 +6596,7 @@ export const Constants = {
         "otro",
       ],
       partner_ambito: ["Local", "Nacional", "Internacional"],
-      partner_tipo: ["Productora", "Medio", "Institución"],
+      partner_tipo: ["Productora", "Medio", "Institución", "Plataforma"],
       person_role: [
         "ic_team",
         "composer",
