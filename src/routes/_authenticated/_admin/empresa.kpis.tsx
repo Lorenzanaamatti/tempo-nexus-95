@@ -20,7 +20,7 @@ import { useEmpresaKpis } from "@/lib/use-empresa-kpis";
 import { formatEUR0, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs, formatShortDateTimeEs } from "@/lib/dates";
 import {
-  CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_METRICAS, yearOptions,
+  CAMPAIGN_CANAL_LABEL, CHART_COLORS, MONTHS_ES, OBJETIVO_GRUPOS, OBJETIVO_METRICAS, yearOptions,
   type CampaignCanal,
 } from "@/lib/kpi-constants";
 
@@ -79,6 +79,14 @@ function KpisPage() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-12">
+          {/* OBJETIVOS VS REAL */}
+          <Section
+            title={`Objetivos ${year} vs. real`}
+            action={<Button variant="outline" size="sm" onClick={() => setTargetsOpen(true)}>Editar objetivos</Button>}
+          >
+            <ObjetivosGrid objetivos={k.objetivos} actuales={k.actuales} />
+          </Section>
+
           {/* ECONÓMICO */}
           <Section title="Económico">
             <div className="grid gap-4 lg:grid-cols-3">
