@@ -196,14 +196,15 @@ function RosterAll() {
   const counts = useMemo(() => ({
     contratado: rows.filter((r) => r.status === "contratado").length,
     prospeccion: rows.filter((r) => r.status === "prospeccion").length,
-    pendiente: rows.filter((r) => r.status === "pendiente").length,
-  }), [rows]);
+    negociacion: rows.filter((r) => r.status === "negociacion").length,
+    objetivo: rows.filter((r) => r.status === "objetivo").length,
+  }) as Record<Status, number>, [rows]);
 
   const exportRows = filtered.map((r) => ({
     Nombre: r.name,
     Categoría: rosterRoleLabel(r.role),
     Subcategoría: r.subtype ?? "",
-    Estado: r.status === "contratado" ? "Contratado" : r.status === "prospeccion" ? "En prospección" : "Pendiente",
+    Estado: STATUS_LABEL[r.status],
     [r.date1Label]: r.date1 ?? "",
     [r.date2Label]: r.date2 ?? "",
     "Proyectos en curso": r.open,
