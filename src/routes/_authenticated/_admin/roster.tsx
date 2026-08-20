@@ -11,6 +11,7 @@ import { usePersistedState } from "@/lib/use-persisted-filters";
 import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
+import { RepresentationStatusMenu } from "@/components/representation-status-menu";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
@@ -54,6 +55,13 @@ const STATUS_LABEL: Record<Status, string> = {
   prospeccion: "En prospección",
   negociacion: "En negociación",
   objetivo: "En objetivos",
+};
+
+const DB_FROM_STATUS: Record<Status, string> = {
+  contratado: "activo",
+  prospeccion: "prospeccion",
+  negociacion: "en_negociacion",
+  objetivo: "objetivo",
 };
 
 function RosterAll() {
@@ -341,7 +349,7 @@ function RosterAll() {
                     {r.kind === "composer" ? (
                       <RepresentationStatusMenu
                         value={DB_FROM_STATUS[r.status]}
-                        onChange={async (next) => {
+                        onChange={async (next: string) => {
                           await supabase.from("composers").update({ representation_status: next as never }).eq("id", r.id);
                           refetch();
                         }}
