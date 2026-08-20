@@ -12,7 +12,9 @@ import { Plus, LayoutGrid, Rows3, X } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import { ListSkeleton } from "@/components/list-states";
 
-type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator" | "productor_musical";
+import { ROSTER_ROLE_OPTIONS, rosterRoleLabel, type RosterRoleValue } from "@/lib/roster-roles";
+
+type RosterRole = RosterRoleValue;
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
 const TIER_ORDER: Tier[] = ["A", "B", "C", "D", "E", "desarrollo"];
 const TIER_LABEL: Record<Tier, string> = {
