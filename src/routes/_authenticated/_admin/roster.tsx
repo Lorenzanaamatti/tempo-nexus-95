@@ -169,7 +169,7 @@ function RosterAll() {
         location: null as string | null,
         role: t.roster_kind,
         subtype: null as string | null,
-        status: "pendiente" as Status,
+        status: "objetivo" as Status,
         date1: t.created_at ? fmtDate(t.created_at) : null,
         date2: null,
         date1Label: "Alta",
@@ -185,7 +185,7 @@ function RosterAll() {
     if (statusFilter !== "todos") list = list.filter((r) => r.status === statusFilter);
     list = [...list].sort((a, b) => {
       if (sortBy === "status") {
-        const order: Record<Status, number> = { contratado: 0, prospeccion: 1, pendiente: 2 };
+        const order: Record<Status, number> = { contratado: 0, prospeccion: 1, negociacion: 2, objetivo: 3 };
         if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
       }
       return a.name.localeCompare(b.name);
