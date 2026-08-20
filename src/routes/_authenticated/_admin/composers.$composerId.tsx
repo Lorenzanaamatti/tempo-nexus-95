@@ -281,10 +281,6 @@ function Inner({
           <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha
         </p>
         <div className="flex items-center gap-2">
-          <RepresentationStatusMenu
-            value={c.representation_status ?? "activo"}
-            onChange={(next) => field("representation_status", next as never)}
-          />
           <CrmTransferMenu
             actions={[
               {
@@ -441,7 +437,9 @@ function Inner({
               ))}
             </select>
           </Field>
-          {c.representation_status === "en_negociacion" ? (
+          {c.representation_status === "en_negociacion" ||
+          c.representation_status === "prospeccion" ||
+          c.representation_status === "objetivo" ? (
             <>
               <Field label="Próxima acción">
                 <Input
