@@ -22,6 +22,7 @@ import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { ComposerChat } from "@/components/composer-chat";
+import { ROSTER_ROLE_OPTIONS, ROSTER_ROLE_SUBTYPES } from "@/lib/roster-roles";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
