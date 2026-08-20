@@ -11,6 +11,7 @@ import { usePersistedState } from "@/lib/use-persisted-filters";
 import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
+import { RepresentationStatusMenu } from "@/components/representation-status-menu";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
@@ -25,26 +26,43 @@ function fmtDate(d: string | null | undefined) {
   return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-type Status = "contratado" | "prospeccion" | "pendiente";
+type Status = "contratado" | "prospeccion" | "negociacion" | "objetivo";
 
 const STATUS_FILTERS: { key: Status | "todos"; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "contratado", label: "Contratados" },
   { key: "prospeccion", label: "En prospección" },
-  { key: "pendiente", label: "Pendientes" },
+  { key: "negociacion", label: "En negociación" },
+  { key: "objetivo", label: "En objetivos" },
 ];
 
 const STATUS_TONE: Record<Status, string> = {
   contratado: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
   prospeccion: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25",
-  pendiente: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
+  negociacion: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/25",
+  objetivo: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
 };
 
 function statusFromComposer(status?: string | null): Status {
   if (status === "activo" || status === "pausa") return "contratado";
-  if (status === "en_negociacion") return "prospeccion";
-  return "pendiente";
+  if (status === "en_negociacion") return "negociacion";
+  if (status === "prospeccion") return "prospeccion";
+  return "objetivo";
 }
+
+const STATUS_LABEL: Record<Status, string> = {
+  contratado: "Contratado",
+  prospeccion: "En prospección",
+  negociacion: "En negociación",
+  objetivo: "En objetivos",
+};
+
+const DB_FROM_STATUS: Record<Status, string> = {
+  contratado: "activo",
+  prospeccion: "prospeccion",
+  negociacion: "en_negociacion",
+  objetivo: "objetivo",
+};
 
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
@@ -159,7 +177,7 @@ function RosterAll() {
         location: null as string | null,
         role: t.roster_kind,
         subtype: null as string | null,
-        status: "pendiente" as Status,
+        status: "objetivo" as Status,
         date1: t.created_at ? fmtDate(t.created_at) : null,
         date2: null,
         date1Label: "Alta",
@@ -175,7 +193,7 @@ function RosterAll() {
     if (statusFilter !== "todos") list = list.filter((r) => r.status === statusFilter);
     list = [...list].sort((a, b) => {
       if (sortBy === "status") {
-        const order: Record<Status, number> = { contratado: 0, prospeccion: 1, pendiente: 2 };
+        const order: Record<Status, number> = { contratado: 0, prospeccion: 1, negociacion: 2, objetivo: 3 };
         if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
       }
       return a.name.localeCompare(b.name);
@@ -186,14 +204,15 @@ function RosterAll() {
   const counts = useMemo(() => ({
     contratado: rows.filter((r) => r.status === "contratado").length,
     prospeccion: rows.filter((r) => r.status === "prospeccion").length,
-    pendiente: rows.filter((r) => r.status === "pendiente").length,
-  }), [rows]);
+    negociacion: rows.filter((r) => r.status === "negociacion").length,
+    objetivo: rows.filter((r) => r.status === "objetivo").length,
+  }) as Record<Status, number>, [rows]);
 
   const exportRows = filtered.map((r) => ({
     Nombre: r.name,
     Categoría: rosterRoleLabel(r.role),
     Subcategoría: r.subtype ?? "",
-    Estado: r.status === "contratado" ? "Contratado" : r.status === "prospeccion" ? "En prospección" : "Pendiente",
+    Estado: STATUS_LABEL[r.status],
     [r.date1Label]: r.date1 ?? "",
     [r.date2Label]: r.date2 ?? "",
     "Proyectos en curso": r.open,
@@ -327,7 +346,17 @@ function RosterAll() {
                     {r.subtype && <span className="ml-2 text-xs text-muted-foreground">{r.subtype}</span>}
                   </td>
                   <td className="px-3 py-2">
-                    <StatusBadge status={r.status} />
+                    {r.kind === "composer" ? (
+                      <RepresentationStatusMenu
+                        value={DB_FROM_STATUS[r.status]}
+                        onChange={async (next: string) => {
+                          await supabase.from("composers").update({ representation_status: next as never }).eq("id", r.id);
+                          refetch();
+                        }}
+                      />
+                    ) : (
+                      <StatusBadge status={r.status} />
+                    )}
                   </td>
                   <td className="px-3 py-2 font-mono text-xs">
                     <DateCell value={r.date1} row={r} />
@@ -364,10 +393,9 @@ type UnifiedRow = {
 };
 
 function StatusBadge({ status }: { status: Status }) {
-  const label = status === "contratado" ? "Contratado" : status === "prospeccion" ? "En prospección" : "Pendiente";
   return (
     <span className={cn("smallcaps rounded-sm border px-2 py-1 text-[10px]", STATUS_TONE[status])}>
-      {label}
+      {STATUS_LABEL[status]}
     </span>
   );
 }

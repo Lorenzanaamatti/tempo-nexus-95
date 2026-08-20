@@ -46,6 +46,8 @@ import { SpecialistTagsEditor } from "@/components/composer-detail/specialist-ta
 import { ComposerBilling } from "@/components/composer-detail/composer-billing";
 import { fetchComposerRelations } from "@/lib/composer-relations";
 import { CrmTransferMenu } from "@/components/crm-transfer-menu";
+import { RepresentationStatusMenu } from "@/components/representation-status-menu";
+import { REPRESENTATION_STATUS_OPTIONS } from "@/lib/representation-status";
 import { composerToTargetAccount, composerToOpportunity } from "@/lib/crm-transfer";
 
 
@@ -361,9 +363,10 @@ function Inner({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {c.tier && <Badge variant="outline" className="rounded-sm">Tier {c.tier}</Badge>}
-            <Badge variant="secondary" className="rounded-sm">
-              {({ activo: "Activo", pausa: "En pausa", en_negociacion: "En negociación", finalizado: "Finalizado" } as Record<string, string>)[c.representation_status ?? "activo"]}
-            </Badge>
+            <RepresentationStatusMenu
+              value={c.representation_status ?? "activo"}
+              onChange={(next) => field("representation_status", next as never)}
+            />
           </div>
         </div>
         <div className="mt-5">
@@ -415,9 +418,10 @@ function Inner({
               value={c.representation_status ?? "activo"}
               onChange={(e) => field("representation_status", e.target.value)}
             >
-              <option value="activo">Activo</option>
+              {REPRESENTATION_STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
               <option value="pausa">En pausa</option>
-              <option value="en_negociacion">En negociación</option>
               <option value="finalizado">Finalizado</option>
             </select>
           </Field>
@@ -433,7 +437,9 @@ function Inner({
               ))}
             </select>
           </Field>
-          {c.representation_status === "en_negociacion" ? (
+          {c.representation_status === "en_negociacion" ||
+          c.representation_status === "prospeccion" ||
+          c.representation_status === "objetivo" ? (
             <>
               <Field label="Próxima acción">
                 <Input
