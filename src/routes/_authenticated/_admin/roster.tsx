@@ -1,8 +1,8 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Target, Film, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { ComposerThumb } from "@/components/composer-thumb";
@@ -11,6 +11,7 @@ import { usePersistedState } from "@/lib/use-persisted-filters";
 import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -20,20 +21,42 @@ function year(d: string | null | undefined) {
   return d ? new Date(d).getFullYear() : null;
 }
 function fmtDate(d: string | null | undefined) {
-  if (!d) return "—";
+  if (!d) return null;
   return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+type Status = "contratado" | "prospeccion" | "pendiente";
+
+const STATUS_FILTERS: { key: Status | "todos"; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "contratado", label: "Contratados" },
+  { key: "prospeccion", label: "En prospección" },
+  { key: "pendiente", label: "Pendientes" },
+];
+
+const STATUS_TONE: Record<Status, string> = {
+  contratado: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+  prospeccion: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25",
+  pendiente: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
+};
+
+function statusFromComposer(status?: string | null): Status {
+  if (status === "activo" || status === "pausa") return "contratado";
+  if (status === "en_negociacion") return "prospeccion";
+  return "pendiente";
 }
 
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
-  const [onlyIncomplete, setOnlyIncomplete] = usePersistedState("roster-all:incomplete", false);
   const [loc, setLoc] = usePersistedState("roster-all:loc", "");
   const [cat, setCat] = usePersistedState("roster-all:cat", "todas");
+  const [statusFilter, setStatusFilter] = usePersistedState<Status | "todos">("roster-all:status", "todos");
+  const [sortBy, setSortBy] = useState<"name" | "status">("status");
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["roster-all-v2"],
+    queryKey: ["roster-all-v3"],
     queryFn: async () => {
-      const [composers, productions, filmography, films, targets, assignments, people] = await Promise.all([
+      const [composers, productions, targets, assignments, people] = await Promise.all([
         supabase
           .from("composers")
           .select(
@@ -43,8 +66,6 @@ function RosterAll() {
         supabase
           .from("productions")
           .select("id, title, year, status, composer_id, premiere_date, music_supervisor_person_id"),
-        supabase.from("composer_filmography").select("id, title, year, composer_id, format"),
-        supabase.from("spanish_films").select("id, title, title_es, year, composer, composer_person_id"),
         supabase
           .from("target_accounts")
           .select("id, name, status, priority, account_type, roster_kind, created_at")
@@ -54,14 +75,11 @@ function RosterAll() {
         supabase.from("people").select("id, composer_id").not("composer_id", "is", null),
       ]);
       const err =
-        composers.error || productions.error || filmography.error || films.error || targets.error ||
-        assignments.error || people.error;
+        composers.error || productions.error || targets.error || assignments.error || people.error;
       if (err) throw err;
       return {
         composers: composers.data ?? [],
         productions: productions.data ?? [],
-        filmography: filmography.data ?? [],
-        films: films.data ?? [],
         targets: targets.data ?? [],
         assignments: assignments.data ?? [],
         people: people.data ?? [],
@@ -72,10 +90,7 @@ function RosterAll() {
   const term = q.trim().toLowerCase();
   const locTerm = loc.trim();
 
-  const rows = useMemo(() => {
-    const list = (data?.composers ?? []).filter((c) => c.roster_role !== "ic_company");
-    // Mismo criterio que la ficha de compositor: producción directa,
-    // asignaciones de producción y supervisión musical (vía people).
+  const rows = useMemo<UnifiedRow[]>(() => {
     const composerByPerson = new Map<string, string>();
     for (const p of data?.people ?? []) {
       if (p.composer_id) composerByPerson.set(p.id, p.composer_id);
@@ -95,100 +110,107 @@ function RosterAll() {
     for (const a of data?.assignments ?? []) {
       add(a.composer_id, prodById.get(a.production_id));
     }
-    return list
+
+    const composerRows = (data?.composers ?? [])
+      .filter((c) => c.roster_role !== "ic_company")
       .filter((c) => !term || (c.full_name ?? "").toLowerCase().includes(term) || (c.artistic_name ?? "").toLowerCase().includes(term))
-      .filter((c) => matchesLocation(locTerm, (c as any).city, (c as any).country, (c as any).ciudad_origen, (c as any).pais_origen))
-      .map((c) => ({ ...c, open: openIdsByComposer.get(c.id)?.size ?? 0 }));
+      .filter((c) => matchesLocation(locTerm, c.city, c.country, c.ciudad_origen, c.pais_origen))
+      .map((c) => {
+        const status = statusFromComposer(c.representation_status);
+        const isProspect = status === "prospeccion";
+        return {
+          id: c.id,
+          kind: "composer" as const,
+          name: c.full_name,
+          artisticName: c.artistic_name,
+          photoPath: c.photo_path,
+          location: formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen),
+          role: c.roster_role,
+          subtype: c.role_subtype || c.specialist_subtype,
+          status,
+          date1: isProspect
+            ? c.prospect_next_action_date
+              ? fmtDate(c.prospect_next_action_date)
+              : null
+            : c.representation_start_date
+              ? String(year(c.representation_start_date))
+              : null,
+          date2: isProspect
+            ? c.prospect_target_date
+              ? fmtDate(c.prospect_target_date)
+              : null
+            : c.renewal_date
+              ? fmtDate(c.renewal_date)
+              : null,
+          date1Label: isProspect ? "Próxima acción" : "Contratación",
+          date2Label: isProspect ? "Objetivo contratación" : "Vencimiento",
+          open: openIdsByComposer.get(c.id)?.size ?? 0,
+        };
+      });
+
+    const targetRows = (data?.targets ?? [])
+      .filter((t) => !term || t.name.toLowerCase().includes(term))
+      .map((t) => ({
+        id: t.id,
+        kind: "target" as const,
+        name: t.name,
+        artisticName: null as string | null,
+        photoPath: null as string | null,
+        location: null as string | null,
+        role: t.roster_kind,
+        subtype: null as string | null,
+        status: "pendiente" as Status,
+        date1: t.created_at ? fmtDate(t.created_at) : null,
+        date2: null,
+        date1Label: "Alta",
+        date2Label: "",
+        open: 0,
+      }));
+
+    return [...composerRows, ...targetRows];
   }, [data, term, locTerm]);
 
-  const catRows = cat === "todas" ? rows : rows.filter((c) => ((c as any).roster_role ?? "composer") === cat);
+  const filtered = useMemo(() => {
+    let list = cat === "todas" ? rows : rows.filter((r) => (r.role ?? "composer") === cat);
+    if (statusFilter !== "todos") list = list.filter((r) => r.status === statusFilter);
+    list = [...list].sort((a, b) => {
+      if (sortBy === "status") {
+        const order: Record<Status, number> = { contratado: 0, prospeccion: 1, pendiente: 2 };
+        if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+      }
+      return a.name.localeCompare(b.name);
+    });
+    return list;
+  }, [rows, cat, statusFilter, sortBy]);
 
-  const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
-    variant === "active"
-      ? !c.representation_start_date || !c.renewal_date
-      : !c.prospect_next_action_date || !c.prospect_target_date;
+  const counts = useMemo(() => ({
+    contratado: rows.filter((r) => r.status === "contratado").length,
+    prospeccion: rows.filter((r) => r.status === "prospeccion").length,
+    pendiente: rows.filter((r) => r.status === "pendiente").length,
+  }), [rows]);
 
-  const actualAll = catRows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
-  const prospeccionAll = catRows.filter((c) => c.representation_status === "en_negociacion");
-  const actual = onlyIncomplete ? actualAll.filter((c) => isIncomplete(c, "active")) : actualAll;
-  const prospeccion = onlyIncomplete ? prospeccionAll.filter((c) => isIncomplete(c, "prospect")) : prospeccionAll;
-  const actualMissing = actualAll.filter((c) => isIncomplete(c, "active")).length;
-  const prospeccionMissing = prospeccionAll.filter((c) => isIncomplete(c, "prospect")).length;
-  const objetivo = (data?.targets ?? []).filter((t) => !term || t.name.toLowerCase().includes(term));
-
-  const filmografia = useMemo(() => {
-    const nameById = new Map((data?.composers ?? []).map((c) => [c.id, c.artistic_name || c.full_name]));
-    const byYear = new Map<number, { key: string; title: string; who: string; source: string }[]>();
-    const push = (y: number | null, item: { key: string; title: string; who: string; source: string }) => {
-      if (!y) return;
-      const arr = byYear.get(y) ?? [];
-      if (!arr.some((x) => x.title.toLowerCase() === item.title.toLowerCase() && x.who === item.who)) arr.push(item);
-      byYear.set(y, arr);
-    };
-    for (const p of data?.productions ?? []) {
-      push(p.year ?? year(p.premiere_date), {
-        key: `p-${p.id}`,
-        title: p.title ?? "—",
-        who: (p.composer_id && nameById.get(p.composer_id)) || "—",
-        source: "Producciones",
-      });
-    }
-    for (const f of data?.filmography ?? []) {
-      push(f.year ?? null, {
-        key: `f-${f.id}`,
-        title: f.title ?? "—",
-        who: nameById.get(f.composer_id) || "—",
-        source: "Ficha compositor",
-      });
-    }
-    const rosterNames = new Set(
-      (data?.composers ?? []).flatMap((c) => [c.full_name, c.artistic_name].filter(Boolean).map((n) => String(n).toLowerCase())),
-    );
-    for (const f of data?.films ?? []) {
-      if (!f.composer || !rosterNames.has(f.composer.toLowerCase())) continue;
-      push(f.year ?? null, {
-        key: `s-${f.id}`,
-        title: f.title_es || f.title,
-        who: f.composer,
-        source: "CRM Películas",
-      });
-    }
-    return [...byYear.entries()]
-      .sort((a, b) => b[0] - a[0])
-      .map(([y, items]) => ({
-        year: y,
-        items: items.filter((i) => !term || i.title.toLowerCase().includes(term) || i.who.toLowerCase().includes(term)),
-      }))
-      .filter((g) => g.items.length);
-  }, [data, term]);
+  const exportRows = filtered.map((r) => ({
+    Nombre: r.name,
+    Categoría: rosterRoleLabel(r.role),
+    Subcategoría: r.subtype ?? "",
+    Estado: r.status === "contratado" ? "Contratado" : r.status === "prospeccion" ? "En prospección" : "Pendiente",
+    [r.date1Label]: r.date1 ?? "",
+    [r.date2Label]: r.date2 ?? "",
+    "Proyectos en curso": r.open,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl title-caps">Roster completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Estos son nuestros clientes y clientas seleccionados según su sector de actividad profesional.
-          </p>
-          <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-            «Pendiente» en una fecha significa que el dato falta por completar en la ficha del representado, no que no exista contrato.
+            Listado único de perfiles mezclados. Cada fila indica claramente si ya es representado, está en prospección o es un objetivo pendiente.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ExportRowsButton rows={rows} filename="roster" sheetName="Roster" />
-          <button
-            type="button"
-            onClick={() => setOnlyIncomplete(!onlyIncomplete)}
-            aria-pressed={onlyIncomplete}
-            className={
-              onlyIncomplete
-                ? "smallcaps rounded-sm bg-primary px-3 py-2 text-xs text-primary-foreground"
-                : "smallcaps rounded-sm border border-border px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
-            }
-          >
-            Solo incompletas
-          </button>
+          <ExportRowsButton rows={exportRows} filename="roster-completo" sheetName="Roster" />
           <select
             value={cat}
             onChange={(e) => setCat(e.target.value)}
@@ -216,107 +238,162 @@ function RosterAll() {
         </div>
       </div>
 
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setStatusFilter(f.key)}
+            aria-pressed={statusFilter === f.key}
+            className={cn(
+              "smallcaps rounded-sm border px-3 py-2 text-xs transition-colors",
+              statusFilter === f.key
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {f.label}
+            <span className="ml-2 font-mono text-[10px] opacity-70">
+              {f.key === "todos" ? rows.length : counts[f.key]}
+            </span>
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Ordenar por</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "name" | "status")}
+            className="h-8 rounded-sm border border-input bg-background px-2 text-xs"
+          >
+            <option value="status">Estado</option>
+            <option value="name">Nombre</option>
+          </select>
+        </div>
+      </div>
+
       {error ? (
         <ErrorState message={(error as Error).message} onRetry={() => refetch()} />
       ) : isLoading ? (
         <ListSkeleton rows={8} />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="Sin resultados"
+          description="Prueba a cambiar el filtro de estado o el buscador."
+        />
       ) : (
-        <div className="space-y-14">
-          <RosterSection
-            title="Representados contratados"
-            description="Personas con contrato de representación en vigor o en pausa temporal."
-            rows={actual}
-            variant="active"
-            missing={actualMissing}
-          />
-          <RosterSection
-            title="En negociación"
-            description="Aún no son representados: conversaciones abiertas para una futura firma."
-            rows={prospeccion}
-            variant="prospect"
-            missing={prospeccionMissing}
-          />
-
-          <section>
-            <div className="mb-4 border-b border-border pb-2">
-              <h2 className="font-display text-3xl title-caps">Cuentas objetivo</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Candidaturas y objetivos de fichaje sin relación contractual: no son representados.</p>
-            </div>
-            {!objetivo.length ? (
-              <EmptyState icon={Target} title="Sin roster en prospección" description="Añade cuentas de tipo Roster para hacer seguimiento de futuras incorporaciones." action={{ label: "Ir a cuentas objetivo", to: "/marketing/target-accounts" }} />
-            ) : (
-              <div className="overflow-x-auto rounded-sm border border-border">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2">Nombre</th>
-                      <th className="px-3 py-2">Perfil</th>
-                      <th className="px-3 py-2">Estado</th>
-                      <th className="px-3 py-2">Prioridad</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {objetivo.map((t) => (
-                      <tr key={t.id} className="border-t border-border hover:bg-muted/40">
-                        <td className="px-3 py-2">
-                          <Link to="/marketing/target-accounts/$accountId" params={{ accountId: t.id }} className="font-display text-base hover:text-primary">
-                            {t.name}
-                          </Link>
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">{t.roster_kind ?? "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{t.status ?? "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{t.priority ?? "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-
-          <section>
-            <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-              <h2 className="font-display text-3xl title-caps">Filmografía IC</h2>
-              <Link to="/empresa/filmografia" className="smallcaps text-xs text-muted-foreground hover:text-foreground">
-                Ver filmografía completa →
-              </Link>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              La filmografía agregada de Interesante Compañía se consulta en EMPRESA · Filmografía IC.
-            </p>
-          </section>
+        <div className="overflow-x-auto rounded-sm border border-border">
+          <table className="w-full min-w-[880px] text-sm">
+            <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2">Perfil</th>
+                <th className="px-3 py-2">Categoría</th>
+                <th className="px-3 py-2">Estado</th>
+                <th className="px-3 py-2">{filtered[0]?.date1Label ?? "Contratación"}</th>
+                <th className="px-3 py-2">{filtered[0]?.date2Label ?? "Vencimiento"}</th>
+                <th className="px-3 py-2 text-right">Proyectos en curso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r) => (
+                <tr key={`${r.kind}-${r.id}`} className="border-t border-border hover:bg-muted/40">
+                  <td className="px-3 py-2">
+                    <RowLink row={r}>
+                      <span className="flex items-center gap-3">
+                        <ComposerThumb
+                          path={r.photoPath}
+                          alt={r.name}
+                          className="h-11 w-11 shrink-0 overflow-hidden rounded-sm bg-muted"
+                          imgClassName="h-full w-full object-cover"
+                          fallback={
+                            <div className="flex h-full items-center justify-center font-display text-lg text-muted-foreground">
+                              {r.name?.[0] ?? "·"}
+                            </div>
+                          }
+                        />
+                        <span className="min-w-0">
+                          <span className="block font-display text-base leading-tight hover:text-primary">{r.name}</span>
+                          {r.location && (
+                            <span className="block truncate text-xs text-muted-foreground">{r.location}</span>
+                          )}
+                        </span>
+                      </span>
+                    </RowLink>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="smallcaps rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                      {rosterRoleLabel(r.role)}
+                    </span>
+                    {r.subtype && <span className="ml-2 text-xs text-muted-foreground">{r.subtype}</span>}
+                  </td>
+                  <td className="px-3 py-2">
+                    <StatusBadge status={r.status} />
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    <DateCell value={r.date1} row={r} />
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    <DateCell value={r.date2} row={r} />
+                  </td>
+                  <td className="px-3 py-2 text-right font-mono text-xs">{r.open}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
 }
 
-type Row = {
+type UnifiedRow = {
   id: string;
-  full_name: string;
-  artistic_name: string | null;
-  city: string | null;
-  country: string | null;
-  ciudad_origen?: string | null;
-  pais_origen?: string | null;
-  photo_path: string | null;
-  roster_role?: string | null;
-  role_subtype?: string | null;
-  specialist_subtype?: string | null;
-  representation_status?: string | null;
-  representation_start_date: string | null;
-  renewal_date: string | null;
-  prospect_next_action_date: string | null;
-  prospect_target_date: string | null;
+  kind: "composer" | "target";
+  name: string;
+  artisticName: string | null;
+  photoPath: string | null;
+  location: string | null;
+  role: string | null;
+  subtype: string | null;
+  status: Status;
+  date1: string | null;
+  date2: string | null;
+  date1Label: string;
+  date2Label: string;
   open: number;
 };
 
-function DateCell({ value, composerId }: { value: string | null; composerId: string }) {
+function StatusBadge({ status }: { status: Status }) {
+  const label = status === "contratado" ? "Contratado" : status === "prospeccion" ? "En prospección" : "Pendiente";
+  return (
+    <span className={cn("smallcaps rounded-sm border px-2 py-1 text-[10px]", STATUS_TONE[status])}>
+      {label}
+    </span>
+  );
+}
+
+function RowLink({ row, children }: { row: UnifiedRow; children: React.ReactNode }) {
+  if (row.kind === "target") {
+    return (
+      <Link to="/marketing/target-accounts/$accountId" params={{ accountId: row.id }} className="block">
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/composers/$composerId" params={{ composerId: row.id }} className="block">
+      {children}
+    </Link>
+  );
+}
+
+function DateCell({ value, row }: { value: string | null; row: UnifiedRow }) {
   if (value) return <>{value}</>;
+  if (row.kind === "target" && row.date2Label === "") return <>—</>;
   return (
     <Link
       to="/composers/$composerId"
-      params={{ composerId }}
+      params={{ composerId: row.id }}
       className="smallcaps rounded-sm border border-dashed border-border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:border-primary hover:text-primary"
       title="Dato por completar en la ficha"
     >
@@ -325,100 +402,3 @@ function DateCell({ value, composerId }: { value: string | null; composerId: str
   );
 }
 
-function RosterSection({ title, description, rows, variant, missing = 0 }: { title: string; description?: string; rows: Row[]; variant: "active" | "prospect"; missing?: number }) {
-  return (
-    <section>
-      <div className="mb-4 flex items-end justify-between gap-4 border-b border-border pb-2">
-        <div>
-          <h2 className="font-display text-3xl title-caps">{title}</h2>
-          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-        </div>
-        <span className="flex items-center gap-3 font-mono text-xs text-muted-foreground">
-          {missing > 0 && <span className="smallcaps">{missing} sin fechas</span>}
-          <span>{rows.length}</span>
-        </span>
-      </div>
-      {!rows.length ? (
-        <EmptyState icon={Users} title="Sin fichas en esta categoría" description="Crea una ficha nueva o revisa las otras categorías del roster." action={{ label: "Añadir ficha", to: "/composers/new" }} />
-      ) : (
-        <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2">Representado</th>
-                <th className="px-3 py-2">Categoría</th>
-                {variant === "prospect" ? (
-                  <>
-                    <th className="px-3 py-2">Próxima acción</th>
-                    <th className="px-3 py-2">Objetivo contratación</th>
-                  </>
-                ) : (
-                  <>
-                    <th className="px-3 py-2">Contratación</th>
-                    <th className="px-3 py-2">Vencimiento</th>
-                  </>
-                )}
-                <th className="px-3 py-2">Proyectos en curso</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((c) => (
-                <tr key={c.id} className="border-t border-border hover:bg-muted/40">
-                  <td className="px-3 py-2">
-                    <Link to="/composers/$composerId" params={{ composerId: c.id }} className="flex items-center gap-3">
-                      <ComposerThumb
-                        path={c.photo_path}
-                        alt={c.full_name}
-                        className="h-11 w-11 shrink-0 overflow-hidden rounded-sm bg-muted"
-                        imgClassName="h-full w-full object-cover"
-                        fallback={
-                          <div className="flex h-full items-center justify-center font-display text-lg text-muted-foreground">
-                            {c.full_name?.[0] ?? "·"}
-                          </div>
-                        }
-                      />
-                      <span className="min-w-0">
-                        <span className="block font-display text-base leading-tight hover:text-primary">{c.full_name}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {formatLocation(c.city ?? c.ciudad_origen, c.country ?? c.pais_origen) || "—"}
-                        </span>
-                      </span>
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2">
-                    <span className="smallcaps rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                      {rosterRoleLabel(c.roster_role)}
-                    </span>
-                    {(c.role_subtype || c.specialist_subtype) && (
-                      <span className="ml-2 text-xs text-muted-foreground">{c.role_subtype || c.specialist_subtype}</span>
-                    )}
-                  </td>
-                  {variant === "prospect" ? (
-                    <>
-                      <td className="px-3 py-2 font-mono text-xs">
-                        <DateCell value={c.prospect_next_action_date ? fmtDate(c.prospect_next_action_date) : null} composerId={c.id} />
-                      </td>
-                      <td className="px-3 py-2 font-mono text-xs">
-                        <DateCell value={c.prospect_target_date ? fmtDate(c.prospect_target_date) : null} composerId={c.id} />
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-3 py-2 font-mono text-xs">
-                        <DateCell value={year(c.representation_start_date)?.toString() ?? null} composerId={c.id} />
-                      </td>
-                      <td className="px-3 py-2 font-mono text-xs">
-                        <DateCell value={c.renewal_date ? fmtDate(c.renewal_date) : null} composerId={c.id} />
-                      </td>
-                    </>
-                  )}
-                  <td className="px-3 py-2 font-mono text-xs">{c.open}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
