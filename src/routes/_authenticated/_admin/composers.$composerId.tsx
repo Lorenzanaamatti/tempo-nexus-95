@@ -637,12 +637,25 @@ function Inner({
               value={(c as { roster_role?: string }).roster_role ?? "composer"}
               onChange={(e) => field("roster_role" as never, e.target.value as never)}
             >
-              <option value="composer">Compositor</option>
-              <option value="artist">Artista</option>
-              <option value="supervisor">Supervisor musical</option>
-              <option value="specialist">Especialista</option>
-              <option value="curator">Curador musical</option>
+              {ROSTER_ROLE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
+          </Field>
+          <Field label="Subcategoría (campo libre)">
+            <Input
+              list="roster-role-subtypes"
+              value={(c as { role_subtype?: string | null }).role_subtype ?? ""}
+              onChange={(e) => field("role_subtype" as never, (e.target.value || null) as never)}
+              placeholder="Ej. orquestador, copista, cantante, sync…"
+            />
+            <datalist id="roster-role-subtypes">
+              {(ROSTER_ROLE_SUBTYPES[(c as { roster_role?: string }).roster_role ?? "composer"] ?? []).map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
           </Field>
           {(c as { roster_role?: string }).roster_role === "specialist" && (
             <>
