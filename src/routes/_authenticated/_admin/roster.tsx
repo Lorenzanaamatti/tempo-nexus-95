@@ -338,7 +338,17 @@ function RosterAll() {
                     {r.subtype && <span className="ml-2 text-xs text-muted-foreground">{r.subtype}</span>}
                   </td>
                   <td className="px-3 py-2">
-                    <StatusBadge status={r.status} />
+                    {r.kind === "composer" ? (
+                      <RepresentationStatusMenu
+                        value={DB_FROM_STATUS[r.status]}
+                        onChange={async (next) => {
+                          await supabase.from("composers").update({ representation_status: next as never }).eq("id", r.id);
+                          refetch();
+                        }}
+                      />
+                    ) : (
+                      <StatusBadge status={r.status} />
+                    )}
                   </td>
                   <td className="px-3 py-2 font-mono text-xs">
                     <DateCell value={r.date1} row={r} />
@@ -375,10 +385,9 @@ type UnifiedRow = {
 };
 
 function StatusBadge({ status }: { status: Status }) {
-  const label = status === "contratado" ? "Contratado" : status === "prospeccion" ? "En prospección" : "Pendiente";
   return (
     <span className={cn("smallcaps rounded-sm border px-2 py-1 text-[10px]", STATUS_TONE[status])}>
-      {label}
+      {STATUS_LABEL[status]}
     </span>
   );
 }
