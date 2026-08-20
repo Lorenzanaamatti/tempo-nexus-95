@@ -12,7 +12,7 @@ import { Plus, LayoutGrid, Rows3, X } from "lucide-react";
 import { ExportButton, type ExportField } from "@/components/export-button";
 import { ListSkeleton } from "@/components/list-states";
 
-import { ROSTER_ROLE_OPTIONS, rosterRoleLabel, type RosterRoleValue } from "@/lib/roster-roles";
+import { ROSTER_ROLE_OPTIONS, type RosterRoleValue } from "@/lib/roster-roles";
 
 type RosterRole = RosterRoleValue;
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
@@ -40,9 +40,10 @@ const ROLE_TITLE: Record<RosterRole, { title: string; singular: string; intro: s
   specialist: { title: "Especialistas",        singular: "especialista",       intro: "Las personas representadas bajo este epígrafe tienen profesiones variadas: perfiles técnicos, producción, cantantes, instrumentistas, ingenieros, etc." },
   curator:    { title: "Music Curators",       singular: "music curator",      intro: "Curadores y selectores musicales." },
   productor_musical: { title: "Productores musicales", singular: "productor musical", intro: "Productoras y productores musicales representados por INTERESANTE COMPAÑÍA." },
+  other:      { title: "Otros perfiles",       singular: "perfil",             intro: "Otros perfiles representados que no encajan en las categorías anteriores." },
 };
 const ALL_ROLES = Object.keys(ROLE_TITLE) as RosterRole[];
-type RoleFilter = RosterRole | "other" | "todos";
+type RoleFilter = RosterRole | "todos";
 const ROLE_TABS: Array<{ value: RoleFilter; label: string }> = [
   { value: "todos", label: "Todos" },
   ...ROSTER_ROLE_OPTIONS.map((o) => ({ value: o.value as RoleFilter, label: o.label })),
