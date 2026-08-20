@@ -6327,6 +6327,8 @@ export type Database = {
         | "pausa"
         | "en_negociacion"
         | "finalizado"
+        | "prospeccion"
+        | "objetivo"
       representation_tier: "A" | "B" | "C" | "desarrollo" | "D" | "E"
       roster_prospect_estado:
         | "contactado"
@@ -6962,6 +6964,8 @@ export const Constants = {
         "pausa",
         "en_negociacion",
         "finalizado",
+        "prospeccion",
+        "objetivo",
       ],
       representation_tier: ["A", "B", "C", "desarrollo", "D", "E"],
       roster_prospect_estado: [
