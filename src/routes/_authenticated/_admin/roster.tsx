@@ -409,14 +409,6 @@ type UnifiedRow = {
   open: number;
 };
 
-function StatusBadge({ status }: { status: Status }) {
-  return (
-    <span className={cn("smallcaps rounded-sm border px-2 py-1 text-[10px]", STATUS_TONE[status])}>
-      {STATUS_LABEL[status]}
-    </span>
-  );
-}
-
 function RowLink({ row, children }: { row: UnifiedRow; children: React.ReactNode }) {
   if (row.kind === "target") {
     return (
