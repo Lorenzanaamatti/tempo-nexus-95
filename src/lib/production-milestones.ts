@@ -66,13 +66,5 @@ export const REPRESENTADO_ROLE_LABEL: Record<string, string> = Object.fromEntrie
   ALL_REPRESENTADO_ROLES.map((r) => [r.value, r.label]),
 );
 
-/** Etiquetas de la categoría de roster (tabla composers). */
-export const ROSTER_ROLE_LABEL: Record<string, string> = {
-  composer: "Compositor",
-  artist: "Artista",
-  supervisor: "Supervisor musical",
-  specialist: "Especialista",
-  curator: "Curador musical",
-  other: "Otro",
-  ic_company: "IC",
-};
+/** Etiquetas de la categoría de roster (tabla composers). Fuente única: roster-roles.ts */
+export { ROSTER_ROLE_LABELS as ROSTER_ROLE_LABEL } from "@/lib/roster-roles";
