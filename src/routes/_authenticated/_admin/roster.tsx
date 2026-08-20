@@ -64,6 +64,20 @@ const DB_FROM_STATUS: Record<Status, string> = {
   objetivo: "objetivo",
 };
 
+/** Equivalencias con los estados del CRM de cuentas objetivo. */
+const TARGET_STATUS_FROM_ROSTER: Record<string, string> = {
+  activo: "cliente_activo",
+  prospeccion: "contactado",
+  en_negociacion: "propuesta_enviada",
+  objetivo: "sin_contacto",
+};
+function statusFromTarget(status?: string | null): Status {
+  if (status === "cliente_activo") return "contratado";
+  if (status === "propuesta_enviada") return "negociacion";
+  if (status === "contactado" || status === "reunion") return "prospeccion";
+  return "objetivo";
+}
+
 function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
   const [loc, setLoc] = usePersistedState("roster-all:loc", "");
@@ -177,7 +191,7 @@ function RosterAll() {
         location: null as string | null,
         role: t.roster_kind,
         subtype: null as string | null,
-        status: "objetivo" as Status,
+        status: statusFromTarget(t.status),
         date1: t.created_at ? fmtDate(t.created_at) : null,
         date2: null,
         date1Label: "Alta",
@@ -346,17 +360,20 @@ function RosterAll() {
                     {r.subtype && <span className="ml-2 text-xs text-muted-foreground">{r.subtype}</span>}
                   </td>
                   <td className="px-3 py-2">
-                    {r.kind === "composer" ? (
-                      <RepresentationStatusMenu
-                        value={DB_FROM_STATUS[r.status]}
-                        onChange={async (next: string) => {
+                    <RepresentationStatusMenu
+                      value={DB_FROM_STATUS[r.status]}
+                      onChange={async (next: string) => {
+                        if (r.kind === "composer") {
                           await supabase.from("composers").update({ representation_status: next as never }).eq("id", r.id);
-                          refetch();
-                        }}
-                      />
-                    ) : (
-                      <StatusBadge status={r.status} />
-                    )}
+                        } else {
+                          await supabase
+                            .from("target_accounts")
+                            .update({ status: (TARGET_STATUS_FROM_ROSTER[next] ?? "sin_contacto") as never })
+                            .eq("id", r.id);
+                        }
+                        refetch();
+                      }}
+                    />
                   </td>
                   <td className="px-3 py-2 font-mono text-xs">
                     <DateCell value={r.date1} row={r} />
