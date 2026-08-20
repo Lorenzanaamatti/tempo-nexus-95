@@ -10,6 +10,7 @@ import { ListSkeleton, EmptyState, ErrorState } from "@/components/list-states";
 import { usePersistedState } from "@/lib/use-persisted-filters";
 import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
+import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -27,6 +28,7 @@ function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
   const [onlyIncomplete, setOnlyIncomplete] = usePersistedState("roster-all:incomplete", false);
   const [loc, setLoc] = usePersistedState("roster-all:loc", "");
+  const [cat, setCat] = usePersistedState("roster-all:cat", "todas");
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v2"],
@@ -35,7 +37,7 @@ function RosterAll() {
         supabase
           .from("composers")
           .select(
-            "id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, photo_path, roster_role, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
+            "id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, photo_path, roster_role, role_subtype, specialist_subtype, representation_status, representation_start_date, renewal_date, prospect_next_action_date, prospect_target_date",
           )
           .order("full_name"),
         supabase
@@ -99,13 +101,15 @@ function RosterAll() {
       .map((c) => ({ ...c, open: openIdsByComposer.get(c.id)?.size ?? 0 }));
   }, [data, term, locTerm]);
 
+  const catRows = cat === "todas" ? rows : rows.filter((c) => ((c as any).roster_role ?? "composer") === cat);
+
   const isIncomplete = (c: { representation_start_date: string | null; renewal_date: string | null; prospect_next_action_date: string | null; prospect_target_date: string | null }, variant: "active" | "prospect") =>
     variant === "active"
       ? !c.representation_start_date || !c.renewal_date
       : !c.prospect_next_action_date || !c.prospect_target_date;
 
-  const actualAll = rows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
-  const prospeccionAll = rows.filter((c) => c.representation_status === "en_negociacion");
+  const actualAll = catRows.filter((c) => c.representation_status === "activo" || c.representation_status === "pausa");
+  const prospeccionAll = catRows.filter((c) => c.representation_status === "en_negociacion");
   const actual = onlyIncomplete ? actualAll.filter((c) => isIncomplete(c, "active")) : actualAll;
   const prospeccion = onlyIncomplete ? prospeccionAll.filter((c) => isIncomplete(c, "prospect")) : prospeccionAll;
   const actualMissing = actualAll.filter((c) => isIncomplete(c, "active")).length;
@@ -185,6 +189,17 @@ function RosterAll() {
           >
             Solo incompletas
           </button>
+          <select
+            value={cat}
+            onChange={(e) => setCat(e.target.value)}
+            aria-label="Filtrar por categoría de representación"
+            className="h-10 rounded-sm border border-input bg-background px-3 text-sm"
+          >
+            <option value="todas">Todas las categorías</option>
+            {ROSTER_ROLE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
           <Input
             value={loc}
             onChange={(e) => setLoc(e.target.value)}
@@ -207,11 +222,26 @@ function RosterAll() {
         <ListSkeleton rows={8} />
       ) : (
         <div className="space-y-14">
-          <RosterSection title="Roster actual" rows={actual} variant="active" missing={actualMissing} />
-          <RosterSection title="Roster en prospección" rows={prospeccion} variant="prospect" missing={prospeccionMissing} />
+          <RosterSection
+            title="Representados contratados"
+            description="Personas con contrato de representación en vigor o en pausa temporal."
+            rows={actual}
+            variant="active"
+            missing={actualMissing}
+          />
+          <RosterSection
+            title="En negociación"
+            description="Aún no son representados: conversaciones abiertas para una futura firma."
+            rows={prospeccion}
+            variant="prospect"
+            missing={prospeccionMissing}
+          />
 
           <section>
-            <h2 className="mb-4 border-b border-border pb-2 font-display text-3xl title-caps">Roster objetivo</h2>
+            <div className="mb-4 border-b border-border pb-2">
+              <h2 className="font-display text-3xl title-caps">Cuentas objetivo</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Candidaturas y objetivos de fichaje sin relación contractual: no son representados.</p>
+            </div>
             {!objetivo.length ? (
               <EmptyState icon={Target} title="Sin roster en prospección" description="Añade cuentas de tipo Roster para hacer seguimiento de futuras incorporaciones." action={{ label: "Ir a cuentas objetivo", to: "/marketing/target-accounts" }} />
             ) : (
@@ -270,6 +300,10 @@ type Row = {
   ciudad_origen?: string | null;
   pais_origen?: string | null;
   photo_path: string | null;
+  roster_role?: string | null;
+  role_subtype?: string | null;
+  specialist_subtype?: string | null;
+  representation_status?: string | null;
   representation_start_date: string | null;
   renewal_date: string | null;
   prospect_next_action_date: string | null;
@@ -291,11 +325,14 @@ function DateCell({ value, composerId }: { value: string | null; composerId: str
   );
 }
 
-function RosterSection({ title, rows, variant, missing = 0 }: { title: string; rows: Row[]; variant: "active" | "prospect"; missing?: number }) {
+function RosterSection({ title, description, rows, variant, missing = 0 }: { title: string; description?: string; rows: Row[]; variant: "active" | "prospect"; missing?: number }) {
   return (
     <section>
-      <div className="mb-4 flex items-end justify-between border-b border-border pb-2">
-        <h2 className="font-display text-3xl title-caps">{title}</h2>
+      <div className="mb-4 flex items-end justify-between gap-4 border-b border-border pb-2">
+        <div>
+          <h2 className="font-display text-3xl title-caps">{title}</h2>
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+        </div>
         <span className="flex items-center gap-3 font-mono text-xs text-muted-foreground">
           {missing > 0 && <span className="smallcaps">{missing} sin fechas</span>}
           <span>{rows.length}</span>
@@ -309,6 +346,7 @@ function RosterSection({ title, rows, variant, missing = 0 }: { title: string; r
             <thead className="bg-muted/50 text-left smallcaps text-xs text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Representado</th>
+                <th className="px-3 py-2">Categoría</th>
                 {variant === "prospect" ? (
                   <>
                     <th className="px-3 py-2">Próxima acción</th>
@@ -346,6 +384,14 @@ function RosterSection({ title, rows, variant, missing = 0 }: { title: string; r
                         </span>
                       </span>
                     </Link>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="smallcaps rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                      {rosterRoleLabel(c.roster_role)}
+                    </span>
+                    {(c.role_subtype || c.specialist_subtype) && (
+                      <span className="ml-2 text-xs text-muted-foreground">{c.role_subtype || c.specialist_subtype}</span>
+                    )}
                   </td>
                   {variant === "prospect" ? (
                     <>

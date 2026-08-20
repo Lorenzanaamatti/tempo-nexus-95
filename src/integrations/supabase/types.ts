@@ -1694,6 +1694,7 @@ export type Database = {
           renewal_date: string | null
           representation_start_date: string | null
           representation_status: Database["public"]["Enums"]["representation_status"]
+          role_subtype: string | null
           roster_role: Database["public"]["Enums"]["roster_role"]
           search_tsv: unknown
           slug: string
@@ -1746,6 +1747,7 @@ export type Database = {
           renewal_date?: string | null
           representation_start_date?: string | null
           representation_status?: Database["public"]["Enums"]["representation_status"]
+          role_subtype?: string | null
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug: string
@@ -1798,6 +1800,7 @@ export type Database = {
           renewal_date?: string | null
           representation_start_date?: string | null
           representation_status?: Database["public"]["Enums"]["representation_status"]
+          role_subtype?: string | null
           roster_role?: Database["public"]["Enums"]["roster_role"]
           search_tsv?: unknown
           slug?: string
@@ -6214,6 +6217,7 @@ export type Database = {
         | "specialist"
         | "curator"
         | "other"
+        | "productor_musical"
       platform_status: "Actualizado" | "Desactualizado" | "Sin perfil"
       premio_estado:
         | "Identificado"
@@ -6339,6 +6343,7 @@ export type Database = {
         | "curator"
         | "other"
         | "ic_company"
+        | "productor_musical"
       social_asset_kind: "image" | "video" | "audio" | "gif" | "documento"
       social_channel:
         | "instagram"
@@ -6839,6 +6844,7 @@ export const Constants = {
         "specialist",
         "curator",
         "other",
+        "productor_musical",
       ],
       platform_status: ["Actualizado", "Desactualizado", "Sin perfil"],
       premio_estado: [
@@ -6974,6 +6980,7 @@ export const Constants = {
         "curator",
         "other",
         "ic_company",
+        "productor_musical",
       ],
       social_asset_kind: ["image", "video", "audio", "gif", "documento"],
       social_channel: [

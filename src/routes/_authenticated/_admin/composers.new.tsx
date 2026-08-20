@@ -9,15 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { slugify } from "@/lib/composers-api";
 import { toast } from "sonner";
 
-type RosterRole = "composer" | "artist" | "supervisor" | "specialist" | "curator";
-const ROLE_LABEL: Record<RosterRole, string> = {
-  composer: "Compositor",
-  artist: "Artista",
-  supervisor: "Supervisor musical",
-  specialist: "Especialista",
-  curator: "Curador musical",
-};
-const ROLES = Object.keys(ROLE_LABEL) as RosterRole[];
+import { ROSTER_ROLE_LABELS, ROSTER_ROLES, type RosterRoleValue } from "@/lib/roster-roles";
+
+type RosterRole = RosterRoleValue;
+const ROLE_LABEL: Record<string, string> = ROSTER_ROLE_LABELS;
+const ROLES = [...ROSTER_ROLES] as RosterRole[];
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/new")({
   component: NewComposerPage,
