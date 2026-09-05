@@ -43,7 +43,7 @@ async function collectStats(supabase: any) {
     partners: partners,
     producciones_espanolas: spanishFilms,
     tareas_totales: tasks,
-    tareas_abiertas: tasksOpen?.length ?? null,
+    tareas_abiertas: tasksOpenCount ?? null,
   };
 }
 
