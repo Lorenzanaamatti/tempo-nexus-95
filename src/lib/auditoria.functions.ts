@@ -23,10 +23,10 @@ async function collectStats(supabase: any) {
     ]);
 
   const { data: memosByStatus } = await supabase.from("deal_memos").select("estado");
-  const { data: tasksOpen } = await supabase
+  const { count: tasksOpenCount } = await supabase
     .from("actions")
     .select("id", { count: "exact", head: true })
-    .neq("status", "done");
+    .neq("status", "hecha");
 
   const estadoCounts: Record<string, number> = {};
   for (const m of memosByStatus ?? []) {
