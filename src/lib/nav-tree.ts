@@ -2,7 +2,7 @@ import {
   CalendarDays, Film, Music, Sparkles, LibraryBig, FileSignature, Building2,
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
   KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
-  Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen,
+  Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen, ShieldCheck,
 } from "lucide-react";
 
 export type NavItem = {
@@ -36,6 +36,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Equipo IC", to: "/empresa/equipo", match: ["/people"], icon: Users },
       { title: "Filmografía IC", to: "/empresa/filmografia", icon: Clapperboard, match: ["/ic", "/producciones/filmografia"] },
       { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, match: ["/agent-actions"] },
+      { title: "Auditoría IA", to: "/empresa/auditoria", icon: ShieldCheck },
     ],
   },
   {
