@@ -43,10 +43,11 @@ const STATUS_TONE: Record<Status, string> = {
   objetivo: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
 };
 
-function statusFromComposer(status?: string | null): Status {
+function statusFromComposer(status?: string | null): Status | null {
   if (status === "activo" || status === "pausa") return "contratado";
   if (status === "en_negociacion") return "negociacion";
   if (status === "prospeccion") return "prospeccion";
+  if (status === "finalizado") return null; // ex-representados: fuera del embudo
   return "objetivo";
 }
 

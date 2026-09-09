@@ -227,7 +227,9 @@ function compute(year: number, raw: any) {
   const artistasContactados =
     (raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year).length +
     composers.filter(
-      (c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year,
+      (c) =>
+        (c.representation_status === "en_negociacion" || c.representation_status === "prospeccion") &&
+        yearOf(c.created_at) === year,
     ).length;
 
   const inYear = (rows: any[], field: string) => rows.filter((r) => yearOf(r[field] ?? r.created_at) === year);
@@ -319,7 +321,11 @@ function compute(year: number, raw: any) {
     artistas_contactados: [
       ...names((raw.rosterProspects ?? []).filter((p: any) => yearOf(p.fecha_primer_contacto) === year), (p) => p.nombre),
       ...names(
-        composers.filter((c) => c.representation_status === "en_negociacion" && yearOf(c.created_at) === year),
+        composers.filter(
+          (c) =>
+            (c.representation_status === "en_negociacion" || c.representation_status === "prospeccion") &&
+            yearOf(c.created_at) === year,
+        ),
         composerName,
       ),
     ],
