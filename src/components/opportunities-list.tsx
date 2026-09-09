@@ -166,7 +166,30 @@ export function OpportunitiesList({
               ))}
             </SelectContent>
           </Select>
+          {productionMode && (
+            <>
+              <Select value={tipoFilter} onValueChange={setTipoFilter}>
+                <SelectTrigger className="w-40 rounded-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {(Object.keys(OPP_TYPE_LABEL) as OppProductionType[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_TYPE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={faseFilter} onValueChange={setFaseFilter}>
+                <SelectTrigger className="w-44 rounded-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las fases</SelectItem>
+                  {(Object.keys(OPP_PHASE_LABEL) as OppPhase[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PHASE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar oportunidad…" className="w-56 rounded-sm" />
+          {productionMode && <OpportunityIntakeDialog />}
           <ExportButton
             entityLabel="Oportunidades"
             filename="oportunidades"
