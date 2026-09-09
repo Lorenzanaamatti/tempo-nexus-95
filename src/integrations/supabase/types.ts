@@ -3371,64 +3371,140 @@ export type Database = {
         Row: {
           created_at: string
           detected_date: string | null
+          director_id: string | null
+          director_text: string | null
+          es_coproduccion: boolean
           estimated_value: number | null
           expected_close_date: string | null
+          fase: Database["public"]["Enums"]["opp_phase"] | null
+          fecha_estreno: string | null
+          fecha_rodaje: string | null
+          financiacion_publica: string | null
+          fuente_url: string | null
+          genero_produccion:
+            | Database["public"]["Enums"]["opp_production_genre"]
+            | null
           id: string
           kind: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date: string | null
           notes: string | null
+          origen: string | null
+          paises: string[]
           partner_company_id: string | null
           partner_name: string | null
+          presupuesto_max: number | null
+          presupuesto_min: number | null
+          presupuesto_texto: string | null
+          prioridad: Database["public"]["Enums"]["opp_priority"] | null
           probability_pct: number | null
+          productora_aie: string | null
           referido_por_composer_id: string | null
+          reparto: string | null
           responsible_person_id: string | null
           statuses: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id: string | null
           target_production_text: string | null
+          tipo_produccion:
+            | Database["public"]["Enums"]["opp_production_type"]
+            | null
           title: string
+          titulo_alt: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           detected_date?: string | null
+          director_id?: string | null
+          director_text?: string | null
+          es_coproduccion?: boolean
           estimated_value?: number | null
           expected_close_date?: string | null
+          fase?: Database["public"]["Enums"]["opp_phase"] | null
+          fecha_estreno?: string | null
+          fecha_rodaje?: string | null
+          financiacion_publica?: string | null
+          fuente_url?: string | null
+          genero_produccion?:
+            | Database["public"]["Enums"]["opp_production_genre"]
+            | null
           id?: string
           kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
+          origen?: string | null
+          paises?: string[]
           partner_company_id?: string | null
           partner_name?: string | null
+          presupuesto_max?: number | null
+          presupuesto_min?: number | null
+          presupuesto_texto?: string | null
+          prioridad?: Database["public"]["Enums"]["opp_priority"] | null
           probability_pct?: number | null
+          productora_aie?: string | null
           referido_por_composer_id?: string | null
+          reparto?: string | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id?: string | null
           target_production_text?: string | null
+          tipo_produccion?:
+            | Database["public"]["Enums"]["opp_production_type"]
+            | null
           title: string
+          titulo_alt?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           detected_date?: string | null
+          director_id?: string | null
+          director_text?: string | null
+          es_coproduccion?: boolean
           estimated_value?: number | null
           expected_close_date?: string | null
+          fase?: Database["public"]["Enums"]["opp_phase"] | null
+          fecha_estreno?: string | null
+          fecha_rodaje?: string | null
+          financiacion_publica?: string | null
+          fuente_url?: string | null
+          genero_produccion?:
+            | Database["public"]["Enums"]["opp_production_genre"]
+            | null
           id?: string
           kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
+          origen?: string | null
+          paises?: string[]
           partner_company_id?: string | null
           partner_name?: string | null
+          presupuesto_max?: number | null
+          presupuesto_min?: number | null
+          presupuesto_texto?: string | null
+          prioridad?: Database["public"]["Enums"]["opp_priority"] | null
           probability_pct?: number | null
+          productora_aie?: string | null
           referido_por_composer_id?: string | null
+          reparto?: string | null
           responsible_person_id?: string | null
           statuses?: Database["public"]["Enums"]["opportunity_status"][]
           target_production_id?: string | null
           target_production_text?: string | null
+          tipo_produccion?:
+            | Database["public"]["Enums"]["opp_production_type"]
+            | null
           title?: string
+          titulo_alt?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "opportunities_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "opportunities_partner_company_id_fkey"
             columns: ["partner_company_id"]
@@ -6183,6 +6259,21 @@ export type Database = {
         | "otro"
       marketing_language: "es" | "en" | "ca" | "fr" | "pt" | "other"
       obligacion_estado: "pendiente" | "completada" | "vencida"
+      opp_phase:
+        | "desarrollo"
+        | "preproduccion"
+        | "rodaje"
+        | "postproduccion"
+        | "finalizado"
+        | "estreno"
+      opp_priority: "alta" | "media" | "baja"
+      opp_production_genre: "ficcion" | "animacion" | "no_ficcion"
+      opp_production_type:
+        | "pelicula"
+        | "serie"
+        | "documental"
+        | "animacion"
+        | "otro"
       opportunity_kind:
         | "fichaje"
         | "pitch"
@@ -6809,6 +6900,23 @@ export const Constants = {
       ],
       marketing_language: ["es", "en", "ca", "fr", "pt", "other"],
       obligacion_estado: ["pendiente", "completada", "vencida"],
+      opp_phase: [
+        "desarrollo",
+        "preproduccion",
+        "rodaje",
+        "postproduccion",
+        "finalizado",
+        "estreno",
+      ],
+      opp_priority: ["alta", "media", "baja"],
+      opp_production_genre: ["ficcion", "animacion", "no_ficcion"],
+      opp_production_type: [
+        "pelicula",
+        "serie",
+        "documental",
+        "animacion",
+        "otro",
+      ],
       opportunity_kind: [
         "fichaje",
         "pitch",
