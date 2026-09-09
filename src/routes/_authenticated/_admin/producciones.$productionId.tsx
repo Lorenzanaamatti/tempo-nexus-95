@@ -352,7 +352,7 @@ function ProduccionDetalle() {
         <ProductionRepresentadosEditor productionId={productionId} />
       </Section>
 
-      <Section title="Hitos de entrega" description="Cada hito con fecha se sincroniza con el calendario, capa Producciones.">
+      <Section title="Procesos de la producción" description="Define cada proceso con su fecha de inicio y fin: composición, grabación, mezcla, máster, entrega…">
         <ProductionMilestonesEditor productionId={productionId} />
       </Section>
 

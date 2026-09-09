@@ -35,9 +35,10 @@ export const MILESTONE_TONE: Record<MilestoneStatus, string> = {
 export type MilestoneLike = { start_date: string | null; end_date: string | null; status: string | null };
 
 export function isMilestoneOverdue(m: MilestoneLike) {
-  if (normalizeMilestoneStatus(m.status) === "completado" || m.end_date) return false;
-  if (!m.start_date) return false;
-  return m.start_date < new Date().toISOString().slice(0, 10);
+  if (normalizeMilestoneStatus(m.status) === "completado") return false;
+  const ref = m.end_date ?? m.start_date;
+  if (!ref) return false;
+  return ref < new Date().toISOString().slice(0, 10);
 }
 
 export const REPRESENTADO_ROLES = [

@@ -46,6 +46,7 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
   const listQ = useProductionMilestones(productionId);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   function invalidate() {
     qc.invalidateQueries({ queryKey: key });
@@ -61,11 +62,12 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
       production_id: productionId,
       name: n,
       start_date: date || null,
+      end_date: endDate || null,
       status: "pendiente",
       position: listQ.data?.length ?? 0,
     });
     if (error) return toast.error(error.message);
-    setName(""); setDate("");
+    setName(""); setDate(""); setEndDate("");
     invalidate();
   }
 
@@ -85,19 +87,20 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_180px_auto]">
+      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_160px_160px_auto]">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre del hito (Entrega stems, Mix final, Master aprobado, Estreno…)"
+          placeholder="Nombre del proceso (Composición, Grabación, Mezcla, Máster, Entrega…)"
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
         />
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Fecha estimada" />
-        <Button onClick={add} disabled={!name.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir hito</Button>
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Fecha de inicio" />
+        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} title="Fecha de fin" />
+        <Button onClick={add} disabled={!name.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir proceso</Button>
       </div>
 
       {!rows.length ? (
-        <EmptyState variant="inline" icon={Flag} title="Sin hitos" description="Añade los hitos de entrega: aparecerán en el calendario, capa Producciones." />
+        <EmptyState variant="inline" icon={Flag} title="Sin procesos" description="Añade los procesos con fecha de inicio y fin: aparecerán en el calendario, capa Producciones." />
       ) : (
         <ol className="space-y-2">
           {rows.map((m) => {
@@ -107,15 +110,15 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
               <li key={m.id} className={`rounded-sm border p-3 ${overdue ? "border-destructive bg-destructive/5" : "border-border"}`}>
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="min-w-[180px] flex-1">
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Hito</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Proceso</Label>
                     <Input value={m.name} onChange={(e) => update(m.id, { name: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Fecha estimada</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Desde</Label>
                     <Input type="date" value={m.start_date ?? ""} onChange={(e) => update(m.id, { start_date: e.target.value || null })} />
                   </div>
                   <div>
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Fecha real</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Hasta</Label>
                     <Input type="date" value={m.end_date ?? ""} onChange={(e) => update(m.id, { end_date: e.target.value || null })} />
                   </div>
                   <div className="w-40">
@@ -127,12 +130,12 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
                       </SelectContent>
                     </Select>
                   </div>
-                  <ConfirmDeleteButton iconOnly title="¿Eliminar este hito?" onConfirm={() => remove(m.id)} />
+                  <ConfirmDeleteButton iconOnly title="¿Eliminar este proceso?" onConfirm={() => remove(m.id)} />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
                   <span className={`rounded-sm px-1.5 py-0.5 smallcaps ${MILESTONE_TONE[st]}`}>{MILESTONE_STATUS_LABEL[st]}</span>
                   <span className="text-muted-foreground">
-                    Estimada {formatDateEs(m.start_date)} · Real {formatDateEs(m.end_date)}
+                    Del {formatDateEs(m.start_date)} al {formatDateEs(m.end_date)}
                   </span>
                   {overdue && (
                     <span className="inline-flex items-center gap-1 rounded-sm bg-destructive px-1.5 py-0.5 font-semibold smallcaps text-destructive-foreground">
@@ -145,7 +148,7 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
           })}
         </ol>
       )}
-      <p className="text-xs text-muted-foreground">Los hitos con fecha aparecen automáticamente en el calendario, capa Producciones.</p>
+      <p className="text-xs text-muted-foreground">Los procesos con fechas aparecen automáticamente en el calendario y en el Gantt de la producción.</p>
     </div>
   );
 }
