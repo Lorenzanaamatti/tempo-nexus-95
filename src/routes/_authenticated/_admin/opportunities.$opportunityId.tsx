@@ -361,6 +361,116 @@ function OpportunityDetail() {
         </div>
       </section>
 
+      {form.kind === "pitch" && (
+        <section className="mt-10">
+          <h2 className="mb-3 font-display text-2xl">Datos del proyecto</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Título alternativo</Label>
+              <Input value={form.titulo_alt} onChange={(e) => setForm({ ...form, titulo_alt: e.target.value })} />
+            </div>
+            <div>
+              <Label>Director (CRM)</Label>
+              <CreatableSelect
+                value={directorLabel}
+                options={(directorsQ.data ?? []).map((d: any) => ({ id: d.id, label: d.full_name }))}
+                placeholder="Busca o crea el director…"
+                onPick={(id, label) => { setDirectorLabel(label); setForm({ ...form, director_id: id, director_text: id ? "" : label }); }}
+                onCreate={async (label) => {
+                  try {
+                    const id = await findOrCreateDirector(label);
+                    directorsQ.refetch();
+                    toast.success("Director añadido al CRM");
+                    return id;
+                  } catch (e: any) { toast.error(e.message); return null; }
+                }}
+                createLabel="Crear director en el CRM"
+              />
+            </div>
+            <div>
+              <Label>Tipo de producción</Label>
+              <Select value={form.tipo_produccion || undefined} onValueChange={(v) => setForm({ ...form, tipo_produccion: v })}>
+                <SelectTrigger><SelectValue placeholder="Tipo…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_TYPE_LABEL) as OppProductionType[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_TYPE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Género</Label>
+              <Select value={form.genero_produccion || undefined} onValueChange={(v) => setForm({ ...form, genero_produccion: v })}>
+                <SelectTrigger><SelectValue placeholder="Género…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_GENRE_LABEL) as OppProductionGenre[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_GENRE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>País(es)</Label>
+              <Input value={form.paises} onChange={(e) => setForm({ ...form, paises: e.target.value })} placeholder="España / Francia" />
+            </div>
+            <div>
+              <Label>AIE</Label>
+              <Input value={form.productora_aie} onChange={(e) => setForm({ ...form, productora_aie: e.target.value })} />
+            </div>
+            <div>
+              <Label>Presupuesto (texto original)</Label>
+              <Input value={form.presupuesto_texto} onChange={(e) => setForm({ ...form, presupuesto_texto: e.target.value })} placeholder="6-8M" />
+            </div>
+            <div>
+              <Label>Financiación pública</Label>
+              <Input value={form.financiacion_publica} onChange={(e) => setForm({ ...form, financiacion_publica: e.target.value })} />
+            </div>
+            <div>
+              <Label>Fase</Label>
+              <Select value={form.fase || undefined} onValueChange={(v) => setForm({ ...form, fase: v })}>
+                <SelectTrigger><SelectValue placeholder="Fase…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_PHASE_LABEL) as OppPhase[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PHASE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Prioridad IC</Label>
+              <Select value={form.prioridad || undefined} onValueChange={(v) => setForm({ ...form, prioridad: v })}>
+                <SelectTrigger><SelectValue placeholder="Prioridad…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_PRIORITY_LABEL) as OppPriority[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PRIORITY_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Fecha de rodaje</Label>
+              <Input value={form.fecha_rodaje} onChange={(e) => setForm({ ...form, fecha_rodaje: e.target.value })} placeholder="Otoño 2026" />
+            </div>
+            <div>
+              <Label>Fecha de estreno</Label>
+              <Input value={form.fecha_estreno} onChange={(e) => setForm({ ...form, fecha_estreno: e.target.value })} placeholder="2027" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Reparto</Label>
+              <Input value={form.reparto} onChange={(e) => setForm({ ...form, reparto: e.target.value })} />
+            </div>
+            <div>
+              <Label>Fuente (URL)</Label>
+              <Input value={form.fuente_url} onChange={(e) => setForm({ ...form, fuente_url: e.target.value })} placeholder="https://…" />
+            </div>
+            <div>
+              <Label>Origen</Label>
+              <Input value={form.origen} onChange={(e) => setForm({ ...form, origen: e.target.value })} placeholder="Report, prensa, contacto…" />
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Representados candidatos</h2>
         <div className="mb-3 flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border p-4">
