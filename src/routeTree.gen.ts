@@ -27,11 +27,9 @@ import { Route as AuthenticatedPortalProyectosRouteImport } from './routes/_auth
 import { Route as AuthenticatedPortalPropuestasRouteImport } from './routes/_authenticated/portal/propuestas'
 import { Route as AuthenticatedPortalPrensaRouteImport } from './routes/_authenticated/portal/prensa'
 import { Route as AuthenticatedPortalPlanRouteImport } from './routes/_authenticated/portal/plan'
-import { Route as AuthenticatedPortalMensajesRouteImport } from './routes/_authenticated/portal/mensajes'
 import { Route as AuthenticatedPortalKpisRouteImport } from './routes/_authenticated/portal/kpis'
 import { Route as AuthenticatedPortalFacturacionRouteImport } from './routes/_authenticated/portal/facturacion'
 import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_authenticated/portal/contratos'
-import { Route as AuthenticatedPortalChatRouteImport } from './routes/_authenticated/portal/chat'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
@@ -230,12 +228,6 @@ const AuthenticatedPortalPlanRoute = AuthenticatedPortalPlanRouteImport.update({
   path: '/plan',
   getParentRoute: () => AuthenticatedPortalRoute,
 } as any)
-const AuthenticatedPortalMensajesRoute =
-  AuthenticatedPortalMensajesRouteImport.update({
-    id: '/mensajes',
-    path: '/mensajes',
-    getParentRoute: () => AuthenticatedPortalRoute,
-  } as any)
 const AuthenticatedPortalKpisRoute = AuthenticatedPortalKpisRouteImport.update({
   id: '/kpis',
   path: '/kpis',
@@ -253,11 +245,6 @@ const AuthenticatedPortalContratosRoute =
     path: '/contratos',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
-const AuthenticatedPortalChatRoute = AuthenticatedPortalChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => AuthenticatedPortalRoute,
-} as any)
 const AuthenticatedPortalCarreraRoute =
   AuthenticatedPortalCarreraRouteImport.update({
     id: '/carrera',
@@ -900,11 +887,9 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
-  '/portal/chat': typeof AuthenticatedPortalChatRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
-  '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/portal/plan': typeof AuthenticatedPortalPlanRoute
   '/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
@@ -1024,11 +1009,9 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedAdminUsersRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
-  '/portal/chat': typeof AuthenticatedPortalChatRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/portal/kpis': typeof AuthenticatedPortalKpisRoute
-  '/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/portal/plan': typeof AuthenticatedPortalPlanRoute
   '/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
@@ -1153,11 +1136,9 @@ export interface FileRoutesById {
   '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
-  '/_authenticated/portal/chat': typeof AuthenticatedPortalChatRoute
   '/_authenticated/portal/contratos': typeof AuthenticatedPortalContratosRoute
   '/_authenticated/portal/facturacion': typeof AuthenticatedPortalFacturacionRoute
   '/_authenticated/portal/kpis': typeof AuthenticatedPortalKpisRoute
-  '/_authenticated/portal/mensajes': typeof AuthenticatedPortalMensajesRoute
   '/_authenticated/portal/plan': typeof AuthenticatedPortalPlanRoute
   '/_authenticated/portal/prensa': typeof AuthenticatedPortalPrensaRoute
   '/_authenticated/portal/propuestas': typeof AuthenticatedPortalPropuestasRoute
@@ -1281,11 +1262,9 @@ export interface FileRouteTypes {
     | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
-    | '/portal/chat'
     | '/portal/contratos'
     | '/portal/facturacion'
     | '/portal/kpis'
-    | '/portal/mensajes'
     | '/portal/plan'
     | '/portal/prensa'
     | '/portal/propuestas'
@@ -1405,11 +1384,9 @@ export interface FileRouteTypes {
     | '/users'
     | '/portal/agenda'
     | '/portal/carrera'
-    | '/portal/chat'
     | '/portal/contratos'
     | '/portal/facturacion'
     | '/portal/kpis'
-    | '/portal/mensajes'
     | '/portal/plan'
     | '/portal/prensa'
     | '/portal/propuestas'
@@ -1533,11 +1510,9 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/users'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
-    | '/_authenticated/portal/chat'
     | '/_authenticated/portal/contratos'
     | '/_authenticated/portal/facturacion'
     | '/_authenticated/portal/kpis'
-    | '/_authenticated/portal/mensajes'
     | '/_authenticated/portal/plan'
     | '/_authenticated/portal/prensa'
     | '/_authenticated/portal/propuestas'
@@ -1774,13 +1749,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalPlanRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
-    '/_authenticated/portal/mensajes': {
-      id: '/_authenticated/portal/mensajes'
-      path: '/mensajes'
-      fullPath: '/portal/mensajes'
-      preLoaderRoute: typeof AuthenticatedPortalMensajesRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
-    }
     '/_authenticated/portal/kpis': {
       id: '/_authenticated/portal/kpis'
       path: '/kpis'
@@ -1800,13 +1768,6 @@ declare module '@tanstack/react-router' {
       path: '/contratos'
       fullPath: '/portal/contratos'
       preLoaderRoute: typeof AuthenticatedPortalContratosRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
-    }
-    '/_authenticated/portal/chat': {
-      id: '/_authenticated/portal/chat'
-      path: '/chat'
-      fullPath: '/portal/chat'
-      preLoaderRoute: typeof AuthenticatedPortalChatRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/portal/carrera': {
@@ -2841,11 +2802,9 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalAgendaRoute: typeof AuthenticatedPortalAgendaRoute
   AuthenticatedPortalCarreraRoute: typeof AuthenticatedPortalCarreraRoute
-  AuthenticatedPortalChatRoute: typeof AuthenticatedPortalChatRoute
   AuthenticatedPortalContratosRoute: typeof AuthenticatedPortalContratosRoute
   AuthenticatedPortalFacturacionRoute: typeof AuthenticatedPortalFacturacionRoute
   AuthenticatedPortalKpisRoute: typeof AuthenticatedPortalKpisRoute
-  AuthenticatedPortalMensajesRoute: typeof AuthenticatedPortalMensajesRoute
   AuthenticatedPortalPlanRoute: typeof AuthenticatedPortalPlanRoute
   AuthenticatedPortalPrensaRoute: typeof AuthenticatedPortalPrensaRoute
   AuthenticatedPortalPropuestasRoute: typeof AuthenticatedPortalPropuestasRoute
@@ -2856,11 +2815,9 @@ interface AuthenticatedPortalRouteChildren {
 const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalAgendaRoute: AuthenticatedPortalAgendaRoute,
   AuthenticatedPortalCarreraRoute: AuthenticatedPortalCarreraRoute,
-  AuthenticatedPortalChatRoute: AuthenticatedPortalChatRoute,
   AuthenticatedPortalContratosRoute: AuthenticatedPortalContratosRoute,
   AuthenticatedPortalFacturacionRoute: AuthenticatedPortalFacturacionRoute,
   AuthenticatedPortalKpisRoute: AuthenticatedPortalKpisRoute,
-  AuthenticatedPortalMensajesRoute: AuthenticatedPortalMensajesRoute,
   AuthenticatedPortalPlanRoute: AuthenticatedPortalPlanRoute,
   AuthenticatedPortalPrensaRoute: AuthenticatedPortalPrensaRoute,
   AuthenticatedPortalPropuestasRoute: AuthenticatedPortalPropuestasRoute,
