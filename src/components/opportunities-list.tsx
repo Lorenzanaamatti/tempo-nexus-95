@@ -58,14 +58,16 @@ export function OpportunitiesList({
   const [kindFilter, setKindFilter] = useState<string>("all");
   const [faseFilter, setFaseFilter] = useState<string>("all");
   const [tipoFilter, setTipoFilter] = useState<string>("all");
+  const [archivedFilter, setArchivedFilter] = useState<string>("activas");
   const [creating, setCreating] = useState(false);
 
   const pg = useServerPagination<OppSortKey>({ list: listKey,
     sortKey: "created_at",
     sortDir: "desc",
     pageSize: 50,
-    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
+    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter, archivedFilter],
   });
+
 
   const { data: result, isLoading, error } = useQuery({
     queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
