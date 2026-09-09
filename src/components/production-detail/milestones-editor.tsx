@@ -87,19 +87,20 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_180px_auto]">
+      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_160px_160px_auto]">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre del hito (Entrega stems, Mix final, Master aprobado, Estreno…)"
+          placeholder="Nombre del proceso (Composición, Grabación, Mezcla, Máster, Entrega…)"
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
         />
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Fecha estimada" />
-        <Button onClick={add} disabled={!name.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir hito</Button>
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Fecha de inicio" />
+        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} title="Fecha de fin" />
+        <Button onClick={add} disabled={!name.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir proceso</Button>
       </div>
 
       {!rows.length ? (
-        <EmptyState variant="inline" icon={Flag} title="Sin hitos" description="Añade los hitos de entrega: aparecerán en el calendario, capa Producciones." />
+        <EmptyState variant="inline" icon={Flag} title="Sin procesos" description="Añade los procesos con fecha de inicio y fin: aparecerán en el calendario, capa Producciones." />
       ) : (
         <ol className="space-y-2">
           {rows.map((m) => {
