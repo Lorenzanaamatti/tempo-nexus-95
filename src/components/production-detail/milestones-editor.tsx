@@ -62,11 +62,12 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
       production_id: productionId,
       name: n,
       start_date: date || null,
+      end_date: endDate || null,
       status: "pendiente",
       position: listQ.data?.length ?? 0,
     });
     if (error) return toast.error(error.message);
-    setName(""); setDate("");
+    setName(""); setDate(""); setEndDate("");
     invalidate();
   }
 
