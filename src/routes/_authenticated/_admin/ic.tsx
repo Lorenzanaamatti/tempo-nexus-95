@@ -196,7 +196,7 @@ function ICActiveProductionsSection() {
       const { data: prods, error } = await supabase
         .from("productions")
         .select(
-          "id, title, year, status, project_type, delivery_date, composer_id, composers(id, full_name, artistic_name, roster_role)",
+          "id, title, year, status, project_type, delivery_date, composer_id, composers!productions_composer_fk(id, full_name, artistic_name, roster_role)",
         )
         .order("year", { ascending: false, nullsFirst: false });
       if (error) throw error;

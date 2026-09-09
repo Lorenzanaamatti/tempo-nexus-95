@@ -42,7 +42,7 @@ function ProductionsIndex() {
       let query = supabase
         .from("productions")
         .select(
-          "id, title, kind, project_type, status, partner, year, production_company, director, composer_id, composers(full_name, artistic_name)",
+          "id, title, kind, project_type, status, partner, year, production_company, director, composer_id, composers!productions_composer_fk(full_name, artistic_name)",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);

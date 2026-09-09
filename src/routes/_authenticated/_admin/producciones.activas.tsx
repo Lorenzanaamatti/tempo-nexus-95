@@ -53,7 +53,14 @@ function ProduccionesActivas() {
 
       {productionsQ.isLoading ? (
         <ListSkeleton rows={6} />
+      ) : productionsQ.error ? (
+        <div className="rounded-sm border border-destructive/40 bg-destructive/5 p-6 text-center">
+          <p className="font-display">No se pudieron cargar las producciones</p>
+          <p className="mt-1 text-sm text-muted-foreground">{(productionsQ.error as any)?.message}</p>
+          <Button className="mt-4" variant="outline" onClick={() => productionsQ.refetch()}>Reintentar</Button>
+        </div>
       ) : !rows.length ? (
+
         q ? (
           <EmptyState variant="filtered" title="Ningún resultado" description="Ninguna producción activa coincide con la búsqueda." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
         ) : (

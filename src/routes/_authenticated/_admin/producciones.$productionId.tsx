@@ -187,9 +187,25 @@ function ProduccionDetalle() {
     navigate({ to: "/producciones/activas" });
   }
 
-  if (prodQ.isLoading || !data) {
+  if (prodQ.isLoading) {
     return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
   }
+
+  if (prodQ.error || !data) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-16 text-center">
+        <p className="font-display text-lg">No se pudo abrir esta producción</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {(prodQ.error as any)?.message ?? "La ficha no existe o fue eliminada."}
+        </p>
+        <div className="mt-5 flex justify-center gap-3">
+          <Button variant="outline" onClick={() => prodQ.refetch()}>Reintentar</Button>
+          <Button variant="ghost" onClick={() => navigate({ to: "/producciones/activas" })}>Volver</Button>
+        </div>
+      </div>
+    );
+  }
+
 
   const finalized = stage === "finalizada";
 
