@@ -20,6 +20,20 @@ import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
 import { CrmTransferMenu } from "@/components/crm-transfer-menu";
 import { opportunityToTargetAccount, opportunityToComposer, opportunityToCompany } from "@/lib/crm-transfer";
+import { CreatableSelect } from "@/components/creatable-select";
+import { findOrCreateDirector } from "@/lib/opportunity-intake";
+import {
+  OPP_GENRE_LABEL,
+  OPP_PHASE_LABEL,
+  OPP_PRIORITY_LABEL,
+  OPP_TYPE_LABEL,
+  parseBudgetRange,
+  parseCountries,
+  type OppPhase,
+  type OppPriority,
+  type OppProductionGenre,
+  type OppProductionType,
+} from "@/lib/opportunity-production";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/$opportunityId")({
   component: OpportunityDetail,
@@ -87,6 +101,16 @@ function OpportunityDetail() {
     },
   });
 
+  const directorsQ = useQuery({
+    queryKey: ["directors-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const [directorLabel, setDirectorLabel] = useState("");
+
   const [form, setForm] = useState({
     title: "",
     kind: "pitch" as OpportunityKind,
@@ -102,6 +126,23 @@ function OpportunityDetail() {
     detected_date: "" as string,
     expected_close_date: "" as string,
     last_contact_date: "" as string,
+    // Datos de proyecto (oportunidades de producción)
+    titulo_alt: "",
+    tipo_produccion: "",
+    genero_produccion: "",
+    paises: "",
+    presupuesto_texto: "",
+    financiacion_publica: "",
+    fase: "",
+    fecha_rodaje: "",
+    fecha_estreno: "",
+    productora_aie: "",
+    director_id: "",
+    director_text: "",
+    reparto: "",
+    fuente_url: "",
+    origen: "",
+    prioridad: "",
   });
   const [saving, setSaving] = useState(false);
   const { dirty, markClean } = useDirtyForm(form);
@@ -124,6 +165,22 @@ function OpportunityDetail() {
         detected_date: d.detected_date ?? "",
         expected_close_date: d.expected_close_date ?? "",
         last_contact_date: d.last_contact_date ?? "",
+        titulo_alt: d.titulo_alt ?? "",
+        tipo_produccion: d.tipo_produccion ?? "",
+        genero_produccion: d.genero_produccion ?? "",
+        paises: (d.paises ?? []).join(" / "),
+        presupuesto_texto: d.presupuesto_texto ?? "",
+        financiacion_publica: d.financiacion_publica ?? "",
+        fase: d.fase ?? "",
+        fecha_rodaje: d.fecha_rodaje ?? "",
+        fecha_estreno: d.fecha_estreno ?? "",
+        productora_aie: d.productora_aie ?? "",
+        director_id: d.director_id ?? "",
+        director_text: d.director_text ?? "",
+        reparto: d.reparto ?? "",
+        fuente_url: d.fuente_url ?? "",
+        origen: d.origen ?? "",
+        prioridad: d.prioridad ?? "",
       };
       setForm(hydrated);
       markClean(hydrated as typeof form);
@@ -131,8 +188,20 @@ function OpportunityDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oppQ.data]);
 
+  useEffect(() => {
+    const d: any = oppQ.data;
+    if (!d) return;
+    if (d.director_id) {
+      const found = (directorsQ.data ?? []).find((x: any) => x.id === d.director_id);
+      if (found) setDirectorLabel(found.full_name);
+    } else if (d.director_text) {
+      setDirectorLabel(d.director_text);
+    }
+  }, [oppQ.data, directorsQ.data]);
+
   async function save() {
     setSaving(true);
+    const range = parseBudgetRange(form.presupuesto_texto);
     const { error } = await supabase.from("opportunities").update({
       title: form.title,
       kind: form.kind,
@@ -148,7 +217,25 @@ function OpportunityDetail() {
       detected_date: form.detected_date || null,
       expected_close_date: form.expected_close_date || null,
       last_contact_date: form.last_contact_date || null,
-    }).eq("id", opportunityId);
+      titulo_alt: form.titulo_alt || null,
+      tipo_produccion: form.tipo_produccion || null,
+      genero_produccion: form.genero_produccion || null,
+      paises: parseCountries(form.paises),
+      presupuesto_texto: form.presupuesto_texto || null,
+      presupuesto_min: range.min,
+      presupuesto_max: range.max,
+      financiacion_publica: form.financiacion_publica || null,
+      fase: form.fase || null,
+      fecha_rodaje: form.fecha_rodaje || null,
+      fecha_estreno: form.fecha_estreno || null,
+      productora_aie: form.productora_aie || null,
+      director_id: form.director_id || null,
+      director_text: form.director_id ? null : (form.director_text || null),
+      reparto: form.reparto || null,
+      fuente_url: form.fuente_url || null,
+      origen: form.origen || null,
+      prioridad: form.prioridad || null,
+    } as never).eq("id", opportunityId);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
@@ -360,6 +447,116 @@ function OpportunityDetail() {
           <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
       </section>
+
+      {form.kind === "pitch" && (
+        <section className="mt-10">
+          <h2 className="mb-3 font-display text-2xl">Datos del proyecto</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Título alternativo</Label>
+              <Input value={form.titulo_alt} onChange={(e) => setForm({ ...form, titulo_alt: e.target.value })} />
+            </div>
+            <div>
+              <Label>Director (CRM)</Label>
+              <CreatableSelect
+                value={directorLabel}
+                options={(directorsQ.data ?? []).map((d: any) => ({ id: d.id, label: d.full_name }))}
+                placeholder="Busca o crea el director…"
+                onPick={(id, label) => { setDirectorLabel(label); setForm({ ...form, director_id: id, director_text: id ? "" : label }); }}
+                onCreate={async (label) => {
+                  try {
+                    const id = await findOrCreateDirector(label);
+                    directorsQ.refetch();
+                    toast.success("Director añadido al CRM");
+                    return id;
+                  } catch (e: any) { toast.error(e.message); return null; }
+                }}
+                createLabel="Crear director en el CRM"
+              />
+            </div>
+            <div>
+              <Label>Tipo de producción</Label>
+              <Select value={form.tipo_produccion || undefined} onValueChange={(v) => setForm({ ...form, tipo_produccion: v })}>
+                <SelectTrigger><SelectValue placeholder="Tipo…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_TYPE_LABEL) as OppProductionType[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_TYPE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Género</Label>
+              <Select value={form.genero_produccion || undefined} onValueChange={(v) => setForm({ ...form, genero_produccion: v })}>
+                <SelectTrigger><SelectValue placeholder="Género…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_GENRE_LABEL) as OppProductionGenre[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_GENRE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>País(es)</Label>
+              <Input value={form.paises} onChange={(e) => setForm({ ...form, paises: e.target.value })} placeholder="España / Francia" />
+            </div>
+            <div>
+              <Label>AIE</Label>
+              <Input value={form.productora_aie} onChange={(e) => setForm({ ...form, productora_aie: e.target.value })} />
+            </div>
+            <div>
+              <Label>Presupuesto (texto original)</Label>
+              <Input value={form.presupuesto_texto} onChange={(e) => setForm({ ...form, presupuesto_texto: e.target.value })} placeholder="6-8M" />
+            </div>
+            <div>
+              <Label>Financiación pública</Label>
+              <Input value={form.financiacion_publica} onChange={(e) => setForm({ ...form, financiacion_publica: e.target.value })} />
+            </div>
+            <div>
+              <Label>Fase</Label>
+              <Select value={form.fase || undefined} onValueChange={(v) => setForm({ ...form, fase: v })}>
+                <SelectTrigger><SelectValue placeholder="Fase…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_PHASE_LABEL) as OppPhase[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PHASE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Prioridad IC</Label>
+              <Select value={form.prioridad || undefined} onValueChange={(v) => setForm({ ...form, prioridad: v })}>
+                <SelectTrigger><SelectValue placeholder="Prioridad…" /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(OPP_PRIORITY_LABEL) as OppPriority[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PRIORITY_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Fecha de rodaje</Label>
+              <Input value={form.fecha_rodaje} onChange={(e) => setForm({ ...form, fecha_rodaje: e.target.value })} placeholder="Otoño 2026" />
+            </div>
+            <div>
+              <Label>Fecha de estreno</Label>
+              <Input value={form.fecha_estreno} onChange={(e) => setForm({ ...form, fecha_estreno: e.target.value })} placeholder="2027" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Reparto</Label>
+              <Input value={form.reparto} onChange={(e) => setForm({ ...form, reparto: e.target.value })} />
+            </div>
+            <div>
+              <Label>Fuente (URL)</Label>
+              <Input value={form.fuente_url} onChange={(e) => setForm({ ...form, fuente_url: e.target.value })} placeholder="https://…" />
+            </div>
+            <div>
+              <Label>Origen</Label>
+              <Input value={form.origen} onChange={(e) => setForm({ ...form, origen: e.target.value })} placeholder="Report, prensa, contacto…" />
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="mb-3 font-display text-2xl">Representados candidatos</h2>

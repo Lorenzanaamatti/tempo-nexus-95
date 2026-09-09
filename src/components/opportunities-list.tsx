@@ -9,11 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Target } from "lucide-react";
-import { formatEUR } from "@/lib/money";
+import { formatEUR0 } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { ExportButton } from "@/components/export-button";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
+import { OpportunityIntakeDialog } from "@/components/opportunity-intake-dialog";
+import {
+  OPP_PHASE_LABEL,
+  OPP_PHASE_TONE,
+  OPP_PRIORITY_LABEL,
+  OPP_TYPE_LABEL,
+  type OppPhase,
+  type OppPriority,
+  type OppProductionType,
+} from "@/lib/opportunity-production";
 
 export type OpportunitiesListProps = {
   /** When set, the view is locked to these opportunity kinds and the kind filter is hidden. */
@@ -22,6 +32,8 @@ export type OpportunitiesListProps = {
   eyebrow?: string;
   title?: string;
   description?: string;
+  /** Ficha de proyecto completa: alta manual/JSON, columnas y filtros de producción. */
+  productionMode?: boolean;
 };
 
 type OppSortKey = "title" | "kind" | "probability_pct" | "estimated_value" | "detected_date" | "expected_close_date" | "created_at";
@@ -32,6 +44,7 @@ export function OpportunitiesList({
   eyebrow = "Pipeline",
   title = "OPORTUNIDADES",
   description = "Oportunidades detectadas, candidatos, estado, probabilidad y próximas acciones.",
+  productionMode = false,
 }: OpportunitiesListProps) {
   const qc = useQueryClient();
   const kindOptions = fixedKinds ?? (Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]);
@@ -43,28 +56,32 @@ export function OpportunitiesList({
   const [newDetectedDate, setNewDetectedDate] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [kindFilter, setKindFilter] = useState<string>("all");
+  const [faseFilter, setFaseFilter] = useState<string>("all");
+  const [tipoFilter, setTipoFilter] = useState<string>("all");
   const [creating, setCreating] = useState(false);
 
   const pg = useServerPagination<OppSortKey>({ list: listKey,
     sortKey: "created_at",
     sortDir: "desc",
     pageSize: 50,
-    deps: [q, statusFilter, kindFilter],
+    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
   });
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
       if (fixedKinds) query = query.in("kind", fixedKinds);
       else if (kindFilter !== "all") query = query.eq("kind", kindFilter);
       if (statusFilter !== "all") query = query.contains("statuses", [statusFilter]);
+      if (productionMode && faseFilter !== "all") query = query.eq("fase", faseFilter);
+      if (productionMode && tipoFilter !== "all") query = query.eq("tipo_produccion", tipoFilter);
       const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       return { rows: (data ?? []) as any[], count: count ?? 0 };
@@ -149,7 +166,30 @@ export function OpportunitiesList({
               ))}
             </SelectContent>
           </Select>
+          {productionMode && (
+            <>
+              <Select value={tipoFilter} onValueChange={setTipoFilter}>
+                <SelectTrigger className="w-40 rounded-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {(Object.keys(OPP_TYPE_LABEL) as OppProductionType[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_TYPE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={faseFilter} onValueChange={setFaseFilter}>
+                <SelectTrigger className="w-44 rounded-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las fases</SelectItem>
+                  {(Object.keys(OPP_PHASE_LABEL) as OppPhase[]).map((k) => (
+                    <SelectItem key={k} value={k}>{OPP_PHASE_LABEL[k]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar oportunidad…" className="w-56 rounded-sm" />
+          {productionMode && <OpportunityIntakeDialog />}
           <ExportButton
             entityLabel="Oportunidades"
             filename="oportunidades"
@@ -184,6 +224,7 @@ export function OpportunitiesList({
         </div>
       </div>
 
+      {!productionMode && (
       <div className="mb-6 grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-4 sm:grid-cols-12">
         <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Oportunidad detectada…" className="sm:col-span-3" />
         <div className="sm:col-span-3">
@@ -219,6 +260,7 @@ export function OpportunitiesList({
         <Input type="date" value={newDetectedDate} onChange={(e) => setNewDetectedDate(e.target.value)} className="sm:col-span-1" />
         <Button onClick={create} disabled={creating} className="sm:col-span-1"><Plus className="h-4 w-4" /></Button>
       </div>
+      )}
 
       {isLoading ? (
         <ListSkeleton rows={6} />
@@ -235,10 +277,20 @@ export function OpportunitiesList({
               <tr>
                 <Th k="kind">Tipo</Th>
                 <Th k="title">Oportunidad</Th>
-                <th className="px-3 py-2 smallcaps text-xs">Partner</th>
-                <th className="px-3 py-2 smallcaps text-xs">Producción</th>
+                <th className="px-3 py-2 smallcaps text-xs">{productionMode ? "Productora" : "Partner"}</th>
+                {productionMode ? (
+                  <>
+                    <th className="px-3 py-2 smallcaps text-xs">Director</th>
+                    <th className="px-3 py-2 smallcaps text-xs">País</th>
+                    <th className="px-3 py-2 smallcaps text-xs">Presupuesto</th>
+                    <th className="px-3 py-2 smallcaps text-xs">Fase</th>
+                  </>
+                ) : (
+                  <th className="px-3 py-2 smallcaps text-xs">Producción</th>
+                )}
                 <th className="px-3 py-2 smallcaps text-xs">Candidatos</th>
                 <th className="px-3 py-2 smallcaps text-xs">Estado</th>
+                {productionMode && <th className="px-3 py-2 smallcaps text-xs">Prioridad</th>}
                 <Th k="probability_pct" className="text-right">Prob.</Th>
                 <Th k="estimated_value" className="text-right">Valor est.</Th>
                 <Th k="detected_date">Detectada</Th>
@@ -250,19 +302,46 @@ export function OpportunitiesList({
               {rows.map((o: any) => (
                 <tr key={o.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
-                    <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
-                      {OPPORTUNITY_KIND_LABEL[(o.kind ?? "pitch") as OpportunityKind]}
-                    </span>
+                    {productionMode ? (
+                      <span className="rounded-sm bg-muted px-2 py-0.5 text-[10px] smallcaps">
+                        {o.tipo_produccion ? OPP_TYPE_LABEL[o.tipo_produccion as OppProductionType] : "—"}
+                      </span>
+                    ) : (
+                      <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
+                        {OPPORTUNITY_KIND_LABEL[(o.kind ?? "pitch") as OpportunityKind]}
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
+                    {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {(o.kind ?? "pitch") === "pitch"
-                      ? (o.target_production?.title || o.target_production_text || "—")
-                      : "—"}
-                  </td>
+                  {productionMode ? (
+                    <>
+                      <td className="px-3 py-2 text-muted-foreground">{o.director?.full_name || o.director_text || "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {(o.paises ?? []).join(" / ") || "—"}
+                        {o.es_coproduccion && <span className="ml-1 rounded-sm bg-muted px-1 text-[10px] smallcaps">Copro</span>}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                        {o.presupuesto_min || o.presupuesto_max
+                          ? `${o.presupuesto_min ? formatEUR0(o.presupuesto_min) : "—"} – ${o.presupuesto_max ? formatEUR0(o.presupuesto_max) : "abierto"}`
+                          : o.presupuesto_texto || "—"}
+                      </td>
+                      <td className="px-3 py-2">
+                        {o.fase ? (
+                          <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPP_PHASE_TONE[o.fase as OppPhase]}`}>{OPP_PHASE_LABEL[o.fase as OppPhase]}</span>
+                        ) : "—"}
+                      </td>
+                    </>
+                  ) : (
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {(o.kind ?? "pitch") === "pitch"
+                        ? (o.target_production?.title || o.target_production_text || "—")
+                        : "—"}
+                    </td>
+                  )}
                   <td className="px-3 py-2 text-muted-foreground">
                     {(o.candidates ?? []).slice(0, 3).map((c: any) => c.composer?.artistic_name || c.composer?.full_name).filter(Boolean).join(", ") || "—"}
                     {(o.candidates?.length ?? 0) > 3 && <span className="text-xs"> +{o.candidates.length - 3}</span>}
@@ -274,6 +353,11 @@ export function OpportunitiesList({
                       ))}
                     </div>
                   </td>
+                  {productionMode && (
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {o.prioridad ? OPP_PRIORITY_LABEL[o.prioridad as OppPriority] : "—"}
+                    </td>
+                  )}
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
