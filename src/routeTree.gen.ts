@@ -65,7 +65,6 @@ import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './rou
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
 import { Route as AuthenticatedAdminProductionCompaniesCompanyIdRouteImport } from './routes/_authenticated/_admin/production-companies.$companyId'
 import { Route as AuthenticatedAdminProduccionesSeguimientoRouteImport } from './routes/_authenticated/_admin/producciones.seguimiento'
-import { Route as AuthenticatedAdminProduccionesGanttDemoRouteImport } from './routes/_authenticated/_admin/producciones.gantt-demo'
 import { Route as AuthenticatedAdminProduccionesFinalizadasRouteImport } from './routes/_authenticated/_admin/producciones.finalizadas'
 import { Route as AuthenticatedAdminProduccionesFilmografiaRouteImport } from './routes/_authenticated/_admin/producciones.filmografia'
 import { Route as AuthenticatedAdminProduccionesEspanolasRouteImport } from './routes/_authenticated/_admin/producciones.espanolas'
@@ -451,12 +450,6 @@ const AuthenticatedAdminProduccionesSeguimientoRoute =
   AuthenticatedAdminProduccionesSeguimientoRouteImport.update({
     id: '/producciones/seguimiento',
     path: '/producciones/seguimiento',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminProduccionesGanttDemoRoute =
-  AuthenticatedAdminProduccionesGanttDemoRouteImport.update({
-    id: '/producciones/gantt-demo',
-    path: '/producciones/gantt-demo',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminProduccionesFinalizadasRoute =
@@ -966,7 +959,6 @@ export interface FileRoutesByFullPath {
   '/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
-  '/producciones/gantt-demo': typeof AuthenticatedAdminProduccionesGanttDemoRoute
   '/producciones/seguimiento': typeof AuthenticatedAdminProduccionesSeguimientoRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -1090,7 +1082,6 @@ export interface FileRoutesByTo {
   '/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
-  '/producciones/gantt-demo': typeof AuthenticatedAdminProduccionesGanttDemoRoute
   '/producciones/seguimiento': typeof AuthenticatedAdminProduccionesSeguimientoRoute
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -1219,7 +1210,6 @@ export interface FileRoutesById {
   '/_authenticated/_admin/producciones/espanolas': typeof AuthenticatedAdminProduccionesEspanolasRoute
   '/_authenticated/_admin/producciones/filmografia': typeof AuthenticatedAdminProduccionesFilmografiaRoute
   '/_authenticated/_admin/producciones/finalizadas': typeof AuthenticatedAdminProduccionesFinalizadasRoute
-  '/_authenticated/_admin/producciones/gantt-demo': typeof AuthenticatedAdminProduccionesGanttDemoRoute
   '/_authenticated/_admin/producciones/seguimiento': typeof AuthenticatedAdminProduccionesSeguimientoRoute
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -1347,7 +1337,6 @@ export interface FileRouteTypes {
     | '/producciones/espanolas'
     | '/producciones/filmografia'
     | '/producciones/finalizadas'
-    | '/producciones/gantt-demo'
     | '/producciones/seguimiento'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
@@ -1471,7 +1460,6 @@ export interface FileRouteTypes {
     | '/producciones/espanolas'
     | '/producciones/filmografia'
     | '/producciones/finalizadas'
-    | '/producciones/gantt-demo'
     | '/producciones/seguimiento'
     | '/production-companies/$companyId'
     | '/productions/$productionId'
@@ -1599,7 +1587,6 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/producciones/espanolas'
     | '/_authenticated/_admin/producciones/filmografia'
     | '/_authenticated/_admin/producciones/finalizadas'
-    | '/_authenticated/_admin/producciones/gantt-demo'
     | '/_authenticated/_admin/producciones/seguimiento'
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
@@ -2038,13 +2025,6 @@ declare module '@tanstack/react-router' {
       path: '/producciones/seguimiento'
       fullPath: '/producciones/seguimiento'
       preLoaderRoute: typeof AuthenticatedAdminProduccionesSeguimientoRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/_admin/producciones/gantt-demo': {
-      id: '/_authenticated/_admin/producciones/gantt-demo'
-      path: '/producciones/gantt-demo'
-      fullPath: '/producciones/gantt-demo'
-      preLoaderRoute: typeof AuthenticatedAdminProduccionesGanttDemoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/producciones/finalizadas': {
@@ -2642,7 +2622,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProduccionesEspanolasRoute: typeof AuthenticatedAdminProduccionesEspanolasRoute
   AuthenticatedAdminProduccionesFilmografiaRoute: typeof AuthenticatedAdminProduccionesFilmografiaRoute
   AuthenticatedAdminProduccionesFinalizadasRoute: typeof AuthenticatedAdminProduccionesFinalizadasRoute
-  AuthenticatedAdminProduccionesGanttDemoRoute: typeof AuthenticatedAdminProduccionesGanttDemoRoute
   AuthenticatedAdminProduccionesSeguimientoRoute: typeof AuthenticatedAdminProduccionesSeguimientoRoute
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
@@ -2785,8 +2764,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminProduccionesFilmografiaRoute,
   AuthenticatedAdminProduccionesFinalizadasRoute:
     AuthenticatedAdminProduccionesFinalizadasRoute,
-  AuthenticatedAdminProduccionesGanttDemoRoute:
-    AuthenticatedAdminProduccionesGanttDemoRoute,
   AuthenticatedAdminProduccionesSeguimientoRoute:
     AuthenticatedAdminProduccionesSeguimientoRoute,
   AuthenticatedAdminProductionCompaniesCompanyIdRoute:
