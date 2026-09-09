@@ -70,12 +70,12 @@ export function OpportunitiesList({
 
 
   const { data: result, isLoading, error } = useQuery({
-    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, archivedFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -84,10 +84,13 @@ export function OpportunitiesList({
       if (statusFilter !== "all") query = query.contains("statuses", [statusFilter]);
       if (productionMode && faseFilter !== "all") query = query.eq("fase", faseFilter);
       if (productionMode && tipoFilter !== "all") query = query.eq("tipo_produccion", tipoFilter);
+      if (archivedFilter === "activas") query = query.is("archived_at", null);
+      else if (archivedFilter === "archivadas") query = query.not("archived_at", "is", null);
       const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       return { rows: (data ?? []) as any[], count: count ?? 0 };
     },
+
     placeholderData: (prev) => prev,
   });
 
