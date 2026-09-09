@@ -130,7 +130,7 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
                       </SelectContent>
                     </Select>
                   </div>
-                  <ConfirmDeleteButton iconOnly title="¿Eliminar este hito?" onConfirm={() => remove(m.id)} />
+                  <ConfirmDeleteButton iconOnly title="¿Eliminar este proceso?" onConfirm={() => remove(m.id)} />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
                   <span className={`rounded-sm px-1.5 py-0.5 smallcaps ${MILESTONE_TONE[st]}`}>{MILESTONE_STATUS_LABEL[st]}</span>
