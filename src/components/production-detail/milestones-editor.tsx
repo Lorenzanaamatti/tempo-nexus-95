@@ -46,6 +46,7 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
   const listQ = useProductionMilestones(productionId);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   function invalidate() {
     qc.invalidateQueries({ queryKey: key });
