@@ -67,13 +67,13 @@ export function OpportunitiesList({
     deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
   });
 
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isLoading, error } = useQuery({
     queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -197,7 +197,7 @@ export function OpportunitiesList({
             fetchAll={async () => {
               let exportQuery = (supabase as any)
                 .from("opportunities")
-                .select("*, partner_company:production_companies(name), target_production:productions(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
+                .select("*, partner_company:production_companies(name), target_production:productions!opportunities_target_production_id_fkey(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
                 .order("created_at", { ascending: false });
               if (fixedKinds) exportQuery = exportQuery.in("kind", fixedKinds);
               const { data, error } = await exportQuery;
@@ -264,7 +264,14 @@ export function OpportunitiesList({
 
       {isLoading ? (
         <ListSkeleton rows={6} />
+      ) : error ? (
+        <EmptyState
+          title="No se han podido cargar las oportunidades"
+          description={(error as Error).message}
+          action={{ label: "Reintentar", onClick: () => qc.invalidateQueries({ queryKey: ["opportunities"] }) }}
+        />
       ) : !rows.length ? (
+
         q ? (
           <EmptyState variant="filtered" title="Ningún resultado" description="Ninguna oportunidad coincide con la búsqueda actual." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
         ) : (
