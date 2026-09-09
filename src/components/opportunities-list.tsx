@@ -44,6 +44,7 @@ export function OpportunitiesList({
   eyebrow = "Pipeline",
   title = "OPORTUNIDADES",
   description = "Oportunidades detectadas, candidatos, estado, probabilidad y próximas acciones.",
+  productionMode = false,
 }: OpportunitiesListProps) {
   const qc = useQueryClient();
   const kindOptions = fixedKinds ?? (Object.keys(OPPORTUNITY_KIND_LABEL) as OpportunityKind[]);
@@ -55,28 +56,32 @@ export function OpportunitiesList({
   const [newDetectedDate, setNewDetectedDate] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [kindFilter, setKindFilter] = useState<string>("all");
+  const [faseFilter, setFaseFilter] = useState<string>("all");
+  const [tipoFilter, setTipoFilter] = useState<string>("all");
   const [creating, setCreating] = useState(false);
 
   const pg = useServerPagination<OppSortKey>({ list: listKey,
     sortKey: "created_at",
     sortDir: "desc",
     pageSize: 50,
-    deps: [q, statusFilter, kindFilter],
+    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
   });
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, kind, target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
       if (fixedKinds) query = query.in("kind", fixedKinds);
       else if (kindFilter !== "all") query = query.eq("kind", kindFilter);
       if (statusFilter !== "all") query = query.contains("statuses", [statusFilter]);
+      if (productionMode && faseFilter !== "all") query = query.eq("fase", faseFilter);
+      if (productionMode && tipoFilter !== "all") query = query.eq("tipo_produccion", tipoFilter);
       const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       return { rows: (data ?? []) as any[], count: count ?? 0 };
