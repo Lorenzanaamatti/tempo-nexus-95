@@ -27,7 +27,7 @@ import {
   type ParsedOpportunity,
 } from "@/lib/opportunity-production";
 import { findOrCreateCompany, findOrCreateDirector, upsertProductionOpportunity, type IntakeOutcome } from "@/lib/opportunity-intake";
-import { formatEUR } from "@/lib/money";
+import { formatEUR0 } from "@/lib/money";
 
 const EMPTY = {
   title: "",
@@ -221,7 +221,7 @@ export function OpportunityIntakeDialog() {
                   const r = parseBudgetRange(form.presupuesto_texto);
                   return r.min || r.max ? (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Rango: {r.min ? formatEUR(r.min) : "—"} – {r.max ? formatEUR(r.max) : "abierto"}
+                      Rango: {r.min ? formatEUR0(r.min) : "—"} – {r.max ? formatEUR0(r.max) : "abierto"}
                     </p>
                   ) : null;
                 })()}
@@ -394,7 +394,7 @@ export function OpportunityIntakeDialog() {
                         <td className="px-2 py-1.5 text-muted-foreground">{r.paises.join(" / ") || "—"}</td>
                         <td className="px-2 py-1.5 text-muted-foreground">
                           {r.presupuesto_min || r.presupuesto_max
-                            ? `${r.presupuesto_min ? formatEUR(r.presupuesto_min) : "—"} – ${r.presupuesto_max ? formatEUR(r.presupuesto_max) : "abierto"}`
+                            ? `${r.presupuesto_min ? formatEUR0(r.presupuesto_min) : "—"} – ${r.presupuesto_max ? formatEUR0(r.presupuesto_max) : "abierto"}`
                             : r.presupuesto_texto || "—"}
                         </td>
                         <td className="px-2 py-1.5 text-muted-foreground">{r.fase ? OPP_PHASE_LABEL[r.fase] : "—"}</td>
