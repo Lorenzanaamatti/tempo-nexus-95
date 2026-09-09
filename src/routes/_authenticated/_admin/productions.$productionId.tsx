@@ -15,6 +15,7 @@ import { ProductionEventsEditor } from "@/components/person-events-editor";
 import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind, type ProductionStatus } from "@/lib/production-constants";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { ProductionPhasesEditor } from "@/components/production-phases-editor";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { SuggestInput } from "@/components/suggest-input";
@@ -511,6 +512,12 @@ function ProductionEdit() {
         <h2 className="mb-1 font-display text-2xl">Fases de la producción</h2>
         <p className="mb-3 text-sm text-muted-foreground">Define las fases libres de esta producción (composición, grabación, mezcla, mastering, entrega…). Se sincronizan al calendario operativo.</p>
         <ProductionPhasesEditor productionId={productionId} />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="mb-1 font-display text-2xl">Calendario Gantt</h2>
+        <p className="mb-3 text-sm text-muted-foreground">Vista por responsable (agencia, representado y productora) o lineal para ver solapes con otras producciones del mismo representado.</p>
+        <ProductionGanttPanel productionIds={[productionId]} />
       </div>
 
       <div className="mt-10">
