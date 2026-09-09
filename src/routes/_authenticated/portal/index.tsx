@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR0 } from "@/lib/money";
-import { FolderKanban, Inbox, CalendarDays, FileSignature, User, MessagesSquare, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
+import { FolderKanban, Inbox, CalendarDays, FileSignature, User, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
