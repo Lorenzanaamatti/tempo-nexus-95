@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { CalendarBoard } from "@/components/calendar-board/calendar-board";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
+import { isFinalized } from "@/lib/production-lifecycle";
 import { CAL_VIEWS, CAL_PICKER_KEYS, mergeCalViews } from "@/lib/calendar-board";
-import { Plus, X, CalendarDays } from "lucide-react";
+import { Plus, X, CalendarDays, GanttChartSquare } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type { Category } from "@/lib/calendar-board";
@@ -111,13 +116,65 @@ function GlobalCalendar() {
           </PopoverContent>
         </Popover>
       </div>
-      <CalendarBoard
-        key={merged.keys.join(",")}
-        initialCategories={merged.cats}
-        initialOnlyMine={merged.onlyMine}
-        subjectTypes={merged.subjectTypes}
-        title={merged.keys.length === 1 && merged.keys[0] === "global" ? "Calendario general" : `Calendario · ${merged.label}`}
-      />
+      <div className="mx-auto mt-3 flex max-w-[1400px] gap-2 px-6">
+        <button
+          type="button"
+          onClick={() => setDisplay("calendario")}
+          className={`rounded-sm border px-3 py-1 text-xs ${display === "calendario" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+        >
+          Calendario
+        </button>
+        <button
+          type="button"
+          onClick={() => setDisplay("gantt")}
+          className={`flex items-center gap-1 rounded-sm border px-3 py-1 text-xs ${display === "gantt" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+        >
+          <GanttChartSquare className="h-3.5 w-3.5" /> Gantt de procesos
+        </button>
+      </div>
+
+      {display === "gantt" ? (
+        <div className="mx-auto max-w-[1400px] space-y-4 px-6 py-6">
+          <div>
+            <h2 className="font-display text-3xl font-extrabold title-caps">Gantt de procesos</h2>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Todos los procesos de las producciones activas: plocked, composición, aprobaciones, grabación,
+              mezclas y entregas. Filtra por compositor, producción o responsable, y usa el modo lineal para
+              detectar solapes entre proyectos.
+            </p>
+          </div>
+          <ActiveProductionsGantt />
+        </div>
+      ) : (
+        <CalendarBoard
+          key={merged.keys.join(",")}
+          initialCategories={merged.cats}
+          initialOnlyMine={merged.onlyMine}
+          subjectTypes={merged.subjectTypes}
+          title={merged.keys.length === 1 && merged.keys[0] === "global" ? "Calendario general" : `Calendario · ${merged.label}`}
+        />
+      )}
     </div>
   );
+}
+
+function ActiveProductionsGantt() {
+  const idsQ = useQuery({
+    queryKey: ["gantt-active-production-ids"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("productions")
+        .select("id, status")
+        .limit(2000);
+      if (error) throw error;
+      return ((data ?? []) as any[]).filter((p) => !isFinalized(p.status)).map((p) => p.id as string);
+    },
+  });
+
+  if (idsQ.isLoading) return <p className="text-sm text-muted-foreground">Cargando producciones…</p>;
+  if (idsQ.error)
+    return <p className="text-sm text-destructive">No se pudieron cargar las producciones: {(idsQ.error as any)?.message}</p>;
+
+  return <ProductionGanttPanel productionIds={idsQ.data ?? []} showFilters defaultMode="lineal" />;
 }
