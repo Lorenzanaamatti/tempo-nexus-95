@@ -302,19 +302,46 @@ export function OpportunitiesList({
               {rows.map((o: any) => (
                 <tr key={o.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2">
-                    <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
-                      {OPPORTUNITY_KIND_LABEL[(o.kind ?? "pitch") as OpportunityKind]}
-                    </span>
+                    {productionMode ? (
+                      <span className="rounded-sm bg-muted px-2 py-0.5 text-[10px] smallcaps">
+                        {o.tipo_produccion ? OPP_TYPE_LABEL[o.tipo_produccion as OppProductionType] : "—"}
+                      </span>
+                    ) : (
+                      <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPPORTUNITY_KIND_TONE[(o.kind ?? "pitch") as OpportunityKind]}`}>
+                        {OPPORTUNITY_KIND_LABEL[(o.kind ?? "pitch") as OpportunityKind]}
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
+                    {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {(o.kind ?? "pitch") === "pitch"
-                      ? (o.target_production?.title || o.target_production_text || "—")
-                      : "—"}
-                  </td>
+                  {productionMode ? (
+                    <>
+                      <td className="px-3 py-2 text-muted-foreground">{o.director?.full_name || o.director_text || "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {(o.paises ?? []).join(" / ") || "—"}
+                        {o.es_coproduccion && <span className="ml-1 rounded-sm bg-muted px-1 text-[10px] smallcaps">Copro</span>}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                        {o.presupuesto_min || o.presupuesto_max
+                          ? `${o.presupuesto_min ? formatEUR0(o.presupuesto_min) : "—"} – ${o.presupuesto_max ? formatEUR0(o.presupuesto_max) : "abierto"}`
+                          : o.presupuesto_texto || "—"}
+                      </td>
+                      <td className="px-3 py-2">
+                        {o.fase ? (
+                          <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${OPP_PHASE_TONE[o.fase as OppPhase]}`}>{OPP_PHASE_LABEL[o.fase as OppPhase]}</span>
+                        ) : "—"}
+                      </td>
+                    </>
+                  ) : (
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {(o.kind ?? "pitch") === "pitch"
+                        ? (o.target_production?.title || o.target_production_text || "—")
+                        : "—"}
+                    </td>
+                  )}
                   <td className="px-3 py-2 text-muted-foreground">
                     {(o.candidates ?? []).slice(0, 3).map((c: any) => c.composer?.artistic_name || c.composer?.full_name).filter(Boolean).join(", ") || "—"}
                     {(o.candidates?.length ?? 0) > 3 && <span className="text-xs"> +{o.candidates.length - 3}</span>}
@@ -326,6 +353,11 @@ export function OpportunitiesList({
                       ))}
                     </div>
                   </td>
+                  {productionMode && (
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {o.prioridad ? OPP_PRIORITY_LABEL[o.prioridad as OppPriority] : "—"}
+                    </td>
+                  )}
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
