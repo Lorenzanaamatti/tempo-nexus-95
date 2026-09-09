@@ -22,6 +22,7 @@ function GlobalCalendar() {
   const nav = Route.useNavigate();
   const selected = (view ?? "").split(",").map((k) => k.trim()).filter(Boolean);
   const merged = mergeCalViews(selected);
+  const [display, setDisplay] = useState<"calendario" | "gantt">("calendario");
 
   const go = (keys: string[]) =>
     nav({ search: { view: keys.length ? keys.join(",") : undefined } });
