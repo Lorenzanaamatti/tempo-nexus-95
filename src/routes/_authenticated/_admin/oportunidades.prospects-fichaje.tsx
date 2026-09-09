@@ -59,7 +59,7 @@ function ProspectsFichajePage() {
           .select(
             "id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, photo_path, roster_role, representation_status, prospect_next_action_date, prospect_target_date",
           )
-          .eq("representation_status", "en_negociacion")
+          .in("representation_status", ["prospeccion", "en_negociacion"])
           .order("full_name"),
         supabase
           .from("target_accounts")

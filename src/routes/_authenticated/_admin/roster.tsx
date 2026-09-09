@@ -43,10 +43,11 @@ const STATUS_TONE: Record<Status, string> = {
   objetivo: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
 };
 
-function statusFromComposer(status?: string | null): Status {
+function statusFromComposer(status?: string | null): Status | null {
   if (status === "activo" || status === "pausa") return "contratado";
   if (status === "en_negociacion") return "negociacion";
   if (status === "prospeccion") return "prospeccion";
+  if (status === "finalizado") return null; // ex-representados: fuera del embudo
   return "objetivo";
 }
 
@@ -147,8 +148,9 @@ function RosterAll() {
       .filter((c) => c.roster_role !== "ic_company")
       .filter((c) => !term || (c.full_name ?? "").toLowerCase().includes(term) || (c.artistic_name ?? "").toLowerCase().includes(term))
       .filter((c) => matchesLocation(locTerm, c.city, c.country, c.ciudad_origen, c.pais_origen))
+      .filter((c) => statusFromComposer(c.representation_status) !== null)
       .map((c) => {
-        const status = statusFromComposer(c.representation_status);
+        const status = statusFromComposer(c.representation_status) as Status;
         const isProspect = status === "prospeccion";
         return {
           id: c.id,
