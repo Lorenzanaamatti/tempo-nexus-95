@@ -88,6 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
       { title: "Seguimiento", to: "/producciones/seguimiento", icon: KanbanSquare },
+      { title: "Gantt", to: "/producciones/gantt", icon: CalendarRange },
       { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
       { title: "Producciones españolas", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
     ],
