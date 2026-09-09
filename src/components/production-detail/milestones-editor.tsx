@@ -148,7 +148,7 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
           })}
         </ol>
       )}
-      <p className="text-xs text-muted-foreground">Los hitos con fecha aparecen automáticamente en el calendario, capa Producciones.</p>
+      <p className="text-xs text-muted-foreground">Los procesos con fechas aparecen automáticamente en el calendario y en el Gantt de la producción.</p>
     </div>
   );
 }
