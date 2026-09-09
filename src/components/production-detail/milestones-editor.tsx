@@ -110,15 +110,15 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
               <li key={m.id} className={`rounded-sm border p-3 ${overdue ? "border-destructive bg-destructive/5" : "border-border"}`}>
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="min-w-[180px] flex-1">
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Hito</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Proceso</Label>
                     <Input value={m.name} onChange={(e) => update(m.id, { name: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Fecha estimada</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Desde</Label>
                     <Input type="date" value={m.start_date ?? ""} onChange={(e) => update(m.id, { start_date: e.target.value || null })} />
                   </div>
                   <div>
-                    <Label className="smallcaps text-[10px] text-muted-foreground">Fecha real</Label>
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Hasta</Label>
                     <Input type="date" value={m.end_date ?? ""} onChange={(e) => update(m.id, { end_date: e.target.value || null })} />
                   </div>
                   <div className="w-40">
