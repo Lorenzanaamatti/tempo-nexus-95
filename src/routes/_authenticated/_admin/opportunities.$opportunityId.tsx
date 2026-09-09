@@ -87,6 +87,16 @@ function OpportunityDetail() {
     },
   });
 
+  const directorsQ = useQuery({
+    queryKey: ["directors-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const [directorLabel, setDirectorLabel] = useState("");
+
   const [form, setForm] = useState({
     title: "",
     kind: "pitch" as OpportunityKind,
@@ -102,6 +112,23 @@ function OpportunityDetail() {
     detected_date: "" as string,
     expected_close_date: "" as string,
     last_contact_date: "" as string,
+    // Datos de proyecto (oportunidades de producción)
+    titulo_alt: "",
+    tipo_produccion: "",
+    genero_produccion: "",
+    paises: "",
+    presupuesto_texto: "",
+    financiacion_publica: "",
+    fase: "",
+    fecha_rodaje: "",
+    fecha_estreno: "",
+    productora_aie: "",
+    director_id: "",
+    director_text: "",
+    reparto: "",
+    fuente_url: "",
+    origen: "",
+    prioridad: "",
   });
   const [saving, setSaving] = useState(false);
   const { dirty, markClean } = useDirtyForm(form);
@@ -124,6 +151,22 @@ function OpportunityDetail() {
         detected_date: d.detected_date ?? "",
         expected_close_date: d.expected_close_date ?? "",
         last_contact_date: d.last_contact_date ?? "",
+        titulo_alt: d.titulo_alt ?? "",
+        tipo_produccion: d.tipo_produccion ?? "",
+        genero_produccion: d.genero_produccion ?? "",
+        paises: (d.paises ?? []).join(" / "),
+        presupuesto_texto: d.presupuesto_texto ?? "",
+        financiacion_publica: d.financiacion_publica ?? "",
+        fase: d.fase ?? "",
+        fecha_rodaje: d.fecha_rodaje ?? "",
+        fecha_estreno: d.fecha_estreno ?? "",
+        productora_aie: d.productora_aie ?? "",
+        director_id: d.director_id ?? "",
+        director_text: d.director_text ?? "",
+        reparto: d.reparto ?? "",
+        fuente_url: d.fuente_url ?? "",
+        origen: d.origen ?? "",
+        prioridad: d.prioridad ?? "",
       };
       setForm(hydrated);
       markClean(hydrated as typeof form);
@@ -131,8 +174,20 @@ function OpportunityDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oppQ.data]);
 
+  useEffect(() => {
+    const d: any = oppQ.data;
+    if (!d) return;
+    if (d.director_id) {
+      const found = (directorsQ.data ?? []).find((x: any) => x.id === d.director_id);
+      if (found) setDirectorLabel(found.full_name);
+    } else if (d.director_text) {
+      setDirectorLabel(d.director_text);
+    }
+  }, [oppQ.data, directorsQ.data]);
+
   async function save() {
     setSaving(true);
+    const range = parseBudgetRange(form.presupuesto_texto);
     const { error } = await supabase.from("opportunities").update({
       title: form.title,
       kind: form.kind,
@@ -148,7 +203,25 @@ function OpportunityDetail() {
       detected_date: form.detected_date || null,
       expected_close_date: form.expected_close_date || null,
       last_contact_date: form.last_contact_date || null,
-    }).eq("id", opportunityId);
+      titulo_alt: form.titulo_alt || null,
+      tipo_produccion: form.tipo_produccion || null,
+      genero_produccion: form.genero_produccion || null,
+      paises: parseCountries(form.paises),
+      presupuesto_texto: form.presupuesto_texto || null,
+      presupuesto_min: range.min,
+      presupuesto_max: range.max,
+      financiacion_publica: form.financiacion_publica || null,
+      fase: form.fase || null,
+      fecha_rodaje: form.fecha_rodaje || null,
+      fecha_estreno: form.fecha_estreno || null,
+      productora_aie: form.productora_aie || null,
+      director_id: form.director_id || null,
+      director_text: form.director_id ? null : (form.director_text || null),
+      reparto: form.reparto || null,
+      fuente_url: form.fuente_url || null,
+      origen: form.origen || null,
+      prioridad: form.prioridad || null,
+    } as never).eq("id", opportunityId);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Guardado");
