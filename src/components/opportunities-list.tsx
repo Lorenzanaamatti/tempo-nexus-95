@@ -317,6 +317,8 @@ export function OpportunitiesList({
                 <Th k="detected_date">Detectada</Th>
                 <Th k="expected_close_date">Cierre est.</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Responsable</th>
+                <th className="px-3 py-2 text-right smallcaps text-xs">Acciones</th>
+
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
