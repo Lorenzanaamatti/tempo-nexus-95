@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR0 } from "@/lib/money";
-import { FolderKanban, Inbox, CalendarDays, FileSignature, User, MessagesSquare, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
+import { FolderKanban, Inbox, CalendarDays, FileSignature, User, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
@@ -165,7 +165,6 @@ function PortalHome() {
           <Quick to="/portal/agenda" title="Agenda y reuniones" desc="Tus próximas citas y compromisos." icon={CalendarDays} />
           <Quick to="/portal/contratos" title="Contratos y derechos" desc="Documentación contractual." icon={FileSignature} />
           <Quick to="/portal/carrera" title="Mi carrera" desc="Biografía, materiales y equipo IC." icon={User} />
-          <Quick to="/portal/chat" title="Chat con IC" desc="Conversación directa con tu equipo." icon={MessagesSquare} />
         </div>
       </section>
     </div>

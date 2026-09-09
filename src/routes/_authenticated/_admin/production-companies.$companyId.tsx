@@ -1,5 +1,6 @@
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Clapperboard } from "lucide-react";
+import { CompanyContacts } from "@/components/company-contacts";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -157,6 +158,12 @@ function CompanyDetail() {
           <Label>Responsables de área</Label>
           <Textarea value={form["area_managers"] ?? ""} rows={3} placeholder="Producción ejecutiva: … · Postproducción: … · Música: …" onChange={(e) => set("area_managers", e.target.value)} />
         </div>
+      </section>
+
+      <section className="mt-10 space-y-4">
+        <h2 className="font-display text-2xl">Otros contactos</h2>
+        <p className="text-sm text-muted-foreground">Añade tantas personas de contacto como necesites: producción, música, legal…</p>
+        <CompanyContacts productionCompanyId={companyId} />
       </section>
 
       <section className="mt-10 space-y-4">

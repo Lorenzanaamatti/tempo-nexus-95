@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { Input } from "@/components/ui/input";
+import { CompanyContacts } from "@/components/company-contacts";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -175,6 +176,12 @@ function PartnerDetail() {
         <div className="grid gap-1.5"><Label>Website</Label><Input value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} placeholder="https://" /></div>
         <div className="grid gap-1.5"><Label>Relación con IC</Label><Textarea rows={3} value={form.relacion_ic ?? ""} onChange={(e) => set("relacion_ic", e.target.value)} /></div>
         <div className="grid gap-1.5"><Label>Notas</Label><Textarea rows={4} value={form.notas ?? ""} onChange={(e) => set("notas", e.target.value)} /></div>
+
+        <div className="space-y-3 border-t border-border pt-6">
+          <h2 className="font-display text-2xl">Otros contactos</h2>
+          <p className="text-sm text-muted-foreground">Personas de contacto adicionales de este partner.</p>
+          <CompanyContacts partnerId={partnerId} />
+        </div>
       </div>
     </div>
   );

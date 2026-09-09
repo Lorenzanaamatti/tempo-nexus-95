@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
-  Mail,
   Home,
   User,
   LineChart,
@@ -15,8 +14,6 @@ import {
   Receipt,
   FileSignature,
   CalendarDays,
-  MessagesSquare,
-  FolderOpen,
   LogOut,
   Newspaper,
   Target,
@@ -37,8 +34,6 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
   { to: "/portal/contratos", label: "Contratos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/portal/prensa", label: "Prensa", icon: Newspaper },
-  { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
-  { to: "/portal/chat", label: "Chat IC", icon: FolderOpen },
 ] as const;
 
 function PortalLayout() {
@@ -59,28 +54,6 @@ function PortalLayout() {
     },
   });
 
-  const { data: unread = 0 } = useQuery({
-    queryKey: ["portal-unread", composerId, user?.id],
-    enabled: !!composerId && !!user,
-    refetchInterval: 120_000,
-    queryFn: async () => {
-      const { data: read } = await supabase
-        .from("chat_message_reads")
-        .select("last_read_at")
-        .eq("user_id", user!.id)
-        .eq("composer_id", composerId!)
-        .maybeSingle();
-      const since = read?.last_read_at ?? "1970-01-01T00:00:00Z";
-      const { count } = await supabase
-        .from("chat_messages")
-        .select("id", { count: "exact", head: true })
-        .eq("composer_id", composerId!)
-        .neq("author_user_id", user!.id)
-        .gt("created_at", since);
-      return count ?? 0;
-    },
-  });
-
   const name = composer?.artistic_name || composer?.full_name || "Bienvenido/a";
 
   return (
@@ -97,18 +70,6 @@ function PortalLayout() {
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle className="h-10 w-10 border-[color:var(--portal-border)] bg-transparent text-[color:var(--portal-fg)] hover:bg-[color:var(--portal-surface-hover)]" />
-            <Link
-              to="/portal/chat"
-              aria-label={`Buzón${unread ? `: ${unread} sin leer` : ""}`}
-              className="relative inline-flex h-10 w-10 items-center justify-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)] transition hover:border-[color:var(--portal-border-strong)]"
-            >
-              <Mail className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--accent-coral)] px-1 text-[10px] font-semibold text-[color:var(--portal-bg)]">
-                  {unread > 99 ? "99+" : unread}
-                </span>
-              )}
-            </Link>
             <button
               type="button"
               onClick={() => signOut()}

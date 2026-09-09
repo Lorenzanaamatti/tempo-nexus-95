@@ -15,6 +15,7 @@ import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { ProductionSearch, ProductionsTable, useProductions } from "@/components/production-lists";
 import { isFinalized, PRODUCTION_STAGE_LABEL, STAGE_DEFAULT_STATUS, type ProductionStage } from "@/lib/production-lifecycle";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { seedProductionPhases, templateForKind } from "@/lib/production-phase-templates";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/activas")({
   component: ProduccionesActivas,
@@ -105,7 +106,7 @@ function NewProductionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   async function save() {
     if (!title.trim()) return;
     setSaving(true);
-    const { error } = await (supabase as any).from("productions").insert({
+    const { data: created, error } = await (supabase as any).from("productions").insert({
       title: title.trim(),
       project_type: kind,
       kind: PRODUCTION_KIND_LABEL[kind],
@@ -113,14 +114,23 @@ function NewProductionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       partner_company_id: companyId || null,
       delivery_date: deliveryDate || null,
       status: STAGE_DEFAULT_STATUS[stage],
-    });
+    }).select("id").single();
+    if (error) { setSaving(false); return toast.error(error.message); }
+
+    try {
+      await seedProductionPhases(created.id, templateForKind(kind));
+    } catch {
+      toast.message("Producción creada, pero no se pudo aplicar la plantilla de procesos.");
+    }
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Producción creada");
+    toast.success("Producción creada con su plantilla de procesos");
     setTitle(""); setComposerId(""); setCompanyId(""); setDeliveryDate("");
     onOpenChange(false);
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
     qc.invalidateQueries({ queryKey: ["productions"] });
+    qc.invalidateQueries({ queryKey: ["produccion-seguimiento"] });
+    qc.invalidateQueries({ queryKey: ["gantt-phases"] });
+    qc.invalidateQueries({ queryKey: ["calendar-events"] });
   }
 
   return (

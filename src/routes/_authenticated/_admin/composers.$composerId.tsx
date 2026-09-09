@@ -21,7 +21,6 @@ import { FilmographyEditor } from "@/components/filmography-editor";
 import { AvailabilityEditor } from "@/components/availability-editor";
 import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
-import { ComposerChat } from "@/components/composer-chat";
 import { ROSTER_ROLE_OPTIONS, ROSTER_ROLE_SUBTYPES } from "@/lib/roster-roles";
 import { toast } from "sonner";
 import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
@@ -621,10 +620,6 @@ function Inner({
             Aún no hay cuenta vinculada. El representado podrá entrar al portal cuando se registre con un email asociado a esta ficha.
           </p>
         )}
-      </Section>
-
-      <Section title="Chat con el compositor">
-        <ComposerChat composerId={c.id} />
       </Section>
 
       {/* Identidad */}

@@ -1057,6 +1057,63 @@ export type Database = {
           },
         ]
       }
+      company_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          is_primary: boolean
+          notes: string | null
+          partner_id: string | null
+          phone: string | null
+          production_company_id: string | null
+          role_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          partner_id?: string | null
+          phone?: string | null
+          production_company_id?: string | null
+          role_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          partner_id?: string | null
+          phone?: string | null
+          production_company_id?: string | null
+          role_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_contacts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_contacts_production_company_id_fkey"
+            columns: ["production_company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_availability: {
         Row: {
           composer_id: string
@@ -4658,11 +4715,73 @@ export type Database = {
           },
         ]
       }
+      production_expenses: {
+        Row: {
+          amount: number
+          composer_id: string | null
+          concepto: string
+          created_at: string
+          description: string | null
+          expense_date: string | null
+          id: string
+          production_id: string
+          provider_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          composer_id?: string | null
+          concepto: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string | null
+          id?: string
+          production_id: string
+          provider_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          composer_id?: string | null
+          concepto?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string | null
+          id?: string
+          production_id?: string
+          provider_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_expenses_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_expenses_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_expenses_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_phases: {
         Row: {
           created_at: string
           end_date: string | null
           id: string
+          is_milestone: boolean
           name: string
           notes: string | null
           owner: string
@@ -4670,12 +4789,14 @@ export type Database = {
           production_id: string
           start_date: string | null
           status: string
+          template_key: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           end_date?: string | null
           id?: string
+          is_milestone?: boolean
           name: string
           notes?: string | null
           owner?: string
@@ -4683,12 +4804,14 @@ export type Database = {
           production_id: string
           start_date?: string | null
           status?: string
+          template_key?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           end_date?: string | null
           id?: string
+          is_milestone?: boolean
           name?: string
           notes?: string | null
           owner?: string
@@ -4696,6 +4819,7 @@ export type Database = {
           production_id?: string
           start_date?: string | null
           status?: string
+          template_key?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -6000,6 +6124,7 @@ export type Database = {
       career_plan_composer: { Args: { _plan_id: string }; Returns: string }
       current_user_is_admin: { Args: never; Returns: boolean }
       current_user_is_big_c: { Args: never; Returns: boolean }
+      current_user_is_staff: { Args: never; Returns: boolean }
       deadline_owner_person: { Args: { _composer_id: string }; Returns: string }
       detect_ic_personas: { Args: { _names: string[] }; Returns: string[] }
       ensure_composer_chat_channels: {
