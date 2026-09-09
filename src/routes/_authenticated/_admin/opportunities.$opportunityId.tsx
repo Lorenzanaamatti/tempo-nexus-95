@@ -20,6 +20,20 @@ import { EntityActionsEditor } from "@/components/entity-actions-editor";
 import { EntityDocumentsEditor } from "@/components/entity-documents-editor";
 import { CrmTransferMenu } from "@/components/crm-transfer-menu";
 import { opportunityToTargetAccount, opportunityToComposer, opportunityToCompany } from "@/lib/crm-transfer";
+import { CreatableSelect } from "@/components/creatable-select";
+import { findOrCreateDirector } from "@/lib/opportunity-intake";
+import {
+  OPP_GENRE_LABEL,
+  OPP_PHASE_LABEL,
+  OPP_PRIORITY_LABEL,
+  OPP_TYPE_LABEL,
+  parseBudgetRange,
+  parseCountries,
+  type OppPhase,
+  type OppPriority,
+  type OppProductionGenre,
+  type OppProductionType,
+} from "@/lib/opportunity-production";
 
 export const Route = createFileRoute("/_authenticated/_admin/opportunities/$opportunityId")({
   component: OpportunityDetail,
