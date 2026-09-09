@@ -14,6 +14,16 @@ import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { ExportButton } from "@/components/export-button";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
+import { OpportunityIntakeDialog } from "@/components/opportunity-intake-dialog";
+import {
+  OPP_PHASE_LABEL,
+  OPP_PHASE_TONE,
+  OPP_PRIORITY_LABEL,
+  OPP_TYPE_LABEL,
+  type OppPhase,
+  type OppPriority,
+  type OppProductionType,
+} from "@/lib/opportunity-production";
 
 export type OpportunitiesListProps = {
   /** When set, the view is locked to these opportunity kinds and the kind filter is hidden. */
@@ -22,6 +32,8 @@ export type OpportunitiesListProps = {
   eyebrow?: string;
   title?: string;
   description?: string;
+  /** Ficha de proyecto completa: alta manual/JSON, columnas y filtros de producción. */
+  productionMode?: boolean;
 };
 
 type OppSortKey = "title" | "kind" | "probability_pct" | "estimated_value" | "detected_date" | "expected_close_date" | "created_at";
