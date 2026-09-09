@@ -384,6 +384,18 @@ export function OpportunitiesList({
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <OpportunityArchiveButton opportunityId={o.id} archivedAt={o.archived_at} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />
+                      <ConfirmDeleteButton
+                        iconOnly
+                        title={`Eliminar “${o.title}”`}
+                        description="Elimina la oportunidad de forma permanente. Úsalo solo si la creaste por error; si simplemente ha expirado, archívala."
+                        onConfirm={() => void remove(o.id)}
+                      />
+                    </div>
+                  </td>
+
                 </tr>
               ))}
             </tbody>
