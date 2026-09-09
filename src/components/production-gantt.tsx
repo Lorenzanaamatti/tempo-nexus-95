@@ -88,7 +88,9 @@ export function ProductionGantt({
   mode?: "desplegado" | "lineal";
   today?: Date;
 }) {
-  const dated = phases.filter((p) => p.start && p.end);
+  const dated = phases
+    .filter((p) => p.start || p.end)
+    .map((p) => ({ ...p, start: p.start || p.end, end: p.end || p.start }));
 
   const model = useMemo(() => {
     if (!dated.length) return null;
@@ -106,7 +108,7 @@ export function ProductionGantt({
   if (!model) {
     return (
       <p className="text-sm text-muted-foreground">
-        Todavía no hay fases con fechas de inicio y fin.
+        Todavía no hay procesos con fechas. Añádelas en la ficha de la producción.
       </p>
     );
   }

@@ -12,8 +12,14 @@ import {
   MILESTONE_STATUSES, MILESTONE_STATUS_LABEL, MILESTONE_TONE,
   isMilestoneOverdue, normalizeMilestoneStatus,
 } from "@/lib/production-milestones";
+import { GANTT_OWNER_LABEL, type GanttOwner } from "@/components/production-gantt";
+import {
+  PHASE_TEMPLATE_LABEL, seedProductionPhases, templateForKind, type PhaseTemplateKey,
+} from "@/lib/production-phase-templates";
 import { toast } from "sonner";
-import { Plus, Flag, AlertTriangle } from "lucide-react";
+import { Plus, Flag, AlertTriangle, Sparkles, Star } from "lucide-react";
+
+const db = supabase as any;
 
 export type Milestone = {
   id: string;
@@ -22,15 +28,17 @@ export type Milestone = {
   end_date: string | null;
   status: string;
   position: number;
+  owner: string | null;
+  is_milestone: boolean | null;
 };
 
 export function useProductionMilestones(productionId: string) {
   return useQuery({
     queryKey: ["production-milestones", productionId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("production_phases")
-        .select("id, name, start_date, end_date, status, position")
+        .select("id, name, start_date, end_date, status, position, owner, is_milestone")
         .eq("production_id", productionId)
         .order("start_date", { ascending: true, nullsFirst: false })
         .order("position");
@@ -40,27 +48,38 @@ export function useProductionMilestones(productionId: string) {
   });
 }
 
-export function ProductionMilestonesEditor({ productionId }: { productionId: string }) {
+export function ProductionMilestonesEditor({
+  productionId,
+  productionKind,
+}: {
+  productionId: string;
+  productionKind?: string | null;
+}) {
   const qc = useQueryClient();
   const key = ["production-milestones", productionId];
   const listQ = useProductionMilestones(productionId);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [owner, setOwner] = useState<GanttOwner>("representado");
+  const [template, setTemplate] = useState<PhaseTemplateKey>(templateForKind(productionKind));
 
   function invalidate() {
     qc.invalidateQueries({ queryKey: key });
     qc.invalidateQueries({ queryKey: ["production-phases", productionId] });
+    qc.invalidateQueries({ queryKey: ["gantt-phases"] });
     qc.invalidateQueries({ queryKey: ["calendar-events"] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
+    qc.invalidateQueries({ queryKey: ["produccion-seguimiento"] });
   }
 
   async function add() {
     const n = name.trim();
     if (!n) return;
-    const { error } = await supabase.from("production_phases").insert({
+    const { error } = await db.from("production_phases").insert({
       production_id: productionId,
       name: n,
+      owner,
       start_date: date || null,
       end_date: endDate || null,
       status: "pendiente",
@@ -71,14 +90,24 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
     invalidate();
   }
 
+  async function applyTemplate() {
+    try {
+      const { inserted } = await seedProductionPhases(productionId, template);
+      toast.success(inserted ? `${inserted} procesos añadidos` : "La plantilla ya estaba aplicada");
+      invalidate();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo aplicar la plantilla");
+    }
+  }
+
   async function update(id: string, patch: Partial<Milestone>) {
-    const { error } = await supabase.from("production_phases").update(patch).eq("id", id);
+    const { error } = await db.from("production_phases").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     invalidate();
   }
 
   async function remove(id: string) {
-    const { error } = await supabase.from("production_phases").delete().eq("id", id);
+    const { error } = await db.from("production_phases").delete().eq("id", id);
     if (error) return toast.error(error.message);
     invalidate();
   }
@@ -87,20 +116,44 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_160px_160px_auto]">
+      <div className="flex flex-wrap items-center gap-2 rounded-sm border border-border bg-muted/30 p-3">
+        <span className="text-xs text-muted-foreground">Plantilla de procesos</span>
+        <Select value={template} onValueChange={(v) => setTemplate(v as PhaseTemplateKey)}>
+          <SelectTrigger className="h-8 w-56 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(PHASE_TEMPLATE_LABEL) as PhaseTemplateKey[]).map((k) => (
+              <SelectItem key={k} value={k}>{PHASE_TEMPLATE_LABEL[k]}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="outline" onClick={applyTemplate}>
+          <Sparkles className="mr-1 h-4 w-4" /> Aplicar plantilla
+        </Button>
+        <span className="text-xs text-muted-foreground">Añade los procesos habituales sin fechas: complétalas a mano.</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_170px_150px_150px_auto]">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nombre del proceso (Composición, Grabación, Mezcla, Máster, Entrega…)"
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
         />
+        <Select value={owner} onValueChange={(v) => setOwner(v as GanttOwner)}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(GANTT_OWNER_LABEL) as GanttOwner[]).map((o) => (
+              <SelectItem key={o} value={o}>{GANTT_OWNER_LABEL[o]}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Fecha de inicio" />
         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} title="Fecha de fin" />
         <Button onClick={add} disabled={!name.trim()}><Plus className="mr-1 h-4 w-4" /> Añadir proceso</Button>
       </div>
 
       {!rows.length ? (
-        <EmptyState variant="inline" icon={Flag} title="Sin procesos" description="Añade los procesos con fecha de inicio y fin: aparecerán en el calendario, capa Producciones." />
+        <EmptyState variant="inline" icon={Flag} title="Sin procesos" description="Aplica una plantilla o añade los procesos con sus fechas: aparecerán en el calendario y en el Gantt." />
       ) : (
         <ol className="space-y-2">
           {rows.map((m) => {
@@ -112,6 +165,17 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
                   <div className="min-w-[180px] flex-1">
                     <Label className="smallcaps text-[10px] text-muted-foreground">Proceso</Label>
                     <Input value={m.name} onChange={(e) => update(m.id, { name: e.target.value })} />
+                  </div>
+                  <div className="w-44">
+                    <Label className="smallcaps text-[10px] text-muted-foreground">Responsable</Label>
+                    <Select value={(m.owner ?? "agencia") as string} onValueChange={(v) => update(m.id, { owner: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(GANTT_OWNER_LABEL) as GanttOwner[]).map((o) => (
+                          <SelectItem key={o} value={o}>{GANTT_OWNER_LABEL[o]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Desde</Label>
@@ -130,12 +194,21 @@ export function ProductionMilestonesEditor({ productionId }: { productionId: str
                       </SelectContent>
                     </Select>
                   </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={m.is_milestone ? "default" : "outline"}
+                    onClick={() => update(m.id, { is_milestone: !m.is_milestone })}
+                    title="Marcar como entrega destacada"
+                  >
+                    <Star className="mr-1 h-4 w-4" /> {m.is_milestone ? "Entrega destacada" : "Destacar"}
+                  </Button>
                   <ConfirmDeleteButton iconOnly title="¿Eliminar este proceso?" onConfirm={() => remove(m.id)} />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
                   <span className={`rounded-sm px-1.5 py-0.5 smallcaps ${MILESTONE_TONE[st]}`}>{MILESTONE_STATUS_LABEL[st]}</span>
                   <span className="text-muted-foreground">
-                    Del {formatDateEs(m.start_date)} al {formatDateEs(m.end_date)}
+                    {GANTT_OWNER_LABEL[(m.owner ?? "agencia") as GanttOwner]} · Del {formatDateEs(m.start_date)} al {formatDateEs(m.end_date)}
                   </span>
                   {overdue && (
                     <span className="inline-flex items-center gap-1 rounded-sm bg-destructive px-1.5 py-0.5 font-semibold smallcaps text-destructive-foreground">
