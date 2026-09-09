@@ -201,6 +201,7 @@ export function OpportunitiesList({
         </div>
       </div>
 
+      {!productionMode && (
       <div className="mb-6 grid grid-cols-1 gap-2 rounded-sm border border-dashed border-border p-4 sm:grid-cols-12">
         <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Oportunidad detectada…" className="sm:col-span-3" />
         <div className="sm:col-span-3">
@@ -236,6 +237,7 @@ export function OpportunitiesList({
         <Input type="date" value={newDetectedDate} onChange={(e) => setNewDetectedDate(e.target.value)} className="sm:col-span-1" />
         <Button onClick={create} disabled={creating} className="sm:col-span-1"><Plus className="h-4 w-4" /></Button>
       </div>
+      )}
 
       {isLoading ? (
         <ListSkeleton rows={6} />
