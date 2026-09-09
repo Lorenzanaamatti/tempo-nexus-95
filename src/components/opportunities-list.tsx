@@ -15,6 +15,9 @@ import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LAB
 import { ExportButton } from "@/components/export-button";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { OpportunityIntakeDialog } from "@/components/opportunity-intake-dialog";
+import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+
 import {
   OPP_PHASE_LABEL,
   OPP_PHASE_TONE,
@@ -58,22 +61,24 @@ export function OpportunitiesList({
   const [kindFilter, setKindFilter] = useState<string>("all");
   const [faseFilter, setFaseFilter] = useState<string>("all");
   const [tipoFilter, setTipoFilter] = useState<string>("all");
+  const [archivedFilter, setArchivedFilter] = useState<string>("activas");
   const [creating, setCreating] = useState(false);
 
   const pg = useServerPagination<OppSortKey>({ list: listKey,
     sortKey: "created_at",
     sortDir: "desc",
     pageSize: 50,
-    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
+    deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter, archivedFilter],
   });
 
+
   const { data: result, isLoading, error } = useQuery({
-    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
+    queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, archivedFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -82,10 +87,13 @@ export function OpportunitiesList({
       if (statusFilter !== "all") query = query.contains("statuses", [statusFilter]);
       if (productionMode && faseFilter !== "all") query = query.eq("fase", faseFilter);
       if (productionMode && tipoFilter !== "all") query = query.eq("tipo_produccion", tipoFilter);
+      if (archivedFilter === "activas") query = query.is("archived_at", null);
+      else if (archivedFilter === "archivadas") query = query.not("archived_at", "is", null);
       const { data, error, count } = await pg.applyTo(query);
       if (error) throw error;
       return { rows: (data ?? []) as any[], count: count ?? 0 };
     },
+
     placeholderData: (prev) => prev,
   });
 
@@ -137,6 +145,14 @@ export function OpportunitiesList({
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
 
+  async function remove(id: string) {
+    const { error } = await (supabase as any).from("opportunities").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Oportunidad eliminada");
+    qc.invalidateQueries({ queryKey: ["opportunities"] });
+  }
+
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
@@ -166,6 +182,15 @@ export function OpportunitiesList({
               ))}
             </SelectContent>
           </Select>
+          <Select value={archivedFilter} onValueChange={setArchivedFilter}>
+            <SelectTrigger className="w-40 rounded-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="activas">Activas</SelectItem>
+              <SelectItem value="archivadas">Archivadas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
+            </SelectContent>
+          </Select>
+
           {productionMode && (
             <>
               <Select value={tipoFilter} onValueChange={setTipoFilter}>
@@ -303,6 +328,8 @@ export function OpportunitiesList({
                 <Th k="detected_date">Detectada</Th>
                 <Th k="expected_close_date">Cierre est.</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Responsable</th>
+                <th className="px-3 py-2 text-right smallcaps text-xs">Acciones</th>
+
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -322,6 +349,12 @@ export function OpportunitiesList({
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
                     {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
+                    {o.archived_at && (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        Archivada {formatDateEs(o.archived_at)}{o.archived_reason ? ` · ${o.archived_reason}` : ""}
+                      </span>
+                    )}
+
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
                   {productionMode ? (
@@ -370,6 +403,18 @@ export function OpportunitiesList({
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <OpportunityArchiveButton opportunityId={o.id} archivedAt={o.archived_at} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />
+                      <ConfirmDeleteButton
+                        iconOnly
+                        title={`Eliminar “${o.title}”`}
+                        description="Elimina la oportunidad de forma permanente. Úsalo solo si la creaste por error; si simplemente ha expirado, archívala."
+                        onConfirm={() => void remove(o.id)}
+                      />
+                    </div>
+                  </td>
+
                 </tr>
               ))}
             </tbody>

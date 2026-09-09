@@ -3369,6 +3369,9 @@ export type Database = {
       }
       opportunities: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
+          archived_reason: string | null
           created_at: string
           detected_date: string | null
           director_id: string | null
@@ -3412,6 +3415,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          archived_reason?: string | null
           created_at?: string
           detected_date?: string | null
           director_id?: string | null
@@ -3455,6 +3461,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          archived_reason?: string | null
           created_at?: string
           detected_date?: string | null
           director_id?: string | null
