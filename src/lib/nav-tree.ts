@@ -2,7 +2,7 @@ import {
   CalendarDays, Film, Music, Sparkles, LibraryBig, FileSignature, Building2,
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
   KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
-  Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen, ShieldCheck,
+  Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen, ShieldCheck, CalendarRange,
 } from "lucide-react";
 
 export type NavItem = {
@@ -88,6 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
       { title: "Seguimiento", to: "/producciones/seguimiento", icon: KanbanSquare },
+      { title: "Gantt", to: "/producciones/gantt", icon: CalendarRange },
       { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
       { title: "Producciones españolas", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
     ],

@@ -7,6 +7,7 @@ import { usePortalComposer } from "@/lib/use-portal-composer";
 import { PRODUCTION_STATUS_LABEL, PRODUCTION_KIND_LABEL, type ProductionStatus, type ProductionKind } from "@/lib/production-constants";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 
 export const Route = createFileRoute("/_authenticated/portal/proyectos")({
   component: Proyectos,
@@ -61,6 +62,17 @@ function Proyectos() {
         <h2 className="font-display text-3xl">Proyectos activos</h2>
         <p className="mt-2 text-sm text-muted-foreground">Producciones gestionadas por IC, sincronizadas con tu ficha en la agencia.</p>
       </header>
+      {composerId && (
+        <section className="space-y-3">
+          <div>
+            <h3 className="font-display text-xl">Calendario de trabajo</h3>
+            <p className="text-sm text-muted-foreground">
+              Qué se espera de cada parte y cuándo: agencia, tú y la productora. En modo lineal ves si dos proyectos se solapan.
+            </p>
+          </div>
+          <ProductionGanttPanel composerId={composerId} />
+        </section>
+      )}
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : (

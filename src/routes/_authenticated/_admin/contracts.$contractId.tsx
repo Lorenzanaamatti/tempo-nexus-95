@@ -15,6 +15,8 @@ import { useDirtyForm } from "@/lib/use-dirty-form";
 import { ContractSignerInput } from "@/components/contract-signer-input";
 import { AuditTrail } from "@/components/audit-trail";
 import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
+import { ProductionPhasesEditor } from "@/components/production-phases-editor";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import {
   CONTRACT_STATUS_LABEL,
   CONTRACT_LANG_LABEL,
@@ -266,6 +268,24 @@ function ContractDetail() {
           <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
 
+      </section>
+      <section className="mt-10">
+        <h3 className="mb-1 font-display text-2xl">Calendario del contrato</h3>
+        {(q.data as any)?.production_id ? (
+          <>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Fases pactadas con la producción vinculada: quién hace qué y cuándo. Se editan aquí y se reflejan en la ficha del proyecto y en el portal del representado.
+            </p>
+            <ProductionPhasesEditor productionId={(q.data as any).production_id} />
+            <div className="mt-6">
+              <ProductionGanttPanel productionIds={[(q.data as any).production_id]} />
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Vincula este contrato a una producción para poder planificar aquí su calendario por fases.
+          </p>
+        )}
       </section>
       <section className="mt-8">
         <h3 className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Historial de cambios</h3>

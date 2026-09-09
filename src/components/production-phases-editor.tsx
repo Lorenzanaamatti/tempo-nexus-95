@@ -15,12 +15,19 @@ type Phase = {
   id: string;
   production_id: string;
   name: string;
+  owner: string;
   start_date: string | null;
   end_date: string | null;
   status: string;
   notes: string | null;
   position: number;
 };
+
+const OWNERS = [
+  { v: "agencia", l: "Agencia" },
+  { v: "representado", l: "Representado" },
+  { v: "productora", l: "Productora / Cliente" },
+];
 
 const STATUS = [
   { v: "planificada", l: "Planificada" },
@@ -123,6 +130,15 @@ export function ProductionPhasesEditor({ productionId }: { productionId: string 
                 <div>
                   <Label className="smallcaps text-[10px] text-muted-foreground">Fin</Label>
                   <Input type="date" value={p.end_date ?? ""} onChange={(e) => update(p.id, { end_date: e.target.value || null })} />
+                </div>
+                <div className="w-48">
+                  <Label className="smallcaps text-[10px] text-muted-foreground">Responsable</Label>
+                  <Select value={p.owner ?? "agencia"} onValueChange={(v) => update(p.id, { owner: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {OWNERS.map((o) => <SelectItem key={o.v} value={o.v}>{o.l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="w-40">
                   <Label className="smallcaps text-[10px] text-muted-foreground">Estado</Label>

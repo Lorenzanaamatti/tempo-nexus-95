@@ -4656,6 +4656,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          owner: string
           position: number
           production_id: string
           start_date: string | null
@@ -4668,6 +4669,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          owner?: string
           position?: number
           production_id: string
           start_date?: string | null
@@ -4680,6 +4682,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          owner?: string
           position?: number
           production_id?: string
           start_date?: string | null
