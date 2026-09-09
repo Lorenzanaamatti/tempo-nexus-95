@@ -67,7 +67,7 @@ export function OpportunitiesList({
     deps: [q, statusFilter, kindFilter, faseFilter, tipoFilter],
   });
 
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isLoading, error } = useQuery({
     queryKey: ["opportunities", listKey, q, statusFilter, kindFilter, faseFilter, tipoFilter, pg.page, pg.pageSize, pg.sortKey, pg.sortDir],
     queryFn: async () => {
       let query = (supabase as any)
@@ -264,7 +264,14 @@ export function OpportunitiesList({
 
       {isLoading ? (
         <ListSkeleton rows={6} />
+      ) : error ? (
+        <EmptyState
+          title="No se han podido cargar las oportunidades"
+          description={(error as Error).message}
+          action={{ label: "Reintentar", onClick: () => qc.invalidateQueries({ queryKey: ["opportunities"] }) }}
+        />
       ) : !rows.length ? (
+
         q ? (
           <EmptyState variant="filtered" title="Ningún resultado" description="Ninguna oportunidad coincide con la búsqueda actual." action={{ label: "Limpiar búsqueda", onClick: () => setQ("") }} />
         ) : (
