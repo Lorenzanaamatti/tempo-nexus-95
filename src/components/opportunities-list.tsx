@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Target } from "lucide-react";
-import { formatEUR } from "@/lib/money";
+import { formatEUR0 } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
 import { ExportButton } from "@/components/export-button";
