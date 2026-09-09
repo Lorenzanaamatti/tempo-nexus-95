@@ -171,6 +171,15 @@ export function OpportunitiesList({
               ))}
             </SelectContent>
           </Select>
+          <Select value={archivedFilter} onValueChange={setArchivedFilter}>
+            <SelectTrigger className="w-40 rounded-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="activas">Activas</SelectItem>
+              <SelectItem value="archivadas">Archivadas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
+            </SelectContent>
+          </Select>
+
           {productionMode && (
             <>
               <Select value={tipoFilter} onValueChange={setTipoFilter}>
