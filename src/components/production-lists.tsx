@@ -10,7 +10,7 @@ import { Clapperboard, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export const PRODUCTION_SELECT =
-  "id, title, project_type, kind, status, year, delivery_date, premiere_date, created_at, partner, production_company, partner_company_id, platform, composer_id, composers(full_name, artistic_name), partner_company:production_companies(name)";
+  "id, title, project_type, kind, status, year, delivery_date, premiere_date, created_at, partner, production_company, partner_company_id, platform, composer_id, composers!productions_composer_fk(full_name, artistic_name), partner_company:production_companies(name)";
 
 export type ProductionRecord = {
   id: string;

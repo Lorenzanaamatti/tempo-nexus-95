@@ -39,7 +39,7 @@ export function RelatedWorks({
       let prodQ = supabase
         .from("productions")
         .select(
-          "id, title, year, project_type, composer:composers(id, full_name, artistic_name)",
+          "id, title, year, project_type, composer:composers!productions_composer_fk(id, full_name, artistic_name)",
         );
       if (kind === "director") prodQ = prodQ.eq("director_id", id);
       if (kind === "company") prodQ = prodQ.eq("partner_company_id", id);

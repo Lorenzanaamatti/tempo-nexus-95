@@ -106,7 +106,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
     queryFn: async () => {
       let q = supabase
         .from("productions")
-        .select("id, title, year, fee_amount, ic_commission, ic_commission_pct, status, composer_id, composers(full_name, artistic_name)")
+        .select("id, title, year, fee_amount, ic_commission, ic_commission_pct, status, composer_id, composers!productions_composer_fk(full_name, artistic_name)")
         .order("year", { ascending: false });
       if (composerId) q = q.eq("composer_id", composerId);
       const { data, error } = await q;

@@ -41,7 +41,7 @@ function CompanyDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("productions")
-        .select("id, title, year, premiere_date, status, composer:composers(full_name, artistic_name), negotiator:people!productions_negotiator_person_id_fkey(full_name)")
+        .select("id, title, year, premiere_date, status, composer:composers!productions_composer_fk(full_name, artistic_name), negotiator:people!productions_negotiator_fk(full_name)")
         .eq("partner_company_id", companyId)
         .order("year", { ascending: false });
       if (error) throw error;

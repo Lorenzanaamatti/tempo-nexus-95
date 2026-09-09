@@ -72,7 +72,7 @@ function DirectorDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("productions")
-        .select("id, title, year, project_type, premiere_date, imdb_url, external_composer, partner_company:production_companies(name), platform:platforms(name), composer:composers(full_name, artistic_name)")
+        .select("id, title, year, project_type, premiere_date, imdb_url, external_composer, partner_company:production_companies(name), platform:platforms(name), composer:composers!productions_composer_fk(full_name, artistic_name)")
         .eq("director_id", directorId)
         .order("year", { ascending: false });
       if (error) throw error;
