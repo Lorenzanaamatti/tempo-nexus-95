@@ -165,7 +165,6 @@ function PortalHome() {
           <Quick to="/portal/agenda" title="Agenda y reuniones" desc="Tus próximas citas y compromisos." icon={CalendarDays} />
           <Quick to="/portal/contratos" title="Contratos y derechos" desc="Documentación contractual." icon={FileSignature} />
           <Quick to="/portal/carrera" title="Mi carrera" desc="Biografía, materiales y equipo IC." icon={User} />
-          <Quick to="/portal/chat" title="Chat con IC" desc="Conversación directa con tu equipo." icon={MessagesSquare} />
         </div>
       </section>
     </div>

@@ -37,8 +37,6 @@ const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
   { to: "/portal/contratos", label: "Contratos", icon: FileSignature },
   { to: "/portal/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/portal/prensa", label: "Prensa", icon: Newspaper },
-  { to: "/portal/mensajes", label: "Mensajes", icon: MessagesSquare },
-  { to: "/portal/chat", label: "Chat IC", icon: FolderOpen },
 ] as const;
 
 function PortalLayout() {
