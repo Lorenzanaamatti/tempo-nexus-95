@@ -145,6 +145,14 @@ export function OpportunitiesList({
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
 
+  async function remove(id: string) {
+    const { error } = await (supabase as any).from("opportunities").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Oportunidad eliminada");
+    qc.invalidateQueries({ queryKey: ["opportunities"] });
+  }
+
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
