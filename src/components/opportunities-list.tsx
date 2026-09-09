@@ -277,10 +277,20 @@ export function OpportunitiesList({
               <tr>
                 <Th k="kind">Tipo</Th>
                 <Th k="title">Oportunidad</Th>
-                <th className="px-3 py-2 smallcaps text-xs">Partner</th>
-                <th className="px-3 py-2 smallcaps text-xs">Producción</th>
+                <th className="px-3 py-2 smallcaps text-xs">{productionMode ? "Productora" : "Partner"}</th>
+                {productionMode ? (
+                  <>
+                    <th className="px-3 py-2 smallcaps text-xs">Director</th>
+                    <th className="px-3 py-2 smallcaps text-xs">País</th>
+                    <th className="px-3 py-2 smallcaps text-xs">Presupuesto</th>
+                    <th className="px-3 py-2 smallcaps text-xs">Fase</th>
+                  </>
+                ) : (
+                  <th className="px-3 py-2 smallcaps text-xs">Producción</th>
+                )}
                 <th className="px-3 py-2 smallcaps text-xs">Candidatos</th>
                 <th className="px-3 py-2 smallcaps text-xs">Estado</th>
+                {productionMode && <th className="px-3 py-2 smallcaps text-xs">Prioridad</th>}
                 <Th k="probability_pct" className="text-right">Prob.</Th>
                 <Th k="estimated_value" className="text-right">Valor est.</Th>
                 <Th k="detected_date">Detectada</Th>
