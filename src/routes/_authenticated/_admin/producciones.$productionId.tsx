@@ -27,6 +27,8 @@ import { ProductionMilestonesEditor } from "@/components/production-detail/miles
 import { ProductionLinkedDocuments } from "@/components/production-detail/linked-documents";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
+import { ProductionExpenses } from "@/components/production-detail/production-expenses";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/components/production-detail/closure-panel";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -352,8 +354,16 @@ function ProduccionDetalle() {
         <ProductionRepresentadosEditor productionId={productionId} />
       </Section>
 
-      <Section title="Procesos de la producción" description="Define cada proceso con su fecha de inicio y fin: composición, grabación, mezcla, máster, entrega…">
-        <ProductionMilestonesEditor productionId={productionId} />
+      <Section title="Procesos de la producción" description="Define cada proceso con su responsable y sus fechas de inicio y fin: composición, grabación, mezcla, máster, entregas…">
+        <ProductionMilestonesEditor productionId={productionId} productionKind={data.project_type ?? null} />
+      </Section>
+
+      <Section title="Gantt de la producción" description="Vista temporal de los procesos por responsable: agencia, representado y productora.">
+        <ProductionGanttPanel productionIds={[productionId]} />
+      </Section>
+
+      <Section title="Gastos de producción" description="Gastos por concepto: músicos, estudio, mezcla, copistería… Se reflejan en la ficha y el portal del compositor.">
+        <ProductionExpenses productionId={productionId} composerId={data.composer_id} feeAmount={data.fee_amount} />
       </Section>
 
       <Section title="Documentos vinculados" description="Presupuestos, deal memos, contratos de obra y adendas de PAPERWORK.">
