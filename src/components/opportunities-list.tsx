@@ -341,6 +341,12 @@ export function OpportunitiesList({
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
                     {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
+                    {o.archived_at && (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        Archivada {formatDateEs(o.archived_at)}{o.archived_reason ? ` · ${o.archived_reason}` : ""}
+                      </span>
+                    )}
+
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
                   {productionMode ? (
