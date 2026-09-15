@@ -116,6 +116,46 @@ function PitchDetail() {
         <h1 className="mt-1 font-display text-4xl title-caps">{form.titulo || "PITCH"}</h1>
       </div>
 
+      {origenQ.data && (
+        <div className="mb-8 rounded-sm border border-border bg-muted/30 p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="smallcaps text-xs text-muted-foreground">Datos de la producción de origen</p>
+            <Link
+              to="/opportunities/$opportunityId"
+              params={{ opportunityId: origenQ.data.id }}
+              className="text-xs underline"
+            >
+              Ver oportunidad
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            {([
+              ["Título alternativo", origenQ.data.titulo_alt],
+              ["Tipo", origenQ.data.tipo_produccion ? OPP_TYPE_LABEL[origenQ.data.tipo_produccion as OppProductionType] : null],
+              ["Fase", origenQ.data.fase ? OPP_PHASE_LABEL[origenQ.data.fase as OppPhase] : null],
+              ["Productora", origenQ.data.partner_company?.name || origenQ.data.partner_name],
+              ["Director", origenQ.data.director?.full_name || origenQ.data.director_text],
+              ["País", (origenQ.data.paises ?? []).join(" / ")],
+              [
+                "Presupuesto",
+                origenQ.data.presupuesto_min || origenQ.data.presupuesto_max
+                  ? `${origenQ.data.presupuesto_min ? formatEUR0(origenQ.data.presupuesto_min) : "—"} – ${origenQ.data.presupuesto_max ? formatEUR0(origenQ.data.presupuesto_max) : "abierto"}`
+                  : origenQ.data.presupuesto_texto,
+              ],
+              ["Detectada", formatDateEs(origenQ.data.detected_date)],
+              ["Reparto", (origenQ.data.reparto ?? []).join(", ")],
+            ] as [string, any][]).map(([k, v]) => (
+              <div key={k}>
+                <p className="smallcaps text-[10px] text-muted-foreground">{k}</p>
+                <p>{v || "—"}</p>
+              </div>
+            ))}
+          </div>
+          {origenQ.data.notes && <p className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground">{origenQ.data.notes}</p>}
+        </div>
+      )}
+
+
       <div className="grid grid-cols-2 gap-4">
         <Field label="Título" full>
           <Input value={form.titulo ?? ""} onChange={(e) => set("titulo", e.target.value)} />
