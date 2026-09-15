@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { ListSkeleton } from "@/components/list-states";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PITCH_ESTADOS, PITCH_TIPOS } from "@/lib/pitches";
+import { formatEUR0 } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
+import { OPP_PHASE_LABEL, OPP_TYPE_LABEL, type OppPhase, type OppProductionType } from "@/lib/opportunity-production";
 
 const db = supabase as any;
 
@@ -32,6 +35,22 @@ function PitchDetail() {
       ]);
       if (error) throw error;
       return { pitch: data, composerIds: (links ?? []).map((l: any) => l.composer_id) as string[] };
+    },
+  });
+
+  const origenQ = useQuery({
+    queryKey: ["pitch-origen", pitchQ.data?.pitch?.oportunidad_id],
+    enabled: !!pitchQ.data?.pitch?.oportunidad_id,
+    queryFn: async () => {
+      const { data, error } = await db
+        .from("opportunities")
+        .select(
+          "id, title, titulo_alt, tipo_produccion, fase, paises, presupuesto_min, presupuesto_max, presupuesto_texto, detected_date, reparto, notes, director_text, director:directors(full_name), partner_name, partner_company:production_companies(name)",
+        )
+        .eq("id", pitchQ.data!.pitch.oportunidad_id)
+        .maybeSingle();
+      if (error) throw error;
+      return data as any;
     },
   });
 
