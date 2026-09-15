@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -10,23 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreatableSelect } from "@/components/creatable-select";
 import { toast } from "sonner";
-import { Plus, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
-  JSON_EXAMPLE,
   OPP_GENRE_LABEL,
   OPP_PHASE_LABEL,
   OPP_PRIORITY_LABEL,
-  OPP_TYPE_LABEL,
   parseBudgetRange,
   parseCountries,
-  parseOpportunityJson,
   type OppPhase,
   type OppPriority,
   type OppProductionGenre,
   type OppProductionType,
   type ParsedOpportunity,
 } from "@/lib/opportunity-production";
-import { findOrCreateCompany, findOrCreateDirector, upsertProductionOpportunity, type IntakeOutcome } from "@/lib/opportunity-intake";
+import { findOrCreateCompany, findOrCreateDirector, upsertProductionOpportunity } from "@/lib/opportunity-intake";
 import { formatEUR0 } from "@/lib/money";
 
 const EMPTY = {
@@ -60,9 +56,6 @@ export function OpportunityIntakeDialog() {
   const [directorLabel, setDirectorLabel] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [json, setJson] = useState("");
-  const [preview, setPreview] = useState<{ rows: ParsedOpportunity[]; errors: string[] } | null>(null);
-  const [results, setResults] = useState<IntakeOutcome[] | null>(null);
 
   const companiesQ = useQuery({
     queryKey: ["production-companies-mini"],
@@ -92,7 +85,6 @@ export function OpportunityIntakeDialog() {
   function reset() {
     setForm({ ...EMPTY });
     setCompanyId(""); setCompanyLabel(""); setDirectorId(""); setDirectorLabel("");
-    setJson(""); setPreview(null); setResults(null);
   }
 
   async function saveManual() {
@@ -142,22 +134,6 @@ export function OpportunityIntakeDialog() {
     qc.invalidateQueries({ queryKey: ["directors-mini"] });
     reset();
     setOpen(false);
-  }
-
-  async function importJson() {
-    if (!preview?.rows.length) return;
-    setSaving(true);
-    const out: IntakeOutcome[] = [];
-    for (const row of preview.rows) {
-      out.push(await upsertProductionOpportunity(row));
-    }
-    setSaving(false);
-    setResults(out);
-    qc.invalidateQueries({ queryKey: ["opportunities"] });
-    qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
-    qc.invalidateQueries({ queryKey: ["directors-mini"] });
-    const ok = out.filter((o) => o.action !== "error").length;
-    toast.success(`${ok} de ${out.length} oportunidades procesadas`);
   }
 
   return (
