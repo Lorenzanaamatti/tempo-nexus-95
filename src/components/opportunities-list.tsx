@@ -214,7 +214,13 @@ export function OpportunitiesList({
             </>
           )}
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar oportunidad…" className="w-56 rounded-sm" />
-          {productionMode && <OpportunityIntakeDialog />}
+          {productionMode && (
+            <div className="flex flex-wrap gap-2">
+              <OpportunityIntakeDialog />
+              <OpportunityImportDialog />
+            </div>
+          )}
+
           <ExportButton
             entityLabel="Oportunidades"
             filename="oportunidades"
