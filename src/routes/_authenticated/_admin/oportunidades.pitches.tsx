@@ -50,6 +50,7 @@ function PitchesPage() {
   const [estado, setEstado] = useState("todos");
   const [tipo, setTipo] = useState("todos");
   const [composer, setComposer] = useState("todos");
+  const [archivo, setArchivo] = useState("activos");
   const [creating, setCreating] = useState(false);
 
   const composerOptions = useMemo(() => {
@@ -64,10 +65,12 @@ function PitchesPage() {
       if (estado !== "todos" && p.estado !== estado) return false;
       if (tipo !== "todos" && p.tipo !== tipo) return false;
       if (composer !== "todos" && !p.composers.some((c: any) => c.id === composer)) return false;
+      if (archivo === "activos" && p.archivado_at) return false;
+      if (archivo === "archivados" && !p.archivado_at) return false;
       if (needle && !String(p.titulo ?? "").toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [listQ.data, q, estado, tipo, composer]);
+  }, [listQ.data, q, estado, tipo, composer, archivo]);
 
   async function createPitch() {
     setCreating(true);
@@ -123,6 +126,14 @@ function PitchesPage() {
             {composerOptions.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Select value={archivo} onValueChange={setArchivo}>
+          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="activos">Pitches activos</SelectItem>
+            <SelectItem value="archivados">Archivados</SelectItem>
+            <SelectItem value="todos">Todos</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {listQ.isLoading ? (
@@ -162,6 +173,11 @@ function PitchesPage() {
                     <span className={cn("rounded-sm px-1.5 py-0.5 text-[11px] smallcaps", PITCH_ESTADO_CLASS[p.estado] ?? "bg-muted")}>
                       {p.estado}
                     </span>
+                    {p.archivado_at && (
+                      <span className="ml-1 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] smallcaps text-muted-foreground">
+                        Archivado
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2 tabular-nums text-muted-foreground">{formatDateEs(p.fecha_pitch)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{p.responsable?.full_name ?? "—"}</td>

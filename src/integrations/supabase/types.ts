@@ -3080,6 +3080,9 @@ export type Database = {
       }
       oportunidades_pitches: {
         Row: {
+          archivado_at: string | null
+          archivado_by: string | null
+          archivado_motivo: string | null
           created_at: string
           estado: string
           fecha_pitch: string | null
@@ -3097,6 +3100,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archivado_at?: string | null
+          archivado_by?: string | null
+          archivado_motivo?: string | null
           created_at?: string
           estado?: string
           fecha_pitch?: string | null
@@ -3114,6 +3120,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archivado_at?: string | null
+          archivado_by?: string | null
+          archivado_motivo?: string | null
           created_at?: string
           estado?: string
           fecha_pitch?: string | null

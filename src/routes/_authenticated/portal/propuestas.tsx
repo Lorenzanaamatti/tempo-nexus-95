@@ -33,7 +33,7 @@ function Propuestas() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("oportunidades_pitch_composers")
-        .select("pitch:oportunidades_pitches(id, titulo, estado, tipo, fecha_pitch, fecha_seguimiento, proyecto_vinculado, notas)")
+        .select("pitch:oportunidades_pitches(id, titulo, estado, tipo, fecha_pitch, fecha_seguimiento, proyecto_vinculado, notas, archivado_at, archivado_motivo, produccion_id)")
         .eq("composer_id", composerId!);
       return (data ?? []).map((r: any) => r.pitch).filter(Boolean);
     },
@@ -47,31 +47,16 @@ function Propuestas() {
           Oportunidades en las que IC te ha presentado como candidato.
         </p>
       </header>
-      {!!pitchesQ.data?.length && (
-        <section className="space-y-3">
-          <h3 className="smallcaps text-xs text-muted-foreground">Pitches en curso</h3>
-          <ul className="space-y-3">
-            {pitchesQ.data.map((p: any) => (
-              <li key={p.id} className="rounded-sm border border-border p-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-display text-lg">{p.titulo}</p>
-                  <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${PITCH_ESTADO_CLASS[p.estado] ?? "bg-muted"}`}>
-                    {p.estado}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {[p.proyecto_vinculado, p.tipo].filter(Boolean).join(" · ") || "—"}
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <Mini label="Fecha del pitch" value={formatDateEs(p.fecha_pitch)} />
-                  <Mini label="Seguimiento" value={formatDateEs(p.fecha_seguimiento)} />
-                </div>
-                {p.notas && <p className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground">{p.notas}</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <PitchSection title="Pitches en curso" pitches={(pitchesQ.data ?? []).filter((p: any) => !p.archivado_at)} />
+      <PitchSection
+        title="Producciones conseguidas"
+        pitches={(pitchesQ.data ?? []).filter((p: any) => p.archivado_at && p.produccion_id)}
+      />
+      <PitchSection
+        title="Descartados"
+        muted
+        pitches={(pitchesQ.data ?? []).filter((p: any) => p.archivado_at && !p.produccion_id)}
+      />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
@@ -112,6 +97,38 @@ function Propuestas() {
         </ul>
       )}
     </div>
+  );
+}
+
+function PitchSection({ title, pitches, muted }: { title: string; pitches: any[]; muted?: boolean }) {
+  if (!pitches.length) return null;
+  return (
+    <section className="space-y-3">
+      <h3 className="smallcaps text-xs text-muted-foreground">{title}</h3>
+      <ul className="space-y-3">
+        {pitches.map((p: any) => (
+          <li key={p.id} className={`rounded-sm border border-border p-4 ${muted ? "opacity-70" : ""}`}>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="font-display text-lg">{p.titulo}</p>
+              <span className={`rounded-sm px-2 py-0.5 text-[10px] smallcaps ${PITCH_ESTADO_CLASS[p.estado] ?? "bg-muted"}`}>
+                {p.estado}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[p.proyecto_vinculado, p.tipo].filter(Boolean).join(" · ") || "—"}
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <Mini label="Fecha del pitch" value={formatDateEs(p.fecha_pitch)} />
+              <Mini label="Seguimiento" value={formatDateEs(p.fecha_seguimiento)} />
+            </div>
+            {p.archivado_motivo && (
+              <p className="mt-3 text-xs text-muted-foreground">{p.archivado_motivo}</p>
+            )}
+            {p.notas && <p className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground">{p.notas}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

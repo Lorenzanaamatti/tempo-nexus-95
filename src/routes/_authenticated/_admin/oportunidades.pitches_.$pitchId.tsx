@@ -14,6 +14,7 @@ import { findOrCreateDirector } from "@/lib/opportunity-intake";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PITCH_ESTADOS, PITCH_TIPOS } from "@/lib/pitches";
+import { PitchCloseActions } from "@/components/pitch-close-actions";
 import {
   OPP_GENRE_LABEL,
   OPP_PHASE_LABEL,
@@ -500,9 +501,19 @@ function PitchDetail() {
         </div>
       </section>
 
-      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
         <ConfirmDeleteButton onConfirm={remove} title="Eliminar pitch" label="Eliminar pitch" />
-        <Button onClick={save} disabled={saving}>Guardar</Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {pitchQ.data?.pitch && (
+            <PitchCloseActions
+              pitchId={pitchId}
+              pitch={pitchQ.data.pitch}
+              opportunity={origenQ.data ?? null}
+              composerIds={composerIds}
+            />
+          )}
+          <Button onClick={save} disabled={saving}>Guardar</Button>
+        </div>
       </div>
     </div>
   );
