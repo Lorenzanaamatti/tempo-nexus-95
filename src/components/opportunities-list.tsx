@@ -80,7 +80,7 @@ export function OpportunitiesList({
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer_id, composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -413,7 +413,7 @@ export function OpportunitiesList({
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-1">
-                      {productionMode && <OpportunityToPitchButton opportunity={o} />}
+                      {productionMode && <OpportunityToPitchButton opportunity={o} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />}
                       <OpportunityArchiveButton opportunityId={o.id} archivedAt={o.archived_at} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />
                       <ConfirmDeleteButton
                         iconOnly
