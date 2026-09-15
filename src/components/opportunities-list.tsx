@@ -413,6 +413,7 @@ export function OpportunitiesList({
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-1">
+                      {productionMode && <OpportunityToPitchButton opportunity={o} />}
                       <OpportunityArchiveButton opportunityId={o.id} archivedAt={o.archived_at} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />
                       <ConfirmDeleteButton
                         iconOnly
