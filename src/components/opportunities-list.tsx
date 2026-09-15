@@ -18,6 +18,7 @@ import { OpportunityIntakeDialog } from "@/components/opportunity-intake-dialog"
 import { OpportunityImportDialog } from "@/components/opportunity-import-dialog";
 import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { OpportunityToPitchButton } from "@/components/opportunity-to-pitch-button";
 
 import {
   OPP_PHASE_LABEL,
