@@ -33,7 +33,7 @@ function Propuestas() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("oportunidades_pitch_composers")
-        .select("pitch:oportunidades_pitches(id, titulo, estado, tipo, fecha_pitch, fecha_seguimiento, proyecto_vinculado, notas)")
+        .select("pitch:oportunidades_pitches(id, titulo, estado, tipo, fecha_pitch, fecha_seguimiento, proyecto_vinculado, notas, archivado_at, archivado_motivo, produccion_id)")
         .eq("composer_id", composerId!);
       return (data ?? []).map((r: any) => r.pitch).filter(Boolean);
     },
