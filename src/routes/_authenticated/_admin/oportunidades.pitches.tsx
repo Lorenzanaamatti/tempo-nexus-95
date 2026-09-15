@@ -173,6 +173,11 @@ function PitchesPage() {
                     <span className={cn("rounded-sm px-1.5 py-0.5 text-[11px] smallcaps", PITCH_ESTADO_CLASS[p.estado] ?? "bg-muted")}>
                       {p.estado}
                     </span>
+                    {p.archivado_at && (
+                      <span className="ml-1 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] smallcaps text-muted-foreground">
+                        Archivado
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2 tabular-nums text-muted-foreground">{formatDateEs(p.fecha_pitch)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{p.responsable?.full_name ?? "—"}</td>
