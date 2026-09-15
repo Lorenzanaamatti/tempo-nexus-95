@@ -14,6 +14,7 @@ import {
   OPP_GENRE_LABEL,
   OPP_PHASE_LABEL,
   OPP_PRIORITY_LABEL,
+  OPP_TYPE_LABEL,
   parseBudgetRange,
   parseCountries,
   type OppPhase,
