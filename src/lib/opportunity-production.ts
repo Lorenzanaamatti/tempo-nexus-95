@@ -270,12 +270,27 @@ function field(chunk: string, labels: string[]): string | null {
     const re = new RegExp(`${label}\\s*:\\s*([^|\\n]+)`, "i");
     const m = chunk.match(re);
     if (m) {
-      const v = m[1].replace(/[🏢🎬💶🔗📅]/gu, "").trim();
+      const v = m[1]
+        .split(/https?:\/\//)[0]
+        .split(/\bNota\s*:/i)[0]
+        .replace(/[🏢🎬💶🔗📅]/gu, "")
+        .trim();
       if (v) return v;
     }
   }
   return null;
 }
+
+/** Deja el nombre de una productora o director listo para buscar en el CRM. */
+function cleanEntity(value: string | null): string | null {
+  if (!value) return null;
+  const first = value
+    .replace(/\(([^)]*)\)/g, " ")
+    .split(/\s*(?:,|\+|\/|;|\by\b|\bcon servicios de\b|\bcreada por\b|\bcreado por\b)\s*/i)[0];
+  const clean = first.replace(/\s+/g, " ").trim().replace(/[.,;]$/, "");
+  return clean || null;
+}
+
 
 /** Parsea el email/report diario en formato de viñetas numeradas. */
 export function parseOpportunityReport(input: string): { rows: ParsedOpportunity[]; errors: string[] } {
