@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,13 +49,15 @@ export function OpportunityToPitchButton({ opportunity }: OpportunityToPitchButt
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={busy} onClick={() => void toPitch()} aria-label="Pasar a pitch">
-          <Send className="h-4 w-4" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Pasar a pitch</TooltipContent>
-    </Tooltip>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-8 gap-1 px-2 text-xs"
+      disabled={busy}
+      onClick={() => void toPitch()}
+      title="Trasladar esta oportunidad al módulo de Pitches"
+    >
+      <Send className="h-3.5 w-3.5" /> A pitch
+    </Button>
   );
 }
