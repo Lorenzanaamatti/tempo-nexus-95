@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { ListSkeleton } from "@/components/list-states";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PITCH_ESTADOS, PITCH_TIPOS } from "@/lib/pitches";
+import { formatEUR0 } from "@/lib/money";
+import { formatDateEs } from "@/lib/dates";
+import { OPP_PHASE_LABEL, OPP_TYPE_LABEL, type OppPhase, type OppProductionType } from "@/lib/opportunity-production";
 
 const db = supabase as any;
 
@@ -32,6 +35,22 @@ function PitchDetail() {
       ]);
       if (error) throw error;
       return { pitch: data, composerIds: (links ?? []).map((l: any) => l.composer_id) as string[] };
+    },
+  });
+
+  const origenQ = useQuery({
+    queryKey: ["pitch-origen", pitchQ.data?.pitch?.oportunidad_id],
+    enabled: !!pitchQ.data?.pitch?.oportunidad_id,
+    queryFn: async () => {
+      const { data, error } = await db
+        .from("opportunities")
+        .select(
+          "id, title, titulo_alt, tipo_produccion, fase, paises, presupuesto_min, presupuesto_max, presupuesto_texto, detected_date, reparto, notes, director_text, director:directors(full_name), partner_name, partner_company:production_companies(name)",
+        )
+        .eq("id", pitchQ.data!.pitch.oportunidad_id)
+        .maybeSingle();
+      if (error) throw error;
+      return data as any;
     },
   });
 
@@ -115,6 +134,46 @@ function PitchDetail() {
         <p className="smallcaps text-muted-foreground">Oportunidades de ventas · Pitches</p>
         <h1 className="mt-1 font-display text-4xl title-caps">{form.titulo || "PITCH"}</h1>
       </div>
+
+      {origenQ.data && (
+        <div className="mb-8 rounded-sm border border-border bg-muted/30 p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="smallcaps text-xs text-muted-foreground">Datos de la producción de origen</p>
+            <Link
+              to="/opportunities/$opportunityId"
+              params={{ opportunityId: origenQ.data.id }}
+              className="text-xs underline"
+            >
+              Ver oportunidad
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            {([
+              ["Título alternativo", origenQ.data.titulo_alt],
+              ["Tipo", origenQ.data.tipo_produccion ? OPP_TYPE_LABEL[origenQ.data.tipo_produccion as OppProductionType] : null],
+              ["Fase", origenQ.data.fase ? OPP_PHASE_LABEL[origenQ.data.fase as OppPhase] : null],
+              ["Productora", origenQ.data.partner_company?.name || origenQ.data.partner_name],
+              ["Director", origenQ.data.director?.full_name || origenQ.data.director_text],
+              ["País", (origenQ.data.paises ?? []).join(" / ")],
+              [
+                "Presupuesto",
+                origenQ.data.presupuesto_min || origenQ.data.presupuesto_max
+                  ? `${origenQ.data.presupuesto_min ? formatEUR0(origenQ.data.presupuesto_min) : "—"} – ${origenQ.data.presupuesto_max ? formatEUR0(origenQ.data.presupuesto_max) : "abierto"}`
+                  : origenQ.data.presupuesto_texto,
+              ],
+              ["Detectada", formatDateEs(origenQ.data.detected_date)],
+              ["Reparto", (origenQ.data.reparto ?? []).join(", ")],
+            ] as [string, any][]).map(([k, v]) => (
+              <div key={k}>
+                <p className="smallcaps text-[10px] text-muted-foreground">{k}</p>
+                <p>{v || "—"}</p>
+              </div>
+            ))}
+          </div>
+          {origenQ.data.notes && <p className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground">{origenQ.data.notes}</p>}
+        </div>
+      )}
+
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Título" full>

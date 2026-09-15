@@ -3086,6 +3086,7 @@ export type Database = {
           fecha_seguimiento: string | null
           id: string
           notas: string | null
+          oportunidad_id: string | null
           partner_destinatario: string | null
           presupuesto_estimado: number | null
           produccion_id: string | null
@@ -3102,6 +3103,7 @@ export type Database = {
           fecha_seguimiento?: string | null
           id?: string
           notas?: string | null
+          oportunidad_id?: string | null
           partner_destinatario?: string | null
           presupuesto_estimado?: number | null
           produccion_id?: string | null
@@ -3118,6 +3120,7 @@ export type Database = {
           fecha_seguimiento?: string | null
           id?: string
           notas?: string | null
+          oportunidad_id?: string | null
           partner_destinatario?: string | null
           presupuesto_estimado?: number | null
           produccion_id?: string | null
@@ -3128,6 +3131,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "oportunidades_pitches_oportunidad_id_fkey"
+            columns: ["oportunidad_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "oportunidades_pitches_partner_destinatario_fkey"
             columns: ["partner_destinatario"]
