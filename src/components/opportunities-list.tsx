@@ -15,6 +15,7 @@ import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LAB
 import { ExportButton } from "@/components/export-button";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { OpportunityIntakeDialog } from "@/components/opportunity-intake-dialog";
+import { OpportunityImportDialog } from "@/components/opportunity-import-dialog";
 import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
