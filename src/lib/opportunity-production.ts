@@ -301,7 +301,14 @@ export function parseOpportunityReport(input: string): { rows: ParsedOpportunity
   const rows: ParsedOpportunity[] = [];
   starts.forEach((start, i) => {
     const raw = text.slice(start, starts[i + 1] ?? text.length);
-    const chunk = raw.replace(/\n\s+/g, " ").trim();
+    // Las líneas indentadas son campos nuevos; las que empiezan en columna 0 son continuación del ajuste del email.
+    const logical: string[] = [];
+    raw.split("\n").forEach((line, idx) => {
+      const isNewField = idx === 0 || /^\s/.test(line);
+      if (isNewField || !logical.length) logical.push(line.trim());
+      else logical[logical.length - 1] = `${logical[logical.length - 1]} ${line.trim()}`.trim();
+    });
+    const chunk = logical.filter(Boolean).join("\n");
     const flat = chunk.replace(/\s+/g, " ");
 
     const titleMatch = flat.match(/\*\*(.+?)\*\*/) ?? flat.match(/^\s*\d+[.)]\s+([^([|]+)/);
@@ -321,14 +328,17 @@ export function parseOpportunityReport(input: string): { rows: ParsedOpportunity
     const countryMatch = afterTitle.match(/[—–-]\s*([^|💶\n]+)/);
     const countryRaw = countryMatch ? countryMatch[1].replace(/\(([^)]*)\)/g, "").trim() : "";
 
-    const presupuesto = field(flat, ["Presupuesto"]);
-    const estado = field(flat, ["Estado", "Fase"]);
-    const productora = field(flat, ["Productora", "Productoras", "Producción"]);
-    const director = field(flat, ["Director", "Directora", "Dirección", "Showrunner/protagonista", "Showrunner", "Creador"]);
-    const reparto = field(flat, ["Reparto", "Cast"]);
-    const aie = field(flat, ["AIE", "A\\.I\\.E"]);
+    const presupuesto = field(chunk, ["Presupuesto"]);
+    const estado = field(chunk, ["Estado", "Fase"]);
+    const productora = cleanEntity(field(chunk, ["Productora", "Productoras", "Producción"]));
+    const director = cleanEntity(
+      field(chunk, ["Director", "Directora", "Dirección", "Showrunner/protagonista", "Showrunner", "Creador"]),
+    );
+    const reparto = field(chunk, ["Reparto", "Cast"]);
+    const aie = field(chunk, ["AIE", "A\\.I\\.E"]);
     const urlMatch = flat.match(/https?:\/\/[^\s)|]+/);
     const notaMatch = chunk.match(/Nota\s*:\s*([\s\S]+)$/i);
+
 
     const range = parseBudgetRange(presupuesto);
     const estreno = estado ? isoFromSpanishDate((estado.match(/estreno[^;)]*/i) ?? [""])[0]) : null;
