@@ -50,6 +50,7 @@ function PitchesPage() {
   const [estado, setEstado] = useState("todos");
   const [tipo, setTipo] = useState("todos");
   const [composer, setComposer] = useState("todos");
+  const [archivo, setArchivo] = useState("activos");
   const [creating, setCreating] = useState(false);
 
   const composerOptions = useMemo(() => {
@@ -64,6 +65,8 @@ function PitchesPage() {
       if (estado !== "todos" && p.estado !== estado) return false;
       if (tipo !== "todos" && p.tipo !== tipo) return false;
       if (composer !== "todos" && !p.composers.some((c: any) => c.id === composer)) return false;
+      if (archivo === "activos" && p.archivado_at) return false;
+      if (archivo === "archivados" && !p.archivado_at) return false;
       if (needle && !String(p.titulo ?? "").toLowerCase().includes(needle)) return false;
       return true;
     });
