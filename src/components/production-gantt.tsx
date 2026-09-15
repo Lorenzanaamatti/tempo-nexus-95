@@ -8,7 +8,7 @@ export type GanttPhase = {
   owner: GanttOwner;
   start: string; // yyyy-mm-dd
   end: string; // yyyy-mm-dd
-  status: "planificada" | "en_curso" | "completada" | "bloqueada";
+  status: string;
   note?: string | null;
   milestone?: boolean;
   productionId?: string;
@@ -23,12 +23,34 @@ export const GANTT_OWNER_LABEL: Record<GanttOwner, string> = {
 
 const OWNER_ORDER: GanttOwner[] = ["agencia", "representado", "productora"];
 
-export const GANTT_STATUS_STYLE: Record<GanttPhase["status"], { bar: string; label: string }> = {
+export type GanttStatusKey = "planificada" | "en_curso" | "completada" | "bloqueada";
+
+export const GANTT_STATUS_STYLE: Record<GanttStatusKey, { bar: string; label: string }> = {
   planificada: { bar: "bg-muted-foreground/25 border border-dashed border-muted-foreground/50", label: "Planificada" },
   en_curso: { bar: "bg-primary", label: "En curso" },
   completada: { bar: "bg-emerald-500", label: "Completada" },
   bloqueada: { bar: "bg-amber-500", label: "Bloqueada" },
 };
+
+const STATUS_ALIAS: Record<string, GanttStatusKey> = {
+  planificada: "planificada",
+  pendiente: "planificada",
+  planificado: "planificada",
+  en_curso: "en_curso",
+  en_progreso: "en_curso",
+  completada: "completada",
+  completado: "completada",
+  finalizada: "completada",
+  finalizado: "completada",
+  bloqueada: "bloqueada",
+  bloqueado: "bloqueada",
+  retrasada: "bloqueada",
+  retrasado: "bloqueada",
+};
+
+export function normalizeGanttStatus(status?: string | null): GanttStatusKey {
+  return STATUS_ALIAS[(status ?? "").toLowerCase()] ?? "planificada";
+}
 
 const DAY = 86400000;
 
@@ -131,7 +153,7 @@ export function ProductionGantt({
   const Bar = ({ p, compact }: { p: GanttPhase; compact?: boolean }) => {
     const left = pct(d(p.start));
     const width = Math.max(pct(d(p.end) + DAY) - left, 1.2);
-    const st = GANTT_STATUS_STYLE[p.status];
+    const st = GANTT_STATUS_STYLE[normalizeGanttStatus(p.status)];
     const title = `${p.name} · ${fmt(p.start)} – ${fmt(p.end)}${p.note ? ` · ${p.note}` : ""}`;
     if (compact) {
       return (
