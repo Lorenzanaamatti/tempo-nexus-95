@@ -70,7 +70,7 @@ function PitchesPage() {
       if (needle && !String(p.titulo ?? "").toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [listQ.data, q, estado, tipo, composer]);
+  }, [listQ.data, q, estado, tipo, composer, archivo]);
 
   async function createPitch() {
     setCreating(true);
@@ -124,6 +124,14 @@ function PitchesPage() {
           <SelectContent>
             <SelectItem value="todos">Todos los representados</SelectItem>
             {composerOptions.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={archivo} onValueChange={setArchivo}>
+          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="activos">Pitches activos</SelectItem>
+            <SelectItem value="archivados">Archivados</SelectItem>
+            <SelectItem value="todos">Todos</SelectItem>
           </SelectContent>
         </Select>
       </div>
