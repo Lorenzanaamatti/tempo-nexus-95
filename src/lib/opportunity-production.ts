@@ -241,3 +241,137 @@ export const JSON_EXAMPLE = `[
     "nota": "Buscan compositor internacional."
   }
 ]`;
+
+// ===================== Ingesta del report diario (texto del email) =====================
+
+const MONTHS_ES: Record<string, string> = {
+  enero: "01", febrero: "02", marzo: "03", abril: "04", mayo: "05", junio: "06",
+  julio: "07", agosto: "08", septiembre: "09", setiembre: "09", octubre: "10",
+  noviembre: "11", diciembre: "12",
+};
+
+function isoFromSpanishDate(raw: string): string | null {
+  const s = norm(raw);
+  const dmy = s.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`;
+  const long = s.match(/(\d{1,2})\s+de\s+([a-z]+)\s+(?:de\s+)?(\d{4})|(\d{1,2})\s+([a-z]+)\s+(\d{4})/);
+  if (long) {
+    const d = long[1] ?? long[4];
+    const mth = MONTHS_ES[long[2] ?? long[5]];
+    const y = long[3] ?? long[6];
+    if (d && mth && y) return `${y}-${mth}-${String(d).padStart(2, "0")}`;
+  }
+  const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return iso ? iso[0] : null;
+}
+
+function field(chunk: string, labels: string[]): string | null {
+  for (const label of labels) {
+    const re = new RegExp(`${label}\\s*:\\s*([^|\\n]+)`, "i");
+    const m = chunk.match(re);
+    if (m) {
+      const v = m[1].replace(/[🏢🎬💶🔗📅]/gu, "").trim();
+      if (v) return v;
+    }
+  }
+  return null;
+}
+
+/** Parsea el email/report diario en formato de viñetas numeradas. */
+export function parseOpportunityReport(input: string): { rows: ParsedOpportunity[]; errors: string[] } {
+  const errors: string[] = [];
+  const text = input.replace(/\r/g, "");
+  const itemRe = /^\s*\d+[.)]\s+\*{0,2}/gm;
+
+  // Cabecera: todo lo anterior al primer proyecto numerado.
+  const firstMatch = itemRe.exec(text);
+  const headerRaw = (firstMatch ? text.slice(0, firstMatch.index) : "").trim();
+  const headerLine = headerRaw.split("\n").map((l) => l.trim()).filter(Boolean)[0] ?? "";
+  const origenHeader = headerLine ? headerLine.replace(/^[^\p{L}\d]+/u, "").trim() : null;
+  const headerDate = headerLine ? isoFromSpanishDate(headerLine) : null;
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Trocea por proyecto.
+  itemRe.lastIndex = 0;
+  const starts: number[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = itemRe.exec(text))) starts.push(m.index);
+  if (!starts.length) return { rows: [], errors: ["No se han encontrado proyectos numerados (1., 2., …) en el texto."] };
+
+  const rows: ParsedOpportunity[] = [];
+  starts.forEach((start, i) => {
+    const raw = text.slice(start, starts[i + 1] ?? text.length);
+    const chunk = raw.replace(/\n\s+/g, " ").trim();
+    const flat = chunk.replace(/\s+/g, " ");
+
+    const titleMatch = flat.match(/\*\*(.+?)\*\*/) ?? flat.match(/^\s*\d+[.)]\s+([^([|]+)/);
+    const title = (titleMatch?.[1] ?? "").trim();
+    if (!title) {
+      errors.push(`Proyecto ${i + 1}: no se ha podido leer el título.`);
+      return;
+    }
+
+    // Etiquetas [película], [ficción] justo después del título.
+    const afterTitle = flat.slice((titleMatch?.index ?? 0) + (titleMatch?.[0].length ?? 0));
+    const tags = [...afterTitle.slice(0, 120).matchAll(/\[([^\]]+)\]/g)].map((t) => t[1]);
+    const tipoRaw = tags[0] ?? null;
+    const genreRaw = tags[1] ?? null;
+
+    // País: entre el guion largo y el primer bloque de datos.
+    const countryMatch = afterTitle.match(/[—–-]\s*([^|💶\n]+)/);
+    const countryRaw = countryMatch ? countryMatch[1].replace(/\(([^)]*)\)/g, "").trim() : "";
+
+    const presupuesto = field(flat, ["Presupuesto"]);
+    const estado = field(flat, ["Estado", "Fase"]);
+    const productora = field(flat, ["Productora", "Productoras", "Producción"]);
+    const director = field(flat, ["Director", "Directora", "Dirección", "Showrunner/protagonista", "Showrunner", "Creador"]);
+    const reparto = field(flat, ["Reparto", "Cast"]);
+    const aie = field(flat, ["AIE", "A\\.I\\.E"]);
+    const urlMatch = flat.match(/https?:\/\/[^\s)|]+/);
+    const notaMatch = chunk.match(/Nota\s*:\s*([\s\S]+)$/i);
+
+    const range = parseBudgetRange(presupuesto);
+    const estreno = estado ? isoFromSpanishDate((estado.match(/estreno[^;)]*/i) ?? [""])[0]) : null;
+
+    rows.push({
+      title,
+      titulo_alt: null,
+      tipo_produccion: parseProductionType(tipoRaw),
+      genero_produccion: parseGenre(genreRaw, tipoRaw),
+      paises: parseCountries(countryRaw),
+      presupuesto_min: range.min,
+      presupuesto_max: range.max,
+      presupuesto_texto: presupuesto,
+      financiacion_publica: null,
+      fase: parsePhase(estado),
+      fecha_rodaje: null,
+      fecha_estreno: estreno,
+      productoraName: productora,
+      productora_aie: aie,
+      directorName: director ? director.replace(/\(([^)]*)\)/g, "").trim() : null,
+      reparto,
+      fuente_url: urlMatch ? urlMatch[0] : null,
+      detected_date: headerDate ?? today,
+      origen: origenHeader,
+      notes: notaMatch ? notaMatch[1].replace(/\s+/g, " ").trim() : null,
+      prioridad: null,
+    });
+  });
+
+  return { rows, errors };
+}
+
+/** Detecta si el texto pegado es JSON o el email del report y lo parsea. */
+export function parseOpportunityIntake(input: string): { rows: ParsedOpportunity[]; errors: string[]; format: "json" | "report" } {
+  const t = input.trim();
+  if (t.startsWith("{") || t.startsWith("[")) return { ...parseOpportunityJson(t), format: "json" };
+  return { ...parseOpportunityReport(t), format: "report" };
+}
+
+export const REPORT_EXAMPLE = `🎬 Proyectos España & Europa >5M€ — 15 septiembre 2026
+
+1. **WASP 2026** ([película], [ficción]) — España (Madrid)
+   💶 Presupuesto: €9M (declarado) | Estado: pre-producción
+   🏢 Productora: Wanda Visión | 🎬 Director: Woody Allen
+   🔗 https://…
+   Nota: Primera película rodada íntegramente en Madrid.`;
