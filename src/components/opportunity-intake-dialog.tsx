@@ -169,13 +169,8 @@ export function OpportunityIntakeDialog() {
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Ingestar oportunidad de producción</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="manual">
-          <TabsList>
-            <TabsTrigger value="manual">Manual</TabsTrigger>
-            <TabsTrigger value="json">Desde JSON</TabsTrigger>
-          </TabsList>
+        <div className="mt-4 space-y-6">
 
-          <TabsContent value="manual" className="mt-4 space-y-6">
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Label>Título del proyecto *</Label>
