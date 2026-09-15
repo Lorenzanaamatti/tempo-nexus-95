@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -10,23 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreatableSelect } from "@/components/creatable-select";
 import { toast } from "sonner";
-import { Plus, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
-  JSON_EXAMPLE,
   OPP_GENRE_LABEL,
   OPP_PHASE_LABEL,
   OPP_PRIORITY_LABEL,
   OPP_TYPE_LABEL,
   parseBudgetRange,
   parseCountries,
-  parseOpportunityJson,
   type OppPhase,
   type OppPriority,
   type OppProductionGenre,
   type OppProductionType,
   type ParsedOpportunity,
 } from "@/lib/opportunity-production";
-import { findOrCreateCompany, findOrCreateDirector, upsertProductionOpportunity, type IntakeOutcome } from "@/lib/opportunity-intake";
+import { findOrCreateCompany, findOrCreateDirector, upsertProductionOpportunity } from "@/lib/opportunity-intake";
 import { formatEUR0 } from "@/lib/money";
 
 const EMPTY = {
@@ -60,9 +57,6 @@ export function OpportunityIntakeDialog() {
   const [directorLabel, setDirectorLabel] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [json, setJson] = useState("");
-  const [preview, setPreview] = useState<{ rows: ParsedOpportunity[]; errors: string[] } | null>(null);
-  const [results, setResults] = useState<IntakeOutcome[] | null>(null);
 
   const companiesQ = useQuery({
     queryKey: ["production-companies-mini"],
@@ -92,7 +86,6 @@ export function OpportunityIntakeDialog() {
   function reset() {
     setForm({ ...EMPTY });
     setCompanyId(""); setCompanyLabel(""); setDirectorId(""); setDirectorLabel("");
-    setJson(""); setPreview(null); setResults(null);
   }
 
   async function saveManual() {
@@ -144,22 +137,6 @@ export function OpportunityIntakeDialog() {
     setOpen(false);
   }
 
-  async function importJson() {
-    if (!preview?.rows.length) return;
-    setSaving(true);
-    const out: IntakeOutcome[] = [];
-    for (const row of preview.rows) {
-      out.push(await upsertProductionOpportunity(row));
-    }
-    setSaving(false);
-    setResults(out);
-    qc.invalidateQueries({ queryKey: ["opportunities"] });
-    qc.invalidateQueries({ queryKey: ["production-companies-mini"] });
-    qc.invalidateQueries({ queryKey: ["directors-mini"] });
-    const ok = out.filter((o) => o.action !== "error").length;
-    toast.success(`${ok} de ${out.length} oportunidades procesadas`);
-  }
-
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
@@ -169,13 +146,8 @@ export function OpportunityIntakeDialog() {
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Ingestar oportunidad de producción</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="manual">
-          <TabsList>
-            <TabsTrigger value="manual">Manual</TabsTrigger>
-            <TabsTrigger value="json">Desde JSON</TabsTrigger>
-          </TabsList>
+        <div className="mt-4 space-y-6">
 
-          <TabsContent value="manual" className="mt-4 space-y-6">
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Label>Título del proyecto *</Label>
@@ -343,83 +315,9 @@ export function OpportunityIntakeDialog() {
               <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
               <Button onClick={saveManual} disabled={saving}>Guardar oportunidad</Button>
             </div>
-          </TabsContent>
-
-          <TabsContent value="json" className="mt-4 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Pega un objeto o una lista de proyectos. Se traducen los formatos del report («película ficción», «6-8M», «España/Francia»)
-              y se evita duplicar: si el título y el director ya existen, la ficha se actualiza.
-            </p>
-            <Textarea
-              rows={10}
-              value={json}
-              onChange={(e) => { setJson(e.target.value); setPreview(null); setResults(null); }}
-              placeholder={JSON_EXAMPLE}
-              className="font-mono text-xs"
-            />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setPreview(parseOpportunityJson(json))} disabled={!json.trim()}>
-                Previsualizar
-              </Button>
-              <Button onClick={importJson} disabled={!preview?.rows.length || saving}>
-                <Upload className="mr-1 h-4 w-4" /> Importar {preview?.rows.length ? `(${preview.rows.length})` : ""}
-              </Button>
-            </div>
-
-            {preview?.errors.length ? (
-              <ul className="rounded-sm border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
-                {preview.errors.map((e, i) => <li key={i}>{e}</li>)}
-              </ul>
-            ) : null}
-
-            {preview?.rows.length ? (
-              <div className="overflow-x-auto rounded-sm border border-border">
-                <table className="w-full text-xs">
-                  <thead className="bg-muted/40 text-left">
-                    <tr>
-                      <th className="px-2 py-1.5 smallcaps">Título</th>
-                      <th className="px-2 py-1.5 smallcaps">Tipo</th>
-                      <th className="px-2 py-1.5 smallcaps">País</th>
-                      <th className="px-2 py-1.5 smallcaps">Presupuesto</th>
-                      <th className="px-2 py-1.5 smallcaps">Fase</th>
-                      <th className="px-2 py-1.5 smallcaps">Productora</th>
-                      <th className="px-2 py-1.5 smallcaps">Director</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {preview.rows.map((r, i) => (
-                      <tr key={i}>
-                        <td className="px-2 py-1.5">{r.title}</td>
-                        <td className="px-2 py-1.5 text-muted-foreground">{r.tipo_produccion ? OPP_TYPE_LABEL[r.tipo_produccion] : "—"}</td>
-                        <td className="px-2 py-1.5 text-muted-foreground">{r.paises.join(" / ") || "—"}</td>
-                        <td className="px-2 py-1.5 text-muted-foreground">
-                          {r.presupuesto_min || r.presupuesto_max
-                            ? `${r.presupuesto_min ? formatEUR0(r.presupuesto_min) : "—"} – ${r.presupuesto_max ? formatEUR0(r.presupuesto_max) : "abierto"}`
-                            : r.presupuesto_texto || "—"}
-                        </td>
-                        <td className="px-2 py-1.5 text-muted-foreground">{r.fase ? OPP_PHASE_LABEL[r.fase] : "—"}</td>
-                        <td className="px-2 py-1.5 text-muted-foreground">{r.productoraName || "—"}</td>
-                        <td className="px-2 py-1.5 text-muted-foreground">{r.directorName || "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : null}
-
-            {results?.length ? (
-              <ul className="space-y-1 rounded-sm border border-border p-3 text-xs">
-                {results.map((r, i) => (
-                  <li key={i} className={r.action === "error" ? "text-destructive" : "text-muted-foreground"}>
-                    <span className="font-medium text-foreground">{r.title}</span> · {r.action}
-                    {r.message ? ` — ${r.message}` : ""}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </TabsContent>
-        </Tabs>
+          </div>
       </DialogContent>
     </Dialog>
   );
 }
+
