@@ -137,15 +137,18 @@ export function PitchCloseActions({ pitchId, pitch, opportunity, composerIds }: 
       .eq("id", pitchId);
 
     if (pitch.responsable_id) {
-      await db.from("actions").insert({
+      const { error: actionErr } = await db.from("actions").insert({
         title: `Producción ganada: ${pitch.titulo}`,
-        area: "producciones",
+        area: "produccion",
         assignee_person_id: pitch.responsable_id,
         subject_type: "production",
         subject_id: produccionId,
         due_date: hoy,
         notes: "Arranque de la producción tras ganar el pitch.",
       });
+      if (actionErr) {
+        toast.error("La producción se creó, pero no se pudo crear la tarea de arranque para la ejecutiva.");
+      }
     }
 
     setBusy(false);
