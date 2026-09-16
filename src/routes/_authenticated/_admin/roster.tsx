@@ -218,7 +218,7 @@ function RosterAll() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl title-caps">Roster completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Listado único de perfiles mezclados. Cada fila indica claramente si ya es representado, está en prospección o es un objetivo pendiente.
+            Representados contratados. Los perfiles en prospección o en negociación se gestionan desde Prospects de fichaje.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -251,25 +251,9 @@ function RosterAll() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => setStatusFilter(f.key)}
-            aria-pressed={statusFilter === f.key}
-            className={cn(
-              "smallcaps rounded-sm border px-3 py-2 text-xs transition-colors",
-              statusFilter === f.key
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {f.label}
-            <span className="ml-2 font-mono text-[10px] opacity-70">
-              {f.key === "todos" ? rows.length : counts[f.key]}
-            </span>
-          </button>
-        ))}
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          {filtered.length} representados contratados
+        </p>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Ordenar por</span>
           <select
