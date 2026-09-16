@@ -185,12 +185,12 @@ function RosterAll() {
         open: 0,
       }));
 
-    return [...composerRows, ...targetRows];
+    // ROSTER COMPLETO solo muestra contratados; prospección y negociación viven en Prospects de fichaje.
+    return [...composerRows, ...targetRows].filter((r) => r.status === "contratado");
   }, [data, term, locTerm]);
 
   const filtered = useMemo(() => {
     let list = cat === "todas" ? rows : rows.filter((r) => (r.role ?? "composer") === cat);
-    if (statusFilter !== "todos") list = list.filter((r) => r.status === statusFilter);
     list = [...list].sort((a, b) => {
       if (sortBy === "status") {
         const order: Record<Status, number> = { contratado: 0, prospeccion: 1, negociacion: 2, objetivo: 3 };
@@ -199,14 +199,7 @@ function RosterAll() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [rows, cat, statusFilter, sortBy]);
-
-  const counts = useMemo(() => ({
-    contratado: rows.filter((r) => r.status === "contratado").length,
-    prospeccion: rows.filter((r) => r.status === "prospeccion").length,
-    negociacion: rows.filter((r) => r.status === "negociacion").length,
-    objetivo: rows.filter((r) => r.status === "objetivo").length,
-  }) as Record<Status, number>, [rows]);
+  }, [rows, cat, sortBy]);
 
   const exportRows = filtered.map((r) => ({
     Nombre: r.name,
