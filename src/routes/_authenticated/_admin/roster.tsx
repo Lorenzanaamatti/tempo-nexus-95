@@ -12,7 +12,6 @@ import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
 import { RepresentationStatusMenu } from "@/components/representation-status-menu";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -27,21 +26,6 @@ function fmtDate(d: string | null | undefined) {
 }
 
 type Status = "contratado" | "prospeccion" | "negociacion" | "objetivo";
-
-const STATUS_FILTERS: { key: Status | "todos"; label: string }[] = [
-  { key: "todos", label: "Todos" },
-  { key: "contratado", label: "Contratados" },
-  { key: "prospeccion", label: "En prospección" },
-  { key: "negociacion", label: "En negociación" },
-  { key: "objetivo", label: "En objetivos" },
-];
-
-const STATUS_TONE: Record<Status, string> = {
-  contratado: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
-  prospeccion: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25",
-  negociacion: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/25",
-  objetivo: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/25",
-};
 
 function statusFromComposer(status?: string | null): Status | null {
   if (status === "activo" || status === "pausa") return "contratado";
@@ -83,8 +67,7 @@ function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
   const [loc, setLoc] = usePersistedState("roster-all:loc", "");
   const [cat, setCat] = usePersistedState("roster-all:cat", "todas");
-  const [statusFilter, setStatusFilter] = usePersistedState<Status | "todos">("roster-all:status", "todos");
-  const [sortBy, setSortBy] = useState<"name" | "status">("status");
+  const [sortBy, setSortBy] = useState<"name" | "status">("name");
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v3"],
@@ -201,12 +184,12 @@ function RosterAll() {
         open: 0,
       }));
 
-    return [...composerRows, ...targetRows];
+    // ROSTER COMPLETO solo muestra contratados; prospección y negociación viven en Prospects de fichaje.
+    return [...composerRows, ...targetRows].filter((r) => r.status === "contratado");
   }, [data, term, locTerm]);
 
   const filtered = useMemo(() => {
     let list = cat === "todas" ? rows : rows.filter((r) => (r.role ?? "composer") === cat);
-    if (statusFilter !== "todos") list = list.filter((r) => r.status === statusFilter);
     list = [...list].sort((a, b) => {
       if (sortBy === "status") {
         const order: Record<Status, number> = { contratado: 0, prospeccion: 1, negociacion: 2, objetivo: 3 };
@@ -215,14 +198,7 @@ function RosterAll() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [rows, cat, statusFilter, sortBy]);
-
-  const counts = useMemo(() => ({
-    contratado: rows.filter((r) => r.status === "contratado").length,
-    prospeccion: rows.filter((r) => r.status === "prospeccion").length,
-    negociacion: rows.filter((r) => r.status === "negociacion").length,
-    objetivo: rows.filter((r) => r.status === "objetivo").length,
-  }) as Record<Status, number>, [rows]);
+  }, [rows, cat, sortBy]);
 
   const exportRows = filtered.map((r) => ({
     Nombre: r.name,
@@ -241,7 +217,7 @@ function RosterAll() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl title-caps">Roster completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Listado único de perfiles mezclados. Cada fila indica claramente si ya es representado, está en prospección o es un objetivo pendiente.
+            Representados contratados. Los perfiles en prospección o en negociación se gestionan desde Prospects de fichaje.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -274,25 +250,9 @@ function RosterAll() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => setStatusFilter(f.key)}
-            aria-pressed={statusFilter === f.key}
-            className={cn(
-              "smallcaps rounded-sm border px-3 py-2 text-xs transition-colors",
-              statusFilter === f.key
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {f.label}
-            <span className="ml-2 font-mono text-[10px] opacity-70">
-              {f.key === "todos" ? rows.length : counts[f.key]}
-            </span>
-          </button>
-        ))}
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          {filtered.length} representados contratados
+        </p>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Ordenar por</span>
           <select
