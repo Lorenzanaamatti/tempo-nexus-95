@@ -12,7 +12,6 @@ import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
 import { RepresentationStatusMenu } from "@/components/representation-status-menu";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
