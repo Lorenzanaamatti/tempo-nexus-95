@@ -68,8 +68,7 @@ function RosterAll() {
   const [q, setQ] = usePersistedState("roster-all:q", "");
   const [loc, setLoc] = usePersistedState("roster-all:loc", "");
   const [cat, setCat] = usePersistedState("roster-all:cat", "todas");
-  const [statusFilter, setStatusFilter] = usePersistedState<Status | "todos">("roster-all:status", "todos");
-  const [sortBy, setSortBy] = useState<"name" | "status">("status");
+  const [sortBy, setSortBy] = useState<"name" | "status">("name");
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["roster-all-v3"],
