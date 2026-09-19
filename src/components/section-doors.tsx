@@ -27,15 +27,17 @@ function doorClass(selected?: boolean) {
 export function SectionDoors({
   doors,
   columns = 3,
+  wide = false,
   children,
 }: {
   doors: Door[];
   columns?: 2 | 3;
+  wide?: boolean;
   children?: ReactNode;
 }) {
   const cols = columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3";
   return (
-    <div className={`mx-auto grid w-full max-w-4xl grid-cols-1 gap-3 ${cols}`}>
+    <div className={`mx-auto grid w-full grid-cols-1 gap-3 ${wide ? "max-w-none" : "max-w-4xl"} ${cols}`}>
       {doors.map((door) => {
         const Icon = door.icon;
         const content = (

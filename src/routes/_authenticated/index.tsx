@@ -166,29 +166,28 @@ function Bienvenida() {
             </div>
           </div>
         </div>
-      </div>
       </header>
 
       <Block title="Cómo tienes el día" eyebrow="Tu jornada" description="Empieza por lo inmediato: prioridades, reuniones y fechas que requieren atención." tone="avocado" columns="side">
-        <SectionDoors doors={dia} columns={2} />
+        <SectionDoors doors={dia} columns={2} wide />
       </Block>
 
       {isBigC && effectiveView === "bigc" && (
         <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper">
-          <SectionDoors doors={economico} />
+          <SectionDoors doors={economico} wide />
         </Block>
       )}
 
       <Block title="En qué vas a trabajar" eyebrow="Áreas de trabajo" description="Toda la actividad de la compañía, organizada para entrar directamente en cada área." tone="plain">
-        <SectionDoors doors={secciones} />
+        <SectionDoors doors={secciones} wide />
       </Block>
 
       <Block title="Recursos" eyebrow="Biblioteca y apoyo" description="Documentos, agenda compartida, aprendizaje y herramientas internas." tone="rust">
-        <SectionDoors doors={doorsOfGroup("Recursos")} />
+        <SectionDoors doors={doorsOfGroup("Recursos")} wide />
       </Block>
 
       <Block title="Departamentos" eyebrow="Accesos directos" description="Entra en las áreas operativas que forman parte de tu trabajo cotidiano." tone="paper">
-        <SectionDoors doors={doorsOfGroup("Departamentos")} />
+        <SectionDoors doors={doorsOfGroup("Departamentos")} wide />
       </Block>
       <footer className="border-t border-border px-6 py-8 text-center font-mono text-xs uppercase text-muted-foreground">
         Interesante Compañía · Herramienta interna
