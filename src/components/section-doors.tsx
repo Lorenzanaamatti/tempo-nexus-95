@@ -36,7 +36,11 @@ export function SectionDoors({
       {doors.map((door) => {
         const content = (
           <>
-            <span className="font-display text-xl font-extrabold uppercase leading-tight tracking-tight">
+            <span
+              className={`font-display text-lg font-extrabold uppercase leading-tight tracking-tight ${
+                door.selected ? "text-primary-foreground" : "text-[color:var(--aubergine)]"
+              }`}
+            >
               {door.title}
             </span>
             {door.description && (
