@@ -73,6 +73,15 @@ function Shell() {
     );
   }
 
+  // Portada: pantalla completa, sin árbol de navegación.
+  if (pathname === "/") {
+    return (
+      <TaskDialogProvider>
+        <Outlet />
+      </TaskDialogProvider>
+    );
+  }
+
   return (
     <SidebarProvider>
       <TaskDialogProvider>
@@ -80,11 +89,18 @@ function Shell() {
       <div className="flex min-h-screen w-full">
         <AppSidebar role={role} sessionView={sessionView} />
         <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
+          <header className="flex h-12 items-center gap-3 border-b border-border bg-background px-4">
             <SidebarTrigger />
             <div className="min-w-0 flex-1"><Breadcrumbs /></div>
             <GlobalSearch />
             <TaskInboxBell />
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--rust)] hover:underline"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Volver a bienvenida</span>
+            </Link>
           </header>
           <main className="flex-1">
             <Outlet />
