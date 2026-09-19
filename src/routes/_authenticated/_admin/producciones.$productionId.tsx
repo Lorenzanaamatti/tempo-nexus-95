@@ -33,6 +33,10 @@ import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/compone
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCurrentRole } from "@/lib/use-role";
+import { Money } from "@/components/money";
+import { formatNumberEs, parseAmount } from "@/lib/money";
+import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
+import { ProductionEventsEditor } from "@/components/person-events-editor";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/$productionId")({
   component: ProduccionDetalle,
@@ -52,11 +56,15 @@ type Form = {
   delivery_date: string;
   actual_delivery_date: string;
   notes: string;
+  fee_amount: string;
+  ic_commission_pct: string;
+  ic_commission: string;
 };
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
   country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", notes: "",
+  fee_amount: "", ic_commission_pct: "", ic_commission: "",
 };
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
@@ -140,6 +148,9 @@ function ProduccionDetalle() {
       delivery_date: data.delivery_date ?? "",
       actual_delivery_date: data.actual_delivery_date ?? "",
       notes: data.notes ?? "",
+      fee_amount: data.fee_amount != null ? String(data.fee_amount) : "",
+      ic_commission_pct: data.ic_commission_pct != null ? String(data.ic_commission_pct) : "",
+      ic_commission: data.ic_commission != null ? String(data.ic_commission) : "",
     };
     setForm(hydrated);
     markClean(hydrated);
@@ -162,6 +173,9 @@ function ProduccionDetalle() {
       delivery_date: form.delivery_date || null,
       actual_delivery_date: form.actual_delivery_date || null,
       notes: form.notes || null,
+      fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
+      ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
+      ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -210,6 +224,9 @@ function ProduccionDetalle() {
 
 
   const finalized = stage === "finalizada";
+  const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
+  const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
+  const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
   return (
     <div className="mx-auto max-w-[1700px] px-6 py-10">
@@ -397,10 +414,83 @@ function ProduccionDetalle() {
       </Section>
 
       {isBigC && (
-        <Section title="Económico" description="Resumen de solo lectura calculado a partir de PAPERWORK y los sprints de facturación.">
-          <ProductionEconomics productionId={productionId} feeAmount={data.fee_amount} commission={data.ic_commission} />
-        </Section>
+        <>
+          <Section title="Datos económicos" description="Fee acordado y comisión IC de esta producción.">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <Label>Fee acordado (€)</Label>
+                <Input
+                  key={`fee-${form.fee_amount}`}
+                  defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
+                  placeholder="0,00"
+                  onBlur={(e) => {
+                    const v = parseAmount(e.target.value);
+                    setForm({ ...form, fee_amount: v == null ? "" : String(v) });
+                  }}
+                />
+                {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
+              </div>
+              <div>
+                <Label>Comisión IC (%)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={100}
+                  value={form.ic_commission_pct}
+                  onChange={(e) => {
+                    const pct = e.target.value;
+                    const f = Number(form.fee_amount);
+                    const auto = pct !== "" && Number.isFinite(f) ? (f * Number(pct)) / 100 : "";
+                    setForm({ ...form, ic_commission_pct: pct, ic_commission: auto === "" ? "" : auto.toFixed(2) });
+                  }}
+                  placeholder="Ej. 15"
+                />
+              </div>
+              <div>
+                <Label>Comisión IC (€)</Label>
+                <Input
+                  key={`com-${form.ic_commission}`}
+                  defaultValue={form.ic_commission !== "" ? formatNumberEs(Number(form.ic_commission)) : ""}
+                  placeholder="0,00"
+                  onBlur={(e) => {
+                    const v = parseAmount(e.target.value);
+                    setForm({ ...form, ic_commission: v == null ? "" : String(v) });
+                  }}
+                />
+                {computedCommission != null && (
+                  <p className="mt-1 text-xs text-muted-foreground">Calculado: <Money value={computedCommission} /></p>
+                )}
+              </div>
+            </div>
+          </Section>
+
+          <Section title="Sprints de facturación" description="Calendario de facturación del trabajo del representado y de la comisión IC.">
+            <div className="space-y-8">
+              <BillingSprintsEditor
+                productionId={productionId}
+                kind="trabajo"
+                title="Sprints de facturación · Trabajo del representado"
+                totalReference={feeNum}
+              />
+              <BillingSprintsEditor
+                productionId={productionId}
+                kind="comision"
+                title="Sprints de facturación · Comisión IC"
+                totalReference={computedCommission ?? (form.ic_commission === "" ? null : Number(form.ic_commission))}
+              />
+            </div>
+          </Section>
+
+          <Section title="Económico" description="Resumen de solo lectura calculado a partir de PAPERWORK y los sprints de facturación.">
+            <ProductionEconomics productionId={productionId} feeAmount={data.fee_amount} commission={data.ic_commission} />
+          </Section>
+        </>
       )}
+
+      <Section title="Eventos en el calendario" description="Fechas y citas de esta producción en el calendario operativo.">
+        <ProductionEventsEditor productionId={productionId} />
+      </Section>
 
       <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
 
