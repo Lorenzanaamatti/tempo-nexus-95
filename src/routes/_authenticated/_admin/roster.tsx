@@ -12,6 +12,7 @@ import { isOpenProduction } from "@/lib/production-progress";
 import { formatLocation, matchesLocation } from "@/lib/geo";
 import { ROSTER_ROLE_OPTIONS, rosterRoleLabel } from "@/lib/roster-roles";
 import { RepresentationStatusMenu } from "@/components/representation-status-menu";
+import { RosterDoors } from "@/components/roster-doors";
 
 export const Route = createFileRoute("/_authenticated/_admin/roster")({
   component: RosterAll,
@@ -212,6 +213,9 @@ function RosterAll() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mb-10">
+        <RosterDoors selected="complete" />
+      </div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>

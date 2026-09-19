@@ -68,7 +68,7 @@
 }
 
 :root {
-  /* Paleta Pantone sobre fondo blanco frío:
+  /* Paleta Pantone sobre fondo blanco papel cálido:
    * 19-3715 TCX Aubergine Gleam (corporativo, botones y CTA)
    * 18-1248 TCX Rust #B55A30 (títulos de sección, separadores, líneas)
    * 16-0640 TCX Avocado Oil #9B892F (tarjetas, paneles, bandas, apoyos) */
@@ -79,7 +79,7 @@
   --rust-soft: #f3e3d8;
   --avocado: #9b892f;
   --avocado-soft: #f4f1e2;
-  --background: #f9feff;
+  --background: #fcfbf7;
   --foreground: #2a2226;
   --card: #ffffff;
   --card-foreground: #2a2226;
@@ -119,7 +119,7 @@
   --accent-coral: var(--rust);
   --accent-coral-soft: #d0805a;
   /* Portal tokens — siempre claros */
-  --portal-bg: #f9feff;
+  --portal-bg: #fcfbf7;
   --portal-fg: #2a2226;
   --portal-surface: #ffffff;
   --portal-surface-hover: var(--avocado-soft);

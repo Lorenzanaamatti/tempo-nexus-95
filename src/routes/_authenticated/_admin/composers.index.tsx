@@ -13,6 +13,7 @@ import { ExportButton, type ExportField } from "@/components/export-button";
 import { ListSkeleton } from "@/components/list-states";
 
 import { ROSTER_ROLE_OPTIONS, type RosterRoleValue } from "@/lib/roster-roles";
+import { RosterDoors } from "@/components/roster-doors";
 
 type RosterRole = RosterRoleValue;
 type Tier = "A" | "B" | "C" | "D" | "E" | "desarrollo";
@@ -226,6 +227,9 @@ function ComposersIndex() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mb-10">
+        <RosterDoors selected={role === "todos" ? "complete" : role} />
+      </div>
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Roster</p>
