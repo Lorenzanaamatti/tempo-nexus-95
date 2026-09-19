@@ -1,4 +1,4 @@
-import { ExportRowsButton } from "@/components/export-rows-button";
+import { PartnersExportButton } from "@/components/partners-export-button";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -74,7 +74,7 @@ export function PartnersView({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar partner…" className="w-56 rounded-sm" />
-          <ExportRowsButton rows={rows} filename="partners" sheetName="Partners" />
+          <PartnersExportButton rows={rows} tipo={tipo} title={title} filename={tipo ? title.toLowerCase() : "partners"} />
           {actions}
           <Select value={ambito} onValueChange={setAmbito}>
             <SelectTrigger className="w-40 rounded-sm"><SelectValue placeholder="Ámbito" /></SelectTrigger>
