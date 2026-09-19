@@ -90,7 +90,7 @@ function PitchesPage() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
-          <h1 className="mt-1 font-display text-5xl title-caps">PITCHES</h1>
+          <h1 className="mt-1 font-display text-5xl title-caps">PITCHES EN CURSO</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Propuestas activas de roster IC a productoras, medios, directores y supervisores.
           </p>

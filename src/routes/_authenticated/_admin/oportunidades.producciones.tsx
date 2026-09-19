@@ -21,8 +21,8 @@ function OportunidadesProducciones() {
       fixedKinds={["pitch"]}
       listKey="oportunidades-producciones"
       productionMode
-      eyebrow="OPORTUNIDADES DE VENTAS · PRODUCCIONES"
-      title="OPORTUNIDADES · PRODUCCIONES"
+      eyebrow="OPORTUNIDADES DE VENTAS"
+      title="PRODUCCIONES EN DESARROLLO"
       description="Proyectos detectados en desarrollo o producción. Alta manual o importación por JSON, sin duplicar: si el título y el director ya existen, la ficha se actualiza."
     />
   );
