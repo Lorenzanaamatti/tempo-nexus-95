@@ -59,9 +59,9 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center">
-          <BrandLogo className="h-14 w-auto object-contain" />
-          <p className="mt-4 smallcaps text-muted-foreground">Herramienta de gestión integral</p>
-          <p className="mt-3 text-sm text-muted-foreground">Acceso restringido al equipo y a los compositores representados.</p>
+          <BrandLogo className="h-24 w-auto object-contain" />
+          <p className="mt-4 smallcaps text-muted-foreground">Herramienta de gestión y consulta</p>
+          <p className="mt-3 text-sm text-muted-foreground">Acceso restringido a equipo y clientes.</p>
         </div>
         <div className="glass-panel rounded-sm p-6">
           <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 text-sm">
