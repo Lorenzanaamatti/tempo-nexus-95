@@ -22,6 +22,8 @@ export type NavGroup = {
   label: string;
   icon: typeof Music;
   items: NavItem[];
+  /** Pantalla intermedia que presenta las opciones de la sección. */
+  landingTo?: string;
   /** Groups only BIG C can see. */
   bigCOnly?: boolean;
 };
@@ -30,6 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Empresa",
     icon: Wallet,
+    landingTo: "/empresa",
     bigCOnly: true,
     items: [
       { title: "KPIs & Objetivos", to: "/empresa/kpis", icon: Gauge },
@@ -44,6 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Clientes",
     icon: LibraryBig,
+    landingTo: "/clientes",
     items: [
       { title: "Roster completo", to: "/roster", icon: LibraryBig, match: ["/composers"] },
       { title: "Compositor", to: "/composers", search: { role: "composer" }, icon: Music },
@@ -58,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Partners",
     icon: Handshake,
+    landingTo: "/partners",
     items: [
       {
         title: "Productoras",
@@ -75,6 +80,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Oportunidades de ventas",
     icon: Target,
+    landingTo: "/oportunidades",
     items: [
       { title: "Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Building2 },
@@ -90,6 +96,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Producciones",
     icon: Film,
+    landingTo: "/producciones",
     items: [
       { title: "Activas", to: "/producciones/activas", icon: Film, match: ["/productions"] },
       { title: "Seguimiento", to: "/producciones/seguimiento", icon: KanbanSquare },
@@ -101,6 +108,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Paperwork",
     icon: FileSignature,
+    landingTo: "/paperwork",
     items: [
       { title: "Presupuestos", to: "/paperwork/presupuestos", icon: Receipt },
       { title: "Deal Memos", to: "/paperwork/deal-memos", icon: KanbanSquare, match: ["/deal-memos"] },
@@ -121,6 +129,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Comunicación",
     icon: Share2,
+    landingTo: "/comunicacion",
     items: [
       { title: "Identidad corporativa", to: "/marketing/brand", icon: Palette },
       { title: "Templates publicaciones", to: "/comunicacion/publicaciones", icon: Mail },
@@ -137,6 +146,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Marketing",
     icon: Megaphone,
+    landingTo: "/marketing",
     items: [
       { title: "Campañas", to: "/marketing/campanas", icon: Megaphone },
       { title: "Métricas", to: "/marketing/metricas", icon: BarChart3 },
@@ -151,6 +161,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Recursos",
     icon: FolderOpen,
+    landingTo: "/recursos",
     items: [
       { title: "Templates", to: "/templates", icon: ScrollText },
       { title: "Calendario general", to: "/calendar", search: { view: "global" }, icon: CalendarDays },
@@ -163,6 +174,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Departamentos",
     icon: Briefcase,
+    landingTo: "/departamentos",
     items: [
       { title: "Financiero", to: "/finance", icon: LineChart, bigCOnly: true },
       { title: "Facturas", to: "/billing", icon: Receipt, bigCOnly: true },

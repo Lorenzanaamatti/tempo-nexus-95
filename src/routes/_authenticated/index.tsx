@@ -54,11 +54,6 @@ const ITEM_HINT: Record<string, string> = {
   Marketing: "Entra en campañas, métricas y obligaciones de comunicación.",
 };
 
-/** Secciones cuya puerta de portada abre una pantalla propia con botones. */
-const GROUP_LANDING: Record<string, string> = {
-  "Oportunidades de ventas": "/oportunidades",
-};
-
 function Bienvenida() {
   const { user } = useAuth();
   const { role, status, isStaff, isBigC, loading } = useCurrentRole();
@@ -106,9 +101,7 @@ function Bienvenida() {
   ];
 
   const economico: Door[] = [
-    { title: "Dashboard económico", description: ITEM_HINT["Dashboard económico"], to: "/finance" },
-    { title: "Plan de facturación", description: ITEM_HINT["Plan de facturación"], to: "/billing" },
-    { title: "Presupuestos", description: ITEM_HINT.Presupuestos, to: "/paperwork/presupuestos" },
+    { title: "Económico IC", description: "Dashboard económico, plan de facturación y presupuestos en un único acceso.", to: "/economico-ic" },
   ];
 
   const secciones: Door[] = NAV_GROUPS.filter(
@@ -116,8 +109,8 @@ function Bienvenida() {
   ).map((g) => ({
     title: g.label,
     description: GROUP_HINT[g.label],
-    to: GROUP_LANDING[g.label] ?? g.items[0]?.to,
-    search: GROUP_LANDING[g.label] ? undefined : g.items[0]?.search,
+    to: g.landingTo ?? g.items[0]?.to,
+    search: g.landingTo ? undefined : g.items[0]?.search,
     icon: g.icon,
   }));
 
