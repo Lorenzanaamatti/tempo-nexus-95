@@ -128,16 +128,16 @@ function Bienvenida() {
     <main className="min-h-screen w-full overflow-hidden bg-background">
       <div className="h-1.5 w-full bg-primary" />
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 pb-8 pt-8 sm:px-8 sm:pb-10 lg:px-12">
-          <BrandLogo variant="noir" className="h-24 w-auto max-w-full object-contain sm:h-28" />
-          <p className="mt-3 text-center font-mono text-xs font-bold uppercase text-rust sm:text-sm">Herramienta de gestión y consulta</p>
-          <div className="mt-8 flex w-full flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 pb-6 pt-8 sm:px-8 sm:pb-8 lg:px-12">
+          <BrandLogo variant="noir" className="h-36 w-auto max-w-full object-contain sm:h-48 lg:h-56" />
+          <p className="mt-4 text-center font-mono text-base font-bold uppercase tracking-[0.18em] text-rust sm:text-lg">Herramienta de gestión y consulta</p>
+          <div className="mt-6 flex w-full flex-col items-center justify-between gap-4 border-t border-border pt-5 sm:flex-row">
             <div className="text-center sm:text-left">
-              <p className="text-xs font-medium uppercase text-muted-foreground">Bienvenida</p>
-              <h1 className="mt-1 font-display text-3xl uppercase text-foreground sm:text-4xl">Hola, {nombre}</h1>
+              <p className="font-mono text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Bienvenida</p>
+              <h1 className="mt-1 font-display text-4xl uppercase leading-[0.95] text-aubergine sm:text-6xl">Hola, {nombre}</h1>
             </div>
             <div className="flex flex-col items-center gap-2 sm:items-end">
-              <span className="text-xs font-medium uppercase text-muted-foreground">Vista de trabajo</span>
+              <span className="font-mono text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Vista de trabajo</span>
               <div className="flex flex-wrap items-center justify-center gap-2">
         {vistas.map((v) => {
           const active = effectiveView === v;
@@ -149,7 +149,7 @@ function Bienvenida() {
               size="sm"
               disabled={!isBigC}
               onClick={() => setSessionView(v)}
-              className={`rounded-full px-4 text-xs font-semibold uppercase ${active ? "" : "text-aubergine hover:border-rust hover:bg-accent"} ${isBigC ? "" : "cursor-default"}`}
+              className={`rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em] ${active ? "" : "text-aubergine hover:border-rust hover:bg-accent"} ${isBigC ? "" : "cursor-default"}`}
             >
               Vista {SESSION_VIEW_LABEL[v]}
             </Button>
@@ -166,8 +166,8 @@ function Bienvenida() {
       </Block>
 
       {isBigC && effectiveView === "bigc" && (
-        <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper">
-          <SectionDoors doors={economico} wide />
+        <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper" columns="side">
+          <SectionDoors doors={economico} columns={2} wide />
         </Block>
       )}
 
@@ -212,11 +212,11 @@ function Block({
   }[tone];
   return (
     <section className={`w-full border-b border-border ${toneClass}`}>
-      <div className={`mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-12 ${columns === "side" ? "lg:grid lg:grid-cols-[minmax(14rem,0.7fr)_minmax(0,1.6fr)] lg:items-start lg:gap-14" : ""}`}>
-        <div className={columns === "side" ? "mb-7 lg:mb-0 lg:pt-1" : "mb-7 flex max-w-3xl flex-col sm:mb-8"}>
-          <p className="font-mono text-xs font-bold uppercase text-rust">{eyebrow}</p>
-          <h2 className="mt-2 font-display text-2xl uppercase text-aubergine sm:text-3xl">{title}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
+      <div className={`mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-12 ${columns === "side" ? "lg:grid lg:grid-cols-[minmax(14rem,0.7fr)_minmax(0,1.9fr)] lg:items-start lg:gap-12" : ""}`}>
+        <div className={columns === "side" ? "mb-5 lg:mb-0 lg:pt-1" : "mb-5 flex max-w-3xl flex-col"}>
+          <p className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-rust">{eyebrow}</p>
+          <h2 className="mt-2 font-display text-3xl uppercase leading-[0.95] text-aubergine sm:text-4xl">{title}</h2>
+          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">{description}</p>
         </div>
         <div>{children}</div>
       </div>

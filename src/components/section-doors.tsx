@@ -15,7 +15,7 @@ export type Door = {
 };
 
 const BASE =
-  "group flex h-auto min-h-32 w-full whitespace-normal rounded-md border px-5 py-5 text-left shadow-none transition-all duration-200 focus-visible:ring-2 sm:min-h-36 sm:px-6 sm:py-6";
+  "group flex h-auto min-h-28 w-full whitespace-normal rounded-md border px-5 py-5 text-left shadow-none transition-all duration-200 focus-visible:ring-2 sm:min-h-32 sm:px-6";
 
 function doorClass(selected?: boolean) {
   return selected
@@ -50,13 +50,13 @@ export function SectionDoors({
               ) : <span />}
               <ArrowUpRight className={`size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${door.selected ? "text-primary-foreground/70" : "text-rust"}`} aria-hidden="true" />
             </span>
-            <span className={`mt-auto pt-5 font-display text-lg font-extrabold uppercase leading-tight sm:text-xl ${
+            <span className={`mt-auto pt-4 font-display text-2xl font-extrabold uppercase leading-[0.95] sm:text-3xl ${
               door.selected ? "text-primary-foreground" : "text-aubergine"
             }`}>
               {door.title}
             </span>
             {door.description ? (
-              <span className={`mt-2 block max-w-[34ch] text-sm font-normal leading-relaxed ${door.selected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+              <span className={`mt-2 block max-w-[38ch] text-base font-normal leading-snug ${door.selected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                 {door.description}
               </span>
             ) : null}
