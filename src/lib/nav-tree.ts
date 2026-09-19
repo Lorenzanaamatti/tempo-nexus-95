@@ -60,12 +60,11 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: Handshake,
     items: [
       {
-        title: "Vista completa",
-        to: "/partners",
-        icon: Handshake,
-        match: ["/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
+        title: "Productoras",
+        to: "/partners/productoras",
+        icon: Building2,
+        match: ["/partners", "/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
       },
-      { title: "Productoras", to: "/partners/productoras", icon: Building2 },
       { title: "Plataformas", to: "/partners/plataformas", icon: MonitorPlay },
       { title: "Medios", to: "/partners/medios", icon: Newspaper },
       { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
