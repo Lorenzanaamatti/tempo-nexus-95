@@ -209,7 +209,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                 <Link to="/users" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {!collapsed && (
-                    <span className="flex flex-1 items-center justify-between gap-2 truncate text-xs">
+                    <span className="flex flex-1 items-center justify-between gap-2 truncate text-sm">
                       <span>Usuarios y permisos</span>
                       {(pendingUsers ?? 0) > 0 && (
                         <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
@@ -233,7 +233,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               >
                 <RefreshCw className="h-4 w-4" />
                 {!collapsed && (
-                  <span className="truncate text-xs">
+                  <span className="truncate text-sm">
                     Vista · {SESSION_VIEW_LABEL[effectiveView]}
                   </span>
                 )}
@@ -245,7 +245,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               <SidebarMenuButton asChild>
                 <Link to="/portal" className="flex items-center gap-2">
                   <HomeIcon className="h-4 w-4" />
-                  {!collapsed && <span className="truncate text-xs">Ir al portal</span>}
+                  {!collapsed && <span className="truncate text-sm">Ir al portal</span>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -254,7 +254,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
             <SidebarMenuButton asChild>
               <Link to="/" className="flex items-center gap-2">
                 <HomeIcon className="h-4 w-4" />
-                {!collapsed && <span className="truncate text-xs">Volver a bienvenida</span>}
+                {!collapsed && <span className="truncate text-sm">Volver a bienvenida</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -263,7 +263,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
             <SidebarMenuButton onClick={() => signOut()}>
               <LogOut className="h-4 w-4" />
               {!collapsed && (
-                <span className="truncate text-xs">
+                <span className="truncate text-sm">
                   {user?.email ? `Salir · ${user.email}` : "Salir"}
                 </span>
               )}
