@@ -148,6 +148,9 @@ function ProduccionDetalle() {
       delivery_date: data.delivery_date ?? "",
       actual_delivery_date: data.actual_delivery_date ?? "",
       notes: data.notes ?? "",
+      fee_amount: data.fee_amount != null ? String(data.fee_amount) : "",
+      ic_commission_pct: data.ic_commission_pct != null ? String(data.ic_commission_pct) : "",
+      ic_commission: data.ic_commission != null ? String(data.ic_commission) : "",
     };
     setForm(hydrated);
     markClean(hydrated);
@@ -170,6 +173,9 @@ function ProduccionDetalle() {
       delivery_date: form.delivery_date || null,
       actual_delivery_date: form.actual_delivery_date || null,
       notes: form.notes || null,
+      fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
+      ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
+      ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
