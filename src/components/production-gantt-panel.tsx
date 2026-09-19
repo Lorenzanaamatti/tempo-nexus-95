@@ -48,13 +48,22 @@ export function ProductionGanttPanel({
     queryFn: async () => {
       const ids = await loadProductionIds({ productionIds, composerId });
       if (!ids.length) return [] as Row[];
-      const [prods, phases] = await Promise.all([
+      const [prods, phases, evSubject, evSource] = await Promise.all([
         db.from("productions").select("id, title, composer_id").in("id", ids),
         db
           .from("production_phases")
           .select("id, production_id, name, owner, start_date, end_date, status, notes, position, is_milestone")
           .in("production_id", ids)
           .order("position"),
+        db
+          .from("calendar_events")
+          .select("id, subject_id, source_production_id, source_phase_id, title, note, start_date, end_date, kind")
+          .eq("subject_type", "production")
+          .in("subject_id", ids),
+        db
+          .from("calendar_events")
+          .select("id, subject_id, source_production_id, source_phase_id, title, note, start_date, end_date, kind")
+          .in("source_production_id", ids),
       ]);
       if (prods.error) throw prods.error;
       if (phases.error) throw phases.error;
