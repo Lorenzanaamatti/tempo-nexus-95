@@ -130,7 +130,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                         <ListChecks className="h-4 w-4" />
                         {!collapsed && (
                           <span className="flex flex-1 items-center justify-between gap-2">
-                            <span>Tareas para hoy</span>
+                            <span>Mis tareas</span>
                             {(myDueTasks ?? 0) > 0 && (
                               <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
                                 {myDueTasks}
