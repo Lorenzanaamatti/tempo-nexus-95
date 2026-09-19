@@ -43,7 +43,7 @@ export async function addEspanolaToProducciones(row: ProduccionEspanola) {
   return productionId;
 }
 
-/** Añade una persona al embudo de fichajes (Oportunidades › Prospects de fichaje). */
+/** Añade una persona al embudo de fichajes (Oportunidades › Quiero fichar a). */
 export async function addProspectFichaje(nombre: string, notas?: string | null, rol?: string | null) {
   const n = nombre.trim();
   if (!n) return null;
@@ -53,7 +53,7 @@ export async function addProspectFichaje(nombre: string, notas?: string | null, 
     .ilike("nombre", n)
     .maybeSingle();
   if (existing) {
-    toast.info(`"${n}" ya está en Prospects de fichaje`);
+    toast.info(`"${n}" ya está en Quiero fichar a`);
     return existing.id as string;
   }
   const { data, error } = await db
@@ -71,7 +71,7 @@ export async function addProspectFichaje(nombre: string, notas?: string | null, 
     toast.error(error.message);
     return null;
   }
-  toast.success(`"${n}" añadido a Prospects de fichaje`);
+  toast.success(`"${n}" añadido a Quiero fichar a`);
   return data.id as string;
 }
 

@@ -185,7 +185,7 @@ function RosterAll() {
         open: 0,
       }));
 
-    // ROSTER COMPLETO solo muestra contratados; prospección y negociación viven en Prospects de fichaje.
+    // ROSTER COMPLETO solo muestra contratados; prospección y negociación viven en Quiero fichar a.
     return [...composerRows, ...targetRows].filter((r) => r.status === "contratado");
   }, [data, term, locTerm]);
 
@@ -221,7 +221,7 @@ function RosterAll() {
           <p className="smallcaps text-muted-foreground">Roster</p>
           <h1 className="mt-1 font-display text-5xl title-caps">Roster completo</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Representados contratados. Los perfiles en prospección o en negociación se gestionan desde Prospects de fichaje.
+            Representados contratados. Los perfiles en prospección o en negociación se gestionan desde Quiero fichar a.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

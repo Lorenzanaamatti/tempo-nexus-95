@@ -499,7 +499,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           acciones={[
                             { label: "Crear ficha de compositor y abrir", run: () => crearYAbrir("roster", r.composer!, "composer") },
                             { label: "Añadir al Roster", run: () => addToRoster(r.composer!, "composer") },
-                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.composer!, `BSO de ${titulo} (${r.year ?? "—"})`) },
+                            { label: "Añadir a Quiero fichar a", run: () => addProspectFichaje(r.composer!, `BSO de ${titulo} (${r.year ?? "—"})`) },
                             { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.composer!, account_type: "roster", roster_kind: "composer" }) },
                           ]}
                         />
@@ -511,7 +511,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                           acciones={[
                             { label: "Crear ficha de supervisor y abrir", run: () => crearYAbrir("roster", r.music_supervisor!, "supervisor") },
                             { label: "Añadir al Roster (supervisor)", run: () => addToRoster(r.music_supervisor!, "supervisor") },
-                            { label: "Añadir a Prospects de fichaje", run: () => addProspectFichaje(r.music_supervisor!, `Supervisión musical de ${titulo}`) },
+                            { label: "Añadir a Quiero fichar a", run: () => addProspectFichaje(r.music_supervisor!, `Supervisión musical de ${titulo}`) },
                             { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: r.music_supervisor!, account_type: "roster", roster_kind: "otros" }) },
                           ]}
                         />

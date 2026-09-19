@@ -70,6 +70,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Plataformas", to: "/partners/plataformas", icon: MonitorPlay },
       { title: "Medios", to: "/partners/medios", icon: Newspaper },
       { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
+      { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
     ],
   },
   {
@@ -78,13 +79,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "A Producciones", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "A Partners", to: "/oportunidades/partners", icon: Building2 },
-      { title: "A Roster", to: "/oportunidades/roster", icon: Music },
+      { title: "Composers ESP", to: "/oportunidades/roster", icon: Music },
       { title: "Pitches", to: "/oportunidades/pitches", icon: Sparkles },
-      { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
-      { title: "Festivales", to: "/oportunidades/festivales", icon: Sparkles },
-      { title: "Premios", to: "/oportunidades/premios", icon: Target },
-      { title: "Prensa", to: "/oportunidades/prensa", icon: Sparkles },
-      { title: "Prospects de fichaje", to: "/oportunidades/prospects-fichaje", icon: Target },
+      { title: "Quiero fichar a", to: "/oportunidades/prospects-fichaje", icon: Target },
     ],
   },
   {
@@ -128,6 +125,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "EPK", to: "/comunicacion/epk", icon: Presentation },
       { title: "Reels", to: "/comunicacion/reels", icon: Video },
       { title: "Clipping", to: "/comunicacion/clipping", icon: Newspaper },
+      { title: "Festivales", to: "/oportunidades/festivales", icon: Sparkles },
+      { title: "Premios", to: "/oportunidades/premios", icon: Target },
+      { title: "Prensa", to: "/oportunidades/prensa", icon: Newspaper },
       { title: "Documentos de venta", to: "/comunicacion/documentos-venta", icon: Presentation, match: ["/marketing/ventas"] },
     ],
   },

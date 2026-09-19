@@ -118,7 +118,7 @@ function ProspectDetailPage() {
   return (
     <div className="space-y-6 p-6">
       <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-        <Link to="/oportunidades/prospects-fichaje" className="hover:text-foreground">Oportunidades · Prospects de fichaje</Link>
+        <Link to="/oportunidades/prospects-fichaje" className="hover:text-foreground">Oportunidades · Quiero fichar a</Link>
       </p>
       <PageHeader
         title={(form.nombre ?? "").toUpperCase()}
