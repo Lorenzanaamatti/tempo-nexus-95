@@ -103,7 +103,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               <BrandLogo variant="clear" className="h-9 w-auto max-w-none object-cover object-left" />
             </div>
           ) : (
-            <BrandLogo variant="clear" className="h-8 w-auto object-contain" />
+            <BrandLogo variant="clear" className="h-12 w-auto object-contain" />
           )}
         </Link>
       </SidebarHeader>
@@ -114,7 +114,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               {!collapsed && (
                 <SidebarGroupLabel
                   aria-current={tareasActive ? "true" : undefined}
-                  className={`flex h-auto items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+                  className={`flex h-auto items-center gap-2 py-2 font-display text-lg font-extrabold uppercase tracking-[0.06em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
                     tareasActive ? "text-[color:var(--aubergine)]" : ""
                   }`}
                 >
@@ -348,11 +348,11 @@ function NavGroupSection({
       <SidebarGroup>
         <SidebarGroupLabel
           aria-current={active ? "true" : undefined}
-          className={`flex h-auto w-full items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+          className={`flex h-auto w-full items-center gap-2 py-2 font-display text-lg font-extrabold uppercase tracking-[0.06em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
             active ? "text-[color:var(--aubergine)]" : ""
           }`}
         >
-          <group.icon className="h-3.5 w-3.5" />
+          <group.icon className="h-4 w-4" />
           {group.landingTo ? (
             <Link to={group.landingTo} className="flex-1 text-left">{group.label}</Link>
           ) : (
