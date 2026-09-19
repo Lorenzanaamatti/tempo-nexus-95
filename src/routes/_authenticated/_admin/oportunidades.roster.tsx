@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExportRowsButton } from "@/components/export-rows-button";
+import { FichajesDoors } from "@/components/fichajes-doors";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
 import { addProspectFichaje } from "@/lib/espanolas-actions";
 import { addToRoster } from "@/lib/spanish-films-crm";
@@ -191,6 +192,10 @@ function DeteccionTalento() {
           </p>
         </div>
         <ExportRowsButton rows={exportRows} filename="deteccion-talento" sheetName="Detección" />
+      </div>
+
+      <div className="mb-8">
+        <FichajesDoors selected="roster" />
       </div>
 
       <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[1.4fr_1.6fr_.8fr_.8fr_auto]">

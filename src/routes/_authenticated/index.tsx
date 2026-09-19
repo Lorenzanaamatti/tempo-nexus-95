@@ -36,6 +36,11 @@ const GROUP_HINT: Record<string, string> = {
   Calendario: "Agenda de la compañía",
 };
 
+/** Secciones cuya puerta de portada abre una pantalla propia con botones. */
+const GROUP_LANDING: Record<string, string> = {
+  "Oportunidades de ventas": "/oportunidades",
+};
+
 function Bienvenida() {
   const { user } = useAuth();
   const { role, status, isStaff, isBigC, loading } = useCurrentRole();
@@ -93,8 +98,8 @@ function Bienvenida() {
   ).map((g) => ({
     title: g.label,
     description: GROUP_HINT[g.label],
-    to: g.items[0]!.to,
-    search: g.items[0]!.search,
+    to: GROUP_LANDING[g.label] ?? g.items[0]!.to,
+    search: GROUP_LANDING[g.label] ? undefined : g.items[0]!.search,
   }));
 
   function doorsOfGroup(label: string): Door[] {
