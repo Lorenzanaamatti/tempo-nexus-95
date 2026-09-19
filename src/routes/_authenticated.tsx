@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Home } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { GlobalSearch } from "@/components/global-search";
@@ -7,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
-import { useSessionView } from "@/lib/session-view";
+import { useSessionView, setSessionView } from "@/lib/session-view";
 import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -37,14 +38,12 @@ function Shell() {
     setReady(true);
   }, [loading, user]);
 
-  // BIG C must pick a session view first. Skip on /vista itself and on portal.
+  // La vista de sesión se elige en la portada; BIG C entra por defecto en vista completa.
   useEffect(() => {
     if (!ready || roleLoading) return;
-    if (!isBigC) return;
-    if (sessionView) return;
-    if (isVistaPicker || isPortal) return;
-    window.location.replace("/vista");
-  }, [ready, roleLoading, isBigC, sessionView, isVistaPicker, isPortal]);
+    if (!isBigC || sessionView) return;
+    setSessionView("bigc");
+  }, [ready, roleLoading, isBigC, sessionView]);
 
   if (!ready) {
     return (
@@ -64,12 +63,13 @@ function Shell() {
     return <Outlet />;
   }
 
-  // BIG C sin vista elegida: no renderizamos el shell hasta que el redirect a /vista se resuelva.
-  if (isBigC && !sessionView) {
+
+  // Portada: pantalla completa, sin árbol de navegación.
+  if (pathname === "/") {
     return (
-      <div className="flex min-h-screen items-center justify-center font-display text-muted-foreground">
-        Preparando tu sesión…
-      </div>
+      <TaskDialogProvider>
+        <Outlet />
+      </TaskDialogProvider>
     );
   }
 
@@ -80,11 +80,18 @@ function Shell() {
       <div className="flex min-h-screen w-full">
         <AppSidebar role={role} sessionView={sessionView} />
         <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
+          <header className="flex h-12 items-center gap-3 border-b border-border bg-background px-4">
             <SidebarTrigger />
             <div className="min-w-0 flex-1"><Breadcrumbs /></div>
             <GlobalSearch />
             <TaskInboxBell />
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--rust)] hover:underline"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Volver a bienvenida</span>
+            </Link>
           </header>
           <main className="flex-1">
             <Outlet />

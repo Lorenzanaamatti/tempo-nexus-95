@@ -24,7 +24,6 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import type { AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import { useMyDueTaskCount } from "@/lib/use-my-tasks";
 import type { TaskArea } from "@/lib/task-areas";
@@ -82,11 +81,13 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
 
   const groups = NAV_GROUPS
     .filter((g) => !(g.bigCOnly && isTeamView))
-    .map((g) =>
-      isTeamView && g.label === "Legal"
-        ? { ...g, items: g.items.filter((i) => i.to !== "/agent-actions") }
-        : g,
-    );
+    .map((g) => ({
+      ...g,
+      items: g.items.filter(
+        (i) => !(i.bigCOnly && isTeamView) && !(isTeamView && g.label === "Legal" && i.to === "/agent-actions"),
+      ),
+    }))
+    .filter((g) => g.items.length > 0);
 
   const visibleAdminGroups = groups;
 
@@ -243,13 +244,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
             </SidebarMenuItem>
           )}
           <SidebarMenuItem>
-            <div className={collapsed ? "flex justify-center py-1" : "flex items-center justify-between gap-2 px-2 py-1"}>
-              {!collapsed && (
-                <span className="smallcaps text-sidebar-foreground/60">Tema</span>
-              )}
-              <ThemeToggle />
-            </div>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center gap-2">
+                <HomeIcon className="h-4 w-4" />
+                {!collapsed && <span className="truncate text-xs">Volver a bienvenida</span>}
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => signOut()}>
               <LogOut className="h-4 w-4" />
@@ -340,11 +342,11 @@ function NavGroupSection({
         <CollapsibleTrigger className="w-full">
           <SidebarGroupLabel
             aria-current={active ? "true" : undefined}
-            className={`flex w-full items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] hover:text-sidebar-accent-foreground ${
-              active ? "text-primary" : ""
+            className={`flex h-auto w-full items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+              active ? "text-[color:var(--aubergine)]" : ""
             }`}
           >
-            <group.icon className="h-3 w-3" />
+            <group.icon className="h-3.5 w-3.5" />
             <span className="flex-1 text-left">{group.label}</span>
             {active && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
             <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
