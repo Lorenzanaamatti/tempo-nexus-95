@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { useAuth } from "@/lib/auth-context";
 import { BrandLogo } from "@/components/brand-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Home,
   User,
@@ -69,7 +68,6 @@ function PortalLayout() {
             </div>
           </Link>
           <div className="ml-auto flex items-center gap-2">
-            <ThemeToggle className="h-10 w-10 border-[color:var(--portal-border)] bg-transparent text-[color:var(--portal-fg)] hover:bg-[color:var(--portal-surface-hover)]" />
             <button
               type="button"
               onClick={() => signOut()}
