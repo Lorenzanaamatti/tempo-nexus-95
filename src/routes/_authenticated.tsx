@@ -38,14 +38,12 @@ function Shell() {
     setReady(true);
   }, [loading, user]);
 
-  // BIG C must pick a session view first. Skip on /vista itself and on portal.
+  // La vista de sesión se elige en la portada; BIG C entra por defecto en vista completa.
   useEffect(() => {
     if (!ready || roleLoading) return;
-    if (!isBigC) return;
-    if (sessionView) return;
-    if (isVistaPicker || isPortal) return;
-    window.location.replace("/vista");
-  }, [ready, roleLoading, isBigC, sessionView, isVistaPicker, isPortal]);
+    if (!isBigC || sessionView) return;
+    setSessionView("bigc");
+  }, [ready, roleLoading, isBigC, sessionView]);
 
   if (!ready) {
     return (
@@ -65,14 +63,6 @@ function Shell() {
     return <Outlet />;
   }
 
-  // BIG C sin vista elegida: no renderizamos el shell hasta que el redirect a /vista se resuelva.
-  if (isBigC && !sessionView) {
-    return (
-      <div className="flex min-h-screen items-center justify-center font-display text-muted-foreground">
-        Preparando tu sesión…
-      </div>
-    );
-  }
 
   // Portada: pantalla completa, sin árbol de navegación.
   if (pathname === "/") {
