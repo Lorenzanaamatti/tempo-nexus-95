@@ -411,10 +411,83 @@ function ProduccionDetalle() {
       </Section>
 
       {isBigC && (
-        <Section title="Económico" description="Resumen de solo lectura calculado a partir de PAPERWORK y los sprints de facturación.">
-          <ProductionEconomics productionId={productionId} feeAmount={data.fee_amount} commission={data.ic_commission} />
-        </Section>
+        <>
+          <Section title="Datos económicos" description="Fee acordado y comisión IC de esta producción.">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <Label>Fee acordado (€)</Label>
+                <Input
+                  key={`fee-${form.fee_amount}`}
+                  defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
+                  placeholder="0,00"
+                  onBlur={(e) => {
+                    const v = parseAmount(e.target.value);
+                    setForm({ ...form, fee_amount: v == null ? "" : String(v) });
+                  }}
+                />
+                {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
+              </div>
+              <div>
+                <Label>Comisión IC (%)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={100}
+                  value={form.ic_commission_pct}
+                  onChange={(e) => {
+                    const pct = e.target.value;
+                    const f = Number(form.fee_amount);
+                    const auto = pct !== "" && Number.isFinite(f) ? (f * Number(pct)) / 100 : "";
+                    setForm({ ...form, ic_commission_pct: pct, ic_commission: auto === "" ? "" : auto.toFixed(2) });
+                  }}
+                  placeholder="Ej. 15"
+                />
+              </div>
+              <div>
+                <Label>Comisión IC (€)</Label>
+                <Input
+                  key={`com-${form.ic_commission}`}
+                  defaultValue={form.ic_commission !== "" ? formatNumberEs(Number(form.ic_commission)) : ""}
+                  placeholder="0,00"
+                  onBlur={(e) => {
+                    const v = parseAmount(e.target.value);
+                    setForm({ ...form, ic_commission: v == null ? "" : String(v) });
+                  }}
+                />
+                {computedCommission != null && (
+                  <p className="mt-1 text-xs text-muted-foreground">Calculado: <Money value={computedCommission} /></p>
+                )}
+              </div>
+            </div>
+          </Section>
+
+          <Section title="Sprints de facturación" description="Calendario de facturación del trabajo del representado y de la comisión IC.">
+            <div className="space-y-8">
+              <BillingSprintsEditor
+                productionId={productionId}
+                kind="trabajo"
+                title="Sprints de facturación · Trabajo del representado"
+                totalReference={feeNum}
+              />
+              <BillingSprintsEditor
+                productionId={productionId}
+                kind="comision"
+                title="Sprints de facturación · Comisión IC"
+                totalReference={computedCommission ?? (form.ic_commission === "" ? null : Number(form.ic_commission))}
+              />
+            </div>
+          </Section>
+
+          <Section title="Económico" description="Resumen de solo lectura calculado a partir de PAPERWORK y los sprints de facturación.">
+            <ProductionEconomics productionId={productionId} feeAmount={data.fee_amount} commission={data.ic_commission} />
+          </Section>
+        </>
       )}
+
+      <Section title="Eventos en el calendario" description="Fechas y citas de esta producción en el calendario operativo.">
+        <ProductionEventsEditor productionId={productionId} />
+      </Section>
 
       <SaveButton floating onClick={save} saving={saving} dirty={dirty} />
 
