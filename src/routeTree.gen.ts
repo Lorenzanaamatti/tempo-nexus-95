@@ -53,6 +53,7 @@ import { Route as AuthenticatedAdminPeopleIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminPeliculasEsIndexRouteImport } from './routes/_authenticated/_admin/peliculas-es.index'
 import { Route as AuthenticatedAdminPartnersIndexRouteImport } from './routes/_authenticated/_admin/partners.index'
 import { Route as AuthenticatedAdminOpportunitiesIndexRouteImport } from './routes/_authenticated/_admin/opportunities.index'
+import { Route as AuthenticatedAdminOportunidadesIndexRouteImport } from './routes/_authenticated/_admin/oportunidades.index'
 import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_authenticated/_admin/directors.index'
 import { Route as AuthenticatedAdminDealMemosIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.index'
 import { Route as AuthenticatedAdminContractsIndexRouteImport } from './routes/_authenticated/_admin/contracts.index'
@@ -92,6 +93,7 @@ import { Route as AuthenticatedAdminOportunidadesPrensaRouteImport } from './rou
 import { Route as AuthenticatedAdminOportunidadesPremiosRouteImport } from './routes/_authenticated/_admin/oportunidades.premios'
 import { Route as AuthenticatedAdminOportunidadesPitchesRouteImport } from './routes/_authenticated/_admin/oportunidades.pitches'
 import { Route as AuthenticatedAdminOportunidadesPartnersRouteImport } from './routes/_authenticated/_admin/oportunidades.partners'
+import { Route as AuthenticatedAdminOportunidadesFichajesRouteImport } from './routes/_authenticated/_admin/oportunidades.fichajes'
 import { Route as AuthenticatedAdminOportunidadesFestivalesRouteImport } from './routes/_authenticated/_admin/oportunidades.festivales'
 import { Route as AuthenticatedAdminMarketingObligacionesRouteImport } from './routes/_authenticated/_admin/marketing.obligaciones'
 import { Route as AuthenticatedAdminMarketingMetricasRouteImport } from './routes/_authenticated/_admin/marketing.metricas'
@@ -382,6 +384,12 @@ const AuthenticatedAdminOpportunitiesIndexRoute =
     path: '/opportunities/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminOportunidadesIndexRoute =
+  AuthenticatedAdminOportunidadesIndexRouteImport.update({
+    id: '/oportunidades/',
+    path: '/oportunidades/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDirectorsIndexRoute =
   AuthenticatedAdminDirectorsIndexRouteImport.update({
     id: '/directors/',
@@ -614,6 +622,12 @@ const AuthenticatedAdminOportunidadesPartnersRoute =
   AuthenticatedAdminOportunidadesPartnersRouteImport.update({
     id: '/oportunidades/partners',
     path: '/oportunidades/partners',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminOportunidadesFichajesRoute =
+  AuthenticatedAdminOportunidadesFichajesRouteImport.update({
+    id: '/oportunidades/fichajes',
+    path: '/oportunidades/fichajes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminOportunidadesFestivalesRoute =
@@ -939,6 +953,7 @@ export interface FileRoutesByFullPath {
   '/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
   '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
+  '/oportunidades/fichajes': typeof AuthenticatedAdminOportunidadesFichajesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/pitches': typeof AuthenticatedAdminOportunidadesPitchesRoute
   '/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
@@ -978,6 +993,7 @@ export interface FileRoutesByFullPath {
   '/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
+  '/oportunidades/': typeof AuthenticatedAdminOportunidadesIndexRoute
   '/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/partners/': typeof AuthenticatedAdminPartnersIndexRoute
   '/peliculas-es/': typeof AuthenticatedAdminPeliculasEsIndexRoute
@@ -1063,6 +1079,7 @@ export interface FileRoutesByTo {
   '/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
   '/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
+  '/oportunidades/fichajes': typeof AuthenticatedAdminOportunidadesFichajesRoute
   '/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/oportunidades/pitches': typeof AuthenticatedAdminOportunidadesPitchesRoute
   '/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
@@ -1102,6 +1119,7 @@ export interface FileRoutesByTo {
   '/contracts': typeof AuthenticatedAdminContractsIndexRoute
   '/deal-memos': typeof AuthenticatedAdminDealMemosIndexRoute
   '/directors': typeof AuthenticatedAdminDirectorsIndexRoute
+  '/oportunidades': typeof AuthenticatedAdminOportunidadesIndexRoute
   '/opportunities': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/partners': typeof AuthenticatedAdminPartnersIndexRoute
   '/peliculas-es': typeof AuthenticatedAdminPeliculasEsIndexRoute
@@ -1192,6 +1210,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/metricas': typeof AuthenticatedAdminMarketingMetricasRoute
   '/_authenticated/_admin/marketing/obligaciones': typeof AuthenticatedAdminMarketingObligacionesRoute
   '/_authenticated/_admin/oportunidades/festivales': typeof AuthenticatedAdminOportunidadesFestivalesRoute
+  '/_authenticated/_admin/oportunidades/fichajes': typeof AuthenticatedAdminOportunidadesFichajesRoute
   '/_authenticated/_admin/oportunidades/partners': typeof AuthenticatedAdminOportunidadesPartnersRoute
   '/_authenticated/_admin/oportunidades/pitches': typeof AuthenticatedAdminOportunidadesPitchesRoute
   '/_authenticated/_admin/oportunidades/premios': typeof AuthenticatedAdminOportunidadesPremiosRoute
@@ -1231,6 +1250,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/contracts/': typeof AuthenticatedAdminContractsIndexRoute
   '/_authenticated/_admin/deal-memos/': typeof AuthenticatedAdminDealMemosIndexRoute
   '/_authenticated/_admin/directors/': typeof AuthenticatedAdminDirectorsIndexRoute
+  '/_authenticated/_admin/oportunidades/': typeof AuthenticatedAdminOportunidadesIndexRoute
   '/_authenticated/_admin/opportunities/': typeof AuthenticatedAdminOpportunitiesIndexRoute
   '/_authenticated/_admin/partners/': typeof AuthenticatedAdminPartnersIndexRoute
   '/_authenticated/_admin/peliculas-es/': typeof AuthenticatedAdminPeliculasEsIndexRoute
@@ -1320,6 +1340,7 @@ export interface FileRouteTypes {
     | '/marketing/metricas'
     | '/marketing/obligaciones'
     | '/oportunidades/festivales'
+    | '/oportunidades/fichajes'
     | '/oportunidades/partners'
     | '/oportunidades/pitches'
     | '/oportunidades/premios'
@@ -1359,6 +1380,7 @@ export interface FileRouteTypes {
     | '/contracts/'
     | '/deal-memos/'
     | '/directors/'
+    | '/oportunidades/'
     | '/opportunities/'
     | '/partners/'
     | '/peliculas-es/'
@@ -1444,6 +1466,7 @@ export interface FileRouteTypes {
     | '/marketing/metricas'
     | '/marketing/obligaciones'
     | '/oportunidades/festivales'
+    | '/oportunidades/fichajes'
     | '/oportunidades/partners'
     | '/oportunidades/pitches'
     | '/oportunidades/premios'
@@ -1483,6 +1506,7 @@ export interface FileRouteTypes {
     | '/contracts'
     | '/deal-memos'
     | '/directors'
+    | '/oportunidades'
     | '/opportunities'
     | '/partners'
     | '/peliculas-es'
@@ -1572,6 +1596,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/metricas'
     | '/_authenticated/_admin/marketing/obligaciones'
     | '/_authenticated/_admin/oportunidades/festivales'
+    | '/_authenticated/_admin/oportunidades/fichajes'
     | '/_authenticated/_admin/oportunidades/partners'
     | '/_authenticated/_admin/oportunidades/pitches'
     | '/_authenticated/_admin/oportunidades/premios'
@@ -1611,6 +1636,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/contracts/'
     | '/_authenticated/_admin/deal-memos/'
     | '/_authenticated/_admin/directors/'
+    | '/_authenticated/_admin/oportunidades/'
     | '/_authenticated/_admin/opportunities/'
     | '/_authenticated/_admin/partners/'
     | '/_authenticated/_admin/peliculas-es/'
@@ -1957,6 +1983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOpportunitiesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/oportunidades/': {
+      id: '/_authenticated/_admin/oportunidades/'
+      path: '/oportunidades'
+      fullPath: '/oportunidades/'
+      preLoaderRoute: typeof AuthenticatedAdminOportunidadesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/directors/': {
       id: '/_authenticated/_admin/directors/'
       path: '/directors'
@@ -2228,6 +2261,13 @@ declare module '@tanstack/react-router' {
       path: '/oportunidades/partners'
       fullPath: '/oportunidades/partners'
       preLoaderRoute: typeof AuthenticatedAdminOportunidadesPartnersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/oportunidades/fichajes': {
+      id: '/_authenticated/_admin/oportunidades/fichajes'
+      path: '/oportunidades/fichajes'
+      fullPath: '/oportunidades/fichajes'
+      preLoaderRoute: typeof AuthenticatedAdminOportunidadesFichajesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/oportunidades/festivales': {
@@ -2617,6 +2657,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMarketingMetricasRoute: typeof AuthenticatedAdminMarketingMetricasRoute
   AuthenticatedAdminMarketingObligacionesRoute: typeof AuthenticatedAdminMarketingObligacionesRoute
   AuthenticatedAdminOportunidadesFestivalesRoute: typeof AuthenticatedAdminOportunidadesFestivalesRoute
+  AuthenticatedAdminOportunidadesFichajesRoute: typeof AuthenticatedAdminOportunidadesFichajesRoute
   AuthenticatedAdminOportunidadesPartnersRoute: typeof AuthenticatedAdminOportunidadesPartnersRoute
   AuthenticatedAdminOportunidadesPitchesRoute: typeof AuthenticatedAdminOportunidadesPitchesRoute
   AuthenticatedAdminOportunidadesPremiosRoute: typeof AuthenticatedAdminOportunidadesPremiosRoute
@@ -2654,6 +2695,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComposersIndexRoute: typeof AuthenticatedAdminComposersIndexRoute
   AuthenticatedAdminContractsIndexRoute: typeof AuthenticatedAdminContractsIndexRoute
   AuthenticatedAdminDirectorsIndexRoute: typeof AuthenticatedAdminDirectorsIndexRoute
+  AuthenticatedAdminOportunidadesIndexRoute: typeof AuthenticatedAdminOportunidadesIndexRoute
   AuthenticatedAdminOpportunitiesIndexRoute: typeof AuthenticatedAdminOpportunitiesIndexRoute
   AuthenticatedAdminPartnersIndexRoute: typeof AuthenticatedAdminPartnersIndexRoute
   AuthenticatedAdminPeliculasEsIndexRoute: typeof AuthenticatedAdminPeliculasEsIndexRoute
@@ -2739,6 +2781,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketingObligacionesRoute,
   AuthenticatedAdminOportunidadesFestivalesRoute:
     AuthenticatedAdminOportunidadesFestivalesRoute,
+  AuthenticatedAdminOportunidadesFichajesRoute:
+    AuthenticatedAdminOportunidadesFichajesRoute,
   AuthenticatedAdminOportunidadesPartnersRoute:
     AuthenticatedAdminOportunidadesPartnersRoute,
   AuthenticatedAdminOportunidadesPitchesRoute:
@@ -2806,6 +2850,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminComposersIndexRoute: AuthenticatedAdminComposersIndexRoute,
   AuthenticatedAdminContractsIndexRoute: AuthenticatedAdminContractsIndexRoute,
   AuthenticatedAdminDirectorsIndexRoute: AuthenticatedAdminDirectorsIndexRoute,
+  AuthenticatedAdminOportunidadesIndexRoute:
+    AuthenticatedAdminOportunidadesIndexRoute,
   AuthenticatedAdminOpportunitiesIndexRoute:
     AuthenticatedAdminOpportunitiesIndexRoute,
   AuthenticatedAdminPartnersIndexRoute: AuthenticatedAdminPartnersIndexRoute,

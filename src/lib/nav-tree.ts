@@ -76,11 +76,15 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Oportunidades de ventas",
     icon: Target,
     items: [
-      { title: "A Producciones", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
-      { title: "A Partners", to: "/oportunidades/partners", icon: Building2 },
-      { title: "Composers ESP", to: "/oportunidades/roster", icon: Music },
-      { title: "Pitches", to: "/oportunidades/pitches", icon: Sparkles },
-      { title: "Quiero fichar a", to: "/oportunidades/prospects-fichaje", icon: Target },
+      { title: "Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
+      { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Building2 },
+      { title: "Pitches en curso", to: "/oportunidades/pitches", icon: Sparkles },
+      {
+        title: "Fichajes que queremos",
+        to: "/oportunidades/fichajes",
+        icon: Music,
+        match: ["/oportunidades/roster", "/oportunidades/prospects-fichaje", "/oportunidades/prospect"],
+      },
     ],
   },
   {

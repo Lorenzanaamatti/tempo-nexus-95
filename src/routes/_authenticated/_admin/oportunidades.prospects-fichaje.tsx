@@ -1,4 +1,5 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
+import { FichajesDoors } from "@/components/fichajes-doors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -117,6 +118,10 @@ function ProspectsFichajePage() {
           </p>
         </div>
         <ExportRowsButton rows={filtered} filename="quiero-fichar-a" sheetName="Quiero fichar a" />
+      </div>
+
+      <div className="mb-8">
+        <FichajesDoors selected="prospects" />
       </div>
 
       <div className="mb-6 grid gap-2 rounded-sm border border-border bg-card/40 p-4 md:grid-cols-[2fr_1fr_1fr_1fr_1.2fr_2fr_auto]">
