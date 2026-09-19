@@ -299,7 +299,7 @@ function NavGroupSection({
   search: { role?: string };
   pendingAgentActions: number;
 }) {
-  const active = findNavLocation(pathname, search)?.group.label === group.label;
+  const active = pathname === group.landingTo || findNavLocation(pathname, search)?.group.label === group.label;
   const [open, setOpen] = useState(active);
 
   // Abre automáticamente el grupo de la ruta actual; el resto recuerda su estado.

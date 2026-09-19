@@ -1,5 +1,7 @@
 import { SectionDoors, type Door } from "@/components/section-doors";
 import { NAV_GROUPS } from "@/lib/nav-tree";
+import { useCurrentRole } from "@/lib/use-role";
+import { useSessionView } from "@/lib/session-view";
 
 const ITEM_DESCRIPTIONS: Record<string, string> = {
   "KPIs & Objetivos": "Consulta los indicadores de la compañía y el avance de sus objetivos.",
@@ -94,14 +96,19 @@ export function GroupLanding({
   title?: string;
   description: string;
 }) {
+  const { isBigC } = useCurrentRole();
+  const sessionView = useSessionView();
   const group = NAV_GROUPS.find((candidate) => candidate.label === groupLabel);
-  const doors: Door[] = (group?.items ?? []).map((item) => ({
-    title: item.title,
-    description: ITEM_DESCRIPTIONS[item.title] ?? item.hint,
-    to: item.to,
-    search: item.search,
-    icon: item.icon,
-  }));
+  const showBigCItems = isBigC && sessionView !== "team" && sessionView !== "roster";
+  const doors: Door[] = (group?.items ?? [])
+    .filter((item) => !item.bigCOnly || showBigCItems)
+    .map((item) => ({
+      title: item.title,
+      description: ITEM_DESCRIPTIONS[item.title] ?? item.hint,
+      to: item.to,
+      search: item.search,
+      icon: item.icon,
+    }));
 
   return <SectionLanding title={title} description={description} doors={doors} />;
 }
