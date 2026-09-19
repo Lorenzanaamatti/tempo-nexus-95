@@ -33,6 +33,10 @@ import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/compone
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCurrentRole } from "@/lib/use-role";
+import { Money } from "@/components/money";
+import { formatNumberEs, parseAmount } from "@/lib/money";
+import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
+import { ProductionEventsEditor } from "@/components/person-events-editor";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/$productionId")({
   component: ProduccionDetalle,
@@ -52,11 +56,15 @@ type Form = {
   delivery_date: string;
   actual_delivery_date: string;
   notes: string;
+  fee_amount: string;
+  ic_commission_pct: string;
+  ic_commission: string;
 };
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
   country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", notes: "",
+  fee_amount: "", ic_commission_pct: "", ic_commission: "",
 };
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
