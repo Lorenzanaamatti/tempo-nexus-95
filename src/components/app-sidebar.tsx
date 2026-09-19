@@ -299,7 +299,7 @@ function NavGroupSection({
   search: { role?: string };
   pendingAgentActions: number;
 }) {
-  const active = findNavLocation(pathname, search)?.group.label === group.label;
+  const active = pathname === group.landingTo || findNavLocation(pathname, search)?.group.label === group.label;
   const [open, setOpen] = useState(active);
 
   // Abre automáticamente el grupo de la ruta actual; el resto recuerda su estado.
@@ -346,19 +346,23 @@ function NavGroupSection({
   return (
     <Collapsible open={open} onOpenChange={toggle}>
       <SidebarGroup>
-        <CollapsibleTrigger className="w-full">
-          <SidebarGroupLabel
-            aria-current={active ? "true" : undefined}
-            className={`flex h-auto w-full items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
-              active ? "text-[color:var(--aubergine)]" : ""
-            }`}
-          >
-            <group.icon className="h-3.5 w-3.5" />
+        <SidebarGroupLabel
+          aria-current={active ? "true" : undefined}
+          className={`flex h-auto w-full items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+            active ? "text-[color:var(--aubergine)]" : ""
+          }`}
+        >
+          <group.icon className="h-3.5 w-3.5" />
+          {group.landingTo ? (
+            <Link to={group.landingTo} className="flex-1 text-left">{group.label}</Link>
+          ) : (
             <span className="flex-1 text-left">{group.label}</span>
-            {active && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
+          )}
+          {active && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
+          <CollapsibleTrigger aria-label={`${open ? "Cerrar" : "Abrir"} ${group.label}`} className="rounded-sm p-1 hover:bg-sidebar-accent">
             <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
-          </SidebarGroupLabel>
-        </CollapsibleTrigger>
+          </CollapsibleTrigger>
+        </SidebarGroupLabel>
         <CollapsibleContent>
           <SidebarGroupContent>
             <SidebarMenu>
