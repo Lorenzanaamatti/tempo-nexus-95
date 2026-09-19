@@ -110,8 +110,8 @@ function Bienvenida() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col items-center px-6 py-14">
       <BrandLogo variant="auto" className="h-16 w-auto" />
-      <p className="smallcaps mt-3 text-[color:var(--rust)]">Herramienta interna</p>
-      <h1 className="mt-6 font-display text-4xl uppercase">Hola, {nombre}</h1>
+      <p className="smallcaps mt-3 text-sm text-[color:var(--rust)]">Herramienta interna</p>
+      <h1 className="mt-6 font-display text-5xl uppercase">Hola, {nombre}</h1>
 
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
         {vistas.map((v) => {
@@ -162,7 +162,7 @@ function Bienvenida() {
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-12 w-full">
-      <h2 className="mb-4 border-b border-[color:var(--rust)]/40 pb-2 text-center font-display text-xl uppercase text-[color:var(--rust)]">
+      <h2 className="mb-4 border-b border-[color:var(--rust)]/40 pb-2 text-center font-display text-2xl uppercase">
         {title}
       </h2>
       {children}

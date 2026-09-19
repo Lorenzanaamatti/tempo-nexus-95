@@ -17,7 +17,7 @@ const BASE =
 function doorClass(selected?: boolean) {
   return selected
     ? `${BASE} border-[color:var(--aubergine)] bg-[color:var(--aubergine)] text-primary-foreground hover:border-[color:var(--aubergine)]`
-    : `${BASE} text-[color:var(--rust)]`;
+    : `${BASE} text-foreground`;
 }
 
 /** Parrilla de "puertas": botones grandes, limpios, sin datos añadidos. */
@@ -36,7 +36,7 @@ export function SectionDoors({
       {doors.map((door) => {
         const content = (
           <>
-            <span className="font-display text-lg font-extrabold uppercase leading-tight tracking-tight">
+            <span className="font-display text-xl font-extrabold uppercase leading-tight tracking-tight">
               {door.title}
             </span>
             {door.description && (
