@@ -57,6 +57,11 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-rust: var(--rust);
+  --color-rust-soft: var(--rust-soft);
+  --color-aubergine: var(--aubergine);
+  --color-avocado: var(--avocado);
+  --color-avocado-soft: var(--avocado-soft);
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
