@@ -224,6 +224,9 @@ function ProduccionDetalle() {
 
 
   const finalized = stage === "finalizada";
+  const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
+  const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
+  const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
   return (
     <div className="mx-auto max-w-[1700px] px-6 py-10">
