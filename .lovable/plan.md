@@ -1,46 +1,61 @@
-# Presupuestos de supervisión musical desde plantilla
+# Reestructura de portada, navegación y color
 
-Sí, se puede. Convierto el documento que has subido en una plantilla viva dentro de Recursos · Templates, con formulario, previsualización, descarga e historial por proyecto.
+Solo diseño y navegación. No se tocan permisos, lógica de negocio ni el portal del representado.
 
-## Dónde vive
+## 1. Paleta
 
-En **Templates · Templates presupuesto** aparece una nueva categoría "Supervisión musical" con la plantilla base creada a partir de tu documento (texto, estructura y logotipo). Desde ahí, botón **Nuevo presupuesto**.
+Tres colores Pantone sobre fondo blanco, sin modo oscuro.
 
-## La ficha que completas
+| Uso | Pantone | Hex |
+| --- | --- | --- |
+| Botones principales y llamadas a la acción (texto blanco) | 19-3715 TCX Aubergine Gleam | morado berenjena profundo — resuelvo el hex exacto de la carta Pantone al implementar y lo dejo en un único token |
+| Títulos de sección, separadores y líneas de fichas | 18-1248 TCX Rust | #B55A30 |
+| Tarjetas, paneles, bandas y apoyos | 16-0640 TCX Avocado Oil | #9B892F (en versiones suaves para fondos, para que el texto siga legible) |
 
-- Fecha (por defecto hoy)
-- Título del presupuesto
-- Proyecto (buscador entre producciones y oportunidades; si no existe, se crea un proyecto provisional con ese título)
-- Cliente / empresa, persona de contacto, email
-- Idioma: español o inglés (texto base bilingüe; otros idiomas vía traducción automática)
-- Precio + moneda + nota de impuestos ("más IVA")
-- Director y tipo de obra (largometraje, serie, documental…) para la frase de apertura
-- Servicios incluidos: lista con casillas ya marcadas por defecto, más campo para añadir líneas propias y reordenarlas
-- Firma: nombre, cargo, teléfono (por defecto los de tu ficha de equipo)
-- Notas internas
+- Botones secundarios en gris neutro.
+- Colores por área y gráficas se rearmonizan a esta familia (aubergine, rust, avocado y sus tonos).
+- Se retira el modo oscuro: desaparece el selector de tema y la app queda siempre en claro.
+- El fondo se mantiene en el blanco frío actual #F9FEFF.
+- Nota: el logotipo actual es negro con punto rojo; el aubergine se aplica como color corporativo aunque el logo no lo lleve todavía.
 
-## Previsualización y salida
+## 2. Pantalla de bienvenida
 
-- Vista previa del documento montado con el logotipo, tal cual saldrá
-- **Descargar Word (.docx)** y **Descargar PDF**
-- **Enviar por email**: a tu correo, y/o a otros destinatarios añadidos, con el PDF adjunto o enlace de descarga
+Nueva portada a pantalla completa, sin menú lateral:
 
-## Archivo por proyecto
+- Logo de Interesante centrado arriba y, debajo, el rótulo de la herramienta.
+- Saludo "Hola, NOMBRE" con el nombre de la persona.
+- Selector de vista: Dirección (BIG C) puede cambiar entre todas las vistas; Team solo ve indicada su vista, sin opciones que no le correspondan.
+- **Cómo tienes el día**: dos puertas grandes en parrilla — Tareas y Calendario.
+- **En qué vas a trabajar**: puertas grandes en parrilla con las secciones reales activas.
+- **Recursos**: Templates, Calendario general, Tutoriales, BI, Agentes IA (solo Dirección), Auditoría (solo Dirección).
+- **Departamentos**: Financiero, Facturas, Personal, CRM (solo Dirección) y Marketing (todos).
+- Botones blancos con texto Rust; al pulsar o quedar activos, aubergine con texto blanco. Sin datos ni cifras en esta pantalla.
+- Tutoriales y BI aún no existen como sección: se crean como páginas vacías con su título y un texto de "en preparación", listas para llenarse.
 
-Cada presupuesto enviado queda en **Presupuestos enviados** dentro de la ficha del proyecto (producción u oportunidad), con fecha, destinatarios, idioma, importe, estado (borrador / enviado) y el archivo generado. Si el proyecto era provisional, al completar sus datos el historial se conserva.
+## 3. Navegación contextual
+
+- El árbol lateral solo aparece dentro de una sección, nunca en la portada.
+- Dentro de una sección se sigue viendo el resto de secciones en el árbol.
+- Títulos de grupo en negrita, mayores que los enlaces, en Rust.
+- Enlace "Volver a bienvenida" con icono de casa arriba a la derecha, en flujo normal (se desplaza con el contenido, no tapa botones).
+- Repaso del árbol para que todos los enlaces apunten a secciones vivas; los que ya no existan se eliminan.
+
+## 4. Puertas dentro de cada sección
+
+Cuando una sección tiene varias opciones de trabajo:
+
+- Parrilla de botones grandes centrados (3 columnas en pantalla ancha), no una barra de pestañas.
+- Cada botón: título en negrita y una línea describiendo el trabajo. Nada más.
+- Blancos con texto Rust; el elegido en aubergine con texto blanco.
+- Al entrar en una opción desaparecen las demás y queda solo **ATRÁS**; la parrilla es algo menor que la pantalla para que ATRÁS y "Volver a bienvenida" no se solapen.
+- Dentro del espacio de trabajo: limpio, centrado, sin scroll constante.
 
 ## Detalles técnicos
 
-- Tablas nuevas: `budget_templates` (texto base por idioma, bloques de servicios por defecto, logo) y `budgets` (datos de la ficha, servicios elegidos, importe, idioma, estado, `production_id` / `opportunity_id`, PDF/DOCX en Storage, destinatarios y fecha de envío). RLS por `current_user_is_staff()` y GRANTs.
-- Generación: servidor TanStack (`createServerFn`) que renderiza el documento a DOCX (`docx`) y a PDF; los archivos se guardan en un bucket privado y se sirven con URL firmada.
-- Logotipo: se usa el logotipo oficial de Interesante Compañía ya presente en la app (si prefieres el del documento subido, lo cambio).
-- Proyecto provisional: se crea una oportunidad mínima con el título y marca "provisional" para completarla después.
-- Traducción a idiomas fuera de ES/EN mediante la IA ya integrada.
-
-## Envío por email
-
-El envío desde la app requiere un dominio propio verificado (aún no configurado). Construyo primero la plantilla, la ficha, la previsualización, las descargas y el archivo por proyecto; en cuanto verifiques el dominio activo el envío por email y el archivado automático del envío.
-
-## Fuera de alcance por ahora
-
-Firma electrónica del presupuesto y conversión automática a contrato.
+- Tokens de color en `src/styles.css`: se reescriben `--primary`, `--ring`, `--accent`, `--border`, `--chart-*` y los tokens de sidebar/portal a la familia aubergine/rust/avocado; se elimina el bloque `.dark`, el script anti-flash de `__root.tsx` y `ThemeToggle`.
+- Nueva portada en `src/routes/_authenticated/index.tsx`, con el selector de vista de `/vista` integrado (`session-view.ts` se mantiene).
+- `src/routes/_authenticated.tsx`: el shell deja de renderizar `AppSidebar` en la portada y añade la cabecera con "Volver a bienvenida".
+- `src/lib/nav-tree.ts`: se añaden los grupos Recursos y Departamentos, se depuran enlaces muertos y se marcan los ítems restringidos a Dirección.
+- Nuevo componente reutilizable de "puertas" (`section-doors.tsx`) usado en la portada y en las secciones con varias opciones; las páginas con pestañas pasan a usarlo.
+- Rutas nuevas vacías: Tutoriales y BI.
+- Sin migraciones ni cambios de permisos.
