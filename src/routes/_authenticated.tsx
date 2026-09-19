@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
-import { useSessionView } from "@/lib/session-view";
+import { useSessionView, setSessionView } from "@/lib/session-view";
 import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
