@@ -342,11 +342,11 @@ function NavGroupSection({
         <CollapsibleTrigger className="w-full">
           <SidebarGroupLabel
             aria-current={active ? "true" : undefined}
-            className={`flex w-full items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] hover:text-sidebar-accent-foreground ${
-              active ? "text-primary" : ""
+            className={`flex h-auto w-full items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+              active ? "text-[color:var(--aubergine)]" : ""
             }`}
           >
-            <group.icon className="h-3 w-3" />
+            <group.icon className="h-3.5 w-3.5" />
             <span className="flex-1 text-left">{group.label}</span>
             {active && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
             <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
