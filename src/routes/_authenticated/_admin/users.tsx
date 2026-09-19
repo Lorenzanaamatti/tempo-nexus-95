@@ -62,7 +62,7 @@ function UsersPage() {
   const rejected = users.filter((u) => u.status === "rejected");
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <header className="mb-8 border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Acceso</p>
         <h1 className="font-display text-5xl title-caps">Usuarios y permisos</h1>

@@ -80,11 +80,11 @@ function PartnerDetail() {
   }
 
   if (detailQ.isLoading) {
-    return <div className="mx-auto max-w-4xl px-6 py-10"><ListSkeleton rows={4} /></div>;
+    return <div className="mx-auto max-w-[1700px] px-6 py-10"><ListSkeleton rows={4} /></div>;
   }
   if (!detailQ.data) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-10">
+      <div className="mx-auto max-w-[1700px] px-6 py-10">
         <EmptyState title="Partner no encontrado" description="Este registro ya no existe." />
       </div>
     );
@@ -94,7 +94,7 @@ function PartnerDetail() {
   const apoyo = form.tipo_apoyo ?? [];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <p className="smallcaps text-muted-foreground">
         <Link to="/partners" className="hover:underline">Partners</Link> · {tipo}
       </p>

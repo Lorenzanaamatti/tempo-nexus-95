@@ -97,7 +97,7 @@ export function CatalogIndex(props: CatalogIndexProps) {
   const inline = !!props.renderExtra;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-8 border-b border-border pb-6">
         <div className="flex items-end justify-between gap-4">
           <div>

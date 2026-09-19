@@ -67,7 +67,7 @@ function FinancePage() {
     : "Presupuesto por proyecto y consolidación temporal de previsto, facturado y cobrado.";
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <header className="mb-8">
         <p className="smallcaps text-muted-foreground">{eyebrow}</p>
         <h1 className="font-display text-5xl title-caps">{title}</h1>

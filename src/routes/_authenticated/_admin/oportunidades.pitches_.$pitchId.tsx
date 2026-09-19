@@ -264,7 +264,7 @@ function PitchDetail() {
   if (!pitchQ.data?.pitch) return <div className="mx-auto max-w-3xl px-6 py-10 text-sm text-muted-foreground">Pitch no encontrado.</div>;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Oportunidades de ventas · Pitches</p>

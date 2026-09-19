@@ -70,7 +70,7 @@ function ICCompanyPage() {
   if (!ic) return <div className="p-10 font-display text-muted-foreground">No se ha encontrado la ficha de Interesante Compañía.</div>;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 space-y-12">
+    <div className="mx-auto max-w-[1700px] px-6 py-10 space-y-12">
       <header className="border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Empresa · Ficha corporativa</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">

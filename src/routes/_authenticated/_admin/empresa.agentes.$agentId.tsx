@@ -80,10 +80,10 @@ function AgentDetail() {
   }
 
   if (loading) return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
-  if (!isBigC) return <div className="mx-auto max-w-4xl px-6 py-10"><EmptyState title="Sin acceso" description="Solo BIG C." /></div>;
+  if (!isBigC) return <div className="mx-auto max-w-[1700px] px-6 py-10"><EmptyState title="Sin acceso" description="Solo BIG C." /></div>;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div>
           <PageCrumb label={data?.agent?.full_name ?? "Agente"} />

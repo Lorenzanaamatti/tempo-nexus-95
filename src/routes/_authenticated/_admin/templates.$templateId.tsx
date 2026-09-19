@@ -70,7 +70,7 @@ function TemplateDetail() {
   if (isLoading) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
   if (!data) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-10">
+      <div className="mx-auto max-w-[1700px] px-6 py-10">
         <EmptyState title="Plantilla no encontrada" description="Puede que se haya eliminado." action={{ label: "Volver a plantillas", to: "/templates" }} />
       </div>
     );
@@ -102,7 +102,7 @@ function TemplateDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div>
           <PageCrumb label={data.nombre} />

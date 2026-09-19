@@ -114,11 +114,11 @@ function EquipoDetail() {
 
   if (loading) return <div className="p-10 font-display text-muted-foreground">Comprobando permisos…</div>;
   if (!isBigC) {
-    return <div className="mx-auto max-w-4xl px-6 py-10"><EmptyState title="Sin acceso" description="Esta sección solo está disponible para BIG C." /></div>;
+    return <div className="mx-auto max-w-[1700px] px-6 py-10"><EmptyState title="Sin acceso" description="Esta sección solo está disponible para BIG C." /></div>;
   }
   if (data && data.is_virtual_assistant) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-10">
+      <div className="mx-auto max-w-[1700px] px-6 py-10">
         <EmptyState
           title="Es un agente IA"
           description="Los agentes se gestionan en EMPRESA > Agentes IA."
@@ -132,7 +132,7 @@ function EquipoDetail() {
   const freelance = form.contract_type === "freelance" || form.contract_type === "proveedor";
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div>
           <PageCrumb label={form.full_name || "Miembro"} />
