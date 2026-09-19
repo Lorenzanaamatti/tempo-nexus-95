@@ -1,11 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PartnersView } from "@/components/partners-view";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/_admin/partners/")({
-  component: () => (
-    <PartnersView
-      title="PARTNERS"
-      description="Productoras, medios e instituciones con las que trabaja Interesante Compañía, en una única lista."
-    />
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/partners/productoras" });
+  },
+  component: () => null,
 });
