@@ -84,7 +84,7 @@ export function ProductionGanttPanel({
         ((prods.data ?? []) as any[]).map((p) => [p.id, { title: p.title, composer_id: p.composer_id }]),
       );
 
-      return ((phases.data ?? []) as any[])
+      const phaseRows: Row[] = ((phases.data ?? []) as any[])
         .filter((p) => p.start_date || p.end_date)
         .map((p) => {
           const m = meta.get(p.production_id);
@@ -103,6 +103,40 @@ export function ProductionGanttPanel({
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
           } as Row;
         });
+
+      // Eventos de calendario de la producción (los que no proceden de un proceso ya pintado)
+      const seen = new Set<string>();
+      const eventRows: Row[] = [...((evSubject.data ?? []) as any[]), ...((evSource.data ?? []) as any[])]
+        .filter((e) => {
+          if (!e.start_date && !e.end_date) return false;
+          if (e.source_phase_id) return false;
+          if (seen.has(e.id)) return false;
+          seen.add(e.id);
+          return true;
+        })
+        .map((e) => {
+          const pid: string = e.source_production_id ?? e.subject_id;
+          const m = meta.get(pid);
+          const start = e.start_date ?? e.end_date;
+          const end = e.end_date ?? e.start_date;
+          return {
+            id: `ev-${e.id}`,
+            name: e.title || "Evento",
+            owner: "agencia" as GanttOwner,
+            start,
+            end,
+            status: "planificada" as GanttPhase["status"],
+            note: e.note,
+            milestone: start === end,
+            productionId: pid,
+            productionTitle: m?.title ?? "Producción",
+            composerId: m?.composer_id ?? null,
+            composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
+          } as Row;
+        })
+        .filter((r) => !!r.productionId && meta.has(r.productionId));
+
+      return [...phaseRows, ...eventRows];
     },
   });
 
