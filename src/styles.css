@@ -70,7 +70,7 @@
 :root {
   /* Paleta Pantone sobre fondo blanco papel cálido:
    * 19-3715 TCX Aubergine Gleam (corporativo, botones y CTA)
-   * 18-1248 TCX Rust #B55A30 (títulos de sección, separadores, líneas)
+   * 18-1248 TCX Rust #B55A30 (rótulos auxiliares, separadores, líneas)
    * 16-0640 TCX Avocado Oil #9B892F (tarjetas, paneles, bandas, apoyos) */
   --radius: 0.375rem;
   --aubergine: #47353f;
@@ -149,6 +149,7 @@
     letter-spacing: -0.01em;
     font-weight: 800;
     font-style: normal;
+    color: var(--aubergine);
   }
   h3 {
     font-family: var(--font-display);
@@ -177,6 +178,7 @@
   .title-caps {
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    color: var(--aubergine);
   }
   .smallcaps {
     text-transform: uppercase;
