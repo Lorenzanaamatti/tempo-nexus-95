@@ -8,6 +8,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { NAV_GROUPS } from "@/lib/nav-tree";
 import { SectionDoors, type Door } from "@/components/section-doors";
 import { setSessionView, useSessionView, SESSION_VIEW_LABEL, type SessionView } from "@/lib/session-view";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Bienvenida,
@@ -24,16 +25,33 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 const GROUP_HINT: Record<string, string> = {
-  Empresa: "Gobierno y números de la compañía",
-  Clientes: "Roster y fichas de representados",
-  Partners: "Productoras, plataformas, medios",
-  "Oportunidades de ventas": "Todo lo que puede convertirse en trabajo",
-  Producciones: "Trabajo en marcha y cerrado",
-  Paperwork: "Presupuestos, deal memos, contratos",
-  "Templates documentos": "Documentos base",
-  Comunicación: "Identidad y publicaciones",
-  Marketing: "Campañas y métricas",
-  Calendario: "Agenda de la compañía",
+  Empresa: "Objetivos, equipo, actividad y visión económica de la compañía.",
+  Clientes: "Consulta el roster completo y las fichas de cada especialidad.",
+  Partners: "Gestiona productoras, plataformas, medios e instituciones.",
+  "Oportunidades de ventas": "Sigue producciones, contactos, pitches y posibles fichajes.",
+  Producciones: "Controla el trabajo activo, su evolución y los proyectos finalizados.",
+  Paperwork: "Prepara presupuestos, acuerdos, contratos y documentación legal.",
+  "Templates documentos": "Encuentra y reutiliza los documentos base de la compañía.",
+  Comunicación: "Coordina identidad, contenidos, prensa y materiales de venta.",
+  Marketing: "Planifica campañas, consulta métricas y controla obligaciones.",
+  Calendario: "Consulta la agenda compartida de la compañía.",
+};
+
+const ITEM_HINT: Record<string, string> = {
+  "Dashboard económico": "Visión global de ingresos, previsiones, costes y rentabilidad.",
+  "Plan de facturación": "Organiza importes, fechas y seguimiento de las facturas previstas.",
+  Presupuestos: "Crea, consulta y organiza presupuestos vinculados a cada proyecto.",
+  Templates: "Accede a documentos y modelos preparados para reutilizar.",
+  "Calendario general": "Consulta reuniones, entregas, hitos y fechas compartidas.",
+  Tutoriales: "Guías prácticas para trabajar con los procesos de la compañía.",
+  BI: "Paneles de análisis e inteligencia de negocio en preparación.",
+  "Agentes IA": "Configura y consulta las herramientas de asistencia interna.",
+  Auditoría: "Revisa actividad, incidencias y controles de la herramienta.",
+  Financiero: "Accede al cuadro económico y al seguimiento financiero.",
+  Facturas: "Consulta el plan de facturación y sus próximos vencimientos.",
+  Personal: "Gestiona el equipo, sus funciones y la información interna.",
+  CRM: "Trabaja con productoras, plataformas y demás relaciones profesionales.",
+  Marketing: "Entra en campañas, métricas y obligaciones de comunicación.",
 };
 
 /** Secciones cuya puerta de portada abre una pantalla propia con botones. */
@@ -63,7 +81,7 @@ function Bienvenida() {
       const { data } = await supabase
         .from("profiles")
         .select("display_name")
-        .eq("id", user!.id)
+        .eq("id", user?.id ?? "")
         .maybeSingle();
       return data;
     },
@@ -83,14 +101,14 @@ function Bienvenida() {
   const effectiveView: SessionView = isBigC ? sessionView ?? "bigc" : "team";
 
   const dia: Door[] = [
-    { title: "Tareas", to: "/tareas", search: { filter: "hoy" } },
-    { title: "Calendario", to: "/calendar", search: { view: "global" } },
+    { title: "Mis tareas", description: "Revisa lo que necesita tu atención y organiza las prioridades de hoy.", to: "/tareas", search: { filter: "hoy" } },
+    { title: "Calendario", description: "Consulta reuniones, entregas y próximos hitos de la agenda compartida.", to: "/calendar", search: { view: "global" } },
   ];
 
   const economico: Door[] = [
-    { title: "Dashboard económico", to: "/finance" },
-    { title: "Plan de facturación", to: "/billing" },
-    { title: "Presupuestos", to: "/paperwork/presupuestos" },
+    { title: "Dashboard económico", description: ITEM_HINT["Dashboard económico"], to: "/finance" },
+    { title: "Plan de facturación", description: ITEM_HINT["Plan de facturación"], to: "/billing" },
+    { title: "Presupuestos", description: ITEM_HINT.Presupuestos, to: "/paperwork/presupuestos" },
   ];
 
   const secciones: Door[] = NAV_GROUPS.filter(
@@ -98,8 +116,9 @@ function Bienvenida() {
   ).map((g) => ({
     title: g.label,
     description: GROUP_HINT[g.label],
-    to: GROUP_LANDING[g.label] ?? g.items[0]!.to,
-    search: GROUP_LANDING[g.label] ? undefined : g.items[0]!.search,
+    to: GROUP_LANDING[g.label] ?? g.items[0]?.to,
+    search: GROUP_LANDING[g.label] ? undefined : g.items[0]?.search,
+    icon: g.icon,
   }));
 
   function doorsOfGroup(label: string): Door[] {
@@ -107,70 +126,107 @@ function Bienvenida() {
     if (!group) return [];
     return group.items
       .filter((i) => isBigC || !i.bigCOnly)
-      .map((i) => ({ title: i.title, to: i.to, search: i.search }));
+      .map((i) => ({ title: i.title, description: ITEM_HINT[i.title] ?? i.hint, to: i.to, search: i.search, icon: i.icon }));
   }
 
   const vistas: SessionView[] = isBigC ? ["bigc", "team", "roster"] : ["team"];
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center px-6 py-10">
-      <BrandLogo variant="auto" className="h-20 w-auto" />
-      <p className="smallcaps mt-2 text-sm text-[color:var(--rust)]">Herramienta interna</p>
-      <h1 className="mt-4 font-display text-4xl uppercase">Hola, {nombre}</h1>
-
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+    <main className="min-h-screen w-full overflow-hidden bg-background">
+      <div className="h-1.5 w-full bg-primary" />
+      <header className="border-b border-border bg-card">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 pb-8 pt-8 sm:px-8 sm:pb-10 lg:px-12">
+          <BrandLogo variant="noir" className="h-24 w-auto max-w-full object-contain sm:h-28" />
+          <p className="mt-3 text-center font-mono text-xs font-bold uppercase text-rust sm:text-sm">Herramienta de gestión y consulta</p>
+          <div className="mt-8 flex w-full flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row">
+            <div className="text-center sm:text-left">
+              <p className="text-xs font-medium uppercase text-muted-foreground">Bienvenida</p>
+              <h1 className="mt-1 font-display text-3xl uppercase text-foreground sm:text-4xl">Hola, {nombre}</h1>
+            </div>
+            <div className="flex flex-col items-center gap-2 sm:items-end">
+              <span className="text-xs font-medium uppercase text-muted-foreground">Vista de trabajo</span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
         {vistas.map((v) => {
           const active = effectiveView === v;
           return (
-            <button
+            <Button
               key={v}
               type="button"
+              variant={active ? "default" : "outline"}
+              size="sm"
               disabled={!isBigC}
               onClick={() => setSessionView(v)}
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium uppercase tracking-[0.12em] transition ${
-                active
-                  ? "border-[color:var(--aubergine)] bg-[color:var(--aubergine)] text-primary-foreground"
-                  : "border-border bg-card text-[color:var(--rust)] hover:border-[color:var(--rust)]"
-              } ${isBigC ? "" : "cursor-default"}`}
+              className={`rounded-full px-4 text-xs font-semibold uppercase ${active ? "" : "text-aubergine hover:border-rust hover:bg-accent"} ${isBigC ? "" : "cursor-default"}`}
             >
               Vista {SESSION_VIEW_LABEL[v]}
-            </button>
+            </Button>
           );
         })}
-      </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <Block title="Cómo tienes el día">
-        <SectionDoors doors={dia} columns={2} />
+      <Block title="Cómo tienes el día" eyebrow="Tu jornada" description="Empieza por lo inmediato: prioridades, reuniones y fechas que requieren atención." tone="avocado" columns="side">
+        <SectionDoors doors={dia} columns={2} wide />
       </Block>
 
       {isBigC && effectiveView === "bigc" && (
-        <Block title="Datos económicos">
-          <SectionDoors doors={economico} />
+        <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper">
+          <SectionDoors doors={economico} wide />
         </Block>
       )}
 
-      <Block title="En qué vas a trabajar">
-        <SectionDoors doors={secciones} />
+      <Block title="En qué vas a trabajar" eyebrow="Áreas de trabajo" description="Toda la actividad de la compañía, organizada para entrar directamente en cada área." tone="plain">
+        <SectionDoors doors={secciones} wide />
       </Block>
 
-      <Block title="Recursos">
-        <SectionDoors doors={doorsOfGroup("Recursos")} />
+      <Block title="Recursos" eyebrow="Biblioteca y apoyo" description="Documentos, agenda compartida, aprendizaje y herramientas internas." tone="rust">
+        <SectionDoors doors={doorsOfGroup("Recursos")} wide />
       </Block>
 
-      <Block title="Departamentos">
-        <SectionDoors doors={doorsOfGroup("Departamentos")} />
+      <Block title="Departamentos" eyebrow="Accesos directos" description="Entra en las áreas operativas que forman parte de tu trabajo cotidiano." tone="paper">
+        <SectionDoors doors={doorsOfGroup("Departamentos")} wide />
       </Block>
-    </div>
+      <footer className="border-t border-border px-6 py-8 text-center font-mono text-xs uppercase text-muted-foreground">
+        Interesante Compañía · Herramienta interna
+      </footer>
+    </main>
   );
 }
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+function Block({
+  title,
+  eyebrow,
+  description,
+  tone,
+  columns = "stacked",
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  description: string;
+  tone: "plain" | "paper" | "avocado" | "rust";
+  columns?: "stacked" | "side";
+  children: React.ReactNode;
+}) {
+  const toneClass = {
+    plain: "bg-background",
+    paper: "bg-card",
+    avocado: "bg-avocado-soft",
+    rust: "bg-accent",
+  }[tone];
   return (
-    <section className="mt-8 w-full">
-      <h2 className="mb-3 border-b border-[color:var(--rust)]/40 pb-1.5 text-center font-display text-xl uppercase">
-        {title}
-      </h2>
-      {children}
+    <section className={`w-full border-b border-border ${toneClass}`}>
+      <div className={`mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-12 ${columns === "side" ? "lg:grid lg:grid-cols-[minmax(14rem,0.7fr)_minmax(0,1.6fr)] lg:items-start lg:gap-14" : ""}`}>
+        <div className={columns === "side" ? "mb-7 lg:mb-0 lg:pt-1" : "mb-7 flex max-w-3xl flex-col sm:mb-8"}>
+          <p className="font-mono text-xs font-bold uppercase text-rust">{eyebrow}</p>
+          <h2 className="mt-2 font-display text-2xl uppercase text-aubergine sm:text-3xl">{title}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
+        </div>
+        <div>{children}</div>
+      </div>
     </section>
   );
 }
