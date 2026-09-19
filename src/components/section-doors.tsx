@@ -12,7 +12,7 @@ export type Door = {
 };
 
 const BASE =
-  "flex min-h-[7.5rem] flex-col items-center justify-center gap-1.5 rounded-md border border-border bg-card px-6 py-6 text-center transition hover:border-[color:var(--rust)] hover:shadow-sm";
+  "flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border border-border bg-card px-5 py-4 text-center transition hover:border-[color:var(--rust)] hover:shadow-sm";
 
 function doorClass(selected?: boolean) {
   return selected
@@ -32,7 +32,7 @@ export function SectionDoors({
 }) {
   const cols = columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3";
   return (
-    <div className={`mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 ${cols}`}>
+    <div className={`mx-auto grid w-full max-w-4xl grid-cols-1 gap-3 ${cols}`}>
       {doors.map((door) => {
         const content = (
           <>
