@@ -82,6 +82,12 @@ function Bienvenida() {
     { title: "Calendario", to: "/calendar", search: { view: "global" } },
   ];
 
+  const economico: Door[] = [
+    { title: "Dashboard económico", to: "/finance" },
+    { title: "Plan de facturación", to: "/billing" },
+    { title: "Presupuestos", to: "/paperwork/presupuestos" },
+  ];
+
   const secciones: Door[] = NAV_GROUPS.filter(
     (g) => !["Recursos", "Departamentos", "Calendario"].includes(g.label) && (isBigC || !g.bigCOnly),
   ).map((g) => ({
@@ -131,6 +137,12 @@ function Bienvenida() {
       <Block title="Cómo tienes el día">
         <SectionDoors doors={dia} columns={2} />
       </Block>
+
+      {isBigC && effectiveView === "bigc" && (
+        <Block title="Datos económicos">
+          <SectionDoors doors={economico} />
+        </Block>
+      )}
 
       <Block title="En qué vas a trabajar">
         <SectionDoors doors={secciones} />
