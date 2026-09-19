@@ -52,6 +52,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Supervisor", to: "/composers", search: { role: "supervisor" }, icon: Music },
       { title: "Especialista", to: "/composers", search: { role: "specialist" }, icon: Music },
       { title: "Curador", to: "/composers", search: { role: "curator" }, icon: Music },
+      { title: "Productor musical", to: "/composers", search: { role: "productor_musical" }, icon: Music },
+      { title: "Otros perfiles", to: "/composers", search: { role: "other" }, icon: Music },
     ],
   },
   {
