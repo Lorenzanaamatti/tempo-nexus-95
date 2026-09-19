@@ -142,6 +142,29 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: CalendarDays,
     items: [{ title: "General", to: "/calendar", search: { view: "global" }, icon: CalendarDays }],
   },
+  {
+    label: "Recursos",
+    icon: FolderOpen,
+    items: [
+      { title: "Templates", to: "/templates", icon: ScrollText },
+      { title: "Calendario general", to: "/calendar", search: { view: "global" }, icon: CalendarDays },
+      { title: "Tutoriales", to: "/recursos/tutoriales", icon: Presentation },
+      { title: "BI", to: "/recursos/bi", icon: BarChart3 },
+      { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, bigCOnly: true },
+      { title: "Auditoría", to: "/empresa/auditoria", icon: ShieldCheck, bigCOnly: true },
+    ],
+  },
+  {
+    label: "Departamentos",
+    icon: Briefcase,
+    items: [
+      { title: "Financiero", to: "/finance", icon: LineChart, bigCOnly: true },
+      { title: "Facturas", to: "/billing", icon: Receipt, bigCOnly: true },
+      { title: "Personal", to: "/empresa/equipo", icon: Users, bigCOnly: true },
+      { title: "CRM", to: "/partners", icon: Handshake, bigCOnly: true },
+      { title: "Marketing", to: "/marketing/campanas", icon: Megaphone },
+    ],
+  },
 ];
 
 /** Prefixes an item owns, including the route itself and its detail pages. */
