@@ -51,6 +51,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
   const isTeamView = role === "admin" && effectiveView === "team";
 
   const { data: myDueTasks } = useMyDueTaskCount();
+  const tareasActive = pathname.startsWith("/tareas");
 
   const { data: pendingAgentActions } = useQuery({
     queryKey: ["agent-actions-pending-count"],
@@ -111,9 +112,15 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
           <>
             <SidebarGroup>
               {!collapsed && (
-                <SidebarGroupLabel className="flex items-center gap-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-primary">
-                  <ListChecks className="h-3 w-3" />
+                <SidebarGroupLabel
+                  aria-current={tareasActive ? "true" : undefined}
+                  className={`flex h-auto items-center gap-1.5 py-1.5 font-display text-base font-extrabold uppercase tracking-[0.08em] text-[color:var(--rust)] hover:text-[color:var(--aubergine)] ${
+                    tareasActive ? "text-[color:var(--aubergine)]" : ""
+                  }`}
+                >
+                  <ListChecks className="h-3.5 w-3.5" />
                   <span className="flex-1">Tareas</span>
+                  {tareasActive && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
                 </SidebarGroupLabel>
               )}
               <SidebarGroupContent>
@@ -121,7 +128,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                   <SidebarMenuItem>
                     <SidebarMenuButton onClick={() => openNewTask({})} title="Nueva tarea">
                       <Plus className="h-4 w-4 text-primary" />
-                      {!collapsed && <span>Nueva tarea</span>}
+                      {!collapsed && <span>Añadir tarea</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
