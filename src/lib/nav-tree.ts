@@ -11,6 +11,8 @@ export type NavItem = {
   search?: Record<string, string>;
   icon: typeof Music;
   hint?: string;
+  /** Items only BIG C (Dirección) can see. */
+  bigCOnly?: boolean;
   /** Extra pathname prefixes that belong to this item (detail routes, aliases). */
   match?: string[];
 };
