@@ -243,13 +243,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
             </SidebarMenuItem>
           )}
           <SidebarMenuItem>
-            <div className={collapsed ? "flex justify-center py-1" : "flex items-center justify-between gap-2 px-2 py-1"}>
-              {!collapsed && (
-                <span className="smallcaps text-sidebar-foreground/60">Tema</span>
-              )}
-              <ThemeToggle />
-            </div>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center gap-2">
+                <HomeIcon className="h-4 w-4" />
+                {!collapsed && <span className="truncate text-xs">Volver a bienvenida</span>}
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => signOut()}>
               <LogOut className="h-4 w-4" />
