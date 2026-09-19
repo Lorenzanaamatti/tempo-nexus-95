@@ -33,7 +33,6 @@ export const NAV_GROUPS: NavGroup[] = [
     bigCOnly: true,
     items: [
       { title: "KPIs & Objetivos", to: "/empresa/kpis", icon: Gauge },
-      { title: "Actividad internacional", to: "/empresa/actividad-internacional", icon: Handshake },
       { title: "Dashboard económico", to: "/finance", icon: LineChart, match: ["/budget"] },
       { title: "Plan de facturación", to: "/billing", icon: Receipt },
       { title: "Equipo IC", to: "/empresa/equipo", match: ["/people"], icon: Users },
@@ -70,6 +69,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Plataformas", to: "/partners/plataformas", icon: MonitorPlay },
       { title: "Medios", to: "/partners/medios", icon: Newspaper },
       { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
+      { title: "Actividad internacional", to: "/empresa/actividad-internacional", icon: Handshake },
       { title: "Subvenciones", to: "/oportunidades/subvenciones", icon: Wallet },
     ],
   },
