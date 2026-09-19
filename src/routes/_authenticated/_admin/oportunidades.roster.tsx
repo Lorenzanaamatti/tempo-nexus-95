@@ -182,8 +182,8 @@ function DeteccionTalento() {
     <div className="mx-auto max-w-7xl px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <div>
-          <p className="smallcaps text-muted-foreground">Oportunidades de ventas · Roster</p>
-          <h1 className="mt-1 font-display text-5xl title-caps">DETECCIÓN DE TALENTO</h1>
+          <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
+          <h1 className="mt-1 font-display text-5xl title-caps">COMPOSERS ESP</h1>
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
             Radar de profesionales musicales detectados en el CRM de producciones españolas:
             compositores, supervisores, mezcladores, orquestadores y directores de orquesta que

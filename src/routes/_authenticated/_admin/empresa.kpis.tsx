@@ -204,7 +204,7 @@ function KpisPage() {
                 <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
                   <span>A Producciones<br /><b className="font-display text-base text-foreground">{k.pipeline.openByKind.producciones}</b></span>
                   <span>A Partners<br /><b className="font-display text-base text-foreground">{k.pipeline.openByKind.partners}</b></span>
-                  <span>A Roster<br /><b className="font-display text-base text-foreground">{k.pipeline.openByKind.roster}</b></span>
+                  <span>Composers ESP<br /><b className="font-display text-base text-foreground">{k.pipeline.openByKind.roster}</b></span>
                 </div>
               </div>
               <Card
@@ -261,7 +261,7 @@ function KpisPage() {
                 )}
               </div>
               <Panel
-                title={`Prospects de fichaje ${year}`}
+                title={`Quiero fichar a · ${year}`}
                 action={<Button variant="outline" size="sm" asChild><Link to="/oportunidades/prospects-fichaje">Gestionar prospects</Link></Button>}
               >
                 {!k.roster.funnel[0].value ? (

@@ -77,7 +77,7 @@ function Shell() {
     <SidebarProvider>
       <TaskDialogProvider>
       <PageCrumbProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-background">
         <AppSidebar role={role} sessionView={sessionView} />
         <div className="flex flex-1 flex-col">
           <header className="flex h-12 items-center gap-3 border-b border-border bg-background px-4">
@@ -93,7 +93,7 @@ function Shell() {
               <span className="hidden sm:inline">Volver a bienvenida</span>
             </Link>
           </header>
-          <main className="flex-1">
+          <main className="flex-1 bg-background">
             <Outlet />
           </main>
         </div>

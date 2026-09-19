@@ -50,5 +50,5 @@ export async function addCuentaObjetivo(nombre: string, accountType: "productora
 /** Alta directa como prospect de fichaje del roster. */
 export async function addProspectFichaje(nombre: string, notas?: string) {
   const r = await ensure("roster_prospects", "nombre", nombre, { nombre: nombre.trim(), notas: notas ?? null });
-  toast[r.created ? "success" : "info"](r.created ? `«${nombre}» añadido a Prospects de fichaje` : `«${nombre}» ya estaba en Prospects`);
+  toast[r.created ? "success" : "info"](r.created ? `«${nombre}» añadido a Quiero fichar a` : `«${nombre}» ya estaba en Quiero fichar a`);
 }
