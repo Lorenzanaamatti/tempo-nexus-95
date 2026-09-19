@@ -130,7 +130,7 @@ export function ProductionGantt({
   if (!model) {
     return (
       <p className="text-sm text-muted-foreground">
-        Todavía no hay procesos con fechas. Añádelas en la ficha de la producción.
+        Todavía no hay nada con fechas. Añade procesos o eventos en la sección «Procesos de la producción» y «Eventos en el calendario» de la ficha.
       </p>
     );
   }
