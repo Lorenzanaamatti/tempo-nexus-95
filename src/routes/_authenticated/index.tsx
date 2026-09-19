@@ -166,8 +166,8 @@ function Bienvenida() {
       </Block>
 
       {isBigC && effectiveView === "bigc" && (
-        <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper">
-          <SectionDoors doors={economico} wide />
+        <Block title="Datos económicos" eyebrow="Dirección" description="Una entrada directa a la situación económica y a la planificación de ingresos." tone="paper" columns="side">
+          <SectionDoors doors={economico} columns={2} wide />
         </Block>
       )}
 
