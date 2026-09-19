@@ -131,7 +131,7 @@ function MetricsTable({ composerId }: { composerId: string | null }) {
         <ExportRowsButton rows={rows} filename="metricas-plataformas" sheetName="Métricas" />
       </div>
       <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead className="bg-muted/40 text-left">
             <tr>
               {["Plataforma", "Seguidores", "Crec. mes (#)", "Crec. mes (%)", "Alcance promedio", "Publicaciones mes", "Mejor publicación"].map((h) => (

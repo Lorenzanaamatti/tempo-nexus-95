@@ -189,7 +189,7 @@ function ProspectDetailPage() {
           <EmptyState title="Sin películas asociadas" description="Aparecerán aquí las producciones españolas donde figure esta persona." />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
                 <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   <th className="py-2 pr-3 text-left">Año</th>

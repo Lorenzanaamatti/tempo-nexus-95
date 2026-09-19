@@ -164,7 +164,7 @@ function ProspectsFichajePage() {
             <EmptyState icon={UserPlus} title="Sin prospects" description="Añade el primer candidato para empezar a medir el embudo de fichajes." />
           ) : (
             <div className="overflow-x-auto rounded-sm border border-border">
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead className="bg-muted/30 text-left">
                   <tr>
                     <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Nombre</th>

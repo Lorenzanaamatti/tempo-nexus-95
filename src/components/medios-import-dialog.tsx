@@ -254,7 +254,7 @@ export function MediosImportDialog() {
                   </div>
 
                   <div className="max-h-[45vh] overflow-auto rounded-md border border-border">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-base">
                       <thead className="sticky top-0 bg-muted/60 text-left">
                         <tr>
                           <th className="w-10 p-2" />

@@ -185,7 +185,7 @@ function ContractsIndex() {
         )
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/40 text-left">
               <tr>
                 <Th k="title">Título</Th>

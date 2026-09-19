@@ -175,7 +175,7 @@ function SeguimientoPage() {
         <EmptyState icon={Clapperboard} title="Sin producciones activas" description="No hay producciones activas que coincidan con los filtros." />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/40 text-left">
               <tr>
                 {["Producción", "Cliente", "Representado", "Estado", "Presupuesto", "Deal Memo", "Contrato", "Factura emitida", "Cobrado", "Días activa", "Alerta"].map((h) => (

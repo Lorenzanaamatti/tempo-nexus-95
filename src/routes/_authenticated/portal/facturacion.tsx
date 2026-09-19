@@ -162,7 +162,7 @@ function Facturacion() {
           <section>
             <h3 className="mb-3 font-display text-xl">Detalle por producción</h3>
             <div className="overflow-x-auto rounded-sm border border-border">
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead className="bg-muted/30 text-left">
                   <tr>
                     <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Producción</th>
@@ -264,7 +264,7 @@ function Facturacion() {
 
       {tab === "costes" && (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/30 text-left">
               <tr>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Producción</th>
@@ -331,7 +331,7 @@ function SprintTable({
 }) {
   return (
     <div className="overflow-x-auto rounded-sm border border-border">
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead className="bg-muted/30 text-left">
           <tr>
             {columns.map((c) => (

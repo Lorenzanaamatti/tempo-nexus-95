@@ -230,7 +230,7 @@ function ICActiveProductionsSection() {
         <p className="text-sm text-muted-foreground">No hay producciones en curso ahora mismo.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Título</th>
@@ -335,7 +335,7 @@ function CombinedFilmographyBody() {
         <p className="text-sm text-muted-foreground">Sin entradas todavía.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Año</th>

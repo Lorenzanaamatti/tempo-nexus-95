@@ -179,7 +179,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead className="bg-muted/40 text-left">
             <tr>
               <th className="px-3 py-2 smallcaps text-xs">Año</th>
@@ -425,7 +425,7 @@ function IcExpensesPanel() {
       </div>
 
       <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead className="bg-muted/40 text-left">
             <tr>
               <th className="px-3 py-2 smallcaps text-xs">Fecha</th>
