@@ -56,7 +56,7 @@ export function FilmsTable({
 
   return (
     <div className="overflow-x-auto rounded-sm border border-border">
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
           <tr>
             <Th k="year">Año</Th>

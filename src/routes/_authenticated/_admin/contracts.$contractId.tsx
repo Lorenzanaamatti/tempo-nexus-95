@@ -143,7 +143,7 @@ function ContractDetail() {
   if (q.isLoading || !q.data) return <div className="p-10 font-display text-muted-foreground">Cargando…</div>;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
           <PageCrumb label={form.title} />

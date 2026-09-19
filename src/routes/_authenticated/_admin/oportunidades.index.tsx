@@ -40,7 +40,7 @@ const DOORS: Door[] = [
 
 function OportunidadesIndex() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-14">
+    <div className="mx-auto max-w-[1700px] px-6 py-14">
       <div className="mb-10 text-center">
         <p className="smallcaps text-muted-foreground">Sección</p>
         <h1 className="mt-1 font-display text-5xl title-caps">OPORTUNIDADES DE VENTAS</h1>

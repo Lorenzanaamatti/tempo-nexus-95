@@ -30,7 +30,7 @@ const DOORS: Door[] = [
 
 function OportunidadesFichajes() {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-14">
+    <div className="mx-auto max-w-[1700px] px-6 py-14">
       <div className="mb-10 text-center">
         <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
         <h1 className="mt-1 font-display text-5xl title-caps">FICHAJES QUE QUEREMOS</h1>

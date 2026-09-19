@@ -74,7 +74,7 @@ function EquipoIndex() {
         <EmptyState title="Sin personas" description="Añade personas al equipo desde el directorio interno." action={{ label: "Ir al directorio", to: "/people" }} />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/40 text-left">
               <tr>
                 {["", "Nombre", "Rol", "Tipo de contrato", "Inicio", "Representados", "Tareas pendientes"].map((h) => (

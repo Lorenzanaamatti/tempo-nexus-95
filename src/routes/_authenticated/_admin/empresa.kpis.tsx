@@ -430,7 +430,7 @@ function KpisPage() {
                 <EmptyState variant="inline" icon={TargetIcon} title="Sin campañas" description={`Todavía no hay campañas registradas en ${year}.`} />
               ) : (
                 <div className="overflow-x-auto rounded-sm border border-border">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-base">
                     <thead className="bg-muted/30 text-left">
                       <tr>
                         <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Campaña</th>

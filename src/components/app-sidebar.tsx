@@ -103,7 +103,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               <BrandLogo variant="clear" className="h-9 w-auto max-w-none object-cover object-left" />
             </div>
           ) : (
-            <BrandLogo variant="clear" className="h-12 w-auto object-contain" />
+            <BrandLogo variant="noir" className="h-10 w-auto object-contain" />
           )}
         </Link>
       </SidebarHeader>

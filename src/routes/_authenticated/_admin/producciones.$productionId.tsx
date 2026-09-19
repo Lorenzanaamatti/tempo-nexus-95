@@ -212,7 +212,7 @@ function ProduccionDetalle() {
   const finalized = stage === "finalizada";
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <PageCrumb label={form.title} />
 
       <Link

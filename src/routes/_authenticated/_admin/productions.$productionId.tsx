@@ -252,7 +252,7 @@ function ProductionEdit() {
   const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex items-end justify-between gap-6 border-b border-border pb-4">
         <div>
           <PageCrumb label={form.title} />

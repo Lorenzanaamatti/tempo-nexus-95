@@ -212,7 +212,7 @@ function RosterAll() {
   }));
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-10">
         <RosterDoors selected="complete" />
       </div>

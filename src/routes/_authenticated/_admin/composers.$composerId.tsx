@@ -274,7 +274,7 @@ function Inner({
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <p className="smallcaps text-muted-foreground">
           <Link to="/composers" search={{ role: "composer" }} className="hover:text-foreground">Roster</Link> · Ficha

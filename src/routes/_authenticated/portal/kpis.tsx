@@ -101,7 +101,7 @@ function Kpis() {
           <EmptyState variant="inline" icon={BarChart3} title="Sin datos suficientes" description="Necesitamos algo más de actividad para calcular tus indicadores." />
         ) : (
           <div className="overflow-x-auto rounded-sm border border-border">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead className="bg-muted/30 text-left">
                 <tr>
                   <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Año</th>

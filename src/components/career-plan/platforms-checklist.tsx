@@ -67,7 +67,7 @@ export function PlatformsChecklist({
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead className="bg-muted/40">
             <tr className="text-left">
               <th className="px-3 py-2 font-medium">Plataforma</th>

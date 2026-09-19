@@ -201,7 +201,7 @@ export function AnnualTargets({
     <div>
       <SubTitle>Objetivos anuales</SubTitle>
       <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead className="bg-muted/40">
             <tr className="text-left">
               <th className="px-3 py-2 font-medium">Año</th>
@@ -362,7 +362,7 @@ function MiniTable({
   return (
     <div className="rounded-sm border border-border">
       <div className="border-b border-border bg-muted/40 px-3 py-2 text-sm font-medium">{title}</div>
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead>
           <tr className="text-left text-xs text-muted-foreground">
             <th className="px-3 py-1.5 font-normal">Periodo</th>

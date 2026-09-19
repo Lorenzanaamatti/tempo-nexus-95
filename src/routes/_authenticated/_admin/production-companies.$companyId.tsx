@@ -98,7 +98,7 @@ function CompanyDetail() {
   const c: any = companyQ.data;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div>
           <PageCrumb label={c.name} />
@@ -180,7 +180,7 @@ function CompanyDetail() {
           <EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Vincula producciones a esta productora para ver aquí su histórico." action={{ label: "Ver producciones", to: "/productions" }} />
         ) : (
           <div className="overflow-x-auto rounded-sm border border-border">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead className="bg-muted/40 text-left">
                 <tr>
                   <th className="px-3 py-2 smallcaps text-xs">Año</th>

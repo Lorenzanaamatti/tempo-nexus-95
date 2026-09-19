@@ -112,7 +112,7 @@ function TareasPage() {
   const today = todayISO();
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="mx-auto max-w-[1700px] px-6 py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="smallcaps text-muted-foreground">Tareas</p>

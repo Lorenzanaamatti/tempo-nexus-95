@@ -129,6 +129,9 @@
 }
 
 @layer base {
+  html {
+    font-size: 17.5px;
+  }
   html, body, #root {
     min-height: 100%;
     background-color: var(--color-background);
@@ -182,9 +185,9 @@
   }
   .smallcaps {
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.68rem;
-    font-weight: 500;
+    letter-spacing: 0.14em;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
   .premium-card {
     background: var(--card);

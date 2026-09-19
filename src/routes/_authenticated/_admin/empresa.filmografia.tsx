@@ -314,7 +314,7 @@ function FilmografiaIC() {
           <EmptyState icon={Film} title="Sin registros" description="Añade una entrada histórica o marca producciones españolas con participación de IC." />
         ) : view === "list" ? (
           <div className="overflow-x-auto rounded-sm border border-border">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   <th className="px-3 py-2">Título</th>

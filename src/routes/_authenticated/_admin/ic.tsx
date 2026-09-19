@@ -70,7 +70,7 @@ function ICCompanyPage() {
   if (!ic) return <div className="p-10 font-display text-muted-foreground">No se ha encontrado la ficha de Interesante Compañía.</div>;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 space-y-12">
+    <div className="mx-auto max-w-[1700px] px-6 py-10 space-y-12">
       <header className="border-b border-border pb-6">
         <p className="smallcaps text-muted-foreground">Empresa · Ficha corporativa</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
@@ -230,7 +230,7 @@ function ICActiveProductionsSection() {
         <p className="text-sm text-muted-foreground">No hay producciones en curso ahora mismo.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Título</th>
@@ -335,7 +335,7 @@ function CombinedFilmographyBody() {
         <p className="text-sm text-muted-foreground">Sin entradas todavía.</p>
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="border-b border-border bg-muted/30 text-left smallcaps text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Año</th>

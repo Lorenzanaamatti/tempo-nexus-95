@@ -90,7 +90,7 @@ export function DeadlineOpportunities({
   function openEdit(row: Row) { setEditing(row); setOpen(true); }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Oportunidades de ventas</p>
@@ -139,7 +139,7 @@ export function DeadlineOpportunities({
         )
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/40 text-left">
               <tr>
                 {columns.map((c) => <th key={c.key} className="px-3 py-2 smallcaps text-xs">{c.label}</th>)}

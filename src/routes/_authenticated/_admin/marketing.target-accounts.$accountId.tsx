@@ -218,11 +218,11 @@ function TargetAccountDetail() {
   }
 
   if (isLoading || !form) {
-    return <div className="mx-auto max-w-4xl px-6 py-10 font-display text-muted-foreground">Cargando…</div>;
+    return <div className="mx-auto max-w-[1700px] px-6 py-10 font-display text-muted-foreground">Cargando…</div>;
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <Button asChild variant="ghost" size="sm">
           <Link to="/marketing/target-accounts"><ArrowLeft className="mr-1 h-4 w-4" /> Cuentas objetivo</Link>

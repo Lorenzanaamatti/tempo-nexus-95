@@ -147,7 +147,7 @@ export function RecordTable({
         />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/40 text-left">
               <tr>{columns.map((c) => <th key={c.key} className="px-3 py-2 smallcaps text-xs">{c.label}</th>)}</tr>
             </thead>

@@ -226,7 +226,7 @@ function ComposersIndex() {
   })();
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-10">
         <RosterDoors selected={role === "todos" ? "complete" : role} />
       </div>
@@ -546,7 +546,7 @@ function RosterList({ items, role }: { items: any[]; role: RosterRole }) {
     v === "available" ? "Disponible" : v === "partial" ? "Parcial" : "No disponible";
   return (
     <div className="overflow-hidden rounded-sm border border-border">
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead className="border-b border-border bg-muted/40">
           <tr className="text-left">
             <th className="px-3 py-2 smallcaps text-xs">Nombre</th>

@@ -86,7 +86,7 @@ function ActividadInternacionalPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-[1700px] px-6 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="smallcaps text-muted-foreground">Empresa</p>
@@ -124,7 +124,7 @@ function ActividadInternacionalPage() {
         <EmptyState icon={Globe} title="Sin actividad internacional" description="Añade el primer contacto internacional para empezar a medir la actividad." />
       ) : (
         <div className="overflow-x-auto rounded-sm border border-border">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-muted/30 text-left">
               <tr>
                 <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Empresa</th>
