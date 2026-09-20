@@ -73,11 +73,12 @@ export const NAV_GROUPS: NavGroup[] = [
     landingTo: "/partners",
     items: [
       {
-        title: "Productoras",
+        title: "Productoras Partners",
         to: "/partners/productoras",
         icon: Building2,
         match: ["/partners", "/production-companies", "/platforms", "/directors", "/providers", "/marketing/target-accounts"],
       },
+      { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Target },
       { title: "Plataformas", to: "/partners/plataformas", icon: MonitorPlay },
       { title: "Medios", to: "/partners/medios", icon: Newspaper },
       { title: "Instituciones", to: "/partners/instituciones", icon: LibraryBig },
@@ -91,7 +92,6 @@ export const NAV_GROUPS: NavGroup[] = [
     landingTo: "/oportunidades",
     items: [
       { title: "CRM de Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
-      { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Building2 },
       { title: "Pitches en curso", to: "/oportunidades/pitches", icon: Sparkles },
     ],
   },
