@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ export function ProductionGanttPanel({
   const [composerFilter, setComposerFilter] = useState("all");
   const [productionFilter, setProductionFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState<"all" | GanttOwner>("all");
+  const reportedRows = useRef("");
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["gantt-phases", productionIds ?? null, composerId ?? null],
@@ -201,6 +202,9 @@ export function ProductionGanttPanel({
   ), [rows, composerFilter, productionFilter, ownerFilter, externalOwner, externalType, dateFrom, dateTo]);
 
   useEffect(() => {
+    const signature = filtered.map((row) => `${row.id}:${row.start}:${row.end}`).join("|");
+    if (signature === reportedRows.current) return;
+    reportedRows.current = signature;
     onFilteredRowsChange?.(filtered);
   }, [filtered, onFilteredRowsChange]);
 
