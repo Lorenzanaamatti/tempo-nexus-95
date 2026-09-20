@@ -1,21 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { MarketingLibrary } from "@/components/marketing-library";
 
 export const Route = createFileRoute("/_authenticated/_admin/comunicacion/blog")({
-  component: StubPage,
+  component: BlogPage,
+  head: () => ({ meta: [{ title: "Blog y publicaciones | Interesante Compañía" }, { name: "description", content: "Biblioteca de artículos, borradores y publicaciones de Interesante Compañía." }, { property: "og:title", content: "Blog y publicaciones | Interesante Compañía" }, { property: "og:description", content: "Biblioteca de artículos, borradores y publicaciones." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
 });
 
-function StubPage() {
-  return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">COMUNICACIÓN</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Blog y publicaciones</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Entradas publicadas y borradores.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
-  );
-}
+function BlogPage() { return <MarketingLibrary section="comunicacion-blog" eyebrow="Comunicación" title="Blog y publicaciones" description="Artículos, borradores, publicaciones y materiales asociados." allowCustomCategories categories={[{key:"borradores",label:"Borradores"},{key:"publicados",label:"Publicados"},{key:"ideas",label:"Ideas"}]}/>; }

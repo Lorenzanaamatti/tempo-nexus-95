@@ -1,21 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { MarketingLibrary } from "@/components/marketing-library";
 
 export const Route = createFileRoute("/_authenticated/_admin/comunicacion/reels")({
-  component: StubPage,
+  component: ReelsPage,
+  head: () => ({ meta: [{ title: "Reels | Interesante Compañía" }, { name: "description", content: "Reels y piezas audiovisuales de presentación." }, { property: "og:title", content: "Reels | Interesante Compañía" }, { property: "og:description", content: "Reels y piezas audiovisuales de presentación." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
 });
 
-function StubPage() {
-  return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">COMUNICACIÓN</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Reels</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Reels y piezas audiovisuales de presentación.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
-  );
-}
+function ReelsPage() { return <MarketingLibrary section="comunicacion-reels" eyebrow="Comunicación" title="Reels" description="Reels y piezas audiovisuales de presentación." allowCustomCategories categories={[{key:"compositores",label:"Compositores"},{key:"artistas",label:"Artistas"},{key:"proyectos",label:"Proyectos"},{key:"ic",label:"Interesante Compañía"}]}/>; }
