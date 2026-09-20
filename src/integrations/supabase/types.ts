@@ -2492,6 +2492,8 @@ export type Database = {
           id: string
           month: number
           notes: string | null
+          source_grant_id: string | null
+          source_grant_line_id: string | null
           updated_at: string
           year: number
         }
@@ -2502,6 +2504,8 @@ export type Database = {
           id?: string
           month: number
           notes?: string | null
+          source_grant_id?: string | null
+          source_grant_line_id?: string | null
           updated_at?: string
           year: number
         }
@@ -2512,10 +2516,27 @@ export type Database = {
           id?: string
           month?: number
           notes?: string | null
+          source_grant_id?: string | null
+          source_grant_line_id?: string | null
           updated_at?: string
           year?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ic_budget_lines_source_grant_id_fkey"
+            columns: ["source_grant_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ic_budget_lines_source_grant_line_id_fkey"
+            columns: ["source_grant_line_id"]
+            isOneToOne: true
+            referencedRelation: "subvencion_partidas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ic_expenses: {
         Row: {
@@ -3364,67 +3385,298 @@ export type Database = {
       }
       oportunidades_subvenciones: {
         Row: {
+          alegaciones_necesarias: boolean
           ambito: Database["public"]["Enums"]["subvencion_ambito"]
+          anticipo_cobrado: number | null
+          aportacion_propia: number | null
+          asesor_externo: string | null
+          auditor_requerido: boolean
+          certificado_digital_necesario: boolean
+          condiciones_particulares: string | null
           created_at: string
-          estado: Database["public"]["Enums"]["subvencion_estado"]
+          cuenta_justificativa_requerida: boolean
+          documentos_generacion_libre: string | null
+          documentos_modelo_oficial: string | null
+          empresa_solicitante: string | null
+          estado: string
+          evidencias_proyecto_requeridas: boolean
+          existe_anticipo: boolean
+          expediente_cerrado: boolean
+          facturas_requeridas: boolean
+          fecha_aceptacion: string | null
+          fecha_anticipo: string | null
           fecha_apertura: string | null
-          fecha_limite_solicitud: string
+          fecha_cobro_anticipo_estimada: string | null
+          fecha_cobro_estimada: string | null
+          fecha_cobro_final_estimada: string | null
+          fecha_cobro_real: string | null
+          fecha_limite_alegaciones: string | null
+          fecha_limite_justificacion: string | null
+          fecha_limite_solicitud: string | null
+          fecha_presentacion_justificacion: string | null
           fecha_resolucion: string | null
+          fecha_resolucion_definitiva: string | null
+          fecha_resolucion_provisional: string | null
+          firma_requerida: boolean
+          forma_presentacion: string | null
+          formato_archivo: string | null
+          formulario_presentacion: string | null
+          gasto_elegible_previsto: number | null
           id: string
+          idioma_presentacion: string | null
+          importe_aceptado: number | null
+          importe_anticipo: number | null
+          importe_cobrado: number | null
           importe_concedido: number | null
+          importe_financiar_empresa: number | null
+          importe_justificado: number | null
           importe_maximo: number | null
+          importe_provisional: number | null
           importe_solicitado: number | null
           institucion_id: string | null
           institucion_nombre: string | null
+          iva_subvencionable: boolean
+          justificacion_preparada: boolean
+          justificacion_presentada: boolean
+          justificantes_bancarios_requeridos: boolean
+          max_paginas_memoria: number | null
+          max_tamano_archivos: string | null
+          memoria_final_requerida: boolean
+          modalidad_justificacion: string | null
           nombre_convocatoria: string
+          nombre_corto: string
+          nominas_tc_requeridos: boolean
           notas: string | null
+          numero_expediente: string | null
+          numero_ofertas_exigidas: number | null
+          numero_registro: string | null
+          obligaciones_publicidad: string | null
+          otra_documentacion_conservar: string | null
+          otros_financiadores: string | null
+          particularidades: string | null
+          periodo_ejecucion_fin: string | null
+          periodo_ejecucion_inicio: string | null
+          porcentaje_anticipo: number | null
+          porcentaje_concedido: number | null
+          porcentaje_solicitado: number | null
+          porcentaje_subvencionable: number | null
+          portal_presentacion: string | null
+          presentada_fecha: string | null
+          presentada_hora: string | null
+          presentada_por_person_id: string | null
+          presupuesto_maximo: number | null
+          presupuesto_minimo: number | null
+          presupuesto_total_proyecto: number | null
+          proyecto_vinculado: string | null
+          quien_puede_firmar: string | null
+          reglas_no_olvidar: string | null
           representado_vinculado: string | null
+          requerimientos: string | null
           requisitos: string | null
+          responsable_justificacion_person_id: string | null
+          responsable_person_id: string | null
+          resultado_provisional: string | null
+          saldo_pendiente: number | null
           tipo: Database["public"]["Enums"]["subvencion_tipo"]
           updated_at: string
           url_convocatoria: string | null
+          url_tramitacion: string | null
         }
         Insert: {
+          alegaciones_necesarias?: boolean
           ambito?: Database["public"]["Enums"]["subvencion_ambito"]
+          anticipo_cobrado?: number | null
+          aportacion_propia?: number | null
+          asesor_externo?: string | null
+          auditor_requerido?: boolean
+          certificado_digital_necesario?: boolean
+          condiciones_particulares?: string | null
           created_at?: string
-          estado?: Database["public"]["Enums"]["subvencion_estado"]
+          cuenta_justificativa_requerida?: boolean
+          documentos_generacion_libre?: string | null
+          documentos_modelo_oficial?: string | null
+          empresa_solicitante?: string | null
+          estado?: string
+          evidencias_proyecto_requeridas?: boolean
+          existe_anticipo?: boolean
+          expediente_cerrado?: boolean
+          facturas_requeridas?: boolean
+          fecha_aceptacion?: string | null
+          fecha_anticipo?: string | null
           fecha_apertura?: string | null
-          fecha_limite_solicitud: string
+          fecha_cobro_anticipo_estimada?: string | null
+          fecha_cobro_estimada?: string | null
+          fecha_cobro_final_estimada?: string | null
+          fecha_cobro_real?: string | null
+          fecha_limite_alegaciones?: string | null
+          fecha_limite_justificacion?: string | null
+          fecha_limite_solicitud?: string | null
+          fecha_presentacion_justificacion?: string | null
           fecha_resolucion?: string | null
+          fecha_resolucion_definitiva?: string | null
+          fecha_resolucion_provisional?: string | null
+          firma_requerida?: boolean
+          forma_presentacion?: string | null
+          formato_archivo?: string | null
+          formulario_presentacion?: string | null
+          gasto_elegible_previsto?: number | null
           id?: string
+          idioma_presentacion?: string | null
+          importe_aceptado?: number | null
+          importe_anticipo?: number | null
+          importe_cobrado?: number | null
           importe_concedido?: number | null
+          importe_financiar_empresa?: number | null
+          importe_justificado?: number | null
           importe_maximo?: number | null
+          importe_provisional?: number | null
           importe_solicitado?: number | null
           institucion_id?: string | null
           institucion_nombre?: string | null
+          iva_subvencionable?: boolean
+          justificacion_preparada?: boolean
+          justificacion_presentada?: boolean
+          justificantes_bancarios_requeridos?: boolean
+          max_paginas_memoria?: number | null
+          max_tamano_archivos?: string | null
+          memoria_final_requerida?: boolean
+          modalidad_justificacion?: string | null
           nombre_convocatoria: string
+          nombre_corto: string
+          nominas_tc_requeridos?: boolean
           notas?: string | null
+          numero_expediente?: string | null
+          numero_ofertas_exigidas?: number | null
+          numero_registro?: string | null
+          obligaciones_publicidad?: string | null
+          otra_documentacion_conservar?: string | null
+          otros_financiadores?: string | null
+          particularidades?: string | null
+          periodo_ejecucion_fin?: string | null
+          periodo_ejecucion_inicio?: string | null
+          porcentaje_anticipo?: number | null
+          porcentaje_concedido?: number | null
+          porcentaje_solicitado?: number | null
+          porcentaje_subvencionable?: number | null
+          portal_presentacion?: string | null
+          presentada_fecha?: string | null
+          presentada_hora?: string | null
+          presentada_por_person_id?: string | null
+          presupuesto_maximo?: number | null
+          presupuesto_minimo?: number | null
+          presupuesto_total_proyecto?: number | null
+          proyecto_vinculado?: string | null
+          quien_puede_firmar?: string | null
+          reglas_no_olvidar?: string | null
           representado_vinculado?: string | null
+          requerimientos?: string | null
           requisitos?: string | null
+          responsable_justificacion_person_id?: string | null
+          responsable_person_id?: string | null
+          resultado_provisional?: string | null
+          saldo_pendiente?: number | null
           tipo?: Database["public"]["Enums"]["subvencion_tipo"]
           updated_at?: string
           url_convocatoria?: string | null
+          url_tramitacion?: string | null
         }
         Update: {
+          alegaciones_necesarias?: boolean
           ambito?: Database["public"]["Enums"]["subvencion_ambito"]
+          anticipo_cobrado?: number | null
+          aportacion_propia?: number | null
+          asesor_externo?: string | null
+          auditor_requerido?: boolean
+          certificado_digital_necesario?: boolean
+          condiciones_particulares?: string | null
           created_at?: string
-          estado?: Database["public"]["Enums"]["subvencion_estado"]
+          cuenta_justificativa_requerida?: boolean
+          documentos_generacion_libre?: string | null
+          documentos_modelo_oficial?: string | null
+          empresa_solicitante?: string | null
+          estado?: string
+          evidencias_proyecto_requeridas?: boolean
+          existe_anticipo?: boolean
+          expediente_cerrado?: boolean
+          facturas_requeridas?: boolean
+          fecha_aceptacion?: string | null
+          fecha_anticipo?: string | null
           fecha_apertura?: string | null
-          fecha_limite_solicitud?: string
+          fecha_cobro_anticipo_estimada?: string | null
+          fecha_cobro_estimada?: string | null
+          fecha_cobro_final_estimada?: string | null
+          fecha_cobro_real?: string | null
+          fecha_limite_alegaciones?: string | null
+          fecha_limite_justificacion?: string | null
+          fecha_limite_solicitud?: string | null
+          fecha_presentacion_justificacion?: string | null
           fecha_resolucion?: string | null
+          fecha_resolucion_definitiva?: string | null
+          fecha_resolucion_provisional?: string | null
+          firma_requerida?: boolean
+          forma_presentacion?: string | null
+          formato_archivo?: string | null
+          formulario_presentacion?: string | null
+          gasto_elegible_previsto?: number | null
           id?: string
+          idioma_presentacion?: string | null
+          importe_aceptado?: number | null
+          importe_anticipo?: number | null
+          importe_cobrado?: number | null
           importe_concedido?: number | null
+          importe_financiar_empresa?: number | null
+          importe_justificado?: number | null
           importe_maximo?: number | null
+          importe_provisional?: number | null
           importe_solicitado?: number | null
           institucion_id?: string | null
           institucion_nombre?: string | null
+          iva_subvencionable?: boolean
+          justificacion_preparada?: boolean
+          justificacion_presentada?: boolean
+          justificantes_bancarios_requeridos?: boolean
+          max_paginas_memoria?: number | null
+          max_tamano_archivos?: string | null
+          memoria_final_requerida?: boolean
+          modalidad_justificacion?: string | null
           nombre_convocatoria?: string
+          nombre_corto?: string
+          nominas_tc_requeridos?: boolean
           notas?: string | null
+          numero_expediente?: string | null
+          numero_ofertas_exigidas?: number | null
+          numero_registro?: string | null
+          obligaciones_publicidad?: string | null
+          otra_documentacion_conservar?: string | null
+          otros_financiadores?: string | null
+          particularidades?: string | null
+          periodo_ejecucion_fin?: string | null
+          periodo_ejecucion_inicio?: string | null
+          porcentaje_anticipo?: number | null
+          porcentaje_concedido?: number | null
+          porcentaje_solicitado?: number | null
+          porcentaje_subvencionable?: number | null
+          portal_presentacion?: string | null
+          presentada_fecha?: string | null
+          presentada_hora?: string | null
+          presentada_por_person_id?: string | null
+          presupuesto_maximo?: number | null
+          presupuesto_minimo?: number | null
+          presupuesto_total_proyecto?: number | null
+          proyecto_vinculado?: string | null
+          quien_puede_firmar?: string | null
+          reglas_no_olvidar?: string | null
           representado_vinculado?: string | null
+          requerimientos?: string | null
           requisitos?: string | null
+          responsable_justificacion_person_id?: string | null
+          responsable_person_id?: string | null
+          resultado_provisional?: string | null
+          saldo_pendiente?: number | null
           tipo?: Database["public"]["Enums"]["subvencion_tipo"]
           updated_at?: string
           url_convocatoria?: string | null
+          url_tramitacion?: string | null
         }
         Relationships: [
           {
@@ -3435,10 +3687,52 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "oportunidades_subvenciones_presentada_por_person_id_fkey"
+            columns: ["presentada_por_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_presentada_por_person_id_fkey"
+            columns: ["presentada_por_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "oportunidades_subvenciones_representado_vinculado_fkey"
             columns: ["representado_vinculado"]
             isOneToOne: false
             referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_responsable_justificacion_perso_fkey"
+            columns: ["responsable_justificacion_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_responsable_justificacion_perso_fkey"
+            columns: ["responsable_justificacion_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oportunidades_subvenciones_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -5962,6 +6256,363 @@ export type Database = {
             columns: ["music_supervisor_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subvencion_documentos: {
+        Row: {
+          archivo_path: string | null
+          created_at: string
+          estado: string
+          fecha_limite_interna: string | null
+          fecha_limite_oficial: string | null
+          firmante: string | null
+          id: string
+          nombre: string
+          obligatorio: boolean
+          observaciones: string | null
+          plantilla_disponible: boolean
+          proporcionado_por: string | null
+          requiere_firma: boolean
+          responsable_person_id: string | null
+          subvencion_id: string
+          updated_at: string
+        }
+        Insert: {
+          archivo_path?: string | null
+          created_at?: string
+          estado?: string
+          fecha_limite_interna?: string | null
+          fecha_limite_oficial?: string | null
+          firmante?: string | null
+          id?: string
+          nombre: string
+          obligatorio?: boolean
+          observaciones?: string | null
+          plantilla_disponible?: boolean
+          proporcionado_por?: string | null
+          requiere_firma?: boolean
+          responsable_person_id?: string | null
+          subvencion_id: string
+          updated_at?: string
+        }
+        Update: {
+          archivo_path?: string | null
+          created_at?: string
+          estado?: string
+          fecha_limite_interna?: string | null
+          fecha_limite_oficial?: string | null
+          firmante?: string | null
+          id?: string
+          nombre?: string
+          obligatorio?: boolean
+          observaciones?: string | null
+          plantilla_disponible?: boolean
+          proporcionado_por?: string | null
+          requiere_firma?: boolean
+          responsable_person_id?: string | null
+          subvencion_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subvencion_documentos_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_documentos_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_documentos_subvencion_id_fkey"
+            columns: ["subvencion_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subvencion_hitos: {
+        Row: {
+          alerta_dias: number | null
+          calendar_event_id: string | null
+          created_at: string
+          estado: string
+          fecha_interna: string | null
+          fecha_oficial: string | null
+          id: string
+          nombre: string
+          responsable_person_id: string | null
+          subvencion_id: string
+          updated_at: string
+        }
+        Insert: {
+          alerta_dias?: number | null
+          calendar_event_id?: string | null
+          created_at?: string
+          estado?: string
+          fecha_interna?: string | null
+          fecha_oficial?: string | null
+          id?: string
+          nombre: string
+          responsable_person_id?: string | null
+          subvencion_id: string
+          updated_at?: string
+        }
+        Update: {
+          alerta_dias?: number | null
+          calendar_event_id?: string | null
+          created_at?: string
+          estado?: string
+          fecha_interna?: string | null
+          fecha_oficial?: string | null
+          id?: string
+          nombre?: string
+          responsable_person_id?: string | null
+          subvencion_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subvencion_hitos_calendar_event_id_fkey"
+            columns: ["calendar_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_hitos_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_hitos_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_hitos_subvencion_id_fkey"
+            columns: ["subvencion_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subvencion_partidas: {
+        Row: {
+          aportacion_propia: number
+          categoria: string | null
+          concepto: string
+          created_at: string
+          factura_recibida: boolean
+          gasto_elegible: number
+          general_budget_category: Database["public"]["Enums"]["ic_budget_category"]
+          general_budget_line_id: string | null
+          general_budget_month: number | null
+          general_budget_year: number | null
+          id: string
+          justificado: boolean
+          pagado: boolean
+          porcentaje_financiable: number | null
+          presupuesto_oferta_recibido: boolean
+          presupuesto_previsto: number
+          proveedor: string | null
+          sent_to_general_budget_at: string | null
+          subvencion_id: string
+          subvencion_imputable: number
+          updated_at: string
+        }
+        Insert: {
+          aportacion_propia?: number
+          categoria?: string | null
+          concepto: string
+          created_at?: string
+          factura_recibida?: boolean
+          gasto_elegible?: number
+          general_budget_category?: Database["public"]["Enums"]["ic_budget_category"]
+          general_budget_line_id?: string | null
+          general_budget_month?: number | null
+          general_budget_year?: number | null
+          id?: string
+          justificado?: boolean
+          pagado?: boolean
+          porcentaje_financiable?: number | null
+          presupuesto_oferta_recibido?: boolean
+          presupuesto_previsto?: number
+          proveedor?: string | null
+          sent_to_general_budget_at?: string | null
+          subvencion_id: string
+          subvencion_imputable?: number
+          updated_at?: string
+        }
+        Update: {
+          aportacion_propia?: number
+          categoria?: string | null
+          concepto?: string
+          created_at?: string
+          factura_recibida?: boolean
+          gasto_elegible?: number
+          general_budget_category?: Database["public"]["Enums"]["ic_budget_category"]
+          general_budget_line_id?: string | null
+          general_budget_month?: number | null
+          general_budget_year?: number | null
+          id?: string
+          justificado?: boolean
+          pagado?: boolean
+          porcentaje_financiable?: number | null
+          presupuesto_oferta_recibido?: boolean
+          presupuesto_previsto?: number
+          proveedor?: string | null
+          sent_to_general_budget_at?: string | null
+          subvencion_id?: string
+          subvencion_imputable?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subvencion_partidas_general_budget_line_id_fkey"
+            columns: ["general_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "ic_budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_partidas_subvencion_id_fkey"
+            columns: ["subvencion_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subvencion_tareas: {
+        Row: {
+          action_id: string | null
+          created_at: string
+          dependencia_id: string | null
+          documento_id: string | null
+          estado: string
+          fecha_limite: string | null
+          id: string
+          prioridad: string
+          responsable_person_id: string | null
+          subvencion_id: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          action_id?: string | null
+          created_at?: string
+          dependencia_id?: string | null
+          documento_id?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          id?: string
+          prioridad?: string
+          responsable_person_id?: string | null
+          subvencion_id: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string | null
+          created_at?: string
+          dependencia_id?: string | null
+          documento_id?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          id?: string
+          prioridad?: string
+          responsable_person_id?: string | null
+          subvencion_id?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subvencion_tareas_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_tareas_dependencia_id_fkey"
+            columns: ["dependencia_id"]
+            isOneToOne: false
+            referencedRelation: "subvencion_tareas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_tareas_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "subvencion_documentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_tareas_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_tareas_responsable_person_id_fkey"
+            columns: ["responsable_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subvencion_tareas_subvencion_id_fkey"
+            columns: ["subvencion_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subvencion_versiones_presentacion: {
+        Row: {
+          created_at: string
+          id: string
+          snapshot: Json
+          subvencion_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          snapshot: Json
+          subvencion_id: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          snapshot?: Json
+          subvencion_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subvencion_versiones_presentacion_subvencion_id_fkey"
+            columns: ["subvencion_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_subvenciones"
             referencedColumns: ["id"]
           },
         ]
