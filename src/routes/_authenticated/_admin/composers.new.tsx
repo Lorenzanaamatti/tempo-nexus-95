@@ -28,6 +28,7 @@ function NewComposerPage() {
   const { role: initialRole } = Route.useSearch() as { role: RosterRole };
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<RosterRole>(initialRole);
+  const [professionalCategory, setProfessionalCategory] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [bioShort, setBioShort] = useState("");
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,10 @@ function NewComposerPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!fullName.trim()) return;
+    if (role === "other" && !professionalCategory.trim()) {
+      toast.error("Indica la categoría profesional");
+      return;
+    }
     setBusy(true);
     const slug = slugify(fullName) || crypto.randomUUID().slice(0, 8);
     const { data, error } = await supabase
@@ -43,6 +48,7 @@ function NewComposerPage() {
         full_name: fullName.trim(),
         slug,
         roster_role: role,
+        role_subtype: role === "other" ? professionalCategory.trim() : null,
         owner_email: ownerEmail.trim() || null,
         bio_short: bioShort.trim() || null,
       })
@@ -74,13 +80,31 @@ function NewComposerPage() {
         </div>
         <div className="space-y-2">
           <Label>Rol en el roster *</Label>
-          <Select value={role} onValueChange={(v) => setRole(v as RosterRole)}>
+          <Select value={role} onValueChange={(v) => {
+            const nextRole = v as RosterRole;
+            setRole(nextRole);
+            if (nextRole !== "other") setProfessionalCategory("");
+          }}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {ROLES.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
+        {role === "other" && (
+          <div className="space-y-2">
+            <Label htmlFor="professionalCategory">Categoría profesional *</Label>
+            <Input
+              id="professionalCategory"
+              value={professionalCategory}
+              onChange={(e) => setProfessionalCategory(e.target.value)}
+              placeholder="Ej. agente, representante, abogado musical…"
+              required
+              maxLength={120}
+              autoFocus
+            />
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="ownerEmail">Email (opcional)</Label>
           <Input id="ownerEmail" type="email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} placeholder="Para vincular su acceso al iniciar sesión" maxLength={255} />
