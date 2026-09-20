@@ -19,6 +19,7 @@ const ITEM_DESCRIPTIONS: Record<string, string> = {
   Curador: "Consulta music curators y sus trabajos.",
   "Productor musical": "Accede a productores musicales y sus fichas.",
   "Otros perfiles": "Consulta el resto de perfiles representados.",
+  "Fichajes que queremos": "Consulta el talento detectado y el embudo de incorporación al roster.",
   Productoras: "Gestiona productoras, contactos y relaciones activas.",
   Plataformas: "Consulta plataformas y responsables de contacto.",
   Medios: "Organiza medios, contactos y seguimiento editorial.",
@@ -108,6 +109,7 @@ export function GroupLanding({
       to: item.to,
       search: item.search,
       icon: item.icon,
+      markerClass: item.markerClass,
     }));
 
   return <SectionLanding title={title} description={description} doors={doors} />;

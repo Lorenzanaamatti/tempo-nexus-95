@@ -3,7 +3,7 @@ import {
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
   KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
   Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen, ShieldCheck, CalendarRange,
-  Briefcase,
+  Briefcase, Mic2, Headphones, SlidersHorizontal, Shapes, UserPlus,
 } from "lucide-react";
 
 export type NavItem = {
@@ -12,6 +12,8 @@ export type NavItem = {
   search?: Record<string, string>;
   icon: typeof Music;
   hint?: string;
+  /** Punto de color que identifica visualmente una especialidad del roster. */
+  markerClass?: string;
   /** Items only BIG C (Dirección) can see. */
   bigCOnly?: boolean;
   /** Extra pathname prefixes that belong to this item (detail routes, aliases). */
@@ -50,13 +52,19 @@ export const NAV_GROUPS: NavGroup[] = [
     landingTo: "/clientes",
     items: [
       { title: "Roster completo", to: "/roster", icon: LibraryBig, match: ["/composers"] },
-      { title: "Compositor", to: "/composers", search: { role: "composer" }, icon: Music },
-      { title: "Artista", to: "/composers", search: { role: "artist" }, icon: Music },
-      { title: "Supervisor", to: "/composers", search: { role: "supervisor" }, icon: Music },
-      { title: "Especialista", to: "/composers", search: { role: "specialist" }, icon: Music },
-      { title: "Curador", to: "/composers", search: { role: "curator" }, icon: Music },
-      { title: "Productor musical", to: "/composers", search: { role: "productor_musical" }, icon: Music },
-      { title: "Otros perfiles", to: "/composers", search: { role: "other" }, icon: Music },
+      { title: "Compositor", to: "/composers", search: { role: "composer" }, icon: Music, markerClass: "bg-chart-1" },
+      { title: "Artista", to: "/composers", search: { role: "artist" }, icon: Mic2, markerClass: "bg-chart-2" },
+      { title: "Supervisor", to: "/composers", search: { role: "supervisor" }, icon: Headphones, markerClass: "bg-chart-3" },
+      { title: "Especialista", to: "/composers", search: { role: "specialist" }, icon: SlidersHorizontal, markerClass: "bg-chart-4" },
+      { title: "Curador", to: "/composers", search: { role: "curator" }, icon: ListChecks, markerClass: "bg-chart-5" },
+      { title: "Productor musical", to: "/composers", search: { role: "productor_musical" }, icon: Sparkles, markerClass: "bg-destructive" },
+      { title: "Otros perfiles", to: "/composers", search: { role: "other" }, icon: Shapes, markerClass: "bg-foreground" },
+      {
+        title: "Fichajes que queremos",
+        to: "/oportunidades/fichajes",
+        icon: UserPlus,
+        match: ["/oportunidades/roster", "/oportunidades/prospects-fichaje", "/oportunidades/prospect"],
+      },
     ],
   },
   {
@@ -85,12 +93,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Building2 },
       { title: "Pitches en curso", to: "/oportunidades/pitches", icon: Sparkles },
-      {
-        title: "Fichajes que queremos",
-        to: "/oportunidades/fichajes",
-        icon: Music,
-        match: ["/oportunidades/roster", "/oportunidades/prospects-fichaje", "/oportunidades/prospect"],
-      },
     ],
   },
   {
