@@ -4,6 +4,7 @@ import { DeadlineOpportunities } from "@/components/deadline-opportunities";
 const ESTADOS = ["Identificado", "Candidatura enviada", "Nominado", "Premio obtenido", "No seleccionado"] as const;
 
 export const Route = createFileRoute("/_authenticated/_admin/oportunidades/premios")({
+  head: () => ({ meta: [{ title: "Premios | Interesante Compañía" }, { name: "description", content: "Listado, importación y calendario de premios y candidaturas." }, { property: "og:title", content: "Premios | Interesante Compañía" }, { property: "og:description", content: "Listado, importación y calendario de premios y candidaturas." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: () => (
     <DeadlineOpportunities
       table="oportunidades_premios"

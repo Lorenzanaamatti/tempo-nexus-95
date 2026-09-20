@@ -6,6 +6,7 @@ const TIPOS = ["Competición", "Mercado", "Música", "Documental", "Cortometraje
 const ESTADOS = ["Identificado", "En preparación", "Inscrito", "Seleccionado", "No seleccionado", "Premio obtenido"] as const;
 
 export const Route = createFileRoute("/_authenticated/_admin/oportunidades/festivales")({
+  head: () => ({ meta: [{ title: "Festivales | Interesante Compañía" }, { name: "description", content: "Listado, importación y calendario de festivales y mercados." }, { property: "og:title", content: "Festivales | Interesante Compañía" }, { property: "og:description", content: "Listado, importación y calendario de festivales y mercados." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: () => (
     <DeadlineOpportunities
       table="oportunidades_festivales"

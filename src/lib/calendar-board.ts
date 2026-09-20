@@ -30,6 +30,8 @@ export const SUBJECT_GROUP_LABEL: Record<string, string> = {
   platform: "Plataformas",
   target_account: "Cuentas objetivo",
   grant: "Subvenciones",
+  festival: "Festivales",
+  award: "Premios",
 };
 
 export const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
@@ -288,6 +290,10 @@ export function buildCalendarModel(input: CalendarModelInput): {
         toPath = "/marketing/target-accounts/$accountId";
         params = { accountId: t.id };
       }
+    } else if (subject_type === "festival" || subject_type === "award") {
+      const firstTitle = evs.find((event) => event.title)?.title as string | undefined;
+      label = firstTitle?.split(" · ").slice(1).join(" · ") || (subject_type === "festival" ? "Festival" : "Premio");
+      toPath = subject_type === "festival" ? "/oportunidades/festivales" : "/oportunidades/premios";
     } else {
       const link = SUBJECT_LINK[subject_type];
       if (link) {
