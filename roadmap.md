@@ -9,3 +9,4 @@
 - [x] Añadir filtros combinables y descargas Excel/PDF a las vistas Gantt y calendario del Calendario General.
 - [x] Separar Financiero en accesos por cada sección de trabajo existente.
 - [x] Eliminar Marketing de Departamentos.
+- [x] Portar la sección Subvenciones de Plusmusic a Interesante (bandeja, fuentes, expedientes) con datos independientes.

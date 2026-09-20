@@ -68,6 +68,8 @@ import { Route as AuthenticatedAdminComunicacionIndexRouteImport } from './route
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminClientesIndexRouteImport } from './routes/_authenticated/_admin/clientes.index'
 import { Route as AuthenticatedAdminCandidaciesIndexRouteImport } from './routes/_authenticated/_admin/candidacies.index'
+import { Route as ApiPublicSubvencionesCorreoRouteImport } from './routes/api/public/subvenciones/correo'
+import { Route as ApiPublicSubvencionesCapturarRouteImport } from './routes/api/public/subvenciones/capturar'
 import { Route as ApiPublicCronSyncProduccionesEspanolasRouteImport } from './routes/api/public/cron/sync-producciones-espanolas'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/_admin/templates.$templateId'
 import { Route as AuthenticatedAdminTareasCalendarioRouteImport } from './routes/_authenticated/_admin/tareas_.calendario'
@@ -120,6 +122,7 @@ import { Route as AuthenticatedAdminEmpresaAuditoriaRouteImport } from './routes
 import { Route as AuthenticatedAdminEmpresaAgentesRouteImport } from './routes/_authenticated/_admin/empresa.agentes'
 import { Route as AuthenticatedAdminEmpresaActividadInternacionalRouteImport } from './routes/_authenticated/_admin/empresa.actividad-internacional'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
+import { Route as AuthenticatedAdminDepartamentosSubvencionesRouteImport } from './routes/_authenticated/_admin/departamentos.subvenciones'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
 import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
@@ -485,6 +488,18 @@ const AuthenticatedAdminCandidaciesIndexRoute =
     path: '/candidacies/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicSubvencionesCorreoRoute =
+  ApiPublicSubvencionesCorreoRouteImport.update({
+    id: '/api/public/subvenciones/correo',
+    path: '/api/public/subvenciones/correo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicSubvencionesCapturarRoute =
+  ApiPublicSubvencionesCapturarRouteImport.update({
+    id: '/api/public/subvenciones/capturar',
+    path: '/api/public/subvenciones/capturar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronSyncProduccionesEspanolasRoute =
   ApiPublicCronSyncProduccionesEspanolasRouteImport.update({
     id: '/api/public/cron/sync-producciones-espanolas',
@@ -797,6 +812,12 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
     path: '/directors/$directorId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDepartamentosSubvencionesRoute =
+  AuthenticatedAdminDepartamentosSubvencionesRouteImport.update({
+    id: '/departamentos/subvenciones',
+    path: '/departamentos/subvenciones',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDealMemosListaRoute =
   AuthenticatedAdminDealMemosListaRouteImport.update({
     id: '/lista',
@@ -1015,6 +1036,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1067,6 +1089,8 @@ export interface FileRoutesByFullPath {
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
@@ -1152,6 +1176,7 @@ export interface FileRoutesByTo {
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1204,6 +1229,8 @@ export interface FileRoutesByTo {
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/candidacies': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
@@ -1294,6 +1321,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/_authenticated/_admin/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1346,6 +1374,8 @@ export interface FileRoutesById {
   '/_authenticated/_admin/tareas_/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/_authenticated/_admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/_authenticated/_admin/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/_authenticated/_admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
@@ -1435,6 +1465,7 @@ export interface FileRouteTypes {
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
+    | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
@@ -1487,6 +1518,8 @@ export interface FileRouteTypes {
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/candidacies/'
     | '/clientes/'
     | '/composers/'
@@ -1572,6 +1605,7 @@ export interface FileRouteTypes {
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
+    | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
@@ -1624,6 +1658,8 @@ export interface FileRouteTypes {
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/candidacies'
     | '/clientes'
     | '/composers'
@@ -1713,6 +1749,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
     | '/_authenticated/_admin/deal-memos/configuracion'
     | '/_authenticated/_admin/deal-memos/lista'
+    | '/_authenticated/_admin/departamentos/subvenciones'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/empresa/actividad-internacional'
     | '/_authenticated/_admin/empresa/agentes'
@@ -1765,6 +1802,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/tareas_/calendario'
     | '/_authenticated/_admin/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/_authenticated/_admin/candidacies/'
     | '/_authenticated/_admin/clientes/'
     | '/_authenticated/_admin/composers/'
@@ -1814,6 +1853,8 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCronSyncProduccionesEspanolasRoute: typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  ApiPublicSubvencionesCapturarRoute: typeof ApiPublicSubvencionesCapturarRoute
+  ApiPublicSubvencionesCorreoRoute: typeof ApiPublicSubvencionesCorreoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2231,6 +2272,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCandidaciesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/subvenciones/correo': {
+      id: '/api/public/subvenciones/correo'
+      path: '/api/public/subvenciones/correo'
+      fullPath: '/api/public/subvenciones/correo'
+      preLoaderRoute: typeof ApiPublicSubvencionesCorreoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/subvenciones/capturar': {
+      id: '/api/public/subvenciones/capturar'
+      path: '/api/public/subvenciones/capturar'
+      fullPath: '/api/public/subvenciones/capturar'
+      preLoaderRoute: typeof ApiPublicSubvencionesCapturarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/sync-producciones-espanolas': {
       id: '/api/public/cron/sync-producciones-espanolas'
       path: '/api/public/cron/sync-producciones-espanolas'
@@ -2595,6 +2650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/departamentos/subvenciones': {
+      id: '/_authenticated/_admin/departamentos/subvenciones'
+      path: '/departamentos/subvenciones'
+      fullPath: '/departamentos/subvenciones'
+      preLoaderRoute: typeof AuthenticatedAdminDepartamentosSubvencionesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/deal-memos/lista': {
       id: '/_authenticated/_admin/deal-memos/lista'
       path: '/lista'
@@ -2877,6 +2939,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComunicacionPublicacionesRoute: typeof AuthenticatedAdminComunicacionPublicacionesRoute
   AuthenticatedAdminComunicacionReelsRoute: typeof AuthenticatedAdminComunicacionReelsRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
+  AuthenticatedAdminDepartamentosSubvencionesRoute: typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -2996,6 +3059,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminComunicacionReelsRoute,
   AuthenticatedAdminContractsContractIdRoute:
     AuthenticatedAdminContractsContractIdRoute,
+  AuthenticatedAdminDepartamentosSubvencionesRoute:
+    AuthenticatedAdminDepartamentosSubvencionesRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminEmpresaActividadInternacionalRoute:
@@ -3214,6 +3279,8 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCronSyncProduccionesEspanolasRoute:
     ApiPublicCronSyncProduccionesEspanolasRoute,
+  ApiPublicSubvencionesCapturarRoute: ApiPublicSubvencionesCapturarRoute,
+  ApiPublicSubvencionesCorreoRoute: ApiPublicSubvencionesCorreoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
