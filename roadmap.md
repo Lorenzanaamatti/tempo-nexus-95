@@ -7,3 +7,4 @@
 - [x] Convertir Blog, EPK y Reels en bibliotecas editables.
 - [x] Auditar y rediseñar Facturación: contratos, porcentajes, edición manual, órdenes a Maggy y remitente, e integración financiera siguiendo PLUSMUSIC.ORG.
 - [x] Añadir filtros combinables y descargas Excel/PDF a las vistas Gantt y calendario del Calendario General.
+- [x] Separar Financiero en accesos por cada sección de trabajo existente.
