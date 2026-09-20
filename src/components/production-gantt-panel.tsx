@@ -189,7 +189,7 @@ export function ProductionGanttPanel({
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [rows]);
 
-  const filtered = rows.filter(
+  const filtered = useMemo(() => rows.filter(
     (r) =>
       (composerFilter === "all" || r.composerId === composerFilter) &&
       (productionFilter === "all" || r.productionId === productionFilter) &&
@@ -198,7 +198,7 @@ export function ProductionGanttPanel({
       (externalType === "all" || r.name.trim().toLowerCase() === externalType.trim().toLowerCase()) &&
       (!dateFrom || r.end >= dateFrom) &&
       (!dateTo || r.start <= dateTo),
-  );
+  ), [rows, composerFilter, productionFilter, ownerFilter, externalOwner, externalType, dateFrom, dateTo]);
 
   useEffect(() => {
     onFilteredRowsChange?.(filtered);
