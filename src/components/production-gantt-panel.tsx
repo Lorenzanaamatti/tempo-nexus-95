@@ -50,7 +50,7 @@ export function ProductionGanttPanel({
       const ids = await loadProductionIds({ productionIds, composerId });
       if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
       const [prods, phases, catalog, evSubject, evSource] = await Promise.all([
-        db.from("productions").select("id, title, composer_id").in("id", ids),
+        db.from("productions").select("id, title, composer_id, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
         db
           .from("production_phases")
           .select("id, production_id, name, owner, start_date, end_date, status, notes, position, is_milestone, catalog_id")
@@ -87,8 +87,12 @@ export function ProductionGanttPanel({
         names = new Map(((cs ?? []) as any[]).map((c) => [c.id, c.artistic_name || c.full_name]));
       }
 
-      const meta = new Map<string, { title: string; composer_id: string | null }>(
-        ((prods.data ?? []) as any[]).map((p) => [p.id, { title: p.title, composer_id: p.composer_id }]),
+      const meta = new Map<string, { title: string; composer_id: string | null; client: string | null }>(
+        ((prods.data ?? []) as any[]).map((p) => [p.id, {
+          title: p.title,
+          composer_id: p.composer_id,
+          client: p.partner_company?.name ?? p.production_company ?? p.partner ?? p.platform_ref?.name ?? p.platform ?? null,
+        }]),
       );
 
       const phaseRows: Row[] = ((phases.data ?? []) as any[])
@@ -107,6 +111,7 @@ export function ProductionGanttPanel({
             milestone: !!p.is_milestone || p.start_date === p.end_date,
             productionId: p.production_id,
             productionTitle: m?.title ?? "Producción",
+            productionClient: m?.client ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: catalogItem?.color_key ?? "graphite",
@@ -139,6 +144,7 @@ export function ProductionGanttPanel({
             milestone: start === end,
             productionId: pid,
             productionTitle: m?.title ?? "Producción",
+            productionClient: m?.client ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: "graphite",
