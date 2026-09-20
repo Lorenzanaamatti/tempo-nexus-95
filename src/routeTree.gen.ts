@@ -122,6 +122,7 @@ import { Route as AuthenticatedAdminEmpresaAuditoriaRouteImport } from './routes
 import { Route as AuthenticatedAdminEmpresaAgentesRouteImport } from './routes/_authenticated/_admin/empresa.agentes'
 import { Route as AuthenticatedAdminEmpresaActividadInternacionalRouteImport } from './routes/_authenticated/_admin/empresa.actividad-internacional'
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
+import { Route as AuthenticatedAdminDepartamentosSubvencionesRouteImport } from './routes/_authenticated/_admin/departamentos.subvenciones'
 import { Route as AuthenticatedAdminDealMemosListaRouteImport } from './routes/_authenticated/_admin/deal-memos.lista'
 import { Route as AuthenticatedAdminDealMemosConfiguracionRouteImport } from './routes/_authenticated/_admin/deal-memos.configuracion'
 import { Route as AuthenticatedAdminDealMemosDealMemoIdRouteImport } from './routes/_authenticated/_admin/deal-memos.$dealMemoId'
@@ -811,6 +812,12 @@ const AuthenticatedAdminDirectorsDirectorIdRoute =
     path: '/directors/$directorId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDepartamentosSubvencionesRoute =
+  AuthenticatedAdminDepartamentosSubvencionesRouteImport.update({
+    id: '/departamentos/subvenciones',
+    path: '/departamentos/subvenciones',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDealMemosListaRoute =
   AuthenticatedAdminDealMemosListaRouteImport.update({
     id: '/lista',
@@ -1029,6 +1036,7 @@ export interface FileRoutesByFullPath {
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1168,6 +1176,7 @@ export interface FileRoutesByTo {
   '/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1312,6 +1321,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/deal-memos/$dealMemoId': typeof AuthenticatedAdminDealMemosDealMemoIdRoute
   '/_authenticated/_admin/deal-memos/configuracion': typeof AuthenticatedAdminDealMemosConfiguracionRoute
   '/_authenticated/_admin/deal-memos/lista': typeof AuthenticatedAdminDealMemosListaRoute
+  '/_authenticated/_admin/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -1455,6 +1465,7 @@ export interface FileRouteTypes {
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
+    | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
@@ -1594,6 +1605,7 @@ export interface FileRouteTypes {
     | '/deal-memos/$dealMemoId'
     | '/deal-memos/configuracion'
     | '/deal-memos/lista'
+    | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
     | '/empresa/agentes'
@@ -1737,6 +1749,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/deal-memos/$dealMemoId'
     | '/_authenticated/_admin/deal-memos/configuracion'
     | '/_authenticated/_admin/deal-memos/lista'
+    | '/_authenticated/_admin/departamentos/subvenciones'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/empresa/actividad-internacional'
     | '/_authenticated/_admin/empresa/agentes'
@@ -2637,6 +2650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDirectorsDirectorIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/departamentos/subvenciones': {
+      id: '/_authenticated/_admin/departamentos/subvenciones'
+      path: '/departamentos/subvenciones'
+      fullPath: '/departamentos/subvenciones'
+      preLoaderRoute: typeof AuthenticatedAdminDepartamentosSubvencionesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/deal-memos/lista': {
       id: '/_authenticated/_admin/deal-memos/lista'
       path: '/lista'
@@ -2919,6 +2939,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminComunicacionPublicacionesRoute: typeof AuthenticatedAdminComunicacionPublicacionesRoute
   AuthenticatedAdminComunicacionReelsRoute: typeof AuthenticatedAdminComunicacionReelsRoute
   AuthenticatedAdminContractsContractIdRoute: typeof AuthenticatedAdminContractsContractIdRoute
+  AuthenticatedAdminDepartamentosSubvencionesRoute: typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
   AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
@@ -3038,6 +3059,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminComunicacionReelsRoute,
   AuthenticatedAdminContractsContractIdRoute:
     AuthenticatedAdminContractsContractIdRoute,
+  AuthenticatedAdminDepartamentosSubvencionesRoute:
+    AuthenticatedAdminDepartamentosSubvencionesRoute,
   AuthenticatedAdminDirectorsDirectorIdRoute:
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminEmpresaActividadInternacionalRoute:
