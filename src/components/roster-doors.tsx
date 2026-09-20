@@ -3,6 +3,16 @@ import type { RosterRoleValue } from "@/lib/roster-roles";
 
 type RosterDoor = RosterRoleValue | "complete";
 
+const ROSTER_MARKERS: Record<RosterRoleValue, string> = {
+  composer: "bg-chart-1",
+  artist: "bg-chart-2",
+  supervisor: "bg-chart-3",
+  specialist: "bg-chart-4",
+  curator: "bg-chart-5",
+  productor_musical: "bg-destructive",
+  other: "bg-foreground",
+};
+
 const ROSTER_DOORS: Array<{ key: RosterDoor; title: string; to: string; role?: RosterRoleValue }> = [
   { key: "complete", title: "Roster completo", to: "/roster" },
   { key: "composer", title: "Compositores", to: "/composers", role: "composer" },
@@ -20,6 +30,7 @@ export function RosterDoors({ selected }: { selected: RosterDoor }) {
     to: door.to,
     search: door.role ? { role: door.role } : undefined,
     selected: selected === door.key,
+    markerClass: door.role ? ROSTER_MARKERS[door.role] : undefined,
   }));
 
   return <SectionDoors doors={doors} columns={3} />;

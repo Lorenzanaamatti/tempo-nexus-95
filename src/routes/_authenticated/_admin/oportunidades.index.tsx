@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_authenticated/_admin/oportunidades/")({
   head: () => ({
     meta: [
       { title: "Oportunidades de ventas | Interesante Compañía" },
-      { name: "description", content: "Todo lo que puede convertirse en trabajo: producciones en desarrollo, productoras a contactar, pitches en curso y fichajes." },
+      { name: "description", content: "Todo lo que puede convertirse en trabajo: producciones en desarrollo, productoras a contactar y pitches en curso." },
       { property: "og:title", content: "Oportunidades de ventas" },
       { property: "og:description", content: "Todo lo que puede convertirse en trabajo en Interesante Compañía." },
       { property: "og:type", content: "website" },
@@ -30,11 +30,6 @@ const DOORS: Door[] = [
     title: "Pitches en curso",
     description: "Propuestas activas de roster IC y su seguimiento.",
     to: "/oportunidades/pitches",
-  },
-  {
-    title: "Fichajes que queremos",
-    description: "Talento detectado y embudo de incorporación al roster.",
-    to: "/oportunidades/fichajes",
   },
 ];
 

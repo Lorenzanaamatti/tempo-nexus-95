@@ -12,6 +12,7 @@ export type Door = {
   onClick?: () => void;
   selected?: boolean;
   icon?: LucideIcon;
+  markerClass?: string;
 };
 
 const BASE =
@@ -45,7 +46,10 @@ export function SectionDoors({
             <span className="flex items-start justify-between gap-4">
               {Icon ? (
                 <span className={`flex size-9 shrink-0 items-center justify-center rounded-full ${door.selected ? "bg-primary-foreground/15" : "bg-accent text-accent-foreground"}`}>
-                  <Icon className="size-4" aria-hidden="true" />
+                  <span className="relative">
+                    <Icon className="size-4" aria-hidden="true" />
+                    {door.markerClass && <span aria-hidden className={`absolute -bottom-1 -right-1 size-2.5 rounded-full border-2 border-card ${door.markerClass}`} />}
+                  </span>
                 </span>
               ) : <span />}
               <ArrowUpRight className={`size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${door.selected ? "text-primary-foreground/70" : "text-rust"}`} aria-hidden="true" />

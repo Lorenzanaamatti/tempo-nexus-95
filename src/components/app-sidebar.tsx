@@ -339,8 +339,9 @@ function NavGroupSection({
             {group.items.map((item: NavItem) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)} tooltip={item.title}>
-                  <Link to={item.to} search={item.search as never}>
+                  <Link to={item.to} search={item.search as never} className="relative">
                     <item.icon className="h-4 w-4" />
+                    {item.markerClass && <span aria-hidden className={`absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-sidebar ${item.markerClass}`} />}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -378,7 +379,10 @@ function NavGroupSection({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isItemActive(item, pathname, search)}>
                     <Link to={item.to} search={item.search as never} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
+                      <span className="relative shrink-0">
+                        <item.icon className="h-4 w-4" />
+                        {item.markerClass && <span aria-hidden className={`absolute -bottom-1 -right-1 size-2 rounded-full border border-sidebar ${item.markerClass}`} />}
+                      </span>
                       <span className="flex flex-1 items-center justify-between gap-2">
                         <span>{item.title}</span>
                         {item.to === "/agent-actions" && pendingAgentActions > 0 && (

@@ -26,9 +26,9 @@ export const Route = createFileRoute("/_authenticated/")({
 
 const GROUP_HINT: Record<string, string> = {
   Empresa: "Objetivos, equipo, actividad y visión económica de la compañía.",
-  Clientes: "Consulta el roster completo y las fichas de cada especialidad.",
+  Clientes: "Consulta el roster, cada especialidad y los fichajes que queremos.",
   Partners: "Gestiona productoras, plataformas, medios e instituciones.",
-  "Oportunidades de ventas": "Sigue producciones, contactos, pitches y posibles fichajes.",
+  "Oportunidades de ventas": "Sigue producciones, contactos y pitches en curso.",
   Producciones: "Controla el trabajo activo, su evolución y los proyectos finalizados.",
   Paperwork: "Prepara presupuestos, acuerdos, contratos y documentación legal.",
   "Templates documentos": "Encuentra y reutiliza los documentos base de la compañía.",
