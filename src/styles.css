@@ -62,6 +62,18 @@
   --color-aubergine: var(--aubergine);
   --color-avocado: var(--avocado);
   --color-avocado-soft: var(--avocado-soft);
+  --color-phase-aubergine: var(--phase-aubergine);
+  --color-phase-rust: var(--phase-rust);
+  --color-phase-avocado: var(--phase-avocado);
+  --color-phase-berry: var(--phase-berry);
+  --color-phase-coral: var(--phase-coral);
+  --color-phase-mustard: var(--phase-mustard);
+  --color-phase-teal: var(--phase-teal);
+  --color-phase-forest: var(--phase-forest);
+  --color-phase-denim: var(--phase-denim);
+  --color-phase-plum: var(--phase-plum);
+  --color-phase-rose: var(--phase-rose);
+  --color-phase-graphite: var(--phase-graphite);
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
@@ -118,6 +130,18 @@
   --sidebar-ring: var(--aubergine);
   --accent-coral: var(--rust);
   --accent-coral-soft: #d0805a;
+  --phase-aubergine: #47353f;
+  --phase-rust: #b55a30;
+  --phase-avocado: #9b892f;
+  --phase-berry: #8f3f5f;
+  --phase-coral: #d06b55;
+  --phase-mustard: #c59a32;
+  --phase-teal: #3f7f79;
+  --phase-forest: #55704b;
+  --phase-denim: #52718d;
+  --phase-plum: #76536f;
+  --phase-rose: #a85f70;
+  --phase-graphite: #625d5f;
   /* Portal tokens — siempre claros */
   --portal-bg: #fcfbf7;
   --portal-fg: #2a2226;

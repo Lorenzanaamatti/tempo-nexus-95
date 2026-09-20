@@ -20,7 +20,7 @@ import { GANTT_OWNER_LABEL, type GanttOwner } from "@/components/production-gant
 import {
   PHASE_TEMPLATE_LABEL, seedProductionPhases, templateForKind, type PhaseTemplateKey,
 } from "@/lib/production-phase-templates";
-import { addToPhaseCatalog, findCatalogByName, useInvalidatePhaseCatalog, usePhaseCatalog } from "@/lib/phase-catalog";
+import { addToPhaseCatalog, findCatalogByName, PHASE_COLOR_CLASS, PHASE_COLOR_KEYS, PHASE_COLOR_LABEL, useInvalidatePhaseCatalog, usePhaseCatalog, type PhaseColorKey } from "@/lib/phase-catalog";
 import { toast } from "sonner";
 import { Plus, Flag, AlertTriangle, Sparkles, Star, PartyPopper } from "lucide-react";
 
@@ -82,6 +82,7 @@ export function ProductionMilestonesEditor({
   const [owner, setOwner] = useState<GanttOwner>("representado");
   const [template, setTemplate] = useState<PhaseTemplateKey>(templateForKind(productionKind));
   const [askStandard, setAskStandard] = useState<string | null>(null);
+  const [standardColor, setStandardColor] = useState<PhaseColorKey>("aubergine");
 
   const catalog = catalogQ.data ?? [];
   const picked = useMemo(() => catalog.find((c) => c.id === pick) ?? null, [catalog, pick]);
@@ -129,7 +130,7 @@ export function ProductionMilestonesEditor({
     setAskStandard(null);
     if (!n) return;
     try {
-      await addToPhaseCatalog({ name: n, requires_detail: true, requires_place: true });
+      await addToPhaseCatalog({ name: n, requires_detail: true, requires_place: true, color_key: standardColor });
       invalidateCatalog();
       toast.success(`“${n}” ya forma parte de la lista estándar`);
     } catch (e: any) {
@@ -382,8 +383,22 @@ export function ProductionMilestonesEditor({
             <AlertDialogTitle>¿Añadirlo a la lista estándar?</AlertDialogTitle>
             <AlertDialogDescription>
               “{askStandard}” no estaba en el desplegable de subprocesos. ¿Quieres que forme parte del estándar y aparezca
-              en todas las producciones?
+              en todas las producciones? Elige también el color con el que aparecerá en los Gantt.
             </AlertDialogDescription>
+            <div className="grid grid-cols-3 gap-2 pt-3 sm:grid-cols-4">
+              {PHASE_COLOR_KEYS.map((color) => (
+                <Button
+                  key={color}
+                  type="button"
+                  variant="outline"
+                  className={`h-auto justify-start gap-2 px-2 py-2 ${standardColor === color ? "ring-2 ring-primary" : ""}`}
+                  onClick={() => setStandardColor(color)}
+                >
+                  <span className={`h-4 w-4 shrink-0 rounded-sm ${PHASE_COLOR_CLASS[color]}`} />
+                  <span className="truncate text-xs">{PHASE_COLOR_LABEL[color]}</span>
+                </Button>
+              ))}
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No, solo aquí</AlertDialogCancel>
