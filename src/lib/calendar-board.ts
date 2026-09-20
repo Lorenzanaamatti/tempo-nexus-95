@@ -29,6 +29,7 @@ export const SUBJECT_GROUP_LABEL: Record<string, string> = {
   production_company: "Productoras",
   platform: "Plataformas",
   target_account: "Cuentas objetivo",
+  grant: "Subvenciones",
 };
 
 export const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
@@ -38,6 +39,7 @@ export const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
   contract: { to: "/contracts/$contractId", param: "contractId" },
   person: { to: "/people/$personId", param: "personId" },
   target_account: { to: "/marketing/target-accounts/$accountId", param: "accountId" },
+  grant: { to: "/oportunidades/subvenciones/$subvencionId", param: "subvencionId" },
 };
 
 export type Layout = "gantt" | "calendar" | "kanban";

@@ -141,6 +141,7 @@ import { Route as AuthenticatedAdminMarketingComunicacionIndexRouteImport } from
 import { Route as AuthenticatedAdminMarketingBrandIndexRouteImport } from './routes/_authenticated/_admin/marketing.brand.index'
 import { Route as AuthenticatedAdminEmpresaEquipoIndexRouteImport } from './routes/_authenticated/_admin/empresa.equipo.index'
 import { Route as AuthenticatedAdminDealMemosPlantillasIndexRouteImport } from './routes/_authenticated/_admin/deal-memos.plantillas.index'
+import { Route as AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRouteImport } from './routes/_authenticated/_admin/oportunidades.subvenciones.$subvencionId'
 import { Route as AuthenticatedAdminOportunidadesProspectProspectIdRouteImport } from './routes/_authenticated/_admin/oportunidades.prospect.$prospectId'
 import { Route as AuthenticatedAdminOportunidadesPitchesPitchIdRouteImport } from './routes/_authenticated/_admin/oportunidades.pitches_.$pitchId'
 import { Route as AuthenticatedAdminMarketingTargetAccountsAccountIdRouteImport } from './routes/_authenticated/_admin/marketing.target-accounts.$accountId'
@@ -922,6 +923,12 @@ const AuthenticatedAdminDealMemosPlantillasIndexRoute =
     path: '/plantillas/',
     getParentRoute: () => AuthenticatedAdminDealMemosRoute,
   } as any)
+const AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute =
+  AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRouteImport.update({
+    id: '/$subvencionId',
+    path: '/$subvencionId',
+    getParentRoute: () => AuthenticatedAdminOportunidadesSubvencionesRoute,
+  } as any)
 const AuthenticatedAdminOportunidadesProspectProspectIdRoute =
   AuthenticatedAdminOportunidadesProspectProspectIdRouteImport.update({
     id: '/oportunidades/prospect/$prospectId',
@@ -1032,7 +1039,7 @@ export interface FileRoutesByFullPath {
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/prospects-fichaje': typeof AuthenticatedAdminOportunidadesProspectsFichajeRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
-  '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
+  '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/paperwork/adendas': typeof AuthenticatedAdminPaperworkAdendasRoute
   '/paperwork/contrato-laboral': typeof AuthenticatedAdminPaperworkContratoLaboralRoute
@@ -1089,6 +1096,7 @@ export interface FileRoutesByFullPath {
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/oportunidades/pitches/$pitchId': typeof AuthenticatedAdminOportunidadesPitchesPitchIdRoute
   '/oportunidades/prospect/$prospectId': typeof AuthenticatedAdminOportunidadesProspectProspectIdRoute
+  '/oportunidades/subvenciones/$subvencionId': typeof AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute
   '/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/empresa/equipo/': typeof AuthenticatedAdminEmpresaEquipoIndexRoute
   '/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
@@ -1168,7 +1176,7 @@ export interface FileRoutesByTo {
   '/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/oportunidades/prospects-fichaje': typeof AuthenticatedAdminOportunidadesProspectsFichajeRoute
   '/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
-  '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
+  '/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren
   '/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/paperwork/adendas': typeof AuthenticatedAdminPaperworkAdendasRoute
   '/paperwork/contrato-laboral': typeof AuthenticatedAdminPaperworkContratoLaboralRoute
@@ -1225,6 +1233,7 @@ export interface FileRoutesByTo {
   '/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/oportunidades/pitches/$pitchId': typeof AuthenticatedAdminOportunidadesPitchesPitchIdRoute
   '/oportunidades/prospect/$prospectId': typeof AuthenticatedAdminOportunidadesProspectProspectIdRoute
+  '/oportunidades/subvenciones/$subvencionId': typeof AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute
   '/deal-memos/plantillas': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/empresa/equipo': typeof AuthenticatedAdminEmpresaEquipoIndexRoute
   '/marketing/brand': typeof AuthenticatedAdminMarketingBrandIndexRoute
@@ -1309,7 +1318,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/oportunidades/producciones': typeof AuthenticatedAdminOportunidadesProduccionesRoute
   '/_authenticated/_admin/oportunidades/prospects-fichaje': typeof AuthenticatedAdminOportunidadesProspectsFichajeRoute
   '/_authenticated/_admin/oportunidades/roster': typeof AuthenticatedAdminOportunidadesRosterRoute
-  '/_authenticated/_admin/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRoute
+  '/_authenticated/_admin/oportunidades/subvenciones': typeof AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren
   '/_authenticated/_admin/opportunities/$opportunityId': typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   '/_authenticated/_admin/paperwork/adendas': typeof AuthenticatedAdminPaperworkAdendasRoute
   '/_authenticated/_admin/paperwork/contrato-laboral': typeof AuthenticatedAdminPaperworkContratoLaboralRoute
@@ -1366,6 +1375,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/marketing/target-accounts/$accountId': typeof AuthenticatedAdminMarketingTargetAccountsAccountIdRoute
   '/_authenticated/_admin/oportunidades/pitches_/$pitchId': typeof AuthenticatedAdminOportunidadesPitchesPitchIdRoute
   '/_authenticated/_admin/oportunidades/prospect/$prospectId': typeof AuthenticatedAdminOportunidadesProspectProspectIdRoute
+  '/_authenticated/_admin/oportunidades/subvenciones/$subvencionId': typeof AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute
   '/_authenticated/_admin/deal-memos/plantillas/': typeof AuthenticatedAdminDealMemosPlantillasIndexRoute
   '/_authenticated/_admin/empresa/equipo/': typeof AuthenticatedAdminEmpresaEquipoIndexRoute
   '/_authenticated/_admin/marketing/brand/': typeof AuthenticatedAdminMarketingBrandIndexRoute
@@ -1506,6 +1516,7 @@ export interface FileRouteTypes {
     | '/marketing/target-accounts/$accountId'
     | '/oportunidades/pitches/$pitchId'
     | '/oportunidades/prospect/$prospectId'
+    | '/oportunidades/subvenciones/$subvencionId'
     | '/deal-memos/plantillas/'
     | '/empresa/equipo/'
     | '/marketing/brand/'
@@ -1642,6 +1653,7 @@ export interface FileRouteTypes {
     | '/marketing/target-accounts/$accountId'
     | '/oportunidades/pitches/$pitchId'
     | '/oportunidades/prospect/$prospectId'
+    | '/oportunidades/subvenciones/$subvencionId'
     | '/deal-memos/plantillas'
     | '/empresa/equipo'
     | '/marketing/brand'
@@ -1782,6 +1794,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/marketing/target-accounts/$accountId'
     | '/_authenticated/_admin/oportunidades/pitches_/$pitchId'
     | '/_authenticated/_admin/oportunidades/prospect/$prospectId'
+    | '/_authenticated/_admin/oportunidades/subvenciones/$subvencionId'
     | '/_authenticated/_admin/deal-memos/plantillas/'
     | '/_authenticated/_admin/empresa/equipo/'
     | '/_authenticated/_admin/marketing/brand/'
@@ -2729,6 +2742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealMemosPlantillasIndexRouteImport
       parentRoute: typeof AuthenticatedAdminDealMemosRoute
     }
+    '/_authenticated/_admin/oportunidades/subvenciones/$subvencionId': {
+      id: '/_authenticated/_admin/oportunidades/subvenciones/$subvencionId'
+      path: '/$subvencionId'
+      fullPath: '/oportunidades/subvenciones/$subvencionId'
+      preLoaderRoute: typeof AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRouteImport
+      parentRoute: typeof AuthenticatedAdminOportunidadesSubvencionesRoute
+    }
     '/_authenticated/_admin/oportunidades/prospect/$prospectId': {
       id: '/_authenticated/_admin/oportunidades/prospect/$prospectId'
       path: '/oportunidades/prospect/$prospectId'
@@ -2819,6 +2839,21 @@ const AuthenticatedAdminEmpresaAgentesRouteWithChildren =
     AuthenticatedAdminEmpresaAgentesRouteChildren,
   )
 
+interface AuthenticatedAdminOportunidadesSubvencionesRouteChildren {
+  AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute: typeof AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute
+}
+
+const AuthenticatedAdminOportunidadesSubvencionesRouteChildren: AuthenticatedAdminOportunidadesSubvencionesRouteChildren =
+  {
+    AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute:
+      AuthenticatedAdminOportunidadesSubvencionesSubvencionIdRoute,
+  }
+
+const AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren =
+  AuthenticatedAdminOportunidadesSubvencionesRoute._addFileChildren(
+    AuthenticatedAdminOportunidadesSubvencionesRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAgentActionsRoute: typeof AuthenticatedAdminAgentActionsRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
@@ -2866,7 +2901,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOportunidadesProduccionesRoute: typeof AuthenticatedAdminOportunidadesProduccionesRoute
   AuthenticatedAdminOportunidadesProspectsFichajeRoute: typeof AuthenticatedAdminOportunidadesProspectsFichajeRoute
   AuthenticatedAdminOportunidadesRosterRoute: typeof AuthenticatedAdminOportunidadesRosterRoute
-  AuthenticatedAdminOportunidadesSubvencionesRoute: typeof AuthenticatedAdminOportunidadesSubvencionesRoute
+  AuthenticatedAdminOportunidadesSubvencionesRoute: typeof AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren
   AuthenticatedAdminOpportunitiesOpportunityIdRoute: typeof AuthenticatedAdminOpportunitiesOpportunityIdRoute
   AuthenticatedAdminPaperworkAdendasRoute: typeof AuthenticatedAdminPaperworkAdendasRoute
   AuthenticatedAdminPaperworkContratoLaboralRoute: typeof AuthenticatedAdminPaperworkContratoLaboralRoute
@@ -3009,7 +3044,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOportunidadesRosterRoute:
     AuthenticatedAdminOportunidadesRosterRoute,
   AuthenticatedAdminOportunidadesSubvencionesRoute:
-    AuthenticatedAdminOportunidadesSubvencionesRoute,
+    AuthenticatedAdminOportunidadesSubvencionesRouteWithChildren,
   AuthenticatedAdminOpportunitiesOpportunityIdRoute:
     AuthenticatedAdminOpportunitiesOpportunityIdRoute,
   AuthenticatedAdminPaperworkAdendasRoute:
