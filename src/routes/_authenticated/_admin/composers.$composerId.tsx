@@ -165,6 +165,7 @@ function Inner({
   const contractsRel: any[] = initialRelations.contracts ?? [];
   const spanishFilms: any[] = initialRelations.spanishFilms ?? [];
   const [tagInput, setTagInput] = useState("");
+  const [tab, setTab] = useState<FichaTab | null>(null);
 
   function field<K extends string>(k: K, v: any) {
     setC((prev: any) => ({ ...prev, [k]: v }));
@@ -221,6 +222,7 @@ function Inner({
 
   // Mismo criterio que la columna "Proyectos en curso" del Roster completo.
   const activeProductions = productionsRel.filter((p: any) => isOpenProduction(p));
+  const finalizedProductions = productionsRel.filter((p: any) => isFinalized(p.status));
   const totalRevenue = projects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
   const totalMargin = projects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
   const portalLink = c.portal_url
@@ -413,6 +415,28 @@ function Inner({
         <KPI label="Margen neto" value={<Money value={totalMargin} compact />} />
       </section>
 
+      {tab === null ? (
+        <SectionDoors
+          wide
+          doors={FICHA_DOORS.map((d): Door => ({
+            title: d.title,
+            description: d.description,
+            icon: d.icon,
+            onClick: () => setTab(d.key),
+          }))}
+        />
+      ) : (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Button type="button" variant="outline" size="sm" onClick={() => setTab(null)}>
+            <ArrowLeft className="mr-1 h-3 w-3" /> Atrás
+          </Button>
+          <span className="font-display text-xl uppercase text-aubergine">
+            {FICHA_DOORS.find((d) => d.key === tab)?.title}
+          </span>
+        </div>
+      )}
+
+      {tab === "representacion" && (<>
       {/* Plan de carrera */}
       <Section title="Plan de carrera">
         <ComposerCareerPlan composerId={c.id} agentPersonId={c.agent_person_id ?? null} />
@@ -515,6 +539,9 @@ function Inner({
         </div>
       </Section>
 
+      </>)}
+
+      {tab === "proyectos" && (<>
       {/* Proyectos activos */}
       <Section title="Proyectos activos">
         {activeProductions.length === 0 ? (
@@ -568,12 +595,15 @@ function Inner({
         )}
       </Section>
 
-      <Section title="Producciones">
-        {productionsRel.length === 0 ? (
-          <EmptyState variant="inline" icon={Film} title="Sin producciones asociadas" description="Asigna esta ficha a una producción para llevar el seguimiento." action={{ label: "Ver producciones", to: "/productions" }} />
+      </>)}
+
+      {tab === "finalizadas" && (<>
+      <Section title="Producciones finalizadas">
+        {finalizedProductions.length === 0 ? (
+          <EmptyState variant="inline" icon={Film} title="Sin producciones finalizadas" description="Aquí se archivan las producciones ya terminadas o estrenadas." action={{ label: "Ver producciones", to: "/productions" }} />
         ) : (
           <ul className="space-y-2">
-            {productionsRel.map((p: any) => (
+            {finalizedProductions.map((p: any) => (
               <li key={p.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
                 <div className="min-w-0">
                   <Link to="/productions/$productionId" params={{ productionId: p.id }} className="text-sm hover:underline">{p.title}</Link>
@@ -590,11 +620,17 @@ function Inner({
         )}
       </Section>
 
+      </>)}
+
+      {tab === "economia" && (<>
       <Section title="Facturación">
         <ComposerBilling productions={productionsRel} composerId={c.id} />
       </Section>
 
 
+      </>)}
+
+      {tab === "contratos" && (<>
       <Section title="Contratos">
         {contractsRel.length === 0 ? (
           <EmptyState variant="inline" icon={FileSignature} title="Sin contratos" description="Los contratos vinculados a esta ficha aparecerán aquí." action={{ label: "Ir a contratos", to: "/contracts" }} />
@@ -618,6 +654,9 @@ function Inner({
         )}
       </Section>
 
+      </>)}
+
+      {tab === "portal" && (<>
       {/* Portal del representado */}
       <Section title="Portal del representado">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -653,6 +692,9 @@ function Inner({
         )}
       </Section>
 
+      </>)}
+
+      {tab === "identidad" && (<>
       {/* Identidad */}
       <Section title="Identidad">
         <PhotoUploader
@@ -732,6 +774,9 @@ function Inner({
         </div>
       </Section>
 
+      </>)}
+
+      {tab === "materiales" && (<>
       {/* Galería */}
       <Section title="Galería fotográfica (máx. 12)">
         <PhotoGallery composerId={c.id} />
@@ -745,6 +790,9 @@ function Inner({
         <SocialActivityPanel composerId={c.id} />
       </Section>
 
+      </>)}
+
+      {tab === "datos" && (<>
       {/* Datos fiscales y dirección */}
       <Section title="Datos fiscales y dirección">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -815,6 +863,21 @@ function Inner({
         </div>
       </Section>
 
+      </>)}
+
+      {tab === "calendario" && (<>
+      <Section title="Calendario del cliente">
+        <p className="text-xs text-muted-foreground">
+          Procesos, entregas e hitos de sus producciones, por semanas.
+        </p>
+        <ProductionGanttPanel composerId={c.id} />
+        <div>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/tareas/calendario">Abrir calendario general</Link>
+          </Button>
+        </div>
+      </Section>
+
       {/* Disponibilidad por periodos */}
       <Section title="Disponibilidad">
         <p className="text-xs text-muted-foreground">
@@ -823,6 +886,9 @@ function Inner({
         <AvailabilityEditor composerId={c.id} />
       </Section>
 
+      </>)}
+
+      {tab === "economia" && (<>
       {/* Tarifa: histórico económico de proyectos */}
       <Section title="Tarifa — histórico económico">
         <p className="text-xs text-muted-foreground">
@@ -831,6 +897,9 @@ function Inner({
         <ProjectsHistoryEditor composerId={c.id} />
       </Section>
 
+      </>)}
+
+      {tab === "identidad" && (<>
       {/* Reel */}
       <Section title="Reel principal">
         <Field label="URL (YouTube, Vimeo, SoundCloud…)">
@@ -905,6 +974,9 @@ function Inner({
         </div>
       </Section>
 
+      </>)}
+
+      {tab === "materiales" && (<>
       {/* Demos */}
       <Section>
         <RelationListEditor
@@ -978,6 +1050,9 @@ function Inner({
         />
       </Section>
 
+      </>)}
+
+      {tab === "interno" && (<>
       <Section title="Notas internas (solo IC)">
         <Textarea
           rows={5}
@@ -991,6 +1066,9 @@ function Inner({
         <ComposerTeamEditor composerId={c.id} />
       </Section>
 
+      </>)}
+
+      {tab === "materiales" && (<>
       {/* Documentos y materiales */}
       <Section>
         <RelationListEditor
@@ -1009,6 +1087,8 @@ function Inner({
           ]}
         />
       </Section>
+
+      </>)}
 
       <SaveButton floating onClick={saveCore} saving={saving} dirty={dirty} />
     </div>
