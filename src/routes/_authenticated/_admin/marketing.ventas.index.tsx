@@ -1,25 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MarketingLibrary } from "@/components/marketing-library";
+import { Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/_admin/marketing/ventas/")({
+  head: () => ({ meta: [
+    { title: "Documentos de venta | IC APP" },
+    { name: "description", content: "Acceso a la biblioteca y compositor de documentos de venta." },
+    { property: "og:title", content: "Documentos de venta | IC APP" },
+    { property: "og:description", content: "Acceso a la biblioteca y compositor de documentos de venta." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: VentasIndex,
 });
 
 function VentasIndex() {
-  return (
-    <MarketingLibrary
-      section="ventas"
-      eyebrow="Marketing"
-      title="Ventas"
-      description="Materiales de venta del roster: reels, one pagers, dossiers, CV, clipping y EPK listos para enviar a productoras y plataformas."
-      categories={[
-        { key: "reels", label: "Reels" },
-        { key: "one-pagers", label: "One pagers" },
-        { key: "dossiers", label: "Dossiers" },
-        { key: "cv", label: "CV" },
-        { key: "clipping-roster", label: "Clipping roster" },
-        { key: "epk", label: "EPK" },
-      ]}
-    />
-  );
+  return <Navigate to="/comunicacion/documentos-venta" replace />;
 }
