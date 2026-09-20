@@ -23,9 +23,12 @@ import { ProjectsHistoryEditor } from "@/components/projects-history-editor";
 import { ComposerTeamEditor } from "@/components/composer-team-editor";
 import { ROSTER_ROLE_OPTIONS, ROSTER_ROLE_SUBTYPES } from "@/lib/roster-roles";
 import { toast } from "sonner";
-import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature } from "lucide-react";
+import { Trash2, Copy, ExternalLink, Clapperboard, Target, Film, FileSignature, ArrowLeft, CalendarDays, UserRound, Euro, Music, MapPin, Images, NotebookPen, type LucideIcon } from "lucide-react";
 import { SaveButton } from "@/components/save-button";
 import { isOpenProduction } from "@/lib/production-progress";
+import { isFinalized } from "@/lib/production-lifecycle";
+import { SectionDoors, type Door } from "@/components/section-doors";
+import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -104,6 +107,34 @@ function ComposerEditPage() {
 }
 
 type CatalogShape = Awaited<ReturnType<typeof fetchCatalogs>>;
+
+type FichaTab =
+  | "calendario"
+  | "representacion"
+  | "proyectos"
+  | "finalizadas"
+  | "economia"
+  | "contratos"
+  | "portal"
+  | "identidad"
+  | "datos"
+  | "materiales"
+  | "interno";
+
+const FICHA_DOORS: { key: FichaTab; title: string; description: string; icon: LucideIcon }[] = [
+  { key: "calendario", title: "Calendario", description: "Procesos, entregas y disponibilidad de esta persona en vista Gantt.", icon: CalendarDays },
+  { key: "representacion", title: "Representación", description: "Tier, estado, agente responsable y plan de carrera.", icon: UserRound },
+  { key: "proyectos", title: "Proyectos y oportunidades", description: "Producciones en curso y candidaturas abiertas.", icon: Clapperboard },
+  { key: "finalizadas", title: "Producciones finalizadas", description: "Archivo de trabajos ya terminados o estrenados.", icon: Film },
+  { key: "economia", title: "Económico", description: "Facturación y el histórico de tarifas por proyecto.", icon: Euro },
+  { key: "contratos", title: "Contratos", description: "Contratos vinculados, firmas y vigencias.", icon: FileSignature },
+  { key: "portal", title: "Portal del representado", description: "Enlace de acceso y cuenta vinculada.", icon: ExternalLink },
+  { key: "identidad", title: "Identidad y perfil", description: "Nombre, bio, reel, estilos, géneros, idiomas y tags.", icon: Music },
+  { key: "datos", title: "Datos fiscales y contacto", description: "NIF, dirección, teléfono y correos.", icon: MapPin },
+  { key: "materiales", title: "Materiales y trayectoria", description: "Fotos, vídeos, demos, filmografía, premios y documentos.", icon: Images },
+  { key: "interno", title: "Notas y equipo", description: "Notas confidenciales y equipo de representación.", icon: NotebookPen },
+];
+
 
 function Inner({
   initial,
