@@ -1,21 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyState } from "@/components/list-states";
+import { MarketingLibrary } from "@/components/marketing-library";
 
 export const Route = createFileRoute("/_authenticated/_admin/comunicacion/epk")({
-  component: StubPage,
+  component: EpkPage,
+  head: () => ({ meta: [{ title: "EPK | Interesante Compañía" }, { name: "description", content: "Electronic Press Kits del roster y de Interesante Compañía." }, { property: "og:title", content: "EPK | Interesante Compañía" }, { property: "og:description", content: "Electronic Press Kits del roster y de la compañía." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
 });
 
-function StubPage() {
-  return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">COMUNICACIÓN</p>
-      <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">EPK</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Electronic Press Kits del roster y de IC.
-      </p>
-      <div className="mt-10">
-        <EmptyState title="Sin contenido" description="Todavía no hay registros en esta sección." />
-      </div>
-    </div>
-  );
-}
+function EpkPage() { return <MarketingLibrary section="comunicacion-epk" eyebrow="Comunicación" title="EPK" description="Electronic Press Kits del roster y de Interesante Compañía." allowCustomCategories categories={[{key:"roster",label:"Roster"},{key:"ic",label:"Interesante Compañía"},{key:"proyectos",label:"Proyectos"}]}/>; }

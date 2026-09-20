@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Plus, Trash2, Upload, Download, FileIcon, LayoutGrid, List as ListIcon, FolderOpen } from "lucide-react";
+import { Plus, Trash2, Upload, Download, FileIcon, LayoutGrid, List as ListIcon, FolderOpen, Eye, ExternalLink } from "lucide-react";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export type LibraryCategory = { key: string; label: string };
 
@@ -210,11 +211,6 @@ function ViewBtn({ active, onClick, icon, label }: { active: boolean; onClick: (
   );
 }
 
-async function openFile(path: string) {
-  const url = await signMarketingAsset(path);
-  if (url) window.open(url, "_blank");
-}
-
 async function deleteFileRow(f: AssetFile) {
   if (!confirm(`¿Eliminar "${f.filename ?? "archivo"}"?`)) return false;
   await deleteMarketingAsset(f.storage_path).catch(() => {});
@@ -224,12 +220,14 @@ async function deleteFileRow(f: AssetFile) {
 }
 
 function FilesGrid({ files, onChanged }: { files: (AssetFile & { asset_title?: string | null })[]; onChanged: () => void }) {
+  const [preview, setPreview] = useState<AssetFile | null>(null);
   if (!files.length) return <EmptyState icon={FolderOpen} title="Sin archivos" description="Sube el primer recurso a esta categoría para tenerlo disponible para todo el equipo." />;
   return (
+    <>
     <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
       {files.map((f) => (
         <li key={f.id} className="group relative overflow-hidden rounded-sm border border-border bg-card/50">
-          <button type="button" onClick={() => openFile(f.storage_path)} className="block aspect-square w-full" title={f.filename ?? ""}>
+          <button type="button" onClick={() => setPreview(f)} className="block aspect-square w-full" title={`Previsualizar ${f.filename ?? "archivo"}`}>
             <FileThumb file={f} />
           </button>
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-background/85 px-1 py-0.5">
@@ -237,32 +235,38 @@ function FilesGrid({ files, onChanged }: { files: (AssetFile & { asset_title?: s
             {f.asset_title && <div className="truncate text-[9px] text-muted-foreground">{f.asset_title}</div>}
           </div>
           <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-            <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => openFile(f.storage_path)}><Download className="h-3 w-3" /></Button>
+            <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => setPreview(f)} title="Previsualizar"><Eye className="h-3 w-3" /></Button>
             <Button size="icon" variant="secondary" className="h-6 w-6 text-destructive hover:text-destructive" onClick={async () => { if (await deleteFileRow(f)) onChanged(); }}><Trash2 className="h-3 w-3" /></Button>
           </div>
         </li>
       ))}
     </ul>
+    <FilePreviewDialog file={preview} onClose={() => setPreview(null)} />
+    </>
   );
 }
 
 function FilesList({ files, onChanged }: { files: (AssetFile & { asset_title?: string | null })[]; onChanged: () => void }) {
+  const [preview, setPreview] = useState<AssetFile | null>(null);
   if (!files.length) return <EmptyState icon={FolderOpen} title="Sin archivos" description="Sube el primer recurso a esta categoría para tenerlo disponible para todo el equipo." />;
   return (
+    <>
     <ul className="divide-y divide-border rounded-sm border border-border">
       {files.map((f) => (
         <li key={f.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-sm border border-border"><FileThumb file={f} /></div>
-          <button type="button" onClick={() => openFile(f.storage_path)} className="min-w-0 flex-1 text-left">
+          <button type="button" onClick={() => setPreview(f)} className="min-w-0 flex-1 text-left">
             <div className="truncate text-sm">{f.asset_title ?? "—"}</div>
             <div className="truncate text-xs text-muted-foreground">{f.filename ?? f.storage_path.split("/").pop()}</div>
           </button>
           <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{new Date(f.created_at).toLocaleDateString()}</span>
-          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openFile(f.storage_path)}><Download className="h-4 w-4" /></Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setPreview(f)} title="Previsualizar"><Eye className="h-4 w-4" /></Button>
           <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={async () => { if (await deleteFileRow(f)) onChanged(); }}><Trash2 className="h-4 w-4" /></Button>
         </li>
       ))}
     </ul>
+    <FilePreviewDialog file={preview} onClose={() => setPreview(null)} />
+    </>
   );
 }
 
@@ -293,6 +297,7 @@ function AssetCard({ item, section }: { item: Asset; section: string }) {
   const qc = useQueryClient();
   const [a, setA] = useState(item);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<AssetFile | null>(null);
   useEffect(() => setA(item), [item]);
 
   const filesQ = useQuery({
@@ -358,14 +363,14 @@ function AssetCard({ item, section }: { item: Asset; section: string }) {
         <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {filesQ.data!.map((f) => (
             <li key={f.id} className="group relative overflow-hidden rounded-sm border border-border">
-              <button type="button" onClick={() => openFile(f.storage_path)} className="block aspect-square w-full" title={f.filename ?? f.storage_path}>
+              <button type="button" onClick={() => setPreview(f)} className="block aspect-square w-full" title={`Previsualizar ${f.filename ?? "archivo"}`}>
                 <FileThumb file={f} />
               </button>
               <div className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-background/80 px-1 py-0.5 text-[10px]">
                 {f.filename ?? f.storage_path.split("/").pop()}
               </div>
               <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => openFile(f.storage_path)}><Download className="h-3 w-3" /></Button>
+                <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => setPreview(f)} title="Previsualizar"><Eye className="h-3 w-3" /></Button>
                 <Button size="icon" variant="secondary" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => removeFile(f)}><Trash2 className="h-3 w-3" /></Button>
               </div>
             </li>
@@ -381,6 +386,61 @@ function AssetCard({ item, section }: { item: Asset; section: string }) {
         <Button size="sm" className="ml-auto" onClick={save}>Guardar</Button>
         <Button size="sm" variant="ghost" onClick={remove} className="text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
       </div>
+      <FilePreviewDialog file={preview} onClose={() => setPreview(null)} />
     </li>
   );
+}
+
+function FilePreviewDialog({ file, onClose }: { file: AssetFile | null; onClose: () => void }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [text, setText] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<string[][] | null>(null);
+  const [size, setSize] = useState<number | null>(null);
+  useEffect(() => {
+    let active = true;
+    setUrl(null); setText(null); setSheet(null); setSize(null);
+    if (!file) return;
+    signMarketingAsset(file.storage_path).then(async (signed) => {
+      if (!active || !signed) return;
+      setUrl(signed);
+      const name = (file.filename ?? file.storage_path).toLowerCase();
+      try {
+        const response = await fetch(signed);
+        const blob = await response.blob();
+        if (!active) return;
+        setSize(blob.size);
+        if (/\.(txt|csv|json|xml|md)$/i.test(name)) setText(await blob.text());
+        if (/\.(xlsx|xls)$/i.test(name)) {
+          const XLSX = await import("xlsx");
+          const wb = XLSX.read(await blob.arrayBuffer(), { type: "array" });
+          const first = wb.SheetNames[0];
+          if (first) setSheet(XLSX.utils.sheet_to_json<string[]>(wb.Sheets[first], { header: 1, defval: "" }).slice(0, 100));
+        }
+      } catch { /* metadata preview remains available */ }
+    });
+    return () => { active = false; };
+  }, [file]);
+  if (!file) return null;
+  const name = file.filename ?? file.storage_path.split("/").pop() ?? "Archivo";
+  const lower = name.toLowerCase();
+  const image = /\.(png|jpe?g|gif|webp|svg)$/i.test(lower);
+  const pdf = /\.pdf$/i.test(lower);
+  const video = /\.(mp4|mov|webm)$/i.test(lower);
+  const audio = /\.(mp3|wav|m4a|ogg)$/i.test(lower);
+  const office = /\.(docx?|pptx?)$/i.test(lower);
+  return <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}><DialogContent className="max-h-[92vh] max-w-5xl overflow-y-auto"><DialogHeader><DialogTitle>{name}</DialogTitle></DialogHeader>
+    <div className="min-h-[420px] overflow-auto rounded-sm border border-border bg-muted/20">
+      {!url ? <div className="grid h-[420px] place-items-center text-muted-foreground">Preparando previsualización…</div>
+      : image ? <img src={url} alt={name} className="mx-auto max-h-[70vh] w-auto object-contain"/>
+      : pdf ? <iframe title={name} src={url} className="h-[70vh] w-full"/>
+      : video ? <video src={url} controls className="mx-auto max-h-[70vh] w-full"/>
+      : audio ? <div className="grid h-[420px] place-items-center"><audio src={url} controls className="w-4/5"/></div>
+      : text != null ? <pre className="whitespace-pre-wrap p-5 text-sm">{text}</pre>
+      : sheet ? <table className="w-full text-sm"><tbody>{sheet.map((row,i)=><tr key={i} className="border-b border-border">{row.map((cell,j)=><td key={j} className="whitespace-nowrap px-3 py-2">{cell}</td>)}</tr>)}</tbody></table>
+      : office ? <iframe title={name} src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`} className="h-[70vh] w-full"/>
+      : <div className="grid h-[420px] place-items-center p-8 text-center"><div><FileIcon className="mx-auto mb-3 h-12 w-12 text-primary"/><p className="font-display text-xl">Vista previa del archivo</p><p className="mt-2 text-muted-foreground">{name}<br/>{size != null ? `${(size / 1024).toLocaleString("es-ES", { maximumFractionDigits: 1 })} KB` : "Tamaño pendiente"}</p></div></div>}
+    </div>
+    <div className="flex justify-between gap-3"><p className="text-sm text-muted-foreground">{file.notes ?? "Revisa el contenido antes de descargarlo."}</p>{url&&<Button asChild><a href={url} download={name}><Download className="mr-1 h-4 w-4"/>Descargar</a></Button>}</div>
+    {url&&<a href={url} target="_blank" rel="noreferrer" className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground">Abrir en otra pestaña <ExternalLink className="ml-1 h-3 w-3"/></a>}
+  </DialogContent></Dialog>;
 }
