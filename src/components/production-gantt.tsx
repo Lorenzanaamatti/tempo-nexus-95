@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { Link } from "@tanstack/react-router";
 import { addDays, format, getISOWeekYear, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { PHASE_COLOR_CLASS, type PhaseColorKey } from "@/lib/phase-catalog";
@@ -53,6 +54,27 @@ function weeksBetween(from: number, to: number) {
 function fmt(v: string) {
   const [y, m, day] = v.split("-");
   return `${day}/${m}/${y}`;
+}
+
+/**
+ * Nombre de la producción en la columna fija: abre su ficha para editarla.
+ * Sin id (filas sueltas o agrupadas por responsable) se muestra como texto.
+ */
+function ProductionLink({ id, title, small = false }: { id?: string; title: string; small?: boolean }) {
+  const base = small
+    ? "mt-0.5 block text-xs font-medium leading-tight"
+    : "block text-sm font-medium leading-tight";
+  if (!id || id === "__") return <p className={`${base} text-foreground`}>{title}</p>;
+  return (
+    <Link
+      to="/producciones/$productionId"
+      params={{ productionId: id }}
+      title={`Abrir la ficha de ${title}`}
+      className={`${base} text-aubergine underline-offset-4 hover:underline focus-visible:underline`}
+    >
+      {title}
+    </Link>
+  );
 }
 
 export type GanttLegendItem = { name: string; colorKey: PhaseColorKey };
@@ -228,7 +250,7 @@ export function ProductionGantt({
                 return (
                   <div key={pid} className="flex border-b border-border/60 last:border-b-0">
                     <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
-                      <p className="text-sm font-medium leading-tight">{title}</p>
+                      <ProductionLink id={pid} title={title} />
                       <p className="mt-0.5 text-xs text-muted-foreground">{rows[0]?.productionClient ?? "Cliente pendiente"}</p>
                       <p className="text-[11px] text-muted-foreground">{rows.length} fases</p>
                     </div>
@@ -259,7 +281,9 @@ export function ProductionGantt({
                       <div key={p.id} className="flex border-b border-border/60 last:border-b-0">
                         <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
                           <p className="text-sm font-medium leading-tight">{p.name}</p>
-                          {p.productionTitle ? <p className="mt-0.5 text-xs font-medium text-foreground">{p.productionTitle}</p> : null}
+                          {p.productionTitle ? (
+                            <ProductionLink id={p.productionId} title={p.productionTitle} small />
+                          ) : null}
                           <p className="text-xs text-muted-foreground">{p.productionClient ?? "Cliente pendiente"}</p>
                           <p className="text-[11px] text-muted-foreground">
                             {multi ? `${GANTT_OWNER_LABEL[p.owner]} · ` : ""}
