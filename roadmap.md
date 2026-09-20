@@ -5,3 +5,4 @@
 - [x] Añadir ingesta Excel/CSV y calendario completo a Premios y Festivales.
 - [x] Previsualizar archivos de Identidad corporativa antes de descargarlos.
 - [x] Convertir Blog, EPK y Reels en bibliotecas editables.
+- [ ] Auditar y rediseñar Facturación: contratos, porcentajes, edición manual, órdenes a Maggy y remitente, e integración financiera siguiendo PLUSMUSIC.ORG.
