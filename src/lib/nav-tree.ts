@@ -182,7 +182,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Facturas", to: "/billing", icon: Receipt, bigCOnly: true },
       { title: "Personal", to: "/empresa/equipo", icon: Users, bigCOnly: true },
       { title: "CRM", to: "/partners", icon: Handshake, bigCOnly: true },
-      { title: "Marketing", to: "/marketing/campanas", icon: Megaphone },
     ],
   },
 ];
