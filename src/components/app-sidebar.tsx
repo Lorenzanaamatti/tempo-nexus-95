@@ -4,7 +4,7 @@ import {
   LibraryBig, Home, FolderKanban, Inbox, FileSignature, MessagesSquare, Building2, Clapperboard, Tv,
   Target, ScrollText, Crosshair, Presentation, Newspaper, Palette, Trophy, Mail, FolderOpen, LineChart,
   Receipt, Share2, KanbanSquare, Handshake, Scale, Wallet, Megaphone, Users, Briefcase, Database, Plus,
-  ListChecks,
+  ListChecks, CalendarRange,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,6 +145,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                             )}
                           </span>
                         )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/tareas/calendario")}>
+                      <Link to="/tareas/calendario" className="flex items-center gap-2">
+                        <CalendarRange className="h-4 w-4" />
+                        {!collapsed && <span>Calendario general</span>}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
