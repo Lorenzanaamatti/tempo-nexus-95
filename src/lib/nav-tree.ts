@@ -3,7 +3,7 @@ import {
   Target, ScrollText, Presentation, Palette, Mail, LineChart, Receipt, Share2,
   KanbanSquare, Handshake, Wallet, Megaphone, Users, Newspaper, MonitorPlay, Clapperboard,
   Video, Newspaper as NewsIcon, BarChart3, ListChecks, Gauge, FolderOpen, ShieldCheck, CalendarRange,
-  Briefcase, Mic2, Headphones, SlidersHorizontal, Shapes, UserPlus,
+  Briefcase, Mic2, Headphones, SlidersHorizontal, Shapes, UserPlus, Landmark,
 } from "lucide-react";
 
 export type NavItem = {
@@ -182,6 +182,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Facturas", to: "/billing", icon: Receipt, bigCOnly: true },
       { title: "Personal", to: "/empresa/equipo", icon: Users, bigCOnly: true },
       { title: "CRM", to: "/partners", icon: Handshake, bigCOnly: true },
+      { title: "Subvenciones", to: "/departamentos/subvenciones", icon: Landmark },
     ],
   },
 ];
