@@ -68,6 +68,8 @@ import { Route as AuthenticatedAdminComunicacionIndexRouteImport } from './route
 import { Route as AuthenticatedAdminComposersIndexRouteImport } from './routes/_authenticated/_admin/composers.index'
 import { Route as AuthenticatedAdminClientesIndexRouteImport } from './routes/_authenticated/_admin/clientes.index'
 import { Route as AuthenticatedAdminCandidaciesIndexRouteImport } from './routes/_authenticated/_admin/candidacies.index'
+import { Route as ApiPublicSubvencionesCorreoRouteImport } from './routes/api/public/subvenciones/correo'
+import { Route as ApiPublicSubvencionesCapturarRouteImport } from './routes/api/public/subvenciones/capturar'
 import { Route as ApiPublicCronSyncProduccionesEspanolasRouteImport } from './routes/api/public/cron/sync-producciones-espanolas'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/_admin/templates.$templateId'
 import { Route as AuthenticatedAdminTareasCalendarioRouteImport } from './routes/_authenticated/_admin/tareas_.calendario'
@@ -484,6 +486,18 @@ const AuthenticatedAdminCandidaciesIndexRoute =
     id: '/candidacies/',
     path: '/candidacies/',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const ApiPublicSubvencionesCorreoRoute =
+  ApiPublicSubvencionesCorreoRouteImport.update({
+    id: '/api/public/subvenciones/correo',
+    path: '/api/public/subvenciones/correo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicSubvencionesCapturarRoute =
+  ApiPublicSubvencionesCapturarRouteImport.update({
+    id: '/api/public/subvenciones/capturar',
+    path: '/api/public/subvenciones/capturar',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicCronSyncProduccionesEspanolasRoute =
   ApiPublicCronSyncProduccionesEspanolasRouteImport.update({
@@ -1067,6 +1081,8 @@ export interface FileRoutesByFullPath {
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/composers/': typeof AuthenticatedAdminComposersIndexRoute
@@ -1204,6 +1220,8 @@ export interface FileRoutesByTo {
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/candidacies': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/composers': typeof AuthenticatedAdminComposersIndexRoute
@@ -1346,6 +1364,8 @@ export interface FileRoutesById {
   '/_authenticated/_admin/tareas_/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/_authenticated/_admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  '/api/public/subvenciones/capturar': typeof ApiPublicSubvencionesCapturarRoute
+  '/api/public/subvenciones/correo': typeof ApiPublicSubvencionesCorreoRoute
   '/_authenticated/_admin/candidacies/': typeof AuthenticatedAdminCandidaciesIndexRoute
   '/_authenticated/_admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/_admin/composers/': typeof AuthenticatedAdminComposersIndexRoute
@@ -1487,6 +1507,8 @@ export interface FileRouteTypes {
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/candidacies/'
     | '/clientes/'
     | '/composers/'
@@ -1624,6 +1646,8 @@ export interface FileRouteTypes {
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/candidacies'
     | '/clientes'
     | '/composers'
@@ -1765,6 +1789,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/tareas_/calendario'
     | '/_authenticated/_admin/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
+    | '/api/public/subvenciones/capturar'
+    | '/api/public/subvenciones/correo'
     | '/_authenticated/_admin/candidacies/'
     | '/_authenticated/_admin/clientes/'
     | '/_authenticated/_admin/composers/'
@@ -1814,6 +1840,8 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCronSyncProduccionesEspanolasRoute: typeof ApiPublicCronSyncProduccionesEspanolasRoute
+  ApiPublicSubvencionesCapturarRoute: typeof ApiPublicSubvencionesCapturarRoute
+  ApiPublicSubvencionesCorreoRoute: typeof ApiPublicSubvencionesCorreoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2230,6 +2258,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/candidacies/'
       preLoaderRoute: typeof AuthenticatedAdminCandidaciesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/subvenciones/correo': {
+      id: '/api/public/subvenciones/correo'
+      path: '/api/public/subvenciones/correo'
+      fullPath: '/api/public/subvenciones/correo'
+      preLoaderRoute: typeof ApiPublicSubvencionesCorreoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/subvenciones/capturar': {
+      id: '/api/public/subvenciones/capturar'
+      path: '/api/public/subvenciones/capturar'
+      fullPath: '/api/public/subvenciones/capturar'
+      preLoaderRoute: typeof ApiPublicSubvencionesCapturarRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/cron/sync-producciones-espanolas': {
       id: '/api/public/cron/sync-producciones-espanolas'
@@ -3214,6 +3256,8 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCronSyncProduccionesEspanolasRoute:
     ApiPublicCronSyncProduccionesEspanolasRoute,
+  ApiPublicSubvencionesCapturarRoute: ApiPublicSubvencionesCapturarRoute,
+  ApiPublicSubvencionesCorreoRoute: ApiPublicSubvencionesCorreoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
