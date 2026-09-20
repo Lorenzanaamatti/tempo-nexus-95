@@ -8,6 +8,8 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { FinanceDashboard } from "@/components/finance-dashboard";
+import { SectionLanding } from "@/components/section-landing";
+import type { Door } from "@/components/section-doors";
 import { formatEUR } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,19 +17,61 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Clapperboard, Receipt } from "lucide-react";
+import { Plus, Pencil, Clapperboard, Receipt, LineChart, FolderKanban, Scale, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentRole } from "@/lib/use-role";
 
-const searchSchema = z.object({ composerId: z.string().uuid().optional() });
+const searchSchema = z.object({
+  composerId: z.string().uuid().optional(),
+  section: z.enum(["evolucion", "presupuesto", "business-plan", "gastos"]).optional(),
+});
+
+const FINANCE_DOORS: Door[] = [
+  {
+    title: "Evolución temporal",
+    description: "Consulta la evolución de lo previsto, facturado y cobrado.",
+    to: "/finance",
+    search: { section: "evolucion" },
+    icon: LineChart,
+  },
+  {
+    title: "Presupuesto por proyecto",
+    description: "Trabaja el presupuesto y el seguimiento económico de cada proyecto.",
+    to: "/finance",
+    search: { section: "presupuesto" },
+    icon: FolderKanban,
+  },
+  {
+    title: "Business Plan · Presupuesto vs. real",
+    description: "Compara el plan anual de ingresos y gastos con los importes reales.",
+    to: "/finance",
+    search: { section: "business-plan" },
+    icon: Scale,
+  },
+  {
+    title: "Gastos operativos IC",
+    description: "Registra y consulta los gastos operativos de la compañía.",
+    to: "/finance",
+    search: { section: "gastos" },
+    icon: WalletCards,
+  },
+];
 
 export const Route = createFileRoute("/_authenticated/_admin/finance")({
   validateSearch: (s) => searchSchema.parse(s),
   component: FinancePage,
+  head: () => ({ meta: [
+    { title: "Financiero | Interesante Compañía" },
+    { name: "description", content: "Áreas de trabajo financiero de Interesante Compañía." },
+    { property: "og:title", content: "Financiero | Interesante Compañía" },
+    { property: "og:description", content: "Áreas de trabajo financiero de Interesante Compañía." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function FinancePage() {
-  const { composerId } = Route.useSearch();
+  const { composerId, section } = Route.useSearch();
   const { isBigC, loading: roleLoading } = useCurrentRole();
   const composerQ = useQuery({
     queryKey: ["finance-composer", composerId ?? null],
@@ -58,6 +102,17 @@ function FinancePage() {
     );
   }
 
+  if (!composerId && !section) {
+    return (
+      <SectionLanding
+        eyebrow="Departamentos"
+        title="Financiero"
+        description="Elige la sección financiera en la que quieres trabajar."
+        doors={FINANCE_DOORS}
+      />
+    );
+  }
+
   const title = composerId
     ? `Económico · ${composerQ.data?.artistic_name || composerQ.data?.full_name || ""}`
     : "Económico · IC";
@@ -74,27 +129,31 @@ function FinancePage() {
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </header>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl">Evolución temporal</h2>
-        <FinanceDashboard composerId={composerId ?? null} />
-      </section>
+      {(composerId || section === "evolucion") && (
+        <section className="space-y-3">
+          <h2 className="font-display text-2xl">Evolución temporal</h2>
+          <FinanceDashboard composerId={composerId ?? null} />
+        </section>
+      )}
 
-      <section className="mt-12 space-y-3">
-        <h2 className="font-display text-2xl">Presupuesto por proyecto</h2>
-        <BudgetTable composerId={composerId ?? null} />
-      </section>
+      {(composerId || section === "presupuesto") && (
+        <section className="space-y-3">
+          <h2 className="font-display text-2xl">Presupuesto por proyecto</h2>
+          <BudgetTable composerId={composerId ?? null} />
+        </section>
+      )}
 
-      {!composerId && (
-        <>
-          <section className="mt-12 space-y-3">
-            <h2 className="font-display text-2xl">Business Plan · Presupuesto vs. real</h2>
-            <BusinessPlanPanel />
-          </section>
-          <section className="mt-12 space-y-3">
-            <h2 className="font-display text-2xl">Gastos operativos IC</h2>
-            <IcExpensesPanel />
-          </section>
-        </>
+      {!composerId && section === "business-plan" && (
+        <section className="space-y-3">
+          <h2 className="font-display text-2xl">Business Plan · Presupuesto vs. real</h2>
+          <BusinessPlanPanel />
+        </section>
+      )}
+      {!composerId && section === "gastos" && (
+        <section className="space-y-3">
+          <h2 className="font-display text-2xl">Gastos operativos IC</h2>
+          <IcExpensesPanel />
+        </section>
       )}
     </div>
   );
