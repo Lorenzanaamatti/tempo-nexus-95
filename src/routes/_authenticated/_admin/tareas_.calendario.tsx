@@ -1,13 +1,15 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { addMonths, format, startOfMonth } from "date-fns";
+import { addDays, addMonths, endOfMonth, endOfYear, format, startOfMonth, startOfYear } from "date-fns";
 import { es } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarMonthGrid, type FlatCalendarEvent } from "@/components/calendar-month-grid";
 import { ProductionGanttPanel } from "@/components/production-gantt-panel";
+import { CalendarExportButton, type CalendarExportRow } from "@/components/calendar-export-button";
+import { GANTT_OWNER_LABEL, type GanttOwner, type GanttPhase } from "@/components/production-gantt";
 import { isFinalized } from "@/lib/production-lifecycle";
 import { CalendarDays, ChevronLeft, ChevronRight, GanttChartSquare } from "lucide-react";
 
@@ -40,6 +42,12 @@ function CalendarioGeneral() {
   const [display, setDisplay] = useState<"calendario" | "gantt">("gantt");
   const [anchor, setAnchor] = useState(() => startOfMonth(new Date()));
   const [composer, setComposer] = useState("all");
+  const [production, setProduction] = useState("all");
+  const [type, setType] = useState("all");
+  const [section, setSection] = useState<"all" | GanttOwner>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [ganttRows, setGanttRows] = useState<Array<GanttPhase & { composerName?: string | null }>>([]);
 
   const productionsQ = useQuery({
     queryKey: ["calendario-general-producciones"],
@@ -61,7 +69,7 @@ function CalendarioGeneral() {
   });
 
   const productions = productionsQ.data ?? [];
-  const filtered = productions.filter((p) => composer === "all" || p.composerId === composer);
+  const filtered = productions.filter((p) => (composer === "all" || p.composerId === composer) && (production === "all" || p.id === production));
   const ids = filtered.map((p) => p.id);
 
   const composerOptions = useMemo(() => {
@@ -73,13 +81,13 @@ function CalendarioGeneral() {
   }, [productions]);
 
   const eventsQ = useQuery({
-    enabled: display === "calendario" && ids.length > 0,
+    enabled: ids.length > 0,
     queryKey: ["calendario-general-eventos", ids],
     queryFn: async () => {
       const [phases, evSubject, evSource] = await Promise.all([
         db
           .from("production_phases")
-          .select("id, production_id, name, detail, start_date, end_date, is_premiere, notes")
+          .select("id, production_id, name, detail, owner, start_date, end_date, is_premiere, notes")
           .in("production_id", ids)
           .order("position"),
         db
@@ -113,6 +121,7 @@ function CalendarioGeneral() {
           title: ph.detail ? `${ph.name} (${ph.detail})` : ph.name,
           note: ph.notes,
           category: "producciones",
+           area: ph.owner ?? "agencia",
           subjectLabel: subjectLabel(p),
           subjectGroup: "Producciones activas",
           to: "/producciones/$productionId",
@@ -137,6 +146,7 @@ function CalendarioGeneral() {
           title: e.title || "Evento",
           note: e.note,
           category: "producciones",
+           area: "agencia",
           subjectLabel: subjectLabel(p),
           subjectGroup: "Producciones activas",
           to: "/producciones/$productionId",
@@ -147,6 +157,36 @@ function CalendarioGeneral() {
       return out;
     },
   });
+
+  const rawEvents = eventsQ.data ?? [];
+  const typeOptions = useMemo(() => Array.from(new Set([
+    ...rawEvents.map((event) => event.title ?? event.kind),
+    ...ganttRows.map((row) => row.name),
+  ].filter(Boolean))).sort((a, b) => a.localeCompare(b, "es")), [rawEvents, ganttRows]);
+
+  const visibleEvents = useMemo(() => rawEvents.filter((event) =>
+    (type === "all" || (event.title ?? event.kind).trim().toLowerCase() === type.trim().toLowerCase()) &&
+    (section === "all" || event.area === section) &&
+    (!dateFrom || format(event.end, "yyyy-MM-dd") >= dateFrom) &&
+    (!dateTo || format(event.start, "yyyy-MM-dd") <= dateTo)
+  ), [rawEvents, type, section, dateFrom, dateTo]);
+
+  const exportRows = useMemo<CalendarExportRow[]>(() => display === "gantt"
+    ? ganttRows.map((row) => ({ production: row.productionTitle ?? "Producción", client: row.productionClient ?? "", person: row.composerName ?? "", section: GANTT_OWNER_LABEL[row.owner], type: row.name, start: row.start, end: row.end, notes: row.note ?? "" }))
+    : visibleEvents.map((event) => { const [productionTitle, person = ""] = event.subjectLabel.split(" · "); return { production: productionTitle, client: "", person, section: event.area ? GANTT_OWNER_LABEL[event.area as GanttOwner] ?? event.area : "Agencia", type: event.title ?? event.kind, start: format(event.start, "yyyy-MM-dd"), end: format(event.end, "yyyy-MM-dd"), notes: event.note ?? "" }; }),
+    [display, ganttRows, visibleEvents]);
+
+  const exportSummary = [dateFrom || dateTo ? `${dateFrom || "inicio"} a ${dateTo || "fin"}` : "Todos los periodos", composer === "all" ? "Todas las personas" : composerOptions.find(([id]) => id === composer)?.[1], production === "all" ? "Todas las producciones" : productions.find((item) => item.id === production)?.title, type === "all" ? "Todos los tipos" : type, section === "all" ? "Todas las secciones" : GANTT_OWNER_LABEL[section]].filter(Boolean).join(" · ");
+  const receiveGanttRows = useCallback((rows: Array<GanttPhase & { composerName?: string | null }>) => setGanttRows(rows), []);
+
+  function applyPeriod(period: string) {
+    const now = new Date();
+    if (period === "all") { setDateFrom(""); setDateTo(""); return; }
+    if (period === "month") { setDateFrom(format(startOfMonth(now), "yyyy-MM-dd")); setDateTo(format(endOfMonth(now), "yyyy-MM-dd")); return; }
+    if (period === "year") { setDateFrom(format(startOfYear(now), "yyyy-MM-dd")); setDateTo(format(endOfYear(now), "yyyy-MM-dd")); return; }
+    const days = period === "30" ? 30 : period === "90" ? 90 : 180;
+    setDateFrom(format(now, "yyyy-MM-dd")); setDateTo(format(addDays(now, days), "yyyy-MM-dd"));
+  }
 
   return (
     <div className="mx-auto max-w-[1700px] px-6 py-10">
@@ -185,6 +225,13 @@ function CalendarioGeneral() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={production} onValueChange={setProduction}><SelectTrigger className="h-9 w-56 text-sm"><SelectValue placeholder="Producción" /></SelectTrigger><SelectContent><SelectItem value="all">Todas las producciones</SelectItem>{productions.map((item) => <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>)}</SelectContent></Select>
+        <Select value={type} onValueChange={setType}><SelectTrigger className="h-9 w-52 text-sm"><SelectValue placeholder="Tipo / proceso" /></SelectTrigger><SelectContent><SelectItem value="all">Todos los tipos</SelectItem>{typeOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+        <Select value={section} onValueChange={(value) => setSection(value as "all" | GanttOwner)}><SelectTrigger className="h-9 w-52 text-sm"><SelectValue placeholder="Sección" /></SelectTrigger><SelectContent><SelectItem value="all">Todas las secciones</SelectItem>{(Object.keys(GANTT_OWNER_LABEL) as GanttOwner[]).map((owner) => <SelectItem key={owner} value={owner}>{GANTT_OWNER_LABEL[owner]}</SelectItem>)}</SelectContent></Select>
+        <Select onValueChange={applyPeriod}><SelectTrigger className="h-9 w-48 text-sm"><SelectValue placeholder="Periodo" /></SelectTrigger><SelectContent><SelectItem value="all">Todo el calendario</SelectItem><SelectItem value="month">Mes actual</SelectItem><SelectItem value="30">Próximos 30 días</SelectItem><SelectItem value="90">Próximos 90 días</SelectItem><SelectItem value="180">Próximos 6 meses</SelectItem><SelectItem value="year">Año actual</SelectItem></SelectContent></Select>
+        <label className="flex h-9 items-center gap-2 border border-input bg-background px-2 text-xs"><span>Desde</span><input type="date" className="bg-transparent" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
+        <label className="flex h-9 items-center gap-2 border border-input bg-background px-2 text-xs"><span>Hasta</span><input type="date" className="bg-transparent" value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
+        <CalendarExportButton rows={exportRows} view={display === "gantt" ? "Gantt" : "Calendario"} summary={exportSummary} />
         {display === "calendario" && (
           <div className="ml-auto flex items-center gap-2">
             <Button size="icon" variant="outline" onClick={() => setAnchor(addMonths(anchor, -1))} aria-label="Mes anterior">
@@ -208,11 +255,11 @@ function CalendarioGeneral() {
       ) : !ids.length ? (
         <p className="text-sm text-muted-foreground">No hay producciones activas con este filtro.</p>
       ) : display === "gantt" ? (
-        <ProductionGanttPanel productionIds={ids} showFilters defaultMode="lineal" />
+         <ProductionGanttPanel productionIds={ids} defaultMode="lineal" externalOwner={section} externalType={type} dateFrom={dateFrom} dateTo={dateTo} onFilteredRowsChange={receiveGanttRows} />
       ) : eventsQ.isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando calendario…</p>
       ) : (
-        <CalendarMonthGrid anchor={anchor} events={eventsQ.data ?? []} />
+         <CalendarMonthGrid anchor={anchor} events={visibleEvents} />
       )}
     </div>
   );
