@@ -48,7 +48,7 @@ export function ProductionGanttPanel({
     staleTime: 30_000,
     queryFn: async () => {
       const ids = await loadProductionIds({ productionIds, composerId });
-      if (!ids.length) return [] as Row[];
+      if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
       const [prods, phases, catalog, evSubject, evSource] = await Promise.all([
         db.from("productions").select("id, title, composer_id").in("id", ids),
         db

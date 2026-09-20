@@ -39,7 +39,7 @@ function weeksBetween(from: number, to: number) {
   while (cur.getTime() < to) {
     const next = addDays(cur, 7);
     out.push({
-      label: `${format(cur, "d/M", { locale: es })}–${format(next, "d/M", { locale: es })}`,
+      label: `${format(cur, "d/M", { locale: es })}-${format(next, "d/M", { locale: es })}`,
       year: format(cur, "yyyy"),
       start: cur.getTime(),
       end: next.getTime(),
