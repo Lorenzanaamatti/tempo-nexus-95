@@ -1,261 +1,91 @@
 import type React from "react";
-import { ExportRowsButton } from "@/components/export-rows-button";
-import { Money } from "@/components/money";
 import { useMemo, useState } from "react";
-import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink } from "lucide-react";
+import { CheckCircle2, ExternalLink, FilePlus2, History, Mail, Plus, Receipt, RotateCcw, Send, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatEUR } from "@/lib/money";
+import { useAuth } from "@/lib/auth-context";
+import { useCurrentRole } from "@/lib/use-role";
 import { formatDateEs } from "@/lib/dates";
-import { Input } from "@/components/ui/input";
+import { Money } from "@/components/money";
+import { ExportRowsButton } from "@/components/export-rows-button";
+import { EmptyState } from "@/components/list-states";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-type Row = {
-  id: string;
-  production_id: string;
-  sprint_number: number;
-  kind: string;
-  label: string | null;
-  amount: number | null;
-  status: string;
-  due_date: string | null;
-  invoiced_date: string | null;
-  paid_date: string | null;
-  holded_invoice_ref: string | null;
-  holded_url: string | null;
-  productions?: { id: string; title: string; composer_id: string | null; composers?: { full_name: string; artistic_name: string | null } | null } | null;
+type BillingRow = {
+  id: string; production_id: string; contract_id: string | null; sprint_number: number; kind: string;
+  label: string | null; concept: string | null; client_name: string | null; amount: number | null;
+  representative_amount: number | null; commission_pct: number | null; representative_due_date: string | null;
+  planned_invoice_date: string | null; due_date: string | null; invoiced_date: string | null; paid_date: string | null;
+  status: string; holded_invoice_ref: string | null; holded_url: string | null; is_manual: boolean;
+  manual_fields: string[]; source_snapshot: Record<string, unknown>;
+  productions?: { id:string; title:string; fee_amount:number|null; ic_commission_pct:number|null; production_company:string|null; partner:string|null; contract_id:string|null; partner_company?:{name:string}|null; composers?:{full_name:string;artistic_name:string|null}|null } | null;
+  contracts?: { id:string; title:string; counterparty:string|null } | null;
 };
+type Order = { id:string; order_number:string; status:string; subject:string; notes:string|null; total_amount:number; recipient_emails:string[]; sent_at:string|null; invoiced_at:string|null; created_at:string; billing_order_items?: Array<{id:string;concept:string;commission_amount:number;production_title:string|null;client_name:string|null;representative_name:string|null}>; billing_order_events?: Array<{id:string;event_type:string;actor_email:string|null;created_at:string;details:Record<string,unknown>}> };
+
+type EditDraft = { concept:string; client_name:string; representative_amount:string; commission_pct:string; amount:string; representative_due_date:string; planned_invoice_date:string; holded_invoice_ref:string; holded_url:string; notes:string };
 
 export const Route = createFileRoute("/_authenticated/_admin/billing")({
+  head: () => ({ meta: [
+    { title: "Facturación IC | Interesante Compañía" },
+    { name: "description", content: "Plan de facturación, comisiones y órdenes de Interesante Compañía." },
+    { property: "og:title", content: "Facturación IC | Interesante Compañía" },
+    { property: "og:description", content: "Plan de facturación, comisiones y órdenes de Interesante Compañía." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ]}),
   component: BillingPlan,
 });
 
-const STATUS_LABEL: Record<string, string> = {
-  pendiente: "Pendiente",
-  facturado: "Facturado",
-  cobrado: "Cobrado",
-  cancelado: "Cancelado",
-};
+const STATUS_LABEL:Record<string,string>={pendiente:"Pendiente",facturado:"Facturado",cobrado:"Cobrado",cancelado:"Cancelado"};
+const ORDER_LABEL:Record<string,string>={borrador:"Borrador",enviada:"Enviada",facturada:"Facturada",anulada:"Anulada"};
+const EMPTY_EDIT:EditDraft={concept:"",client_name:"",representative_amount:"",commission_pct:"",amount:"",representative_due_date:"",planned_invoice_date:"",holded_invoice_ref:"",holded_url:"",notes:""};
+const n=(value:string|number|null|undefined)=>value==null||value===""?null:Number(value);
+const composerName=(r:BillingRow)=>r.productions?.composers?.artistic_name||r.productions?.composers?.full_name||"—";
+const clientName=(r:BillingRow)=>r.client_name||r.productions?.partner_company?.name||r.productions?.production_company||r.productions?.partner||r.contracts?.counterparty||"—";
+const sourceAmount=(r:BillingRow)=>r.representative_amount??r.productions?.fee_amount??null;
+const sourcePct=(r:BillingRow)=>r.commission_pct??r.productions?.ic_commission_pct??null;
+const calculatedCommission=(r:BillingRow)=>r.amount??(sourceAmount(r)!=null&&sourcePct(r)!=null?Math.round(Number(sourceAmount(r))*Number(sourcePct(r))*100)/100:null);
 
-function BillingPlan() {
-  const qc = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState<"all" | "pendiente" | "facturado" | "cobrado" | "vencido">("all");
-  const [search, setSearch] = useState("");
-
-  const sprintsQ = useQuery({
-    queryKey: ["billing-plan"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("production_billing_sprints")
-        .select("id, production_id, sprint_number, kind, label, amount, status, due_date, invoiced_date, paid_date, holded_invoice_ref, holded_url, productions(id, title, composer_id, composers!composer_id(full_name, artistic_name))")
-        .eq("kind", "comision")
-        .order("due_date", { ascending: true, nullsFirst: false });
-      if (error) throw error;
-      return (data ?? []) as Row[];
-    },
-  });
-
-  const updateRef = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Pick<Row, "holded_invoice_ref" | "holded_url">> }) => {
-      const { error } = await supabase.from("production_billing_sprints").update(patch).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["billing-plan"] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Error al guardar"),
-  });
-
-  const today = new Date().toISOString().slice(0, 10);
-
-  const rows = useMemo(() => {
-    const list = sprintsQ.data ?? [];
-    return list.filter((r) => {
-      if (statusFilter === "vencido") {
-        if (!(r.due_date && !r.invoiced_date && r.due_date < today)) return false;
-      } else if (statusFilter !== "all" && r.status !== statusFilter) return false;
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        const hay = [
-          r.productions?.title,
-          r.productions?.composers?.artistic_name,
-          r.productions?.composers?.full_name,
-          r.label,
-          r.holded_invoice_ref,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [sprintsQ.data, statusFilter, search, today]);
-
-  const totals = rows.reduce(
-    (acc, r) => {
-      const a = Number(r.amount) || 0;
-      acc.total += a;
-      if (r.invoiced_date) acc.fact += a;
-      if (r.paid_date) acc.cob += a;
-      if (r.due_date && !r.invoiced_date && r.due_date < today) acc.vencido += a;
-      return acc;
-    },
-    { total: 0, fact: 0, cob: 0, vencido: 0 },
-  );
-
-  return (
-    <div className="mx-auto max-w-[1700px] px-6 py-10">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="smallcaps text-muted-foreground">Operativo</p>
-          <h1 className="font-display text-4xl title-caps">Plan de facturación IC</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Facturas de comisión IC pendientes de emitir, emitidas y cobradas. Anota la referencia de la factura en Holded y un enlace directo.
-          </p>
-        </div>
-        <ExportRowsButton rows={rows} filename="facturacion-ic" sheetName="Facturación" />
-      </header>
-
-      <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Total filtrado" value={<Money value={totals.total} />} />
-        <Kpi label="Facturado" value={<Money value={totals.fact} />} accent="primary" />
-        <Kpi label="Cobrado" value={<Money value={totals.cob} />} accent="success" />
-        <Kpi label="Vencido sin facturar" value={<Money value={totals.vencido} />} accent="warn" />
-      </section>
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Input
-          placeholder="Buscar producción, compositor, ref…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-9 max-w-xs"
-        />
-        <FilterChips
-          label="Estado"
-          value={statusFilter}
-          options={[
-            ["all", "Todos"],
-            ["pendiente", "Pendiente"],
-            ["facturado", "Facturado"],
-            ["cobrado", "Cobrado"],
-            ["vencido", "Vencido"],
-          ]}
-          onChange={(v) => setStatusFilter(v as typeof statusFilter)}
-        />
-      </div>
-
-      <div className="overflow-x-auto rounded-sm border border-border">
-        <table className="min-w-full text-sm">
-          <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2">Producción</th>
-              <th className="px-3 py-2">Sprint</th>
-              <th className="px-3 py-2 text-right">Importe</th>
-              <th className="px-3 py-2">Vencimiento</th>
-              <th className="px-3 py-2">Facturado</th>
-              <th className="px-3 py-2">Cobrado</th>
-              <th className="px-3 py-2">Estado</th>
-              <th className="px-3 py-2">Ref. Holded</th>
-              <th className="px-3 py-2">URL Holded</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sprintsQ.isLoading ? (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">Cargando…</td></tr>
-            ) : rows.length === 0 ? (
-              <tr><td colSpan={9} className="px-3 py-4"><EmptyState variant="filtered" title="Ningún resultado" description="Ninguna factura de comisión coincide con los filtros actuales." /></td></tr>
-            ) : (
-              rows.map((r) => {
-                const vencido = r.due_date && !r.invoiced_date && r.due_date < today;
-                return (
-                  <tr key={r.id} className={`border-t border-border ${vencido ? "bg-amber-500/5" : ""}`}>
-                    <td className="px-3 py-2">
-                      <Link to="/productions/$productionId" params={{ productionId: r.production_id }} className="font-display hover:underline">
-                        {r.productions?.title ?? "—"}
-                      </Link>
-                      {r.productions?.composers && (
-                        <div className="text-xs text-muted-foreground">
-                          {r.productions.composers.artistic_name || r.productions.composers.full_name}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-muted-foreground">#{r.sprint_number}{r.label ? ` · ${r.label}` : ""}</td>
-                    <td className="px-3 py-2 text-right tabular-nums"><Money value={r.amount} /></td>
-                    <td className={`px-3 py-2 ${vencido ? "text-amber-600 dark:text-amber-400" : ""}`}>{formatDateEs(r.due_date)}</td>
-                    <td className="px-3 py-2">{formatDateEs(r.invoiced_date)}</td>
-                    <td className="px-3 py-2">{formatDateEs(r.paid_date)}</td>
-                    <td className="px-3 py-2">{STATUS_LABEL[r.status] ?? r.status}</td>
-                    <td className="px-3 py-2">
-                      <Input
-                        defaultValue={r.holded_invoice_ref ?? ""}
-                        placeholder="F-2026-…"
-                        className="h-8 w-32 text-xs"
-                        onBlur={(e) => {
-                          const v = e.target.value.trim() || null;
-                          if (v !== (r.holded_invoice_ref ?? null)) updateRef.mutate({ id: r.id, patch: { holded_invoice_ref: v } });
-                        }}
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          defaultValue={r.holded_url ?? ""}
-                          placeholder="https://app.holded.com/…"
-                          className="h-8 w-44 text-xs"
-                          onBlur={(e) => {
-                            const v = e.target.value.trim() || null;
-                            if (v !== (r.holded_url ?? null)) updateRef.mutate({ id: r.id, patch: { holded_url: v } });
-                          }}
-                        />
-                        {r.holded_url && (
-                          <a href={r.holded_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+function BillingPlan(){
+  const qc=useQueryClient(); const {user}=useAuth(); const {isBigC}=useCurrentRole();
+  const [tab,setTab]=useState<"plan"|"orders">("plan"); const [search,setSearch]=useState(""); const [status,setStatus]=useState("all");
+  const [selected,setSelected]=useState<string[]>([]); const [editing,setEditing]=useState<BillingRow|null>(null); const [draft,setDraft]=useState<EditDraft>(EMPTY_EDIT);
+  const [newManual,setNewManual]=useState(false); const [orderOpen,setOrderOpen]=useState(false); const [orderSubject,setOrderSubject]=useState(""); const [orderNotes,setOrderNotes]=useState(""); const [historyOrder,setHistoryOrder]=useState<Order|null>(null);
+  const sprintsQ=useQuery({queryKey:["billing-plan-combined"],queryFn:async()=>{const {data,error}=await (supabase as any).from("production_billing_sprints").select("*, productions(id,title,fee_amount,ic_commission_pct,production_company,partner,contract_id,partner_company:production_companies(name),composers!composer_id(full_name,artistic_name)), contracts(id,title,counterparty)").eq("kind","comision").order("planned_invoice_date",{ascending:true,nullsFirst:false}).order("due_date",{ascending:true,nullsFirst:false});if(error)throw error;return(data??[]) as BillingRow[]}});
+  const ordersQ=useQuery({queryKey:["billing-orders"],queryFn:async()=>{const {data,error}=await (supabase as any).from("billing_orders").select("*, billing_order_items(*), billing_order_events(*)").order("created_at",{ascending:false});if(error)throw error;return(data??[]) as Order[]}});
+  const rows=useMemo(()=>{const q=search.trim().toLowerCase();return(sprintsQ.data??[]).filter(r=>(status==="all"||r.status===status)&&(!q||[r.productions?.title,composerName(r),clientName(r),r.concept,r.label,r.holded_invoice_ref].filter(Boolean).join(" ").toLowerCase().includes(q)))},[sprintsQ.data,status,search]);
+  const chosen=(sprintsQ.data??[]).filter(r=>selected.includes(r.id)); const today=new Date().toISOString().slice(0,10);
+  const totals=rows.reduce((a,r)=>{const amount=Number(calculatedCommission(r))||0;a.total+=amount;if(r.invoiced_date)a.invoiced+=amount;if(r.paid_date)a.paid+=amount;if((r.planned_invoice_date||r.due_date||"")<today&&!r.invoiced_date)a.overdue+=amount;return a},{total:0,invoiced:0,paid:0,overdue:0});
+  const saveLine=useMutation({mutationFn:async({row,values}:{row:BillingRow;values:EditDraft})=>{const patch:any={concept:values.concept||null,client_name:values.client_name||null,representative_amount:n(values.representative_amount),commission_pct:n(values.commission_pct),amount:n(values.amount),representative_due_date:values.representative_due_date||null,planned_invoice_date:values.planned_invoice_date||null,holded_invoice_ref:values.holded_invoice_ref||null,holded_url:values.holded_url||null,notes:values.notes||null,is_manual:true,manual_fields:["concept","client_name","representative_amount","commission_pct","amount","representative_due_date","planned_invoice_date"],source_snapshot:{fee_amount:row.productions?.fee_amount??null,ic_commission_pct:row.productions?.ic_commission_pct??null,contract_id:row.contract_id??row.productions?.contract_id??null},last_edited_by:user?.id,last_edited_at:new Date().toISOString()};const {error}=await(supabase as any).from("production_billing_sprints").update(patch).eq("id",row.id);if(error)throw error},onSuccess:()=>{toast.success("Línea actualizada");setEditing(null);qc.invalidateQueries({queryKey:["billing-plan-combined"]})},onError:(e:any)=>toast.error(e.message)});
+  const createManual=useMutation({mutationFn:async()=>{const production=(sprintsQ.data??[])[0]?.production_id;if(!production)throw new Error("Para crear una línea manual debe existir al menos una producción; selecciona la producción desde su ficha.");const {error}=await(supabase as any).from("production_billing_sprints").insert({production_id:production,sprint_number:99,kind:"comision",label:draft.concept||"Línea manual",concept:draft.concept,client_name:draft.client_name,representative_amount:n(draft.representative_amount),commission_pct:n(draft.commission_pct),amount:n(draft.amount),representative_due_date:draft.representative_due_date||null,planned_invoice_date:draft.planned_invoice_date||null,due_date:draft.planned_invoice_date||null,notes:draft.notes||null,is_manual:true,manual_fields:["all"],last_edited_by:user?.id,last_edited_at:new Date().toISOString()});if(error)throw error},onSuccess:()=>{toast.success("Línea manual añadida");setNewManual(false);setDraft(EMPTY_EDIT);qc.invalidateQueries({queryKey:["billing-plan-combined"]})},onError:(e:any)=>toast.error(e.message)});
+  const createOrder=useMutation({mutationFn:async()=>{if(!user?.email||!user.id)throw new Error("Tu usuario no tiene correo disponible");if(!chosen.length)throw new Error("Selecciona al menos una línea");const recipients=Array.from(new Set(["maggy@plus-music.com",user.email.toLowerCase()]));const {data:number,error:numberError}=await(supabase as any).rpc("next_billing_order_number");if(numberError)throw numberError;const total=chosen.reduce((sum,r)=>sum+(Number(calculatedCommission(r))||0),0);const {data:order,error}=await(supabase as any).from("billing_orders").insert({order_number:number,status:"borrador",subject:orderSubject||`Orden de facturación ${number}`,notes:orderNotes||null,total_amount:total,recipient_emails:recipients,created_by:user.id}).select("*").single();if(error)throw error;const items=chosen.map((r,index)=>({order_id:order.id,sprint_id:r.id,production_id:r.production_id,contract_id:r.contract_id??r.productions?.contract_id??null,production_title:r.productions?.title??null,client_name:clientName(r),representative_name:composerName(r),concept:r.concept||r.label||`Comisión IC sprint ${r.sprint_number}`,representative_amount:sourceAmount(r),commission_pct:sourcePct(r),commission_amount:calculatedCommission(r)??0,representative_due_date:r.representative_due_date,planned_invoice_date:r.planned_invoice_date||r.due_date,invoice_reference:r.holded_invoice_ref,notes:r.source_snapshot?.notes??null,position:index,snapshot:r}));const {error:itemError}=await(supabase as any).from("billing_order_items").insert(items);if(itemError)throw itemError;await(supabase as any).from("billing_order_events").insert({order_id:order.id,event_type:"creada",actor_user_id:user.id,actor_email:user.email,details:{lines:items.length,total}});return order},onSuccess:()=>{toast.success("Orden creada y lista para revisar");setOrderOpen(false);setSelected([]);setOrderSubject("");setOrderNotes("");setTab("orders");qc.invalidateQueries({queryKey:["billing-orders"]})},onError:(e:any)=>toast.error(e.message)});
+  const setOrderStatus=useMutation({mutationFn:async({order,status}:{order:Order;status:"enviada"|"facturada"|"anulada"})=>{if(!user?.email||!user.id)throw new Error("No se pudo identificar tu correo");if(status==="enviada")throw new Error("El correo está pendiente de activar para este proyecto");const stamp=status==="facturada"?{invoiced_at:new Date().toISOString()}:{cancelled_at:new Date().toISOString()};const {error}=await(supabase as any).from("billing_orders").update({status,...stamp}).eq("id",order.id);if(error)throw error;await(supabase as any).from("billing_order_events").insert({order_id:order.id,event_type:status,actor_user_id:user.id,actor_email:user.email,details:{}});if(status==="facturada"){const ids=(order.billing_order_items??[]).map((i:any)=>i.sprint_id).filter(Boolean);if(ids.length)await(supabase as any).from("production_billing_sprints").update({status:"facturado",invoiced_date:new Date().toISOString().slice(0,10)}).in("id",ids)}},onSuccess:()=>{toast.success("Orden actualizada");qc.invalidateQueries({queryKey:["billing-orders"]});qc.invalidateQueries({queryKey:["billing-plan-combined"]})},onError:(e:any)=>toast.error(e.message)});
+  function openEdit(row:BillingRow){setEditing(row);setDraft({concept:row.concept||row.label||"",client_name:clientName(row)==="—"?"":clientName(row),representative_amount:String(sourceAmount(row)??""),commission_pct:String(sourcePct(row)??""),amount:String(calculatedCommission(row)??""),representative_due_date:row.representative_due_date||"",planned_invoice_date:row.planned_invoice_date||row.due_date||"",holded_invoice_ref:row.holded_invoice_ref||"",holded_url:row.holded_url||"",notes:""})}
+  if(!isBigC)return <div className="mx-auto max-w-[1700px] px-6 py-16"><EmptyState title="Acceso restringido" description="La información de facturación solo está disponible para BIG C."/></div>;
+  return <div className="mx-auto max-w-[1700px] px-6 py-10">
+    <header className="mb-7 flex flex-wrap items-end justify-between gap-4"><div><p className="smallcaps text-muted-foreground">Empresa · Económico IC</p><h1 className="font-display text-4xl title-caps">Facturación IC</h1><p className="mt-2 max-w-4xl text-base text-muted-foreground">Honorarios del representado, comisión de la agencia, fechas y órdenes en una única vista trazable.</p></div><div className="flex gap-2"><ExportRowsButton rows={rows} filename="facturacion-ic" sheetName="Facturación"/><Button variant="outline" onClick={()=>{setDraft(EMPTY_EDIT);setNewManual(true)}}><Plus className="mr-2 h-4 w-4"/>Línea manual</Button></div></header>
+    <div className="mb-6 flex gap-1 border-b border-border"><Button variant={tab==="plan"?"default":"ghost"} onClick={()=>setTab("plan")}><Receipt className="mr-2 h-4 w-4"/>Plan de facturación</Button><Button variant={tab==="orders"?"default":"ghost"} onClick={()=>setTab("orders")}><Mail className="mr-2 h-4 w-4"/>Órdenes ({ordersQ.data?.length??0})</Button></div>
+    {tab==="plan"?<>
+      <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4"><Kpi label="Comisión prevista" value={<Money value={totals.total}/>}/><Kpi label="Facturado" value={<Money value={totals.invoiced}/>}/><Kpi label="Cobrado" value={<Money value={totals.paid}/>}/><Kpi label="Vencido sin facturar" value={<Money value={totals.overdue}/>} warn/></section>
+      <div className="mb-4 flex flex-wrap items-center gap-3"><Input className="max-w-sm" placeholder="Buscar producción, cliente, representado…" value={search} onChange={e=>setSearch(e.target.value)}/><select className="h-10 border border-input bg-background px-3" value={status} onChange={e=>setStatus(e.target.value)}><option value="all">Todos los estados</option><option value="pendiente">Pendiente</option><option value="facturado">Facturado</option><option value="cobrado">Cobrado</option></select>{selected.length>0&&<Button onClick={()=>{setOrderSubject(`Orden de facturación · ${selected.length} línea${selected.length>1?"s":""}`);setOrderOpen(true)}}><FilePlus2 className="mr-2 h-4 w-4"/>Crear orden ({selected.length})</Button>}</div>
+      <div className="overflow-x-auto border border-border"><table className="min-w-[1550px] w-full text-sm"><thead className="bg-muted/40 text-left"><tr><th className="p-3"><Checkbox checked={rows.length>0&&rows.every(r=>selected.includes(r.id))} onCheckedChange={v=>setSelected(v?rows.map(r=>r.id):[])}/></th><th className="p-3">Producción / contrato</th><th className="p-3">Cliente</th><th className="p-3">Representado</th><th className="p-3 text-right">Cobra representado</th><th className="p-3">Fecha cobro</th><th className="p-3 text-right">% IC</th><th className="p-3 text-right">Comisión IC</th><th className="p-3">Facturar IC</th><th className="p-3">Estado</th><th className="p-3">Factura</th><th className="p-3"></th></tr></thead><tbody>{sprintsQ.isLoading?<tr><td colSpan={12} className="p-10 text-center">Cargando…</td></tr>:rows.length===0?<tr><td colSpan={12} className="p-4"><EmptyState variant="filtered" title="Ninguna línea" description="No hay líneas que coincidan con los filtros."/></td></tr>:rows.map(r=>{const changed=r.is_manual&&((r.source_snapshot?.fee_amount??null)!==(r.productions?.fee_amount??null)||(r.source_snapshot?.ic_commission_pct??null)!==(r.productions?.ic_commission_pct??null));return <tr key={r.id} className="border-t border-border align-top"><td className="p-3"><Checkbox checked={selected.includes(r.id)} onCheckedChange={v=>setSelected(all=>v?[...new Set([...all,r.id])]:all.filter(id=>id!==r.id))}/></td><td className="p-3"><Link to="/productions/$productionId" params={{productionId:r.production_id}} className="font-display text-base text-primary hover:underline">{r.productions?.title||"Línea manual"}</Link><div className="text-xs text-muted-foreground">{r.contracts?.title||r.concept||r.label||`Sprint ${r.sprint_number}`}</div>{changed&&<button className="mt-1 text-xs font-medium text-amber-700 underline" onClick={()=>confirmContractChange(r)}>Contrato actualizado · decidir</button>}</td><td className="p-3">{clientName(r)}</td><td className="p-3">{composerName(r)}</td><td className="p-3 text-right tabular-nums"><Money value={sourceAmount(r)}/></td><td className="p-3">{formatDateEs(r.representative_due_date)}</td><td className="p-3 text-right tabular-nums">{sourcePct(r)!=null?`${sourcePct(r)} %`:"—"}</td><td className="p-3 text-right font-semibold tabular-nums"><Money value={calculatedCommission(r)}/>{r.is_manual&&<div className="text-xs font-normal text-muted-foreground">ajuste manual</div>}</td><td className="p-3">{formatDateEs(r.planned_invoice_date||r.due_date)}</td><td className="p-3">{STATUS_LABEL[r.status]||r.status}</td><td className="p-3">{r.holded_invoice_ref||"—"}{r.holded_url&&<a href={r.holded_url} target="_blank" rel="noreferrer" className="ml-2 inline-block"><ExternalLink className="h-4 w-4"/></a>}</td><td className="p-3"><Button size="sm" variant="outline" onClick={()=>openEdit(r)}>Editar</Button></td></tr>})}</tbody></table></div>
+    </>:<OrdersView orders={ordersQ.data??[]} loading={ordersQ.isLoading} onStatus={(order,next)=>setOrderStatus.mutate({order,status:next})} onHistory={setHistoryOrder}/>} 
+    <LineDialog open={Boolean(editing)||newManual} title={newManual?"Añadir línea manual":"Editar línea de facturación"} draft={draft} setDraft={setDraft} onClose={()=>{setEditing(null);setNewManual(false)}} onSave={()=>editing?saveLine.mutate({row:editing,values:draft}):createManual.mutate()} busy={saveLine.isPending||createManual.isPending}/>
+    <Dialog open={orderOpen} onOpenChange={setOrderOpen}><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Revisar orden de facturación</DialogTitle></DialogHeader><div className="grid gap-4"><Field label="Asunto"><Input value={orderSubject} onChange={e=>setOrderSubject(e.target.value)}/></Field><Field label="Destinatarios"><Input readOnly value={`maggy@plus-music.com · ${user?.email||"correo del usuario"}`}/></Field><Field label="Observaciones"><Textarea value={orderNotes} onChange={e=>setOrderNotes(e.target.value)}/></Field><div className="border border-border"><table className="w-full text-sm"><tbody>{chosen.map(r=><tr key={r.id} className="border-t first:border-t-0"><td className="p-2">{r.productions?.title}</td><td className="p-2">{clientName(r)}</td><td className="p-2 text-right"><Money value={calculatedCommission(r)}/></td></tr>)}</tbody><tfoot><tr className="border-t font-semibold"><td colSpan={2} className="p-2">Total</td><td className="p-2 text-right"><Money value={chosen.reduce((s,r)=>s+(Number(calculatedCommission(r))||0),0)}/></td></tr></tfoot></table></div></div><DialogFooter><Button variant="outline" onClick={()=>setOrderOpen(false)}>Cancelar</Button><Button onClick={()=>createOrder.mutate()} disabled={createOrder.isPending}>{createOrder.isPending?"Creando…":"Crear borrador"}</Button></DialogFooter></DialogContent></Dialog>
+    <HistoryDialog order={historyOrder} onClose={()=>setHistoryOrder(null)}/>
+  </div>;
+  async function confirmContractChange(row:BillingRow){const preserve=window.confirm("El contrato ha cambiado. Aceptar conserva el ajuste manual. Cancelar recalcula importe y porcentaje con los datos actuales del contrato.");if(preserve){await(supabase as any).from("production_billing_sprints").update({source_snapshot:{fee_amount:row.productions?.fee_amount??null,ic_commission_pct:row.productions?.ic_commission_pct??null,contract_id:row.productions?.contract_id??null},last_edited_by:user?.id,last_edited_at:new Date().toISOString()}).eq("id",row.id);toast.success("Se conserva el ajuste manual")}else{const fee=row.productions?.fee_amount??null,pct=row.productions?.ic_commission_pct??null;await(supabase as any).from("production_billing_sprints").update({representative_amount:fee,commission_pct:pct,amount:fee!=null&&pct!=null?Math.round(fee*pct)/100:null,manual_fields:[],is_manual:false,source_snapshot:{fee_amount:fee,ic_commission_pct:pct,contract_id:row.productions?.contract_id??null},last_edited_by:user?.id,last_edited_at:new Date().toISOString()}).eq("id",row.id);toast.success("Línea recalculada")}qc.invalidateQueries({queryKey:["billing-plan-combined"]})}
 }
 
-function Kpi({ label, value, accent }: { label: string; value: React.ReactNode; accent?: "primary" | "success" | "warn" }) {
-  const ring = accent === "primary" ? "border-primary/40" : accent === "success" ? "border-emerald-500/40" : accent === "warn" ? "border-amber-500/50" : "border-border";
-  return (
-    <div className={`rounded-sm border ${ring} bg-card p-3`}>
-      <div className="smallcaps text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 font-display text-2xl tabular-nums">{value}</div>
-    </div>
-  );
-}
-
-function FilterChips({ label, value, options, onChange }: { label: string; value: string; options: [string, string][]; onChange: (v: string) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="smallcaps text-xs text-muted-foreground">{label}</span>
-      <div className="flex gap-1 rounded-sm border border-border p-1">
-        {options.map(([v, l]) => (
-          <Button
-            key={v}
-            size="sm"
-            variant={value === v ? "default" : "ghost"}
-            onClick={() => onChange(v)}
-            className="h-7 px-3 text-xs"
-          >
-            {l}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-}
+function Kpi({label,value,warn}:{label:string;value:React.ReactNode;warn?:boolean}){return <div className={`border bg-card p-4 ${warn?"border-amber-500/50":"border-border"}`}><p className="smallcaps text-xs text-muted-foreground">{label}</p><div className="mt-1 font-display text-2xl">{value}</div></div>}
+function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="grid gap-1 text-sm"><span className="font-medium">{label}</span>{children}</label>}
+function LineDialog({open,title,draft,setDraft,onClose,onSave,busy}:{open:boolean;title:string;draft:EditDraft;setDraft:(v:EditDraft)=>void;onClose:()=>void;onSave:()=>void;busy:boolean}){const set=(key:keyof EditDraft)=>(e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>setDraft({...draft,[key]:e.target.value});return <Dialog open={open} onOpenChange={v=>{if(!v)onClose()}}><DialogContent className="max-w-4xl"><DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader><div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"><Field label="Concepto"><Input value={draft.concept} onChange={set("concept")}/></Field><Field label="Cliente"><Input value={draft.client_name} onChange={set("client_name")}/></Field><Field label="Importe representado"><Input type="number" step="0.01" value={draft.representative_amount} onChange={set("representative_amount")}/></Field><Field label="Porcentaje IC"><Input type="number" step="0.01" value={draft.commission_pct} onChange={set("commission_pct")}/></Field><Field label="Comisión IC"><Input type="number" step="0.01" value={draft.amount} onChange={set("amount")}/></Field><Field label="Fecha cobro representado"><Input type="date" value={draft.representative_due_date} onChange={set("representative_due_date")}/></Field><Field label="Fecha prevista factura IC"><Input type="date" value={draft.planned_invoice_date} onChange={set("planned_invoice_date")}/></Field><Field label="Referencia factura"><Input value={draft.holded_invoice_ref} onChange={set("holded_invoice_ref")}/></Field><Field label="Enlace factura"><Input value={draft.holded_url} onChange={set("holded_url")}/></Field><div className="md:col-span-2 lg:col-span-3"><Field label="Observaciones"><Textarea value={draft.notes} onChange={set("notes")}/></Field></div></div><DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button onClick={onSave} disabled={busy}>{busy?"Guardando…":"Guardar"}</Button></DialogFooter></DialogContent></Dialog>}
+function OrdersView({orders,loading,onStatus,onHistory}:{orders:Order[];loading:boolean;onStatus:(o:Order,s:"enviada"|"facturada"|"anulada")=>void;onHistory:(o:Order)=>void}){return <div className="overflow-x-auto border border-border"><table className="min-w-[1100px] w-full text-sm"><thead className="bg-muted/40 text-left"><tr><th className="p-3">Orden</th><th className="p-3">Asunto</th><th className="p-3">Destinatarios</th><th className="p-3">Líneas</th><th className="p-3 text-right">Total</th><th className="p-3">Estado</th><th className="p-3">Fecha</th><th className="p-3"></th></tr></thead><tbody>{loading?<tr><td colSpan={8} className="p-10 text-center">Cargando…</td></tr>:orders.length===0?<tr><td colSpan={8} className="p-4"><EmptyState title="Sin órdenes" description="Selecciona líneas del plan para crear la primera orden."/></td></tr>:orders.map(o=><tr key={o.id} className="border-t border-border"><td className="p-3 font-mono">{o.order_number}</td><td className="p-3 font-display">{o.subject}</td><td className="p-3">{o.recipient_emails.join(" · ")}</td><td className="p-3">{o.billing_order_items?.length??0}</td><td className="p-3 text-right"><Money value={o.total_amount}/></td><td className="p-3">{ORDER_LABEL[o.status]||o.status}</td><td className="p-3">{formatDateEs(o.sent_at||o.created_at)}</td><td className="p-3"><div className="flex justify-end gap-1"><Button size="icon" variant="ghost" title="Historial" onClick={()=>onHistory(o)}><History className="h-4 w-4"/></Button>{o.status==="borrador"&&<Button size="sm" onClick={()=>onStatus(o,"enviada")}><Send className="mr-1 h-4 w-4"/>Enviar</Button>}{o.status==="enviada"&&<Button size="sm" variant="outline" onClick={()=>onStatus(o,"facturada")}><CheckCircle2 className="mr-1 h-4 w-4"/>Facturada</Button>}{!['facturada','anulada'].includes(o.status)&&<Button size="icon" variant="ghost" title="Anular" onClick={()=>onStatus(o,"anulada")}><XCircle className="h-4 w-4"/></Button>}</div></td></tr>)}</tbody></table></div>}
+function HistoryDialog({order,onClose}:{order:Order|null;onClose:()=>void}){return <Dialog open={Boolean(order)} onOpenChange={v=>{if(!v)onClose()}}><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Historial · {order?.order_number}</DialogTitle></DialogHeader><div className="space-y-3">{order?.billing_order_events?.length?order.billing_order_events.sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(e=><div key={e.id} className="flex justify-between border-b border-border pb-2"><div><strong className="capitalize">{e.event_type.replaceAll("_"," ")}</strong><p className="text-sm text-muted-foreground">{e.actor_email||"Sistema"}</p></div><time className="text-sm text-muted-foreground">{new Date(e.created_at).toLocaleString("es-ES")}</time></div>):<p className="text-muted-foreground">Sin eventos registrados.</p>}</div></DialogContent></Dialog>}
