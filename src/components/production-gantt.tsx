@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { addDays, format, getISOWeekYear, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { PHASE_COLOR_CLASS, type PhaseColorKey } from "@/lib/phase-catalog";
@@ -16,6 +16,7 @@ export type GanttPhase = {
   milestone?: boolean;
   productionId?: string;
   productionTitle?: string;
+  productionClient?: string | null;
   colorKey?: PhaseColorKey;
 };
 
@@ -87,20 +88,30 @@ export function ProductionGantt({
   today?: Date;
   legendItems?: GanttLegendItem[];
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const todayTime = today.getTime();
   const dated = phases
     .filter((p) => p.start || p.end)
     .map((p) => ({ ...p, start: p.start || p.end, end: p.end || p.start }));
 
   const model = useMemo(() => {
     if (!dated.length) return null;
-    const rawMin = Math.min(...dated.map((p) => d(p.start)));
-    const rawMax = Math.max(...dated.map((p) => d(p.end)));
+    const rawMin = Math.min(todayTime, ...dated.map((p) => d(p.start)));
+    const rawMax = Math.max(addDays(today, 84).getTime(), ...dated.map((p) => d(p.end)));
     const min = startOfWeek(new Date(rawMin), { weekStartsOn: 1 });
     const max = addDays(startOfWeek(new Date(rawMax), { weekStartsOn: 1 }), 7);
     const from = min.getTime();
     const to = max.getTime();
     return { from, to, span: Math.max(to - from, DAY), weeks: weeksBetween(from, to) };
-  }, [dated]);
+  }, [dated, todayTime]);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container || !model) return;
+    const weekWidth = 72;
+    const elapsedWeeks = Math.max(0, (todayTime - model.from) / (7 * DAY));
+    container.scrollLeft = elapsedWeeks * weekWidth;
+  }, [model, todayTime]);
 
   if (!model) {
     return (
@@ -164,10 +175,10 @@ export function ProductionGantt({
   return (
     <div className="space-y-4">
       <GanttLegend items={legendItems} />
-      <div className="overflow-x-auto rounded-sm border border-border">
+      <div ref={scrollRef} className="overflow-x-auto rounded-sm border border-border">
         <div style={{ minWidth: `${timelineWidth}px` }}>
           <div className="flex border-b border-border bg-muted/40">
-            <div className="w-56 shrink-0 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="sticky left-0 z-20 w-56 shrink-0 bg-muted px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               {mode === "lineal" ? "Producción" : "Fase"}
             </div>
             <div className="relative flex-1">
@@ -196,8 +207,9 @@ export function ProductionGantt({
                 const rows = dated.filter((p) => (p.productionId ?? "__") === pid);
                 return (
                   <div key={pid} className="flex border-b border-border/60 last:border-b-0">
-                    <div className="w-56 shrink-0 px-3 py-3">
+                    <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
                       <p className="text-sm font-medium leading-tight">{title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{rows[0]?.productionClient ?? "Cliente pendiente"}</p>
                       <p className="text-[11px] text-muted-foreground">{rows.length} fases</p>
                     </div>
                     <div className="relative min-h-[46px] flex-1 py-3">
@@ -225,8 +237,10 @@ export function ProductionGantt({
                     .sort((a, b) => d(a.start) - d(b.start))
                     .map((p) => (
                       <div key={p.id} className="flex border-b border-border/60 last:border-b-0">
-                        <div className="w-56 shrink-0 px-3 py-3">
+                        <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
                           <p className="text-sm font-medium leading-tight">{p.name}</p>
+                          {p.productionTitle ? <p className="mt-0.5 text-xs font-medium text-foreground">{p.productionTitle}</p> : null}
+                          <p className="text-xs text-muted-foreground">{p.productionClient ?? "Cliente pendiente"}</p>
                           <p className="text-[11px] text-muted-foreground">
                             {multi ? `${GANTT_OWNER_LABEL[p.owner]} · ` : ""}
                             {fmt(p.start)} – {fmt(p.end)}

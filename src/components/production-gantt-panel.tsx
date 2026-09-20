@@ -49,8 +49,9 @@ export function ProductionGanttPanel({
     queryFn: async () => {
       const ids = await loadProductionIds({ productionIds, composerId });
       if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
-      const [prods, phases, catalog, evSubject, evSource] = await Promise.all([
-        db.from("productions").select("id, title, composer_id").in("id", ids),
+      const [prods, assignments, phases, catalog, evSubject, evSource] = await Promise.all([
+        db.from("productions").select("id, title, composer_id, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
+        db.from("production_assignments").select("production_id, partner_company:production_companies(name)").in("production_id", ids).not("partner_company_id", "is", null),
         db
           .from("production_phases")
           .select("id, production_id, name, owner, start_date, end_date, status, notes, position, is_milestone, catalog_id")
@@ -72,6 +73,12 @@ export function ProductionGanttPanel({
       if (catalog.error) throw catalog.error;
 
       const catalogRows = (catalog.data ?? []) as { id: string; name: string; color_key: PhaseColorKey }[];
+      const assignedClients = new Map<string, string>();
+      ((assignments.data ?? []) as any[]).forEach((assignment) => {
+        const name = assignment.partner_company?.name;
+        if (name && !assignedClients.has(assignment.production_id)) assignedClients.set(assignment.production_id, name);
+      });
+
       const catalogById = new Map(catalogRows.map((c) => [c.id, c]));
       const catalogByName = new Map(catalogRows.map((c) => [c.name.trim().toLowerCase(), c]));
 
@@ -87,8 +94,12 @@ export function ProductionGanttPanel({
         names = new Map(((cs ?? []) as any[]).map((c) => [c.id, c.artistic_name || c.full_name]));
       }
 
-      const meta = new Map<string, { title: string; composer_id: string | null }>(
-        ((prods.data ?? []) as any[]).map((p) => [p.id, { title: p.title, composer_id: p.composer_id }]),
+      const meta = new Map<string, { title: string; composer_id: string | null; client: string | null }>(
+        ((prods.data ?? []) as any[]).map((p) => [p.id, {
+          title: p.title,
+          composer_id: p.composer_id,
+          client: p.partner_company?.name ?? assignedClients.get(p.id) ?? p.production_company ?? p.partner ?? p.platform_ref?.name ?? p.platform ?? null,
+        }]),
       );
 
       const phaseRows: Row[] = ((phases.data ?? []) as any[])
@@ -107,6 +118,7 @@ export function ProductionGanttPanel({
             milestone: !!p.is_milestone || p.start_date === p.end_date,
             productionId: p.production_id,
             productionTitle: m?.title ?? "Producción",
+            productionClient: m?.client ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: catalogItem?.color_key ?? "graphite",
@@ -139,6 +151,7 @@ export function ProductionGanttPanel({
             milestone: start === end,
             productionId: pid,
             productionTitle: m?.title ?? "Producción",
+            productionClient: m?.client ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: "graphite",
