@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Download, Eye, FilePlus2, Files, Layers3, Plus, Sav
 import { PDFDocument } from "pdf-lib";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useRole } from "@/lib/use-role";
+import { useCurrentRole } from "@/lib/use-role";
 import { uploadMarketingAsset, signMarketingAsset, deleteMarketingAsset } from "@/lib/marketing-upload";
 import { DECK_PURPOSES, DECK_PURPOSE_LABEL, MARKETING_LANGUAGES, MARKETING_LANGUAGE_LABEL, type DeckPurpose, type MarketingLanguage } from "@/lib/marketing-constants";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ const parsedParts = (value: string) => [...new Set(value.split(/[,;\s]+/).map(Nu
 
 export function SalesDocumentStudio() {
   const qc = useQueryClient();
-  const { isBigC } = useRole();
+  const { isBigC } = useCurrentRole();
   const [tab, setTab] = useState<"library" | "compose" | "created">("library");
   const [newOpen, setNewOpen] = useState(false);
   const [preview, setPreview] = useState<DeckFile | null>(null);
