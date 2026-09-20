@@ -147,7 +147,10 @@ export function ProductionGantt({
       const weekLeft = pct(weekStart);
       const weekWidth = pct(weekStart + 7 * DAY) - weekLeft;
       const dayOffset = Math.max(0, Math.min(6, Math.round((d(p.start) - weekStart) / DAY)));
-      const markerLeft = ((dayOffset + 0.5) / 7) * 100;
+      // La planificación trabaja visualmente de lunes a viernes: lunes se
+      // marca al inicio del cuadrante y viernes al final. El fin de semana
+      // permanece anclado al extremo derecho de esa misma semana.
+      const markerLeft = 6 + (Math.min(dayOffset, 4) / 4) * 88;
       return (
         <div
           className={`absolute inset-y-1 ${color}`}
