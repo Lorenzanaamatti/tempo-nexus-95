@@ -298,6 +298,269 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_manual_lines: {
+        Row: {
+          client_name: string | null
+          commission_amount: number | null
+          commission_pct: number | null
+          concept: string
+          created_at: string
+          created_by: string
+          id: string
+          invoice_reference: string | null
+          invoice_url: string | null
+          invoiced_date: string | null
+          last_edited_by: string | null
+          notes: string | null
+          paid_date: string | null
+          planned_invoice_date: string | null
+          representative_amount: number | null
+          representative_due_date: string | null
+          representative_name: string | null
+          status: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          commission_amount?: number | null
+          commission_pct?: number | null
+          concept: string
+          created_at?: string
+          created_by: string
+          id?: string
+          invoice_reference?: string | null
+          invoice_url?: string | null
+          invoiced_date?: string | null
+          last_edited_by?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          planned_invoice_date?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          commission_amount?: number | null
+          commission_pct?: number | null
+          concept?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          invoice_reference?: string | null
+          invoice_url?: string | null
+          invoiced_date?: string | null
+          last_edited_by?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          planned_invoice_date?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_order_events: {
+        Row: {
+          actor_email: string | null
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          order_id: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          order_id: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "billing_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_order_items: {
+        Row: {
+          client_name: string | null
+          commission_amount: number
+          commission_pct: number | null
+          concept: string
+          contract_id: string | null
+          created_at: string
+          id: string
+          invoice_reference: string | null
+          notes: string | null
+          order_id: string
+          planned_invoice_date: string | null
+          position: number
+          production_id: string | null
+          production_title: string | null
+          representative_amount: number | null
+          representative_due_date: string | null
+          representative_name: string | null
+          snapshot: Json
+          sprint_id: string | null
+        }
+        Insert: {
+          client_name?: string | null
+          commission_amount: number
+          commission_pct?: number | null
+          concept: string
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          invoice_reference?: string | null
+          notes?: string | null
+          order_id: string
+          planned_invoice_date?: string | null
+          position?: number
+          production_id?: string | null
+          production_title?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          snapshot?: Json
+          sprint_id?: string | null
+        }
+        Update: {
+          client_name?: string | null
+          commission_amount?: number
+          commission_pct?: number | null
+          concept?: string
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          invoice_reference?: string | null
+          notes?: string | null
+          order_id?: string
+          planned_invoice_date?: string | null
+          position?: number
+          production_id?: string | null
+          production_title?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          snapshot?: Json
+          sprint_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_order_items_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "billing_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_order_items_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_order_items_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_order_items_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "production_billing_sprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_orders: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          created_by: string
+          email_idempotency_key: string | null
+          email_result: Json | null
+          id: string
+          invoiced_at: string | null
+          notes: string | null
+          order_number: string
+          recipient_emails: string[]
+          sent_at: string | null
+          sent_by: string | null
+          status: Database["public"]["Enums"]["billing_order_status"]
+          subject: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by: string
+          email_idempotency_key?: string | null
+          email_result?: Json | null
+          id?: string
+          invoiced_at?: string | null
+          notes?: string | null
+          order_number: string
+          recipient_emails?: string[]
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["billing_order_status"]
+          subject: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string
+          email_idempotency_key?: string | null
+          email_result?: Json | null
+          id?: string
+          invoiced_at?: string | null
+          notes?: string | null
+          order_number?: string
+          recipient_emails?: string[]
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["billing_order_status"]
+          subject?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_asset_files: {
         Row: {
           asset_id: string
@@ -4820,56 +5083,99 @@ export type Database = {
       production_billing_sprints: {
         Row: {
           amount: number | null
+          client_name: string | null
+          commission_pct: number | null
+          concept: string | null
+          contract_id: string | null
           created_at: string
           due_date: string | null
           holded_invoice_ref: string | null
           holded_url: string | null
           id: string
           invoiced_date: string | null
+          is_manual: boolean
           kind: Database["public"]["Enums"]["billing_sprint_kind"]
           label: string | null
+          last_edited_at: string | null
+          last_edited_by: string | null
+          manual_fields: string[]
           notes: string | null
           paid_date: string | null
+          planned_invoice_date: string | null
           production_id: string
+          representative_amount: number | null
+          representative_due_date: string | null
+          source_snapshot: Json
           sprint_number: number
           status: Database["public"]["Enums"]["billing_sprint_status"]
           updated_at: string
         }
         Insert: {
           amount?: number | null
+          client_name?: string | null
+          commission_pct?: number | null
+          concept?: string | null
+          contract_id?: string | null
           created_at?: string
           due_date?: string | null
           holded_invoice_ref?: string | null
           holded_url?: string | null
           id?: string
           invoiced_date?: string | null
+          is_manual?: boolean
           kind: Database["public"]["Enums"]["billing_sprint_kind"]
           label?: string | null
+          last_edited_at?: string | null
+          last_edited_by?: string | null
+          manual_fields?: string[]
           notes?: string | null
           paid_date?: string | null
+          planned_invoice_date?: string | null
           production_id: string
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          source_snapshot?: Json
           sprint_number: number
           status?: Database["public"]["Enums"]["billing_sprint_status"]
           updated_at?: string
         }
         Update: {
           amount?: number | null
+          client_name?: string | null
+          commission_pct?: number | null
+          concept?: string | null
+          contract_id?: string | null
           created_at?: string
           due_date?: string | null
           holded_invoice_ref?: string | null
           holded_url?: string | null
           id?: string
           invoiced_date?: string | null
+          is_manual?: boolean
           kind?: Database["public"]["Enums"]["billing_sprint_kind"]
           label?: string | null
+          last_edited_at?: string | null
+          last_edited_by?: string | null
+          manual_fields?: string[]
           notes?: string | null
           paid_date?: string | null
+          planned_invoice_date?: string | null
           production_id?: string
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          source_snapshot?: Json
           sprint_number?: number
           status?: Database["public"]["Enums"]["billing_sprint_status"]
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "production_billing_sprints_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "production_billing_sprints_production_id_fkey"
             columns: ["production_id"]
@@ -7069,6 +7375,7 @@ export type Database = {
         Args: { _composer_id: string }
         Returns: undefined
       }
+      next_billing_order_number: { Args: never; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
@@ -7094,6 +7401,7 @@ export type Database = {
         | "pago"
         | "cobro"
       availability_status: "available" | "partial" | "unavailable"
+      billing_order_status: "borrador" | "enviada" | "facturada" | "anulada"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
       calendar_category:
@@ -7709,6 +8017,7 @@ export const Constants = {
         "cobro",
       ],
       availability_status: ["available", "partial", "unavailable"],
+      billing_order_status: ["borrador", "enviada", "facturada", "anulada"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
       calendar_category: [
