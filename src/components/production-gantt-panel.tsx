@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,11 @@ export function ProductionGanttPanel({
   defaultMode = "desplegado",
   showModeToggle = true,
   showFilters = false,
+  externalOwner = "all",
+  externalType = "all",
+  dateFrom,
+  dateTo,
+  onFilteredRowsChange,
 }: {
   productionIds?: string[];
   composerId?: string;
@@ -37,6 +42,11 @@ export function ProductionGanttPanel({
   showModeToggle?: boolean;
   /** Muestra filtros por compositor, producción y responsable (vista global). */
   showFilters?: boolean;
+  externalOwner?: "all" | GanttOwner;
+  externalType?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  onFilteredRowsChange?: (rows: Row[]) => void;
 }) {
   const [mode, setMode] = useState<"desplegado" | "lineal">(defaultMode);
   const [composerFilter, setComposerFilter] = useState("all");
@@ -183,8 +193,16 @@ export function ProductionGanttPanel({
     (r) =>
       (composerFilter === "all" || r.composerId === composerFilter) &&
       (productionFilter === "all" || r.productionId === productionFilter) &&
-      (ownerFilter === "all" || r.owner === ownerFilter),
+      (ownerFilter === "all" || r.owner === ownerFilter) &&
+      (externalOwner === "all" || r.owner === externalOwner) &&
+      (externalType === "all" || r.name.trim().toLowerCase() === externalType.trim().toLowerCase()) &&
+      (!dateFrom || r.end >= dateFrom) &&
+      (!dateTo || r.start <= dateTo),
   );
+
+  useEffect(() => {
+    onFilteredRowsChange?.(filtered);
+  }, [filtered, onFilteredRowsChange]);
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Cargando calendario…</p>;
   if (error) {
