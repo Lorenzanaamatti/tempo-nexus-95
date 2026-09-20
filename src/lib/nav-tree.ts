@@ -90,7 +90,7 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: Target,
     landingTo: "/oportunidades",
     items: [
-      { title: "Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
+      { title: "CRM de Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
       { title: "Productoras a contactar", to: "/oportunidades/partners", icon: Building2 },
       { title: "Pitches en curso", to: "/oportunidades/pitches", icon: Sparkles },
     ],

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/_admin/oportunidades/")({
 
 const DOORS: Door[] = [
   {
-    title: "Producciones en desarrollo",
+    title: "CRM de Producciones en desarrollo",
     description: "Proyectos detectados en España y Europa, listos para pitch.",
     to: "/oportunidades/producciones",
   },
