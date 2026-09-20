@@ -140,9 +140,11 @@ export function ProductionGanttPanel({
           const m = meta.get(pid);
           const start = e.start_date ?? e.end_date;
           const end = e.end_date ?? e.start_date;
+          const eventName = String(e.title || "Evento").split("·")[0].trim();
+          const catalogItem = catalogByName.get(eventName.toLowerCase());
           return {
             id: `ev-${e.id}`,
-            name: e.title || "Evento",
+            name: eventName,
             owner: "agencia" as GanttOwner,
             start,
             end,
@@ -154,7 +156,7 @@ export function ProductionGanttPanel({
             productionClient: m?.client ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
-            colorKey: "graphite",
+            colorKey: catalogItem?.color_key ?? "graphite",
           } as Row;
         })
         .filter((r) => !!r.productionId && meta.has(r.productionId));
