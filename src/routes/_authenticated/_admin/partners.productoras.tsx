@@ -5,8 +5,8 @@ export const Route = createFileRoute("/_authenticated/_admin/partners/productora
   component: () => (
     <PartnersView
       tipo="Productora"
-      title="PRODUCTORAS"
-      description="Productoras de cine, televisión, publicidad, animación y documental con las que trabajamos."
+      title="PRODUCTORAS PARTNERS"
+      description="Productoras de cine, televisión, publicidad, animación y documental con las que ya trabajamos."
     />
   ),
 });

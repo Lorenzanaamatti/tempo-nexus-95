@@ -10,9 +10,9 @@ function OportunidadesPartners() {
     <OpportunitiesList
       fixedKinds={["presentar_ic", "fichaje_productora"]}
       listKey="oportunidades-partners"
-      eyebrow="OPORTUNIDADES DE VENTAS"
+      eyebrow="PARTNERS"
       title="PRODUCTORAS A CONTACTAR"
-      description="Oportunidades con productoras, plataformas y otros partners estratégicos."
+      description="Productoras, plataformas y otros partners estratégicos con los que aún no trabajamos."
     />
   );
 }
