@@ -148,6 +148,14 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/tareas/calendario")}>
+                      <Link to="/tareas/calendario" className="flex items-center gap-2">
+                        <CalendarRange className="h-4 w-4" />
+                        {!collapsed && <span>Calendario general</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
