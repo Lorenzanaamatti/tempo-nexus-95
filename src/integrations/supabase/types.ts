@@ -4027,6 +4027,7 @@ export type Database = {
       phase_catalog: {
         Row: {
           allows_multiple: boolean
+          color_key: string
           created_at: string
           default_owner: string
           id: string
@@ -4040,6 +4041,7 @@ export type Database = {
         }
         Insert: {
           allows_multiple?: boolean
+          color_key?: string
           created_at?: string
           default_owner?: string
           id?: string
@@ -4053,6 +4055,7 @@ export type Database = {
         }
         Update: {
           allows_multiple?: boolean
+          color_key?: string
           created_at?: string
           default_owner?: string
           id?: string
