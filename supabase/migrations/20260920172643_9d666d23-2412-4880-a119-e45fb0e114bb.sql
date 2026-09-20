@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sync_deadline_opportunity() FROM PUBLIC, anon, authenticated;
