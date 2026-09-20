@@ -6751,6 +6751,460 @@ export type Database = {
           },
         ]
       }
+      subv_capturas: {
+        Row: {
+          conector: string | null
+          created_at: string
+          duracion_ms: number | null
+          fuente_id: string | null
+          id: string
+          mensaje: string | null
+          nuevas: number
+          ok: boolean
+          repetidas: number
+        }
+        Insert: {
+          conector?: string | null
+          created_at?: string
+          duracion_ms?: number | null
+          fuente_id?: string | null
+          id?: string
+          mensaje?: string | null
+          nuevas?: number
+          ok?: boolean
+          repetidas?: number
+        }
+        Update: {
+          conector?: string | null
+          created_at?: string
+          duracion_ms?: number | null
+          fuente_id?: string | null
+          id?: string
+          mensaje?: string | null
+          nuevas?: number
+          ok?: boolean
+          repetidas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subv_capturas_fuente_id_fkey"
+            columns: ["fuente_id"]
+            isOneToOne: false
+            referencedRelation: "subv_fuentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subv_expediente_documentos: {
+        Row: {
+          archivo_path: string | null
+          created_at: string
+          expediente_id: string
+          id: string
+          nombre: string
+          subido_por: string | null
+          tipo: string | null
+        }
+        Insert: {
+          archivo_path?: string | null
+          created_at?: string
+          expediente_id: string
+          id?: string
+          nombre: string
+          subido_por?: string | null
+          tipo?: string | null
+        }
+        Update: {
+          archivo_path?: string | null
+          created_at?: string
+          expediente_id?: string
+          id?: string
+          nombre?: string
+          subido_por?: string | null
+          tipo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subv_expediente_documentos_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "subv_expedientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subv_expedientes: {
+        Row: {
+          convocatoria_url: string | null
+          created_at: string
+          created_by: string | null
+          documentacion_pendiente: string | null
+          empresa: string | null
+          estado: string
+          fecha_limite: string | null
+          fecha_presentacion: string | null
+          fecha_resolucion: string | null
+          id: string
+          importe_concedido: number | null
+          importe_solicitado: number | null
+          notas: string | null
+          oportunidad_id: string | null
+          organismo: string | null
+          requisitos: string | null
+          responsable_id: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          convocatoria_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          documentacion_pendiente?: string | null
+          empresa?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          fecha_presentacion?: string | null
+          fecha_resolucion?: string | null
+          id?: string
+          importe_concedido?: number | null
+          importe_solicitado?: number | null
+          notas?: string | null
+          oportunidad_id?: string | null
+          organismo?: string | null
+          requisitos?: string | null
+          responsable_id?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          convocatoria_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          documentacion_pendiente?: string | null
+          empresa?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          fecha_presentacion?: string | null
+          fecha_resolucion?: string | null
+          id?: string
+          importe_concedido?: number | null
+          importe_solicitado?: number | null
+          notas?: string | null
+          oportunidad_id?: string | null
+          organismo?: string | null
+          requisitos?: string | null
+          responsable_id?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subv_expedientes_oportunidad_id_fkey"
+            columns: ["oportunidad_id"]
+            isOneToOne: false
+            referencedRelation: "subv_oportunidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subv_expedientes_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "ic_team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subv_expedientes_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subv_fuentes: {
+        Row: {
+          activa: boolean
+          beneficiarios: string | null
+          categoria: string | null
+          cobertura: string | null
+          conector: string | null
+          content_hash: string | null
+          created_at: string
+          dinero_directo: string | null
+          frecuencia: string | null
+          health_status: string
+          id: string
+          last_change_at: string | null
+          last_checked_at: string | null
+          last_error: string | null
+          last_success_at: string | null
+          limitaciones: string | null
+          metodo_conexion: string | null
+          naturaleza: string | null
+          next_check_at: string | null
+          nivel_automatizacion: string | null
+          nombre: string
+          notas_tecnicas: string | null
+          parser_version: string | null
+          prioridad: string | null
+          que_aporta: string | null
+          relev_cultura: string | null
+          relev_empresa: string | null
+          relev_mujeres: string | null
+          relev_tech: string | null
+          source_id: string
+          subcategoria: string | null
+          territorio: string | null
+          tipos_oportunidad: string | null
+          updated_at: string
+          url_portal: string | null
+          url_tecnica: string | null
+          verificacion: string | null
+        }
+        Insert: {
+          activa?: boolean
+          beneficiarios?: string | null
+          categoria?: string | null
+          cobertura?: string | null
+          conector?: string | null
+          content_hash?: string | null
+          created_at?: string
+          dinero_directo?: string | null
+          frecuencia?: string | null
+          health_status?: string
+          id?: string
+          last_change_at?: string | null
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          limitaciones?: string | null
+          metodo_conexion?: string | null
+          naturaleza?: string | null
+          next_check_at?: string | null
+          nivel_automatizacion?: string | null
+          nombre: string
+          notas_tecnicas?: string | null
+          parser_version?: string | null
+          prioridad?: string | null
+          que_aporta?: string | null
+          relev_cultura?: string | null
+          relev_empresa?: string | null
+          relev_mujeres?: string | null
+          relev_tech?: string | null
+          source_id: string
+          subcategoria?: string | null
+          territorio?: string | null
+          tipos_oportunidad?: string | null
+          updated_at?: string
+          url_portal?: string | null
+          url_tecnica?: string | null
+          verificacion?: string | null
+        }
+        Update: {
+          activa?: boolean
+          beneficiarios?: string | null
+          categoria?: string | null
+          cobertura?: string | null
+          conector?: string | null
+          content_hash?: string | null
+          created_at?: string
+          dinero_directo?: string | null
+          frecuencia?: string | null
+          health_status?: string
+          id?: string
+          last_change_at?: string | null
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          limitaciones?: string | null
+          metodo_conexion?: string | null
+          naturaleza?: string | null
+          next_check_at?: string | null
+          nivel_automatizacion?: string | null
+          nombre?: string
+          notas_tecnicas?: string | null
+          parser_version?: string | null
+          prioridad?: string | null
+          que_aporta?: string | null
+          relev_cultura?: string | null
+          relev_empresa?: string | null
+          relev_mujeres?: string | null
+          relev_tech?: string | null
+          source_id?: string
+          subcategoria?: string | null
+          territorio?: string | null
+          tipos_oportunidad?: string | null
+          updated_at?: string
+          url_portal?: string | null
+          url_tecnica?: string | null
+          verificacion?: string | null
+        }
+        Relationships: []
+      }
+      subv_oportunidades: {
+        Row: {
+          analizada_ia: boolean
+          bdns: string | null
+          content_hash: string | null
+          created_at: string
+          decidido_at: string | null
+          decidido_por: string | null
+          descripcion: string | null
+          destinatarios: string | null
+          detectada_at: string
+          duplicate_key: string | null
+          estado: string
+          excluyentes_ia: string | null
+          fecha_limite: string | null
+          fecha_publicacion: string | null
+          fuente_id: string | null
+          id: string
+          importe: number | null
+          motivo_ia: string | null
+          notas: string | null
+          organismo: string | null
+          score_ia: number | null
+          sector: string | null
+          source_id: string | null
+          source_item_id: string | null
+          source_item_url: string | null
+          territorio: string | null
+          tipo_oportunidad: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          analizada_ia?: boolean
+          bdns?: string | null
+          content_hash?: string | null
+          created_at?: string
+          decidido_at?: string | null
+          decidido_por?: string | null
+          descripcion?: string | null
+          destinatarios?: string | null
+          detectada_at?: string
+          duplicate_key?: string | null
+          estado?: string
+          excluyentes_ia?: string | null
+          fecha_limite?: string | null
+          fecha_publicacion?: string | null
+          fuente_id?: string | null
+          id?: string
+          importe?: number | null
+          motivo_ia?: string | null
+          notas?: string | null
+          organismo?: string | null
+          score_ia?: number | null
+          sector?: string | null
+          source_id?: string | null
+          source_item_id?: string | null
+          source_item_url?: string | null
+          territorio?: string | null
+          tipo_oportunidad?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          analizada_ia?: boolean
+          bdns?: string | null
+          content_hash?: string | null
+          created_at?: string
+          decidido_at?: string | null
+          decidido_por?: string | null
+          descripcion?: string | null
+          destinatarios?: string | null
+          detectada_at?: string
+          duplicate_key?: string | null
+          estado?: string
+          excluyentes_ia?: string | null
+          fecha_limite?: string | null
+          fecha_publicacion?: string | null
+          fuente_id?: string | null
+          id?: string
+          importe?: number | null
+          motivo_ia?: string | null
+          notas?: string | null
+          organismo?: string | null
+          score_ia?: number | null
+          sector?: string | null
+          source_id?: string | null
+          source_item_id?: string | null
+          source_item_url?: string | null
+          territorio?: string | null
+          tipo_oportunidad?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subv_oportunidades_fuente_id_fkey"
+            columns: ["fuente_id"]
+            isOneToOne: false
+            referencedRelation: "subv_fuentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subv_programas: {
+        Row: {
+          area: string | null
+          beneficiarios: string | null
+          created_at: string
+          id: string
+          nombre: string
+          por_que_importa: string | null
+          recurrencia: string | null
+          source_id: string | null
+          tipo_apoyo: string | null
+          url: string | null
+        }
+        Insert: {
+          area?: string | null
+          beneficiarios?: string | null
+          created_at?: string
+          id?: string
+          nombre: string
+          por_que_importa?: string | null
+          recurrencia?: string | null
+          source_id?: string | null
+          tipo_apoyo?: string | null
+          url?: string | null
+        }
+        Update: {
+          area?: string | null
+          beneficiarios?: string | null
+          created_at?: string
+          id?: string
+          nombre?: string
+          por_que_importa?: string | null
+          recurrencia?: string | null
+          source_id?: string | null
+          tipo_apoyo?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
+      subv_taxonomias: {
+        Row: {
+          definicion: string | null
+          grupo: string
+          id: string
+          valor: string
+        }
+        Insert: {
+          definicion?: string | null
+          grupo: string
+          id?: string
+          valor: string
+        }
+        Update: {
+          definicion?: string | null
+          grupo?: string
+          id?: string
+          valor?: string
+        }
+        Relationships: []
+      }
       subvencion_documentos: {
         Row: {
           archivo_path: string | null
