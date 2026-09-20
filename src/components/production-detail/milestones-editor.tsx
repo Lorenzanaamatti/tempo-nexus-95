@@ -81,7 +81,7 @@ export function ProductionMilestonesEditor({
   const [endDate, setEndDate] = useState("");
   const [owner, setOwner] = useState<GanttOwner>("representado");
   const [template, setTemplate] = useState<PhaseTemplateKey>(templateForKind(productionKind));
-  const [askStandard, setAskStandard] = useState<string | null>(null);
+  const [askStandard, setAskStandard] = useState<{ name: string; phaseId: string } | null>(null);
   const [standardColor, setStandardColor] = useState<PhaseColorKey>("aubergine");
 
   const catalog = catalogQ.data ?? [];
@@ -104,7 +104,7 @@ export function ProductionMilestonesEditor({
     const n = effectiveName.trim();
     if (!n) return;
     const match = picked ?? findCatalogByName(catalog, n);
-    const { error } = await db.from("production_phases").insert({
+    const { data: inserted, error } = await db.from("production_phases").insert({
       production_id: productionId,
       name: n,
       owner,
@@ -117,22 +117,24 @@ export function ProductionMilestonesEditor({
       people: people.trim() || null,
       catalog_id: match?.id ?? null,
       is_premiere: match?.is_premiere ?? false,
-    });
+    }).select("id").single();
     if (error) return toast.error(error.message);
     const wasManual = !picked && !match;
     setName(""); setDetail(""); setPlace(""); setPeople(""); setDate(""); setEndDate("");
     invalidate();
-    if (wasManual) setAskStandard(n);
+    if (wasManual && inserted?.id) setAskStandard({ name: n, phaseId: inserted.id });
   }
 
   async function confirmStandard() {
-    const n = askStandard;
+    const pending = askStandard;
     setAskStandard(null);
-    if (!n) return;
+    if (!pending) return;
     try {
-      await addToPhaseCatalog({ name: n, requires_detail: true, requires_place: true, color_key: standardColor });
+      const catalogId = await addToPhaseCatalog({ name: pending.name, requires_detail: true, requires_place: true, color_key: standardColor });
+      if (catalogId) await db.from("production_phases").update({ catalog_id: catalogId }).eq("id", pending.phaseId);
       invalidateCatalog();
-      toast.success(`“${n}” ya forma parte de la lista estándar`);
+      invalidate();
+      toast.success(`“${pending.name}” ya forma parte de la lista estándar`);
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo añadir a la lista estándar");
     }
@@ -382,7 +384,7 @@ export function ProductionMilestonesEditor({
           <AlertDialogHeader>
             <AlertDialogTitle>¿Añadirlo a la lista estándar?</AlertDialogTitle>
             <AlertDialogDescription>
-              “{askStandard}” no estaba en el desplegable de subprocesos. ¿Quieres que forme parte del estándar y aparezca
+              “{askStandard?.name}” no estaba en el desplegable de subprocesos. ¿Quieres que forme parte del estándar y aparezca
               en todas las producciones? Elige también el color con el que aparecerá en los Gantt.
             </AlertDialogDescription>
             <div className="grid grid-cols-3 gap-2 pt-3 sm:grid-cols-4">

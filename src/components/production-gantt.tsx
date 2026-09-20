@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { addDays, format, startOfWeek } from "date-fns";
+import { addDays, format, getISOWeekYear, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { PHASE_COLOR_CLASS, type PhaseColorKey } from "@/lib/phase-catalog";
 
@@ -40,7 +40,7 @@ function weeksBetween(from: number, to: number) {
     const next = addDays(cur, 7);
     out.push({
       label: `${format(cur, "d/M", { locale: es })}-${format(next, "d/M", { locale: es })}`,
-      year: format(cur, "yyyy"),
+      year: String(getISOWeekYear(cur)),
       start: cur.getTime(),
       end: next.getTime(),
     });
@@ -159,12 +159,13 @@ export function ProductionGantt({
     new Map(dated.map((p) => [p.productionId ?? "__", p.productionTitle ?? "Producción"])).entries(),
   );
   const multi = productions.length > 1;
+  const timelineWidth = Math.max(760, 224 + model.weeks.length * 72);
 
   return (
     <div className="space-y-4">
       <GanttLegend items={legendItems} />
       <div className="overflow-x-auto rounded-sm border border-border">
-        <div className="min-w-[760px]">
+        <div style={{ minWidth: `${timelineWidth}px` }}>
           <div className="flex border-b border-border bg-muted/40">
             <div className="w-56 shrink-0 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               {mode === "lineal" ? "Producción" : "Fase"}
