@@ -298,6 +298,72 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_manual_lines: {
+        Row: {
+          client_name: string | null
+          commission_amount: number | null
+          commission_pct: number | null
+          concept: string
+          created_at: string
+          created_by: string
+          id: string
+          invoice_reference: string | null
+          invoice_url: string | null
+          invoiced_date: string | null
+          last_edited_by: string | null
+          notes: string | null
+          paid_date: string | null
+          planned_invoice_date: string | null
+          representative_amount: number | null
+          representative_due_date: string | null
+          representative_name: string | null
+          status: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          commission_amount?: number | null
+          commission_pct?: number | null
+          concept: string
+          created_at?: string
+          created_by: string
+          id?: string
+          invoice_reference?: string | null
+          invoice_url?: string | null
+          invoiced_date?: string | null
+          last_edited_by?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          planned_invoice_date?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          commission_amount?: number | null
+          commission_pct?: number | null
+          concept?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          invoice_reference?: string | null
+          invoice_url?: string | null
+          invoiced_date?: string | null
+          last_edited_by?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          planned_invoice_date?: string | null
+          representative_amount?: number | null
+          representative_due_date?: string | null
+          representative_name?: string | null
+          status?: Database["public"]["Enums"]["billing_sprint_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       billing_order_events: {
         Row: {
           actor_email: string | null
