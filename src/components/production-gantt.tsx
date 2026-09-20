@@ -141,22 +141,42 @@ export function ProductionGantt({
     const width = Math.max(pct(d(p.end) + DAY) - left, 1.2);
     const color = PHASE_COLOR_CLASS[p.colorKey ?? "graphite"];
     const title = `${p.name} · ${fmt(p.start)} – ${fmt(p.end)}${p.note ? ` · ${p.note}` : ""}`;
+    if (p.milestone) {
+      const date = new Date(`${p.start}T00:00:00`);
+      const weekStart = startOfWeek(date, { weekStartsOn: 1 }).getTime();
+      const weekLeft = pct(weekStart);
+      const weekWidth = pct(weekStart + 7 * DAY) - weekLeft;
+      const dayOffset = Math.max(0, Math.min(6, Math.round((d(p.start) - weekStart) / DAY)));
+      // La planificación trabaja visualmente de lunes a viernes: lunes se
+      // marca al inicio del cuadrante y viernes al final. El fin de semana
+      // permanece anclado al extremo derecho de esa misma semana.
+      const markerLeft = 6 + (Math.min(dayOffset, 4) / 4) * 88;
+      return (
+        <div
+          className={`absolute inset-y-1 ${color}`}
+          style={{ left: `${weekLeft}%`, width: `${weekWidth}%` }}
+          title={title}
+        >
+          <span
+            className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background shadow-sm"
+            style={{ left: `${markerLeft}%` }}
+            aria-hidden
+          />
+        </div>
+      );
+    }
     if (compact) {
       return (
         <div
-          className={`absolute top-1/2 -translate-y-1/2 ${p.milestone ? `h-3 w-3 rotate-45 ${color}` : `h-4 rounded-[3px] ${color}`}`}
-          style={p.milestone ? { left: `${left}%` } : { left: `${left}%`, width: `${width}%` }}
+          className={`absolute top-1/2 h-4 -translate-y-1/2 rounded-[3px] ${color}`}
+          style={{ left: `${left}%`, width: `${width}%` }}
           title={title}
         />
       );
     }
     return (
       <div className="relative" style={{ marginLeft: `${left}%`, width: `${width}%` }}>
-        {p.milestone ? (
-          <div className={`h-4 w-4 rotate-45 ${color}`} title={title} />
-        ) : (
-          <div className={`h-5 rounded-[3px] ${color}`} title={title} />
-        )}
+        <div className={`h-5 rounded-[3px] ${color}`} title={title} />
         {p.note ? (
           <p className="mt-1 truncate text-[11px] text-muted-foreground" title={p.note}>
             {p.note}
