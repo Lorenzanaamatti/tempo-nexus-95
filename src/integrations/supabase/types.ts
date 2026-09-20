@@ -2708,6 +2708,10 @@ export type Database = {
           deck_id: string
           file_name: string | null
           id: string
+          mime_type: string | null
+          page_count: number | null
+          preview_manifest: Json
+          size_bytes: number | null
           storage_path: string
         }
         Insert: {
@@ -2715,6 +2719,10 @@ export type Database = {
           deck_id: string
           file_name?: string | null
           id?: string
+          mime_type?: string | null
+          page_count?: number | null
+          preview_manifest?: Json
+          size_bytes?: number | null
           storage_path: string
         }
         Update: {
@@ -2722,6 +2730,10 @@ export type Database = {
           deck_id?: string
           file_name?: string | null
           id?: string
+          mime_type?: string | null
+          page_count?: number | null
+          preview_manifest?: Json
+          size_bytes?: number | null
           storage_path?: string
         }
         Relationships: [
@@ -2739,48 +2751,68 @@ export type Database = {
           audience: string | null
           created_at: string
           external_url: string | null
+          format: string
           id: string
           language: Database["public"]["Enums"]["marketing_language"]
           notes: string | null
+          parent_deck_id: string | null
           public_link: string | null
           purpose: Database["public"]["Enums"]["deck_purpose"]
+          status: string
           storage_path: string | null
           tags: string[]
           title: string
           updated_at: string
           version: string | null
+          version_number: number
         }
         Insert: {
           audience?: string | null
           created_at?: string
           external_url?: string | null
+          format?: string
           id?: string
           language?: Database["public"]["Enums"]["marketing_language"]
           notes?: string | null
+          parent_deck_id?: string | null
           public_link?: string | null
           purpose?: Database["public"]["Enums"]["deck_purpose"]
+          status?: string
           storage_path?: string | null
           tags?: string[]
           title: string
           updated_at?: string
           version?: string | null
+          version_number?: number
         }
         Update: {
           audience?: string | null
           created_at?: string
           external_url?: string | null
+          format?: string
           id?: string
           language?: Database["public"]["Enums"]["marketing_language"]
           notes?: string | null
+          parent_deck_id?: string | null
           public_link?: string | null
           purpose?: Database["public"]["Enums"]["deck_purpose"]
+          status?: string
           storage_path?: string | null
           tags?: string[]
           title?: string
           updated_at?: string
           version?: string | null
+          version_number?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "marketing_decks_parent_deck_id_fkey"
+            columns: ["parent_deck_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_decks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketing_metricas: {
         Row: {
@@ -5771,6 +5803,159 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sales_document_composition_items: {
+        Row: {
+          composition_id: string
+          created_at: string
+          editability: string
+          id: string
+          position: number
+          selected_parts: number[]
+          selection_kind: string
+          source_deck_id: string | null
+          source_file_id: string | null
+          source_file_name: string
+          source_format: string
+          source_storage_path: string
+        }
+        Insert: {
+          composition_id: string
+          created_at?: string
+          editability?: string
+          id?: string
+          position?: number
+          selected_parts?: number[]
+          selection_kind?: string
+          source_deck_id?: string | null
+          source_file_id?: string | null
+          source_file_name: string
+          source_format: string
+          source_storage_path: string
+        }
+        Update: {
+          composition_id?: string
+          created_at?: string
+          editability?: string
+          id?: string
+          position?: number
+          selected_parts?: number[]
+          selection_kind?: string
+          source_deck_id?: string | null
+          source_file_id?: string | null
+          source_file_name?: string
+          source_format?: string
+          source_storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_document_composition_items_composition_id_fkey"
+            columns: ["composition_id"]
+            isOneToOne: false
+            referencedRelation: "sales_document_compositions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_document_composition_items_source_deck_id_fkey"
+            columns: ["source_deck_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_decks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_document_composition_items_source_file_id_fkey"
+            columns: ["source_file_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_deck_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_document_compositions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          id: string
+          language: Database["public"]["Enums"]["marketing_language"]
+          notes: string | null
+          purpose: Database["public"]["Enums"]["deck_purpose"]
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          purpose?: Database["public"]["Enums"]["deck_purpose"]
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["marketing_language"]
+          notes?: string | null
+          purpose?: Database["public"]["Enums"]["deck_purpose"]
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_document_outputs: {
+        Row: {
+          composition_id: string
+          created_at: string
+          file_name: string
+          format: string
+          generated_by: string | null
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+        }
+        Insert: {
+          composition_id: string
+          created_at?: string
+          file_name: string
+          format: string
+          generated_by?: string | null
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+        }
+        Update: {
+          composition_id?: string
+          created_at?: string
+          file_name?: string
+          format?: string
+          generated_by?: string | null
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_document_outputs_composition_id_fkey"
+            columns: ["composition_id"]
+            isOneToOne: false
+            referencedRelation: "sales_document_compositions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_campaigns: {
         Row: {
