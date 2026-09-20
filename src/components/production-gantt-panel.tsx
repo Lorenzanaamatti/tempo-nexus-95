@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProductionGantt, GANTT_OWNER_LABEL, type GanttPhase, type GanttOwner } from "@/components/production-gantt";
+import { ProductionGantt, GANTT_OWNER_LABEL, type GanttLegendItem, type GanttPhase, type GanttOwner } from "@/components/production-gantt";
+import type { PhaseColorKey } from "@/lib/phase-catalog";
 import { Rows3, LayoutList } from "lucide-react";
 
 const db = supabase as any;
@@ -47,14 +48,15 @@ export function ProductionGanttPanel({
     staleTime: 30_000,
     queryFn: async () => {
       const ids = await loadProductionIds({ productionIds, composerId });
-      if (!ids.length) return [] as Row[];
-      const [prods, phases, evSubject, evSource] = await Promise.all([
+      if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
+      const [prods, phases, catalog, evSubject, evSource] = await Promise.all([
         db.from("productions").select("id, title, composer_id").in("id", ids),
         db
           .from("production_phases")
-          .select("id, production_id, name, owner, start_date, end_date, status, notes, position, is_milestone")
+          .select("id, production_id, name, owner, start_date, end_date, status, notes, position, is_milestone, catalog_id")
           .in("production_id", ids)
           .order("position"),
+        db.from("phase_catalog").select("id, name, color_key").order("position"),
         db
           .from("calendar_events")
           .select("id, subject_id, source_production_id, source_phase_id, title, note, start_date, end_date, kind")
@@ -67,6 +69,11 @@ export function ProductionGanttPanel({
       ]);
       if (prods.error) throw prods.error;
       if (phases.error) throw phases.error;
+      if (catalog.error) throw catalog.error;
+
+      const catalogRows = (catalog.data ?? []) as { id: string; name: string; color_key: PhaseColorKey }[];
+      const catalogById = new Map(catalogRows.map((c) => [c.id, c]));
+      const catalogByName = new Map(catalogRows.map((c) => [c.name.trim().toLowerCase(), c]));
 
       const composerIds = Array.from(
         new Set(((prods.data ?? []) as any[]).map((p) => p.composer_id).filter(Boolean)),
@@ -88,6 +95,7 @@ export function ProductionGanttPanel({
         .filter((p) => p.start_date || p.end_date)
         .map((p) => {
           const m = meta.get(p.production_id);
+          const catalogItem = catalogById.get(p.catalog_id) ?? catalogByName.get(String(p.name).trim().toLowerCase());
           return {
             id: p.id,
             name: p.name,
@@ -101,6 +109,7 @@ export function ProductionGanttPanel({
             productionTitle: m?.title ?? "Producción",
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
+            colorKey: catalogItem?.color_key ?? "graphite",
           } as Row;
         });
 
@@ -132,15 +141,16 @@ export function ProductionGanttPanel({
             productionTitle: m?.title ?? "Producción",
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
+            colorKey: "graphite",
           } as Row;
         })
         .filter((r) => !!r.productionId && meta.has(r.productionId));
 
-      return [...phaseRows, ...eventRows];
+      return { rows: [...phaseRows, ...eventRows], legend: catalogRows.map((c) => ({ name: c.name, colorKey: c.color_key })) };
     },
   });
 
-  const rows = data ?? [];
+  const rows = data?.rows ?? [];
 
   const composerOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -213,7 +223,7 @@ export function ProductionGanttPanel({
           </>
         )}
       </div>
-      <ProductionGantt phases={filtered} mode={mode} />
+      <ProductionGantt phases={filtered} mode={mode} legendItems={(data?.legend ?? []) as GanttLegendItem[]} />
     </div>
   );
 }
