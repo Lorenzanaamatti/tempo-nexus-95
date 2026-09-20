@@ -3,7 +3,7 @@
 ## Objetivo
 Convertir **Documentos de venta** en una biblioteca de modelos reutilizables y un compositor para crear documentos especiales sin alterar los originales.
 
-La pantalla actual está vacía, pero la base ya contempla título, propósito, audiencia, idioma, versión, etiquetas y varios archivos por documento. Se aprovechará esa estructura y se conservarán los tres registros existentes.
+La pantalla actual está vacía, pero la base ya contempla título, propósito, audiencia, idioma, versión, etiquetas y varios archivos por documento. Se aprovechará esa estructura y se conservarán los tres registros existentes. La biblioteca vacía de Marketing → Ventas se integrará aquí para evitar dos lugares distintos con la misma finalidad.
 
 ## Qué podrá hacer el equipo
 
@@ -54,6 +54,7 @@ La pantalla actual está vacía, pero la base ya contempla título, propósito, 
 - Extraer miniaturas y estructura de PPTX, DOCX y PDF sin ejecutar contenido incorporado.
 - Implementar un motor de composición por manifiesto: cada bloque guarda archivo de origen, posición original, orden final y modo de incorporación.
 - Ejecutar la generación en el servidor con herramientas compatibles con el entorno; la interfaz consultará el estado y mostrará errores concretos por archivo.
+- Usar una conexión de Microsoft PowerPoint para convertir los resultados a PDF con fidelidad; se solicitará vincular una cuenta de Microsoft 365 durante la implementación. La composición y descarga del PPTX no dependerán de esa conexión.
 - Mantener la previsualización y descarga existentes como patrón visual, usando fondo blanco cálido y títulos Aubergine.
 
 ## Verificación
