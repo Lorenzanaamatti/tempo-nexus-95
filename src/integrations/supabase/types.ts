@@ -4024,6 +4024,48 @@ export type Database = {
           },
         ]
       }
+      phase_catalog: {
+        Row: {
+          allows_multiple: boolean
+          created_at: string
+          default_owner: string
+          id: string
+          is_premiere: boolean
+          name: string
+          position: number
+          requires_detail: boolean
+          requires_place: boolean
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          allows_multiple?: boolean
+          created_at?: string
+          default_owner?: string
+          id?: string
+          is_premiere?: boolean
+          name: string
+          position?: number
+          requires_detail?: boolean
+          requires_place?: boolean
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allows_multiple?: boolean
+          created_at?: string
+          default_owner?: string
+          id?: string
+          is_premiere?: boolean
+          name?: string
+          position?: number
+          requires_detail?: boolean
+          requires_place?: boolean
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       plataforma_checklist: {
         Row: {
           actualizado: boolean
@@ -4797,13 +4839,18 @@ export type Database = {
       }
       production_phases: {
         Row: {
+          catalog_id: string | null
           created_at: string
+          detail: string | null
           end_date: string | null
           id: string
           is_milestone: boolean
+          is_premiere: boolean
           name: string
           notes: string | null
           owner: string
+          people: string | null
+          place: string | null
           position: number
           production_id: string
           start_date: string | null
@@ -4812,13 +4859,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          catalog_id?: string | null
           created_at?: string
+          detail?: string | null
           end_date?: string | null
           id?: string
           is_milestone?: boolean
+          is_premiere?: boolean
           name: string
           notes?: string | null
           owner?: string
+          people?: string | null
+          place?: string | null
           position?: number
           production_id: string
           start_date?: string | null
@@ -4827,13 +4879,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          catalog_id?: string | null
           created_at?: string
+          detail?: string | null
           end_date?: string | null
           id?: string
           is_milestone?: boolean
+          is_premiere?: boolean
           name?: string
           notes?: string | null
           owner?: string
+          people?: string | null
+          place?: string | null
           position?: number
           production_id?: string
           start_date?: string | null
@@ -4842,6 +4899,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "production_phases_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "phase_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "production_phases_production_id_fkey"
             columns: ["production_id"]
