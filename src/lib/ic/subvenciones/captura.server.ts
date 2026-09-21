@@ -3,6 +3,7 @@
  * Normaliza, deduplica y deja las novedades en la bandeja sin borrar nada.
  */
 import { motivoDescarte } from "./perfil";
+import { enriquecerPlazos } from "./plazos.server";
 
 type Admin = any;
 
@@ -155,6 +156,7 @@ export async function capturarBdns(supabaseAdmin: Admin, fuente: any, dias = 3) 
       });
     }
 
+    await enriquecerPlazos(items);
     const r = await guardar(supabaseAdmin, fuente, items);
     await registrar(supabaseAdmin, fuente.id, "bdns", true, { ...r, inicio });
     return r;
@@ -217,6 +219,7 @@ export async function capturarCido(supabaseAdmin: Admin, fuente: any, dias = 7) 
         });
       }
     }
+    await enriquecerPlazos(items);
     const r = await guardar(supabaseAdmin, fuente, items);
     await registrar(supabaseAdmin, fuente.id, "cido", true, { ...r, inicio });
     return r;
