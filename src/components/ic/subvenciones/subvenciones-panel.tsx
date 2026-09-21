@@ -208,8 +208,13 @@ function Bandeja() {
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {[o.organismo, o.territorio, o.tipo_oportunidad].filter(Boolean).join(" · ")}
-                    {o.fecha_limite &&
-                      ` · Cierra ${fechaCorta(o.fecha_limite)}${dias != null ? ` (${dias} días)` : ""}`}
+                    {o.fecha_limite
+                      ? ` · Cierra ${fechaCorta(o.fecha_limite)}${dias != null ? ` (${dias} días)` : ""}`
+                      : ` · ${
+                          `${o.notas ?? ""} ${o.descripcion ?? ""}`.includes("Plazo abierto")
+                            ? "Plazo abierto"
+                            : "Plazo no publicado"
+                        }`}
                   </p>
                   {o.motivo_ia && <p className="mt-2 text-sm">{o.motivo_ia}</p>}
                   {o.excluyentes_ia && (
