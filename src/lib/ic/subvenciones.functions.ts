@@ -12,11 +12,13 @@ export const capturarAhora = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { capturarTodo } = await import("@/lib/ic/subvenciones/captura.server");
     const { puntuarPendientes } = await import("@/lib/ic/subvenciones/scoring.server");
+    const { completarPlazosPendientes } = await import("@/lib/ic/subvenciones/plazos.server");
     const capturas = await capturarTodo(supabaseAdmin, data.modo);
+    const plazos = await completarPlazosPendientes(supabaseAdmin, 40);
     const puntuacion = await puntuarPendientes(supabaseAdmin, 20);
     const nuevas = capturas.reduce((t, c) => t + c.nuevas, 0);
     const errores = capturas.filter((c) => c.error).length;
-    return { nuevas, errores, puntuadas: puntuacion.hechas };
+    return { nuevas, errores, puntuadas: puntuacion.hechas, plazos: plazos.completadas };
   });
 
 /** Puntúa con IA las convocatorias que aún no tienen nota. */
