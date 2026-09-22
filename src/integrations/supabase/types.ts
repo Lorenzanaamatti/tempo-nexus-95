@@ -298,6 +298,120 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_invoices: {
+        Row: {
+          amount: number
+          client_name: string | null
+          concept: string | null
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string | null
+          issue_date: string
+          last_edited_by: string | null
+          notes: string | null
+          order_id: string | null
+          order_item_id: string | null
+          paid_date: string | null
+          pdf_path: string | null
+          period_month: number | null
+          period_year: number | null
+          production_id: string | null
+          production_title: string | null
+          representative_name: string | null
+          sprint_id: string | null
+          status: Database["public"]["Enums"]["billing_invoice_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          client_name?: string | null
+          concept?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string
+          last_edited_by?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_item_id?: string | null
+          paid_date?: string | null
+          pdf_path?: string | null
+          period_month?: number | null
+          period_year?: number | null
+          production_id?: string | null
+          production_title?: string | null
+          representative_name?: string | null
+          sprint_id?: string | null
+          status?: Database["public"]["Enums"]["billing_invoice_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_name?: string | null
+          concept?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string
+          last_edited_by?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_item_id?: string | null
+          paid_date?: string | null
+          pdf_path?: string | null
+          period_month?: number | null
+          period_year?: number | null
+          production_id?: string | null
+          production_title?: string | null
+          representative_name?: string | null
+          sprint_id?: string | null
+          status?: Database["public"]["Enums"]["billing_invoice_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "billing_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "billing_order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "production_billing_sprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_manual_lines: {
         Row: {
           client_name: string | null
@@ -7855,6 +7969,7 @@ export type Database = {
         | "pago"
         | "cobro"
       availability_status: "available" | "partial" | "unavailable"
+      billing_invoice_status: "emitida" | "cobrada" | "anulada"
       billing_order_status: "borrador" | "enviada" | "facturada" | "anulada"
       billing_sprint_kind: "trabajo" | "comision"
       billing_sprint_status: "pendiente" | "facturado" | "cobrado"
@@ -8471,6 +8586,7 @@ export const Constants = {
         "cobro",
       ],
       availability_status: ["available", "partial", "unavailable"],
+      billing_invoice_status: ["emitida", "cobrada", "anulada"],
       billing_order_status: ["borrador", "enviada", "facturada", "anulada"],
       billing_sprint_kind: ["trabajo", "comision"],
       billing_sprint_status: ["pendiente", "facturado", "cobrado"],
