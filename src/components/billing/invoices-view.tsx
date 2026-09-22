@@ -155,6 +155,16 @@ export function InvoicesView({ productionFilter }: { productionFilter?: string |
     onError: (e: any) => toast.error(e.message),
   });
 
+  const removeInvoice = useMutation({
+    mutationFn: async (invoice: Invoice) => {
+      if (invoice.pdf_path) await supabase.storage.from("billing-invoices").remove([invoice.pdf_path]);
+      const { error } = await (supabase as any).from("billing_invoices").delete().eq("id", invoice.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Factura eliminada"); qc.invalidateQueries({ queryKey: ["billing-invoices"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   async function openPdf(invoice: Invoice) {
     if (!invoice.pdf_path) return;
     const { data, error } = await supabase.storage.from("billing-invoices").createSignedUrl(invoice.pdf_path, 300);
@@ -249,6 +259,7 @@ export function InvoicesView({ productionFilter }: { productionFilter?: string |
                     <Button size="icon" variant="ghost" title="Editar" onClick={() => openEdit(i)}><Pencil className="h-4 w-4" /></Button>
                     {i.status === "emitida" && <Button size="sm" variant="outline" onClick={() => setStatusM.mutate({ invoice: i, next: "cobrada" })}><CheckCircle2 className="mr-1 h-4 w-4" />Cobrada</Button>}
                     {i.status !== "anulada" && <Button size="icon" variant="ghost" title="Anular" onClick={() => setStatusM.mutate({ invoice: i, next: "anulada" })}><XCircle className="h-4 w-4" /></Button>}
+                    <ConfirmDeleteButton iconOnly label="Eliminar factura" title={`¿Eliminar la factura ${i.invoice_number || "sin número"}?`} description="Se borrará del historial junto con su PDF. Esta acción no se puede deshacer." onConfirm={() => removeInvoice.mutate(i)} />
                   </div></td>
                 </tr>)}</tbody>
               </table>
