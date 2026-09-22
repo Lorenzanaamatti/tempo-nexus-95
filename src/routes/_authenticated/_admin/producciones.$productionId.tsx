@@ -440,9 +440,11 @@ function ProduccionDetalle() {
                   value={form.ic_commission_pct}
                   onChange={(e) => {
                     const pct = e.target.value;
-                    const f = Number(form.fee_amount);
-                    const auto = pct !== "" && Number.isFinite(f) ? (f * Number(pct)) / 100 : "";
-                    setForm({ ...form, ic_commission_pct: pct, ic_commission: auto === "" ? "" : auto.toFixed(2) });
+                    const f = form.fee_amount === "" ? NaN : Number(form.fee_amount);
+                    // Solo recalculamos la comisión en euros si hay un fee válido:
+                    // nunca sobrescribimos con 0 una comisión pactada a mano.
+                    const auto = pct !== "" && Number.isFinite(f) && f > 0 ? (f * Number(pct)) / 100 : null;
+                    setForm({ ...form, ic_commission_pct: pct, ...(auto == null ? {} : { ic_commission: auto.toFixed(2) }) });
                   }}
                   placeholder="Ej. 15"
                 />
