@@ -10,3 +10,6 @@
 - [x] Separar Financiero en accesos por cada sección de trabajo existente.
 - [x] Eliminar Marketing de Departamentos.
 - [x] Portar la sección Subvenciones de Plusmusic a Interesante (bandeja, fuentes, expedientes) con datos independientes.
+- [x] Panel de comisión IC por proyecto (facturado, cobrado y pendiente con progreso).
+- [x] Permitir eliminar facturas del historial.
+- [x] Botón visible para crear/enviar la orden de facturación.
