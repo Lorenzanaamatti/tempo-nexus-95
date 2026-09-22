@@ -8,6 +8,7 @@ import { formatDateEs } from "@/lib/dates";
 import { Money } from "@/components/money";
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { EmptyState } from "@/components/list-states";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";

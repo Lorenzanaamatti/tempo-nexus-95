@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminIcRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/_admin/finance'
 import { Route as AuthenticatedAdminEconomicoIcRouteImport } from './routes/_authenticated/_admin/economico-ic'
 import { Route as AuthenticatedAdminDealMemosRouteImport } from './routes/_authenticated/_admin/deal-memos'
+import { Route as AuthenticatedAdminComisionesProyectoRouteImport } from './routes/_authenticated/_admin/comisiones-proyecto'
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated/_admin/calendar'
 import { Route as AuthenticatedAdminBudgetRouteImport } from './routes/_authenticated/_admin/budget'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/_admin/billing'
@@ -313,6 +314,12 @@ const AuthenticatedAdminDealMemosRoute =
   AuthenticatedAdminDealMemosRouteImport.update({
     id: '/deal-memos',
     path: '/deal-memos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminComisionesProyectoRoute =
+  AuthenticatedAdminComisionesProyectoRouteImport.update({
+    id: '/comisiones-proyecto',
+    path: '/comisiones-proyecto',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminCalendarRoute =
@@ -1005,6 +1012,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/comisiones-proyecto': typeof AuthenticatedAdminComisionesProyectoRoute
   '/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/economico-ic': typeof AuthenticatedAdminEconomicoIcRoute
   '/finance': typeof AuthenticatedAdminFinanceRoute
@@ -1146,6 +1154,7 @@ export interface FileRoutesByTo {
   '/billing': typeof AuthenticatedAdminBillingRoute
   '/budget': typeof AuthenticatedAdminBudgetRoute
   '/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/comisiones-proyecto': typeof AuthenticatedAdminComisionesProyectoRoute
   '/economico-ic': typeof AuthenticatedAdminEconomicoIcRoute
   '/finance': typeof AuthenticatedAdminFinanceRoute
   '/ic': typeof AuthenticatedAdminIcRoute
@@ -1290,6 +1299,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/_admin/budget': typeof AuthenticatedAdminBudgetRoute
   '/_authenticated/_admin/calendar': typeof AuthenticatedAdminCalendarRoute
+  '/_authenticated/_admin/comisiones-proyecto': typeof AuthenticatedAdminComisionesProyectoRoute
   '/_authenticated/_admin/deal-memos': typeof AuthenticatedAdminDealMemosRouteWithChildren
   '/_authenticated/_admin/economico-ic': typeof AuthenticatedAdminEconomicoIcRoute
   '/_authenticated/_admin/finance': typeof AuthenticatedAdminFinanceRoute
@@ -1434,6 +1444,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/budget'
     | '/calendar'
+    | '/comisiones-proyecto'
     | '/deal-memos'
     | '/economico-ic'
     | '/finance'
@@ -1575,6 +1586,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/budget'
     | '/calendar'
+    | '/comisiones-proyecto'
     | '/economico-ic'
     | '/finance'
     | '/ic'
@@ -1718,6 +1730,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/billing'
     | '/_authenticated/_admin/budget'
     | '/_authenticated/_admin/calendar'
+    | '/_authenticated/_admin/comisiones-proyecto'
     | '/_authenticated/_admin/deal-memos'
     | '/_authenticated/_admin/economico-ic'
     | '/_authenticated/_admin/finance'
@@ -2067,6 +2080,13 @@ declare module '@tanstack/react-router' {
       path: '/deal-memos'
       fullPath: '/deal-memos'
       preLoaderRoute: typeof AuthenticatedAdminDealMemosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/comisiones-proyecto': {
+      id: '/_authenticated/_admin/comisiones-proyecto'
+      path: '/comisiones-proyecto'
+      fullPath: '/comisiones-proyecto'
+      preLoaderRoute: typeof AuthenticatedAdminComisionesProyectoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/calendar': {
@@ -2921,6 +2941,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBudgetRoute: typeof AuthenticatedAdminBudgetRoute
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
+  AuthenticatedAdminComisionesProyectoRoute: typeof AuthenticatedAdminComisionesProyectoRoute
   AuthenticatedAdminDealMemosRoute: typeof AuthenticatedAdminDealMemosRouteWithChildren
   AuthenticatedAdminEconomicoIcRoute: typeof AuthenticatedAdminEconomicoIcRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
@@ -3030,6 +3051,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBudgetRoute: AuthenticatedAdminBudgetRoute,
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
+  AuthenticatedAdminComisionesProyectoRoute:
+    AuthenticatedAdminComisionesProyectoRoute,
   AuthenticatedAdminDealMemosRoute:
     AuthenticatedAdminDealMemosRouteWithChildren,
   AuthenticatedAdminEconomicoIcRoute: AuthenticatedAdminEconomicoIcRoute,
