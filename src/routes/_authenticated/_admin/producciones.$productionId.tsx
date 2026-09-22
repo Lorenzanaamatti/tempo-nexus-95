@@ -415,7 +415,12 @@ function ProduccionDetalle() {
 
       {isBigC && (
         <>
+          <Section title="Facturas" description="Facturas reales emitidas asociadas a esta producción.">
+            <ProductionInvoices productionId={productionId} />
+          </Section>
+
           <Section title="Datos económicos" description="Fee acordado y comisión IC de esta producción.">
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <Label>Fee acordado (€)</Label>
