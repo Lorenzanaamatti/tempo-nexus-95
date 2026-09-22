@@ -116,15 +116,20 @@ export async function leerPlazo(url: string | null): Promise<Plazo> {
   if (!url) return null;
   try {
     const control = new AbortController();
-    const reloj = setTimeout(() => control.abort(), 12000);
-    const res = await fetch(url, {
-      headers: { "User-Agent": "InteresanteBot/1.0", Accept: "text/html,*/*" },
-      signal: control.signal,
-    });
-    clearTimeout(reloj);
-    if (!res.ok) return null;
-    const html = await res.text();
-    return plazoDesdeTexto(aTextoPlano(html).slice(0, 300000));
+    // El reloj cubre también la lectura del cuerpo: una web lenta no puede
+    // bloquear la revisión completa.
+    const reloj = setTimeout(() => control.abort(), 10000);
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": "InteresanteBot/1.0", Accept: "text/html,*/*" },
+        signal: control.signal,
+      });
+      if (!res.ok) return null;
+      const html = await res.text();
+      return plazoDesdeTexto(aTextoPlano(html).slice(0, 300000));
+    } finally {
+      clearTimeout(reloj);
+    }
   } catch {
     return null;
   }
