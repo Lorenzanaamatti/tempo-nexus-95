@@ -45,11 +45,12 @@ function iso(y: number, m: number, d: number): string | null {
 export function extraerFecha(texto: string): string | null {
   const t = sinAcentos(texto);
 
-  const num = t.match(/(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/);
-  if (num) return iso(Number(num[3]), Number(num[2]), Number(num[1]));
-
-  const isoM = t.match(/(\d{4})-(\d{2})-(\d{2})/);
+  // ISO primero: "2026-10-05" no debe leerse como 26/10/05.
+  const isoM = t.match(/(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)/);
   if (isoM) return iso(Number(isoM[1]), Number(isoM[2]), Number(isoM[3]));
+
+  const num = t.match(/(?<!\d)(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})(?!\d)/);
+  if (num) return iso(Number(num[3]), Number(num[2]), Number(num[1]));
 
   const larga = t.match(/(\d{1,2})\s+d[e']?\s*([a-z]+)\s+d[e']?\s*(\d{4})/);
   if (larga) {
@@ -82,7 +83,7 @@ const ETIQUETAS = [
 
 const ABIERTO = ["termini obert", "plazo abierto", "convocatoria abierta", "tot l any"];
 
-export function plazoDesdeTexto(textoPlano: string): Plazo {
+export function plazoDesdeTexto(textoPlano: string, hoy = new Date().toISOString().slice(0, 10)): Plazo {
   const t = sinAcentos(textoPlano).replace(/\s+/g, " ");
   for (const etiqueta of ETIQUETAS) {
     let desde = 0;
@@ -90,7 +91,9 @@ export function plazoDesdeTexto(textoPlano: string): Plazo {
       const i = t.indexOf(etiqueta, desde);
       if (i === -1) break;
       const fecha = extraerFecha(t.slice(i + etiqueta.length, i + etiqueta.length + 120));
-      if (fecha) return { fecha, abierto: false };
+      // Una fecha de cierre ya pasada casi siempre es una lectura errónea
+      // (fecha de publicación, otro aviso de la página): se descarta.
+      if (fecha && fecha >= hoy) return { fecha, abierto: false };
       desde = i + etiqueta.length;
     }
   }
@@ -113,15 +116,20 @@ export async function leerPlazo(url: string | null): Promise<Plazo> {
   if (!url) return null;
   try {
     const control = new AbortController();
-    const reloj = setTimeout(() => control.abort(), 12000);
-    const res = await fetch(url, {
-      headers: { "User-Agent": "InteresanteBot/1.0", Accept: "text/html,*/*" },
-      signal: control.signal,
-    });
-    clearTimeout(reloj);
-    if (!res.ok) return null;
-    const html = await res.text();
-    return plazoDesdeTexto(aTextoPlano(html).slice(0, 300000));
+    // El reloj cubre también la lectura del cuerpo: una web lenta no puede
+    // bloquear la revisión completa.
+    const reloj = setTimeout(() => control.abort(), 10000);
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": "InteresanteBot/1.0", Accept: "text/html,*/*" },
+        signal: control.signal,
+      });
+      if (!res.ok) return null;
+      const html = await res.text();
+      return plazoDesdeTexto(aTextoPlano(html).slice(0, 300000));
+    } finally {
+      clearTimeout(reloj);
+    }
   } catch {
     return null;
   }
