@@ -547,7 +547,7 @@ export function ActionsLog({
       for (const p of productions) {
         items.push({
           id: `prod-${p.id}`,
-          fecha: p.estimated_delivery_date ?? `${p.year ?? new Date().getFullYear()}-01-01`,
+          fecha: p.delivery_date ?? `${p.year ?? new Date().getFullYear()}-01-01`,
           tipo: "Producción",
           descripcion: p.title ?? "Producción",
           resultado: p.status ?? null,
