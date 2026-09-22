@@ -83,7 +83,7 @@ const ETIQUETAS = [
 
 const ABIERTO = ["termini obert", "plazo abierto", "convocatoria abierta", "tot l any"];
 
-export function plazoDesdeTexto(textoPlano: string): Plazo {
+export function plazoDesdeTexto(textoPlano: string, hoy = new Date().toISOString().slice(0, 10)): Plazo {
   const t = sinAcentos(textoPlano).replace(/\s+/g, " ");
   for (const etiqueta of ETIQUETAS) {
     let desde = 0;
@@ -91,7 +91,9 @@ export function plazoDesdeTexto(textoPlano: string): Plazo {
       const i = t.indexOf(etiqueta, desde);
       if (i === -1) break;
       const fecha = extraerFecha(t.slice(i + etiqueta.length, i + etiqueta.length + 120));
-      if (fecha) return { fecha, abierto: false };
+      // Una fecha de cierre ya pasada casi siempre es una lectura errónea
+      // (fecha de publicación, otro aviso de la página): se descarta.
+      if (fecha && fecha >= hoy) return { fecha, abierto: false };
       desde = i + etiqueta.length;
     }
   }
