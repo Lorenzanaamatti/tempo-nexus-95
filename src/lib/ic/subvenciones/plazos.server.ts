@@ -45,11 +45,12 @@ function iso(y: number, m: number, d: number): string | null {
 export function extraerFecha(texto: string): string | null {
   const t = sinAcentos(texto);
 
-  const num = t.match(/(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/);
-  if (num) return iso(Number(num[3]), Number(num[2]), Number(num[1]));
-
-  const isoM = t.match(/(\d{4})-(\d{2})-(\d{2})/);
+  // ISO primero: "2026-10-05" no debe leerse como 26/10/05.
+  const isoM = t.match(/(?<!\d)(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)/);
   if (isoM) return iso(Number(isoM[1]), Number(isoM[2]), Number(isoM[3]));
+
+  const num = t.match(/(?<!\d)(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})(?!\d)/);
+  if (num) return iso(Number(num[3]), Number(num[2]), Number(num[1]));
 
   const larga = t.match(/(\d{1,2})\s+d[e']?\s*([a-z]+)\s+d[e']?\s*(\d{4})/);
   if (larga) {
