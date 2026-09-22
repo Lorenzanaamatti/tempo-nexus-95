@@ -112,7 +112,7 @@ export function useCareerActuals(composerId: string | null | undefined, planId: 
       const from = `${year}-01-01`;
       const to = `${year}-12-31`;
       const [prods, clips, pitches] = await Promise.all([
-        supabase.from("productions").select("id, title, status, year, fee_amount, estimated_delivery_date, kind").eq("composer_id", composerId!),
+        supabase.from("productions").select("id, title, status, year, fee_amount, delivery_date, kind").eq("composer_id", composerId!),
         supabase.from("press_clippings").select("id, published_date").eq("composer_id", composerId!).gte("published_date", from).lte("published_date", to),
         planId
           ? supabase.from("career_plan_actions").select("id, resultado, fecha").eq("career_plan_id", planId).eq("tipo", "Pitch").gte("fecha", from).lte("fecha", to)
