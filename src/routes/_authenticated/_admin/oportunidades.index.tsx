@@ -22,6 +22,11 @@ const DOORS: Door[] = [
     to: "/oportunidades/producciones",
   },
   {
+    title: "CRM de producciones españolas de 2020 en adelante",
+    description: "Cine y series españolas para detectar productoras, responsables y oportunidades comerciales.",
+    to: "/producciones/espanolas",
+  },
+  {
     title: "Productoras a contactar",
     description: "Productoras, plataformas y partners estratégicos a los que presentar IC.",
     to: "/oportunidades/partners",

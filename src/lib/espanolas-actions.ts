@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProduccionEspanola } from "@/lib/producciones-espanolas";
+import { addCompanyToCrm, normalizeName } from "@/lib/spanish-films-crm";
 
 const db = supabase as any;
 
@@ -22,7 +23,7 @@ export async function addEspanolaToProducciones(row: ProduccionEspanola) {
         year: row.year,
         kind: row.media_type === "tv" ? "serie" : "cine",
         is_historical: true,
-        notes: `Importada desde Producciones españolas (TMDb ${row.tmdb_id ?? "—"})`,
+        notes: `Importada desde CRM de producciones españolas de 2020 en adelante (TMDb ${row.tmdb_id ?? "—"})`,
       })
       .select("id")
       .single();
@@ -94,5 +95,50 @@ export async function addPartner(nombre: string, tipo: "Productora" | "Plataform
     return null;
   }
   toast.success(`"${n}" añadido a Partners (${tipo})`);
+  return data.id as string;
+}
+
+/** Añade (o reutiliza) una productora en el listado comercial «Productoras a contactar». */
+export async function addProductoraAContactar(nombre: string) {
+  const n = nombre.trim();
+  if (!n) return null;
+  const companyId = await addCompanyToCrm(n);
+  if (!companyId) return null;
+
+  const { data: candidates, error: searchError } = await db
+    .from("opportunities")
+    .select("id, partner_company_id, partner_name, partner_company:production_companies(name)")
+    .in("kind", ["presentar_ic", "fichaje_productora"]);
+  if (searchError) {
+    toast.error(searchError.message);
+    return null;
+  }
+  const normalized = normalizeName(n);
+  const existing = (candidates ?? []).find((candidate: any) =>
+    candidate.partner_company_id === companyId ||
+    normalizeName(candidate.partner_name) === normalized ||
+    normalizeName(candidate.partner_company?.name) === normalized,
+  );
+  if (existing) {
+    toast.info(`«${n}» ya está en Productoras a contactar`);
+    return existing.id as string;
+  }
+
+  const { data, error } = await db
+    .from("opportunities")
+    .insert({
+      title: `Presentar IC a ${n}`,
+      kind: "presentar_ic",
+      partner_company_id: companyId,
+      statuses: ["identificado"],
+      detected_date: new Date().toISOString().slice(0, 10),
+    })
+    .select("id")
+    .single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`«${n}» añadida a Productoras a contactar`);
   return data.id as string;
 }

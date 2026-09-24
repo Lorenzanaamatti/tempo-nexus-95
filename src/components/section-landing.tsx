@@ -30,7 +30,7 @@ const ITEM_DESCRIPTIONS: Record<string, string> = {
   Seguimiento: "Revisa el estado operativo y los próximos pasos de cada producción.",
   Gantt: "Consulta procesos, plazos, dependencias e hitos de producción.",
   Finalizadas: "Accede al archivo de producciones terminadas.",
-  "Producciones españolas": "Consulta proyectos españoles detectados y sus datos clave.",
+  "CRM de producciones españolas de 2020 en adelante": "Consulta cine y series españolas para detectar nuevas oportunidades.",
   Presupuestos: "Crea y consulta presupuestos vinculados a cada proyecto.",
   "Deal Memos": "Prepara y organiza acuerdos económicos de los proyectos.",
   Contratos: "Consulta contratos, firmas y documentación asociada.",

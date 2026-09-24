@@ -19,6 +19,7 @@ import { OpportunityImportDialog } from "@/components/opportunity-import-dialog"
 import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { OpportunityToPitchButton } from "@/components/opportunity-to-pitch-button";
+import { ProductoraActionsMenu } from "@/components/productora-actions-menu";
 
 import {
   OPP_PHASE_LABEL,
@@ -364,7 +365,11 @@ export function OpportunitiesList({
                     )}
 
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{o.partner_company?.name || o.partner_name || "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">
+                    {o.partner_company?.name || o.partner_name ? (
+                      <ProductoraActionsMenu name={o.partner_company?.name || o.partner_name} />
+                    ) : "—"}
+                  </td>
                   {productionMode ? (
                     <>
                       <td className="px-3 py-2 text-muted-foreground">{o.director?.full_name || o.director_text || "—"}</td>
