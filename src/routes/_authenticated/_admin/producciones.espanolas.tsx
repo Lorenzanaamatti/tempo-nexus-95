@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ListSkeleton, EmptyState } from "@/components/list-states";
+import { ProductoraActionsMenu } from "@/components/productora-actions-menu";
 import {
   EN_SEGUIMIENTO, PROSPECCION_ESTADOS, PROSPECCION_LABEL, posterUrl,
   ROLES_FICHAJE,
@@ -36,6 +37,16 @@ const ALL = "__all__";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/espanolas")({
   component: ProduccionesEspanolas,
+  head: () => ({
+    meta: [
+      { title: "CRM de producciones españolas de 2020 en adelante | Interesante Compañía" },
+      { name: "description", content: "Cine y series españolas desde 2020 para inteligencia de mercado, prospección y seguimiento comercial." },
+      { property: "og:title", content: "CRM de producciones españolas de 2020 en adelante" },
+      { property: "og:description", content: "Catálogo comercial de cine y series españolas desde 2020." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 function useEspanolas() {
@@ -205,8 +216,8 @@ function ProduccionesEspanolas() {
     <div className="mx-auto max-w-[1400px] px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">PRODUCCIONES</p>
-          <h1 className="mt-2 font-display text-5xl font-extrabold title-caps">Producciones españolas</h1>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">OPORTUNIDADES DE VENTAS</p>
+          <h1 className="mt-2 max-w-5xl font-display text-5xl font-extrabold title-caps">CRM de producciones españolas de 2020 en adelante</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
             CRM de mercado: cine y series españolas, participe o no Interesante Compañía. Inteligencia de mercado y prospección.
           </p>
@@ -477,17 +488,7 @@ function YearTable({ rows, onEdit }: { rows: ProduccionEspanola[]; onEdit: (r: P
                         {(r.production_companies ?? []).length ? (
                           <div className="flex flex-col gap-0.5">
                             {(r.production_companies ?? []).map((c) => (
-                              <Accionable
-                                key={c}
-                                text={c}
-                                titulo={c}
-                                acciones={[
-                                  { label: "Crear ficha de productora y abrir", run: () => crearYAbrir("productora", c) },
-                                  { label: "Añadir a Partners (Productora)", run: () => addPartner(c, "Productora") },
-                                  { label: "Añadir a Productoras CRM", run: () => addCompanyToCrm(c) },
-                                  { label: "Añadir a Cuentas objetivo", run: () => addToTargetAccounts({ name: c, account_type: "productora" }) },
-                                ]}
-                              />
+                              <ProductoraActionsMenu key={c} name={c} />
                             ))}
                           </div>
                         ) : <span className="text-muted-foreground">—</span>}
@@ -598,10 +599,12 @@ function FilmCard({ row, onEdit }: { row: ProduccionEspanola; onEdit: () => void
         <p className="text-xs text-muted-foreground">
           {row.year ?? "—"} · {(row.directors ?? []).join(", ") || "Sin director"}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {(row.production_companies ?? []).slice(0, 2).join(", ") || "—"}
-          {row.platform ? ` · ${row.platform}` : ""}
-        </p>
+        <div className="flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+          {(row.production_companies ?? []).length ? (row.production_companies ?? []).slice(0, 2).map((company) => (
+            <ProductoraActionsMenu key={company} name={company} className="text-xs" />
+          )) : <span>—</span>}
+          {row.platform ? <span>· {row.platform}</span> : null}
+        </div>
         <p className="text-xs text-muted-foreground">{(row.genres ?? []).slice(0, 3).join(" · ")}</p>
         <div className="flex flex-wrap gap-1">
           {row.ic_participo && (

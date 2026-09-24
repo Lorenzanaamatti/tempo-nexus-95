@@ -13,3 +13,5 @@
 - [x] Panel de comisión IC por proyecto (facturado, cobrado y pendiente con progreso).
 - [x] Permitir eliminar facturas del historial.
 - [x] Botón visible para crear/enviar la orden de facturación.
+- [x] Unificar las acciones de productoras en los CRM de producciones, sin duplicados.
+- [x] Reubicar y renombrar el CRM de producciones españolas desde 2020 en Oportunidades de ventas.

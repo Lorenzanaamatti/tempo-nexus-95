@@ -92,6 +92,7 @@ export const NAV_GROUPS: NavGroup[] = [
     landingTo: "/oportunidades",
     items: [
       { title: "CRM de Producciones en desarrollo", to: "/oportunidades/producciones", icon: Film, match: ["/opportunities"] },
+      { title: "CRM de producciones españolas de 2020 en adelante", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
       { title: "Pitches en curso", to: "/oportunidades/pitches", icon: Sparkles },
     ],
   },
@@ -104,7 +105,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Seguimiento", to: "/producciones/seguimiento", icon: KanbanSquare },
       { title: "Gantt", to: "/producciones/gantt", icon: CalendarRange },
       { title: "Finalizadas", to: "/producciones/finalizadas", icon: FolderOpen },
-      { title: "Producciones españolas", to: "/producciones/espanolas", icon: Clapperboard, match: ["/peliculas-es"] },
     ],
   },
   {
