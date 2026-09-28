@@ -2,14 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EmptyState } from "@/components/list-states";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listUsers, setUserAccess } from "@/lib/users-admin.functions";
+import { deleteUser, listUsers, setUserAccess } from "@/lib/users-admin.functions";
 import { ROLE_LABEL, type AppRole } from "@/lib/use-role";
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, X, Clock, UserCheck } from "lucide-react";
+import { Check, X, Clock, UserCheck, Trash2 } from "lucide-react";
 import { useCurrentRole } from "@/lib/use-role";
 
 export const Route = createFileRoute("/_authenticated/_admin/users")({
@@ -26,6 +26,7 @@ function UsersPage() {
   const { isBigC, loading: roleLoading } = useCurrentRole();
   const fetchUsers = useServerFn(listUsers);
   const updateAccess = useServerFn(setUserAccess);
+  const removeUser = useServerFn(deleteUser);
   const qc = useQueryClient();
 
   const usersQ = useQuery({
@@ -54,6 +55,15 @@ function UsersPage() {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "Error"),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (vars: { userId: string; email: string }) => removeUser({ data: vars }),
+    onSuccess: () => {
+      toast.success("Cuenta eliminada");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "No se ha podido eliminar la cuenta"),
   });
 
   const users = usersQ.data ?? [];
@@ -113,6 +123,9 @@ function UsersPage() {
                 onRevoke={() =>
                   mut.mutate({ userId: u.id, role: null, status: "rejected" })
                 }
+                  onDelete={() => {
+                    if (u.email && window.confirm(`¿Eliminar definitivamente la cuenta ${u.email}?`)) deleteMut.mutate({ userId: u.id, email: u.email });
+                  }}
               />
             ))}
           </Section>
@@ -129,6 +142,9 @@ function UsersPage() {
                   onRevoke={() =>
                     mut.mutate({ userId: u.id, role: null, status: "rejected" })
                   }
+                  onDelete={() => {
+                    if (u.email && window.confirm(`¿Eliminar definitivamente la cuenta ${u.email}?`)) deleteMut.mutate({ userId: u.id, email: u.email });
+                  }}
                 />
               ))}
             </Section>
@@ -200,8 +216,8 @@ function UserCard({
 }
 
 function ActiveUserRow({
-  user, onChangeRole, onRevoke,
-}: { user: any; onChangeRole: (role: AppRole) => void; onRevoke: () => void }) {
+  user, onChangeRole, onRevoke, onDelete,
+}: { user: any; onChangeRole: (role: AppRole) => void; onRevoke: () => void; onDelete: () => void }) {
   const currentRole: AppRole | "" =
     user.roles.includes("admin") ? "admin"
     : user.roles.includes("team") ? "team"
@@ -229,6 +245,9 @@ function ActiveUserRow({
         </Select>
         <Button size="sm" variant="ghost" onClick={onRevoke}>
           Revocar
+        </Button>
+        <Button size="icon" variant="ghost" onClick={onDelete} title="Eliminar cuenta" aria-label="Eliminar cuenta">
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </div>

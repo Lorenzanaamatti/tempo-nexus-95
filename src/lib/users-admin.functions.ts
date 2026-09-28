@@ -114,3 +114,24 @@ export const setUserAccess = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+type DeleteUserInput = { userId: string; email: string };
+
+export const deleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown): DeleteUserInput => {
+    const value = input as DeleteUserInput;
+    if (!value || typeof value.userId !== "string" || typeof value.email !== "string") throw new Error("Usuario y correo requeridos");
+    return { userId: value.userId, email: value.email.trim().toLowerCase() };
+  })
+  .handler(async ({ data, context }) => {
+    await ensureBigC(context);
+    if (data.userId === context.userId) throw new Error("No puedes eliminar tu propia cuenta");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: account, error: accountError } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+    if (accountError) throw new Error(accountError.message);
+    if (!account.user || account.user.email?.toLowerCase() !== data.email) throw new Error("La cuenta ha cambiado. Actualiza la lista antes de eliminarla.");
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
