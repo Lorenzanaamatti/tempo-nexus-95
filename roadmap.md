@@ -15,3 +15,6 @@
 - [x] Botón visible para crear/enviar la orden de facturación.
 - [x] Unificar las acciones de productoras en los CRM de producciones, sin duplicados.
 - [x] Reubicar y renombrar el CRM de producciones españolas desde 2020 en Oportunidades de ventas.
+- [ ] Eliminar la cuenta Gmail duplicada de Clàudia.
+- [ ] Garantizar que las tareas recién creadas aparezcan de inmediato aunque hubiera filtros activos.
+- [ ] Verificar «haetra» y las tareas recientes de Clàudia.
