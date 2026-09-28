@@ -1,7 +1,7 @@
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ const SELECT =
 
 function TareasPage() {
   const { user } = useAuth();
-  const { open: openNewTask } = useNewTaskDialog();
+  const { open: openNewTask, lastCreatedTaskId } = useNewTaskDialog();
   const qc = useQueryClient();
   const personId = useMyPersonId().data ?? null;
   const dueCount = useMyDueTaskCount().data ?? 0;
@@ -61,6 +61,15 @@ function TareasPage() {
   const { filter } = Route.useSearch();
   const nav = Route.useNavigate();
   const onlyToday = filter === "hoy";
+
+  useEffect(() => {
+    if (!lastCreatedTaskId) return;
+    setMine(true);
+    setAreaFilter("all");
+    setStatusFilter("all");
+    setQ("");
+    if (onlyToday) nav({ search: {} });
+  }, [lastCreatedTaskId, nav, onlyToday]);
 
   const peopleQ = useQuery({
     queryKey: ["people-ic-team"],

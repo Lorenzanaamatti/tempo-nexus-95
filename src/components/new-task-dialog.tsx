@@ -13,7 +13,7 @@ import { TASK_STATUSES } from "@/lib/task-status";
 
 type LinkedProduction = { id: string; title: string };
 type OpenOptions = { area?: TaskArea | null; production?: LinkedProduction | null };
-type Ctx = { open: (opts?: OpenOptions) => void };
+type Ctx = { open: (opts?: OpenOptions) => void; lastCreatedTaskId: string | null };
 const TaskDialogCtx = createContext<Ctx | null>(null);
 
 export function useNewTaskDialog() {
@@ -26,6 +26,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
   const [isOpen, setOpen] = useState(false);
   const [initialArea, setInitialArea] = useState<TaskArea | null>(null);
   const [initialProduction, setInitialProduction] = useState<LinkedProduction | null>(null);
+  const [lastCreatedTaskId, setLastCreatedTaskId] = useState<string | null>(null);
 
   const open = useCallback((opts?: OpenOptions) => {
     setInitialArea(opts?.area ?? null);
@@ -34,21 +35,22 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <TaskDialogCtx.Provider value={{ open }}>
+    <TaskDialogCtx.Provider value={{ open, lastCreatedTaskId }}>
       {children}
       <NewTaskDialog
         isOpen={isOpen}
         onClose={() => setOpen(false)}
         initialArea={initialArea}
         initialProduction={initialProduction}
+        onCreated={setLastCreatedTaskId}
       />
     </TaskDialogCtx.Provider>
   );
 }
 
 function NewTaskDialog({
-  isOpen, onClose, initialArea, initialProduction,
-}: { isOpen: boolean; onClose: () => void; initialArea: TaskArea | null; initialProduction: LinkedProduction | null }) {
+  isOpen, onClose, initialArea, initialProduction, onCreated,
+}: { isOpen: boolean; onClose: () => void; initialArea: TaskArea | null; initialProduction: LinkedProduction | null; onCreated: (id: string) => void }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -116,27 +118,37 @@ function NewTaskDialog({
     setSubmitted(true);
     if (!title.trim() || !area) return;
     setSaving(true);
-    const { error } = await (supabase as any).from("actions").insert({
-      title: title.trim(),
-      notes: notes.trim() || null,
-      kind: "tarea",
-      area,
-      subarea: subarea.trim() || null,
-      due_date: dueDate || null,
-      assignee_person_id: assignee || null,
-      production_id: productionId || null,
-      status,
-    });
-    setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Tarea creada");
-    qc.invalidateQueries({ queryKey: ["tasks"] });
-    qc.invalidateQueries({ queryKey: ["task-inbox"] });
-    setTitle(""); setNotes(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente"); setProductionId("");
-    qc.invalidateQueries({ queryKey: ["notifications"] });
-    qc.invalidateQueries({ queryKey: ["production-tasks"] });
-    setSubmitted(false);
-    onClose();
+    try {
+      const { data, error } = await (supabase as any).from("actions").insert({
+        title: title.trim(),
+        notes: notes.trim() || null,
+        kind: "tarea",
+        area,
+        subarea: subarea.trim() || null,
+        due_date: dueDate || null,
+        assignee_person_id: assignee || null,
+        production_id: productionId || null,
+        status,
+      }).select("id").single();
+      if (error) throw error;
+      if (!data?.id) throw new Error("No se ha podido confirmar el guardado de la tarea.");
+      onCreated(data.id as string);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["tasks"] }),
+        qc.invalidateQueries({ queryKey: ["task-inbox"] }),
+        qc.invalidateQueries({ queryKey: ["my-due-tasks"] }),
+        qc.invalidateQueries({ queryKey: ["notifications"] }),
+        qc.invalidateQueries({ queryKey: ["production-tasks"] }),
+      ]);
+      toast.success("Tarea guardada y añadida al listado");
+      setTitle(""); setNotes(""); setSubarea(""); setAssignee(""); setDueDate(""); setStatus("pendiente"); setProductionId("");
+      setSubmitted(false);
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se ha podido guardar la tarea");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
