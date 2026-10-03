@@ -46,7 +46,7 @@ const SELECT =
 
 function TareasPage() {
   const { user } = useAuth();
-  const { open: openNewTask, lastCreatedTaskId } = useNewTaskDialog();
+  const { open: openNewTask, lastCreatedTaskId, clearLastCreated } = useNewTaskDialog();
   const qc = useQueryClient();
   const personId = useMyPersonId().data ?? null;
   const dueCount = useMyDueTaskCount().data ?? 0;
@@ -62,6 +62,8 @@ function TareasPage() {
   const nav = Route.useNavigate();
   const onlyToday = filter === "hoy";
 
+  // Tras crear una tarea, reseteamos los filtros UNA vez para que se vea,
+  // y limpiamos la marca para que no vuelva a interferir con los filtros.
   useEffect(() => {
     if (!lastCreatedTaskId) return;
     setMine(true);
@@ -69,7 +71,9 @@ function TareasPage() {
     setStatusFilter("all");
     setQ("");
     if (onlyToday) nav({ search: {} });
-  }, [lastCreatedTaskId, nav, onlyToday]);
+    clearLastCreated();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTaskId]);
 
   const peopleQ = useQuery({
     queryKey: ["people-ic-team"],

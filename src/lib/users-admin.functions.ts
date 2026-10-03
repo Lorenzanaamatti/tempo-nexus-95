@@ -131,6 +131,41 @@ export const deleteUser = createServerFn({ method: "POST" })
     const { data: account, error: accountError } = await supabaseAdmin.auth.admin.getUserById(data.userId);
     if (accountError) throw new Error(accountError.message);
     if (!account.user || account.user.email?.toLowerCase() !== data.email) throw new Error("La cuenta ha cambiado. Actualiza la lista antes de eliminarla.");
+
+    // Varias tablas referencian auth.users sin ON DELETE CASCADE/SET NULL,
+    // así que hay que desvincular esos registros antes de borrar la cuenta:
+    // - columnas NOT NULL (p. ej. billing_orders.created_by) se reasignan al admin que ejecuta el borrado;
+    // - columnas anulables se ponen a NULL.
+    const reassignToAdmin: Array<{ table: string; column: string }> = [
+      { table: "billing_orders", column: "created_by" },
+      { table: "billing_manual_lines", column: "created_by" },
+    ];
+    const setToNull: Array<{ table: string; column: string }> = [
+      { table: "billing_manual_lines", column: "last_edited_by" },
+      { table: "billing_invoices", column: "created_by" },
+      { table: "billing_invoices", column: "last_edited_by" },
+      { table: "candidacy_files", column: "uploaded_by" },
+      { table: "oportunidades_pitches", column: "archivado_by" },
+      { table: "career_plans", column: "created_by" },
+      { table: "production_billing_sprints", column: "last_edited_by" },
+      { table: "sales_document_compositions", column: "created_by" },
+      { table: "subv_expedientes", column: "created_by" },
+    ];
+    for (const { table, column } of reassignToAdmin) {
+      const { error: updErr } = await supabaseAdmin
+        .from(table)
+        .update({ [column]: context.userId })
+        .eq(column, data.userId);
+      if (updErr) throw new Error(`No se pudo reasignar ${table}.${column}: ${updErr.message}`);
+    }
+    for (const { table, column } of setToNull) {
+      const { error: updErr } = await supabaseAdmin
+        .from(table)
+        .update({ [column]: null })
+        .eq(column, data.userId);
+      if (updErr) throw new Error(`No se pudo desvincular ${table}.${column}: ${updErr.message}`);
+    }
+
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
     if (error) throw new Error(error.message);
     return { ok: true };

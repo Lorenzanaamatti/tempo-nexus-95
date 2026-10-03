@@ -13,7 +13,7 @@ import { TASK_STATUSES } from "@/lib/task-status";
 
 type LinkedProduction = { id: string; title: string };
 type OpenOptions = { area?: TaskArea | null; production?: LinkedProduction | null };
-type Ctx = { open: (opts?: OpenOptions) => void; lastCreatedTaskId: string | null };
+type Ctx = { open: (opts?: OpenOptions) => void; lastCreatedTaskId: string | null; clearLastCreated: () => void };
 const TaskDialogCtx = createContext<Ctx | null>(null);
 
 export function useNewTaskDialog() {
@@ -34,8 +34,10 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
     setOpen(true);
   }, []);
 
+  const clearLastCreated = useCallback(() => setLastCreatedTaskId(null), []);
+
   return (
-    <TaskDialogCtx.Provider value={{ open, lastCreatedTaskId }}>
+    <TaskDialogCtx.Provider value={{ open, lastCreatedTaskId, clearLastCreated }}>
       {children}
       <NewTaskDialog
         isOpen={isOpen}
