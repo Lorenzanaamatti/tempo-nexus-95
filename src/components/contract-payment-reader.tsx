@@ -27,7 +27,7 @@ export function ContractPaymentReader({
   defaultProductionId,
   storagePath,
 }: {
-  contractId: string;
+  contractId?: string | null;
   defaultProductionId?: string | null;
   storagePath?: string | null;
 }) {
@@ -87,7 +87,7 @@ export function ContractPaymentReader({
     let n = (existing?.[0]?.sprint_number ?? 0) as number;
     const payload = rows.map((r) => ({
       production_id: productionId,
-      contract_id: contractId,
+      contract_id: contractId ?? null,
       kind: "trabajo" as const,
       sprint_number: ++n,
       label: r.label,
