@@ -160,6 +160,7 @@ function PortalHome() {
       <section>
         <h3 className="mb-5 smallcaps text-xs text-[color:var(--portal-fg)]">Accesos rápidos</h3>
         <div className="grid gap-px border border-[color:var(--portal-border)] bg-[color:var(--portal-border)] sm:grid-cols-2 lg:grid-cols-3">
+          <Quick to="/portal/actividad" title="Lo que hacemos por ti" desc="Cada pitch, envío, reunión y trabajo conseguido." icon={Inbox} />
           <Quick to="/portal/proyectos" title="Proyectos activos" desc="Lo que tienes en marcha ahora mismo." icon={FolderKanban} />
           <Quick to="/portal/propuestas" title="Propuestas en curso" desc="Oportunidades en negociación." icon={Inbox} />
           <Quick to="/portal/agenda" title="Agenda y reuniones" desc="Tus próximas citas y compromisos." icon={CalendarDays} />
