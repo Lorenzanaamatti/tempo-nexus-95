@@ -52,6 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
     landingTo: "/clientes",
     items: [
       { title: "Roster completo", to: "/roster", icon: LibraryBig, match: ["/composers"] },
+      { title: "Ocupación y avisos de ingresos", to: "/roster/ocupacion", icon: Briefcase },
       { title: "Compositor", to: "/composers", search: { role: "composer" }, icon: Music, markerClass: "bg-chart-1" },
       { title: "Artista", to: "/composers", search: { role: "artist" }, icon: Mic2, markerClass: "bg-chart-2" },
       { title: "Supervisor", to: "/composers", search: { role: "supervisor" }, icon: Headphones, markerClass: "bg-chart-3" },
