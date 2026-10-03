@@ -15,6 +15,13 @@
       "when": 1791025773244,
       "tag": "0001_fix_occupancy_closed_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791026224513,
+      "tag": "0002_occupancy_exclude_company",
+      "breakpoints": true
     }
   ]
 }
