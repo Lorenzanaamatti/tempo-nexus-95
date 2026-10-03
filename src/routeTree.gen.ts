@@ -75,6 +75,7 @@ import { Route as ApiPublicSubvencionesCapturarRouteImport } from './routes/api/
 import { Route as ApiPublicCronSyncProduccionesEspanolasRouteImport } from './routes/api/public/cron/sync-producciones-espanolas'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/_admin/templates.$templateId'
 import { Route as AuthenticatedAdminTareasCalendarioRouteImport } from './routes/_authenticated/_admin/tareas_.calendario'
+import { Route as AuthenticatedAdminRosterOcupacionRouteImport } from './routes/_authenticated/_admin/roster_.ocupacion'
 import { Route as AuthenticatedAdminRecursosTutorialesRouteImport } from './routes/_authenticated/_admin/recursos.tutoriales'
 import { Route as AuthenticatedAdminRecursosBiRouteImport } from './routes/_authenticated/_admin/recursos.bi'
 import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from './routes/_authenticated/_admin/productions.$productionId'
@@ -530,6 +531,12 @@ const AuthenticatedAdminTareasCalendarioRoute =
   AuthenticatedAdminTareasCalendarioRouteImport.update({
     id: '/tareas_/calendario',
     path: '/tareas/calendario',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRosterOcupacionRoute =
+  AuthenticatedAdminRosterOcupacionRouteImport.update({
+    id: '/roster_/ocupacion',
+    path: '/roster/ocupacion',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRecursosTutorialesRoute =
@@ -1102,6 +1109,7 @@ export interface FileRoutesByFullPath {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
   '/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
+  '/roster/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
@@ -1244,6 +1252,7 @@ export interface FileRoutesByTo {
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
   '/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
+  '/roster/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
@@ -1391,6 +1400,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
   '/_authenticated/_admin/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
+  '/_authenticated/_admin/roster_/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/_authenticated/_admin/tareas_/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
   '/_authenticated/_admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/api/public/cron/sync-producciones-espanolas': typeof ApiPublicCronSyncProduccionesEspanolasRoute
@@ -1537,6 +1547,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/recursos/bi'
     | '/recursos/tutoriales'
+    | '/roster/ocupacion'
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
@@ -1679,6 +1690,7 @@ export interface FileRouteTypes {
     | '/productions/$productionId'
     | '/recursos/bi'
     | '/recursos/tutoriales'
+    | '/roster/ocupacion'
     | '/tareas/calendario'
     | '/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
@@ -1825,6 +1837,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/recursos/bi'
     | '/_authenticated/_admin/recursos/tutoriales'
+    | '/_authenticated/_admin/roster_/ocupacion'
     | '/_authenticated/_admin/tareas_/calendario'
     | '/_authenticated/_admin/templates/$templateId'
     | '/api/public/cron/sync-producciones-espanolas'
@@ -2345,6 +2358,13 @@ declare module '@tanstack/react-router' {
       path: '/tareas/calendario'
       fullPath: '/tareas/calendario'
       preLoaderRoute: typeof AuthenticatedAdminTareasCalendarioRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/roster_/ocupacion': {
+      id: '/_authenticated/_admin/roster_/ocupacion'
+      path: '/roster/ocupacion'
+      fullPath: '/roster/ocupacion'
+      preLoaderRoute: typeof AuthenticatedAdminRosterOcupacionRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/recursos/tutoriales': {
@@ -3030,6 +3050,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminRecursosBiRoute: typeof AuthenticatedAdminRecursosBiRoute
   AuthenticatedAdminRecursosTutorialesRoute: typeof AuthenticatedAdminRecursosTutorialesRoute
+  AuthenticatedAdminRosterOcupacionRoute: typeof AuthenticatedAdminRosterOcupacionRoute
   AuthenticatedAdminTareasCalendarioRoute: typeof AuthenticatedAdminTareasCalendarioRoute
   AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
   AuthenticatedAdminCandidaciesIndexRoute: typeof AuthenticatedAdminCandidaciesIndexRoute
@@ -3197,6 +3218,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRecursosBiRoute: AuthenticatedAdminRecursosBiRoute,
   AuthenticatedAdminRecursosTutorialesRoute:
     AuthenticatedAdminRecursosTutorialesRoute,
+  AuthenticatedAdminRosterOcupacionRoute:
+    AuthenticatedAdminRosterOcupacionRoute,
   AuthenticatedAdminTareasCalendarioRoute:
     AuthenticatedAdminTareasCalendarioRoute,
   AuthenticatedAdminTemplatesTemplateIdRoute:
