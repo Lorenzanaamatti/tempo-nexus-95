@@ -47,7 +47,7 @@ export async function fetchAgencyTimeline(composerId: string, onlyVisible: boole
       .eq("composer_id", composerId),
     db.from("productions").select("id, title, created_at, start_date, status").eq("composer_id", composerId),
     db.from("production_assignments").select("production_id, start_date, created_at, role_in_project, production:productions(title)").eq("composer_id", composerId),
-    db.from("press_clippings").select("*").eq("composer_id", composerId),
+    (onlyVisible ? db.from("press_clippings").select("id, outlet, headline, published_date, created_at").eq("composer_id", composerId).eq("visible_to_composer", true) : db.from("press_clippings").select("id, outlet, headline, published_date, created_at").eq("composer_id", composerId)),
   ]);
   const items: AgencyItem[] = [];
   for (const r of log.data ?? [])
@@ -82,7 +82,7 @@ export async function fetchAgencyTimeline(composerId: string, onlyVisible: boole
   for (const a of assigns.data ?? [])
     items.push({ key: `a-${a.production_id}-${a.created_at}`, date: a.start_date ?? a.created_at?.slice(0, 10), kind: "produccion", title: `Incorporado a «${a.production?.title ?? "producción"}»`, detail: a.role_in_project });
   for (const c of clips.data ?? [])
-    items.push({ key: `c-${c.id}`, date: c.published_at ?? c.date ?? c.created_at?.slice(0, 10), kind: "prensa", title: c.title ?? c.headline ?? "Aparición en prensa", counterpart: c.media_name ?? c.outlet ?? null });
+    items.push({ key: `c-${c.id}`, date: c.published_date ?? c.created_at?.slice(0, 10), kind: "prensa", title: c.headline ?? "Aparición en prensa", counterpart: c.outlet ?? null });
   return items.filter((i) => i.date).sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
