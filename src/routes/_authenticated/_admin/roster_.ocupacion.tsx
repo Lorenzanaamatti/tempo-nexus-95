@@ -50,7 +50,7 @@ function Ocupacion() {
     queryFn: async () => {
       const [occ, comps, prods] = await Promise.all([
         (supabase as any).rpc("roster_occupancy_months", { _months: months }),
-        (supabase as any).from("composers").select("id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, fee_min, fee_max, representation_status").in("representation_status", ["activo", "pausa"]),
+        (supabase as any).from("composers").select("id, full_name, artistic_name, city, country, ciudad_origen, pais_origen, fee_min, fee_max, representation_status").in("representation_status", ["activo", "pausa"]).neq("roster_role", "ic_company"),
         (supabase as any).from("productions").select("id, title, composer_id, status, start_date, delivery_date, is_historical").not("composer_id", "is", null),
       ]);
       if (occ.error) throw occ.error;
