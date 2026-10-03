@@ -32,6 +32,7 @@ import { Route as AuthenticatedPortalFacturacionRouteImport } from './routes/_au
 import { Route as AuthenticatedPortalContratosRouteImport } from './routes/_authenticated/portal/contratos'
 import { Route as AuthenticatedPortalCarreraRouteImport } from './routes/_authenticated/portal/carrera'
 import { Route as AuthenticatedPortalAgendaRouteImport } from './routes/_authenticated/portal/agenda'
+import { Route as AuthenticatedPortalActividadRouteImport } from './routes/_authenticated/portal/actividad'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/_admin/users'
 import { Route as AuthenticatedAdminTareasRouteImport } from './routes/_authenticated/_admin/tareas'
 import { Route as AuthenticatedAdminRosterRouteImport } from './routes/_authenticated/_admin/roster'
@@ -274,6 +275,12 @@ const AuthenticatedPortalAgendaRoute =
   AuthenticatedPortalAgendaRouteImport.update({
     id: '/agenda',
     path: '/agenda',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalActividadRoute =
+  AuthenticatedPortalActividadRouteImport.update({
+    id: '/actividad',
+    path: '/actividad',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
@@ -1020,6 +1027,7 @@ export interface FileRoutesByFullPath {
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/tareas': typeof AuthenticatedAdminTareasRoute
   '/users': typeof AuthenticatedAdminUsersRoute
+  '/portal/actividad': typeof AuthenticatedPortalActividadRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
@@ -1161,6 +1169,7 @@ export interface FileRoutesByTo {
   '/roster': typeof AuthenticatedAdminRosterRoute
   '/tareas': typeof AuthenticatedAdminTareasRoute
   '/users': typeof AuthenticatedAdminUsersRoute
+  '/portal/actividad': typeof AuthenticatedPortalActividadRoute
   '/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/portal/contratos': typeof AuthenticatedPortalContratosRoute
@@ -1307,6 +1316,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/roster': typeof AuthenticatedAdminRosterRoute
   '/_authenticated/_admin/tareas': typeof AuthenticatedAdminTareasRoute
   '/_authenticated/_admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/portal/actividad': typeof AuthenticatedPortalActividadRoute
   '/_authenticated/portal/agenda': typeof AuthenticatedPortalAgendaRoute
   '/_authenticated/portal/carrera': typeof AuthenticatedPortalCarreraRoute
   '/_authenticated/portal/contratos': typeof AuthenticatedPortalContratosRoute
@@ -1452,6 +1462,7 @@ export interface FileRouteTypes {
     | '/roster'
     | '/tareas'
     | '/users'
+    | '/portal/actividad'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/contratos'
@@ -1593,6 +1604,7 @@ export interface FileRouteTypes {
     | '/roster'
     | '/tareas'
     | '/users'
+    | '/portal/actividad'
     | '/portal/agenda'
     | '/portal/carrera'
     | '/portal/contratos'
@@ -1738,6 +1750,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/roster'
     | '/_authenticated/_admin/tareas'
     | '/_authenticated/_admin/users'
+    | '/_authenticated/portal/actividad'
     | '/_authenticated/portal/agenda'
     | '/_authenticated/portal/carrera'
     | '/_authenticated/portal/contratos'
@@ -2031,6 +2044,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/portal/agenda'
       preLoaderRoute: typeof AuthenticatedPortalAgendaRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/actividad': {
+      id: '/_authenticated/portal/actividad'
+      path: '/actividad'
+      fullPath: '/portal/actividad'
+      preLoaderRoute: typeof AuthenticatedPortalActividadRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/_admin/users': {
@@ -3238,6 +3258,7 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedPortalRouteChildren {
+  AuthenticatedPortalActividadRoute: typeof AuthenticatedPortalActividadRoute
   AuthenticatedPortalAgendaRoute: typeof AuthenticatedPortalAgendaRoute
   AuthenticatedPortalCarreraRoute: typeof AuthenticatedPortalCarreraRoute
   AuthenticatedPortalContratosRoute: typeof AuthenticatedPortalContratosRoute
@@ -3251,6 +3272,7 @@ interface AuthenticatedPortalRouteChildren {
 }
 
 const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
+  AuthenticatedPortalActividadRoute: AuthenticatedPortalActividadRoute,
   AuthenticatedPortalAgendaRoute: AuthenticatedPortalAgendaRoute,
   AuthenticatedPortalCarreraRoute: AuthenticatedPortalCarreraRoute,
   AuthenticatedPortalContratosRoute: AuthenticatedPortalContratosRoute,
