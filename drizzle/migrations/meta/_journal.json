@@ -8,6 +8,13 @@
       "when": 1791025733435,
       "tag": "0000_roster_occupancy_activity_casting",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791025773244,
+      "tag": "0001_fix_occupancy_closed_statuses",
+      "breakpoints": true
     }
   ]
 }
