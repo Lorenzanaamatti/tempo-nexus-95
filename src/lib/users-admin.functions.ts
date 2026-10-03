@@ -151,15 +151,16 @@ export const deleteUser = createServerFn({ method: "POST" })
       { table: "sales_document_compositions", column: "created_by" },
       { table: "subv_expedientes", column: "created_by" },
     ];
+    const admin = supabaseAdmin as any;
     for (const { table, column } of reassignToAdmin) {
-      const { error: updErr } = await supabaseAdmin
+      const { error: updErr } = await admin
         .from(table)
         .update({ [column]: context.userId })
         .eq(column, data.userId);
       if (updErr) throw new Error(`No se pudo reasignar ${table}.${column}: ${updErr.message}`);
     }
     for (const { table, column } of setToNull) {
-      const { error: updErr } = await supabaseAdmin
+      const { error: updErr } = await admin
         .from(table)
         .update({ [column]: null })
         .eq(column, data.userId);
