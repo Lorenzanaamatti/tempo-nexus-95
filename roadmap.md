@@ -18,3 +18,8 @@
 - [x] Eliminar la cuenta Gmail duplicada de Clàudia.
 - [x] Garantizar que las tareas recién creadas aparezcan de inmediato aunque hubiera filtros activos.
 - [x] Verificar «haetra» y las tareas recientes de Clàudia.
+- [x] Ficha de casting: rango de caché y procedencia del representado.
+- [x] Ocupación del roster mes a mes con aviso de 3 meses sin ingresos (notificación semanal).
+- [x] Lector de contratos/deal memos con IA que propone plazos de pago y los calendariza tras confirmar.
+- [x] Portal del artista: «Lo que hacemos por ti» con todas las gestiones de la agencia.
+- [x] Calendario: vistas de procesos, ventas, fichajes, facturación, contratos y subvenciones.
