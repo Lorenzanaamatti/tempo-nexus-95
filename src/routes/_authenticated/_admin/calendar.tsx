@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +51,17 @@ function GlobalCalendar() {
               </button>
             );
           })}
+          <Link
+            to="/roster/ocupacion"
+            search={{ c: undefined }}
+            className="group flex items-center gap-3 rounded-sm border border-border p-5 text-left transition hover:border-primary hover:bg-primary/5"
+          >
+            <CalendarDays className="h-5 w-5 text-primary" />
+            <span>
+              <span className="block font-display text-lg font-semibold">Ocupación del roster</span>
+              <span className="block text-xs text-muted-foreground">Quién trabaja en qué y quién se queda sin ingresos</span>
+            </span>
+          </Link>
         </div>
       </div>
     );

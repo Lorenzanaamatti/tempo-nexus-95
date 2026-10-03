@@ -54,17 +54,20 @@ export const LAYOUT_LABELS: Record<Layout, string> = {
 
 export const CAL_VIEWS = [
   { key: "global",       label: "General",      cats: ["operativo","marketing","facturacion","personal","oportunidades"] as Category[], onlyMine: false },
-  { key: "producciones", label: "Producciones", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["production"] as string[] },
+  { key: "producciones", label: "Procesos de producción", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["production"] as string[] },
   { key: "roster",       label: "Roster",       cats: ["operativo","personal"] as Category[], onlyMine: false, subjectTypes: ["composer","person"] as string[] },
+  { key: "ventas",       label: "Ventas y negociaciones", cats: ["oportunidades","operativo"] as Category[], onlyMine: false, subjectTypes: ["opportunity","production_company","target_account"] as string[] },
+  { key: "fichajes",     label: "Fichajes",     cats: ["operativo","oportunidades","personal"] as Category[], onlyMine: false, subjectTypes: ["composer"] as string[] },
   { key: "marketing",    label: "Marketing",    cats: ["marketing"] as Category[], onlyMine: false },
-  { key: "economico",    label: "Facturación",  cats: ["facturacion"] as Category[], onlyMine: false },
-  { key: "legal",        label: "Legal",        cats: ["operativo"] as Category[], onlyMine: false },
+  { key: "economico",    label: "Facturación y cobros",  cats: ["facturacion"] as Category[], onlyMine: false },
+  { key: "legal",        label: "Contratos y legal", cats: ["operativo"] as Category[], onlyMine: false, subjectTypes: ["contract"] as string[] },
+  { key: "subvenciones", label: "Subvenciones, festivales y premios", cats: ["operativo","oportunidades","marketing"] as Category[], onlyMine: false, subjectTypes: ["grant","festival","award"] as string[] },
   { key: "tareas",       label: "Tareas",       cats: ["operativo","personal","oportunidades","marketing"] as Category[], onlyMine: false },
   { key: "personal",     label: "Mis tareas",   cats: ["operativo","personal","oportunidades","marketing"] as Category[], onlyMine: true },
 ] as const;
 
 /** Views offered in the calendar entry picker (order matters). */
-export const CAL_PICKER_KEYS = ["global","producciones","roster","economico","marketing","legal","tareas"] as const;
+export const CAL_PICKER_KEYS = ["global","producciones","roster","ventas","fichajes","economico","legal","subvenciones","marketing","tareas"] as const;
 
 /** Merge several presets into a single board configuration. */
 export function mergeCalViews(keys: string[]) {

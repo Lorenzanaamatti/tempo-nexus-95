@@ -51,6 +51,7 @@ import { CrmTransferMenu } from "@/components/crm-transfer-menu";
 import { RepresentationStatusMenu } from "@/components/representation-status-menu";
 import { REPRESENTATION_STATUS_OPTIONS } from "@/lib/representation-status";
 import { composerToTargetAccount, composerToOpportunity } from "@/lib/crm-transfer";
+import { ActivityLogEditor } from "@/components/agency-activity";
 
 
 export const Route = createFileRoute("/_authenticated/_admin/composers/$composerId")({
@@ -212,6 +213,9 @@ function Inner({
         portal_url: c.portal_url,
         current_location: (c as { current_location?: string | null }).current_location ?? null,
         social_links: (c as { social_links?: SocialLinks | null }).social_links ?? {},
+        fee_min: (c as { fee_min?: number | null }).fee_min ?? null,
+        fee_max: (c as { fee_max?: number | null }).fee_max ?? null,
+        fee_notes: (c as { fee_notes?: string | null }).fee_notes ?? null,
       })
       .eq("id", c.id);
     setSaving(false);
@@ -657,6 +661,13 @@ function Inner({
       </>)}
 
       {tab === "portal" && (<>
+      <Section title="Lo que la agencia hace por esta persona">
+        <p className="text-xs text-muted-foreground">
+          Pitches, propuestas y producciones se recogen solos. Aquí se anotan además las gestiones que no
+          dejan otro rastro: envíos de reel, llamadas, reuniones. Lo marcado como visible aparece en su portal.
+        </p>
+        <ActivityLogEditor composerId={c.id} />
+      </Section>
       {/* Portal del representado */}
       <Section title="Portal del representado">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -889,6 +900,34 @@ function Inner({
       </>)}
 
       {tab === "economia" && (<>
+      <Section title="Rango de precios (casting)">
+        <p className="text-xs text-muted-foreground">
+          Lo que el comercial necesita saber al proponer: horquilla habitual de caché por proyecto.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field label="Caché mínimo (€)">
+            <Input
+              type="number"
+              value={(c as { fee_min?: number | null }).fee_min ?? ""}
+              onChange={(e) => field("fee_min", e.target.value === "" ? null : Number(e.target.value))}
+            />
+          </Field>
+          <Field label="Caché habitual máximo (€)">
+            <Input
+              type="number"
+              value={(c as { fee_max?: number | null }).fee_max ?? ""}
+              onChange={(e) => field("fee_max", e.target.value === "" ? null : Number(e.target.value))}
+            />
+          </Field>
+          <Field label="Notas de tarifa">
+            <Input
+              value={(c as { fee_notes?: string | null }).fee_notes ?? ""}
+              onChange={(e) => field("fee_notes", e.target.value || null)}
+              placeholder="Ej. serie por capítulo, publicidad…"
+            />
+          </Field>
+        </div>
+      </Section>
       {/* Tarifa: histórico económico de proyectos */}
       <Section title="Tarifa — histórico económico">
         <p className="text-xs text-muted-foreground">

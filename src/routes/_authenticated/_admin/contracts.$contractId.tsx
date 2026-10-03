@@ -17,6 +17,7 @@ import { AuditTrail } from "@/components/audit-trail";
 import { ContractCounterpartiesEditor } from "@/components/contract-counterparties-editor";
 import { ProductionPhasesEditor } from "@/components/production-phases-editor";
 import { ProductionGanttPanel } from "@/components/production-gantt-panel";
+import { ContractPaymentReader } from "@/components/contract-payment-reader";
 import {
   CONTRACT_STATUS_LABEL,
   CONTRACT_LANG_LABEL,
@@ -212,6 +213,10 @@ function ContractDetail() {
 
         <div className="sm:col-span-2">
           <ContractCounterpartiesEditor contractId={contractId} />
+        </div>
+
+        <div className="sm:col-span-2">
+          <ContractPaymentReader contractId={contractId} defaultProductionId={(q.data as any)?.production_id ?? null} />
         </div>
 
         <div>

@@ -1491,6 +1491,90 @@ export type Database = {
           },
         ]
       }
+      composer_activity_log: {
+        Row: {
+          composer_id: string
+          counterpart: string | null
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          happened_on: string
+          id: string
+          kind: string
+          opportunity_id: string | null
+          pitch_id: string | null
+          production_id: string | null
+          title: string
+          visible_to_artist: boolean
+        }
+        Insert: {
+          composer_id: string
+          counterpart?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          happened_on?: string
+          id?: string
+          kind?: string
+          opportunity_id?: string | null
+          pitch_id?: string | null
+          production_id?: string | null
+          title: string
+          visible_to_artist?: boolean
+        }
+        Update: {
+          composer_id?: string
+          counterpart?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          happened_on?: string
+          id?: string
+          kind?: string
+          opportunity_id?: string | null
+          pitch_id?: string | null
+          production_id?: string | null
+          title?: string
+          visible_to_artist?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_activity_log_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_activity_log_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_activity_log_pitch_id_fkey"
+            columns: ["pitch_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades_pitches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_activity_log_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_activity_log_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_availability: {
         Row: {
           composer_id: string
@@ -2106,6 +2190,9 @@ export type Database = {
           current_location: string | null
           email: string | null
           email_secondary: string | null
+          fee_max: number | null
+          fee_min: number | null
+          fee_notes: string | null
           fee_range_id: string | null
           full_name: string
           genero: Database["public"]["Enums"]["genero_persona"] | null
@@ -2159,6 +2246,9 @@ export type Database = {
           current_location?: string | null
           email?: string | null
           email_secondary?: string | null
+          fee_max?: number | null
+          fee_min?: number | null
+          fee_notes?: string | null
           fee_range_id?: string | null
           full_name: string
           genero?: Database["public"]["Enums"]["genero_persona"] | null
@@ -2212,6 +2302,9 @@ export type Database = {
           current_location?: string | null
           email?: string | null
           email_secondary?: string | null
+          fee_max?: number | null
+          fee_min?: number | null
+          fee_notes?: string | null
           fee_range_id?: string | null
           full_name?: string
           genero?: Database["public"]["Enums"]["genero_persona"] | null
@@ -7944,6 +8037,18 @@ export type Database = {
         Returns: undefined
       }
       next_billing_order_number: { Args: never; Returns: string }
+      notify_roster_income_gaps: { Args: never; Returns: number }
+      roster_occupancy_months: {
+        Args: { _months?: number }
+        Returns: {
+          billing_amount: number
+          composer_id: string
+          has_billing: boolean
+          has_negotiation: boolean
+          has_production: boolean
+          month: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

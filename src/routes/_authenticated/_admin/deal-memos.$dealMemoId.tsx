@@ -10,6 +10,7 @@ import { DealMemoVersions } from "@/components/deal-memos/detail/versions";
 import { DealMemoLog } from "@/components/deal-memos/detail/log";
 import { DealMemoNotas } from "@/components/deal-memos/detail/notas";
 import { AuditTrail } from "@/components/audit-trail";
+import { ContractPaymentReader } from "@/components/contract-payment-reader";
 
 export const Route = createFileRoute("/_authenticated/_admin/deal-memos/$dealMemoId")({
   component: DealMemoDetail,
@@ -41,9 +42,13 @@ function DealMemoDetail() {
             <TabsTrigger value="versiones">Versiones</TabsTrigger>
             <TabsTrigger value="log">Log</TabsTrigger>
             <TabsTrigger value="notas">Notas</TabsTrigger>
+            <TabsTrigger value="pagos">Plazos de pago</TabsTrigger>
           </TabsList>
           <TabsContent value="documento" className="pt-4"><DealMemoDocument dm={dm} /></TabsContent>
           <TabsContent value="datos" className="pt-4"><DealMemoForm dm={dm} onSaved={onChange} /></TabsContent>
+          <TabsContent value="pagos" className="pt-4">
+            <ContractPaymentReader defaultProductionId={(dm as any).production_id ?? null} />
+          </TabsContent>
           <TabsContent value="versiones" className="pt-4"><DealMemoVersions dm={dm} onChange={onChange} /></TabsContent>
           <TabsContent value="log" className="space-y-6 pt-4">
             <DealMemoLog dealMemoId={dm.id} />
