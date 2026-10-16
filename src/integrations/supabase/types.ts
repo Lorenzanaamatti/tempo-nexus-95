@@ -5778,6 +5778,7 @@ export type Database = {
           director_id: string | null
           external_composer: string | null
           fee_amount: number | null
+          gantt_color: string | null
           ic_commission: number | null
           ic_commission_pct: number | null
           id: string
@@ -5825,6 +5826,7 @@ export type Database = {
           director_id?: string | null
           external_composer?: string | null
           fee_amount?: number | null
+          gantt_color?: string | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
           id?: string
@@ -5872,6 +5874,7 @@ export type Database = {
           director_id?: string | null
           external_composer?: string | null
           fee_amount?: number | null
+          gantt_color?: string | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
           id?: string

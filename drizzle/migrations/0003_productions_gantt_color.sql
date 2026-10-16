@@ -1,0 +1,1 @@
+ALTER TABLE public.productions ADD COLUMN IF NOT EXISTS gantt_color text NULL;

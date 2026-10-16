@@ -61,7 +61,7 @@ export function ProductionGanttPanel({
       const ids = await loadProductionIds({ productionIds, composerId });
       if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
       const [prods, assignments, phases, catalog, evSubject, evSource] = await Promise.all([
-        db.from("productions").select("id, title, composer_id, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
+        db.from("productions").select("id, title, gantt_color, composer_id, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
         db.from("production_assignments").select("production_id, partner_company:production_companies(name)").in("production_id", ids).not("partner_company_id", "is", null),
         db
           .from("production_phases")
@@ -105,9 +105,10 @@ export function ProductionGanttPanel({
         names = new Map(((cs ?? []) as any[]).map((c) => [c.id, c.artistic_name || c.full_name]));
       }
 
-      const meta = new Map<string, { title: string; composer_id: string | null; client: string | null }>(
+      const meta = new Map<string, { title: string; color: string | null; composer_id: string | null; client: string | null }>(
         ((prods.data ?? []) as any[]).map((p) => [p.id, {
           title: p.title,
+          color: p.gantt_color ?? null,
           composer_id: p.composer_id,
           client: p.partner_company?.name ?? assignedClients.get(p.id) ?? p.production_company ?? p.partner ?? p.platform_ref?.name ?? p.platform ?? null,
         }]),
@@ -130,6 +131,7 @@ export function ProductionGanttPanel({
             productionId: p.production_id,
             productionTitle: m?.title ?? "Producción",
             productionClient: m?.client ?? null,
+            productionColor: m?.color ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: catalogItem?.color_key ?? "graphite",
@@ -165,6 +167,7 @@ export function ProductionGanttPanel({
             productionId: pid,
             productionTitle: m?.title ?? "Producción",
             productionClient: m?.client ?? null,
+            productionColor: m?.color ?? null,
             composerId: m?.composer_id ?? null,
             composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
             colorKey: catalogItem?.color_key ?? "graphite",
@@ -222,7 +225,7 @@ export function ProductionGanttPanel({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        {showModeToggle && (
+        {false && showModeToggle && (
           <>
             <Button size="sm" variant={mode === "desplegado" ? "default" : "outline"} onClick={() => setMode("desplegado")}>
               <LayoutList className="mr-1 h-4 w-4" />Desplegado

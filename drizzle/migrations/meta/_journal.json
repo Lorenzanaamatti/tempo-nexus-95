@@ -22,6 +22,13 @@
       "when": 1791026224513,
       "tag": "0002_occupancy_exclude_company",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792147966504,
+      "tag": "0003_productions_gantt_color",
+      "breakpoints": true
     }
   ]
 }
