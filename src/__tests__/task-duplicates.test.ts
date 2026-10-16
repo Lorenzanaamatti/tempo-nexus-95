@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { findDuplicatePairs, pairKey } from "@/lib/task-duplicates";
 
 describe("detector de duplicados de tareas", () => {
