@@ -88,14 +88,12 @@ function TareasPage() {
     queryKey: ["tasks", personId, user?.id, areaFilter, statusFilter],
     queryFn: async () => {
       let query = (supabase as any).from("actions").select(SELECT).eq("kind", "tarea");
-      {
-        const filters = [
-          personId ? `assignee_person_id.eq.${personId}` : null,
-          user?.id ? `requester_user_id.eq.${user.id}` : null,
-        ].filter(Boolean) as string[];
-        if (!filters.length) return [] as Row[];
-        query = query.or(filters.join(","));
-      }
+      const filters = [
+        personId ? `assignee_person_id.eq.${personId}` : null,
+        user?.id ? `requester_user_id.eq.${user.id}` : null,
+      ].filter(Boolean) as string[];
+      if (!filters.length) return [] as Row[];
+      query = query.or(filters.join(","));
       if (areaFilter !== "all") query = query.eq("area", areaFilter);
       if (statusFilter === "pending") query = query.eq("done", false);
       else if (statusFilter !== "all") query = query.eq("status", statusFilter);
