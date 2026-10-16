@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { canImportTasks, parseTaskDate, resolveDueDate, fridayOf } from "@/lib/task-import";
 
 describe("task import", () => {
