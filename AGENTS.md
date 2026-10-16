@@ -4,3 +4,4 @@
 - Agency work for an artist is aggregated at read time (`fetchAgencyTimeline`) from pitches, candidacies, productions, press and the manual `composer_activity_log`; never duplicate those sources into the log.
 - AI-read contract payment terms are only suggestions; they become `production_billing_sprints` only after explicit human confirmation and never overwrite existing sprints.
 - Gantt colour belongs to the production (`productions.gantt_color`, 25-key palette in `src/lib/project-palette.ts`), not to the phase type; one row per phase under its film so every film reads as one colour block.
+- Task notifications (`notify_task_assignment`) run as an AFTER trigger on `actions`; never move them to BEFORE INSERT — the notification FK to `actions` cannot see the not-yet-inserted row and task creation with an assignee fails. Row mutations (assignment status defaults) stay in the BEFORE trigger `actions_assignment_defaults`.
