@@ -90,7 +90,7 @@ function ImportTasksPage() {
     try {
       const { created } = await runImport({ data: {
         area, assignee_person_id: assigneeId,
-        rows: chosen.map((r) => ({ title: r.title, notes: r.notes || null, due_date: r.due, subarea: r.raw.categoria ?? null })),
+        rows: chosen.map((r) => ({ title: r.title, notes: r.notes || null, due_date: r.due, subarea: r.raw.categoria ?? null, client: r.raw.cliente ? String(r.raw.cliente) : null })),
       } });
       const omitted = rows.filter((r) => !r.selected && r.duplicate).length;
       const rejected = rows.filter((r) => r.errors.length).length;
