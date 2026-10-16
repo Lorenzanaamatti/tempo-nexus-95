@@ -7,7 +7,6 @@ import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import { isFinalized } from "@/lib/production-lifecycle";
 import { CAL_VIEWS, CAL_PICKER_KEYS, mergeCalViews } from "@/lib/calendar-board";
 import { Plus, X, CalendarDays, GanttChartSquare } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type { Category } from "@/lib/calendar-board";
 export { CalendarBoard };
