@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Plus, CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { cn } from "@/lib/utils";
+import { canImportTasks } from "@/lib/task-import";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
   validateSearch: (s: Record<string, unknown>): { filter?: string } => ({
@@ -140,6 +141,7 @@ function TareasPage() {
             <div className="smallcaps text-[10px] text-muted-foreground">pendientes hoy</div>
           </div>
           <ExportRowsButton rows={rows} filename="tareas" sheetName="Tareas" />
+          {canImportTasks(user?.email) && <Button variant="outline" asChild><Link to="/tareas/importar">Importar tareas</Link></Button>}
           <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
         </div>
       </div>
