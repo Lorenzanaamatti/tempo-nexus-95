@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { addDays, format, getISOWeekYear, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
-import { PHASE_COLOR_CLASS, type PhaseColorKey } from "@/lib/phase-catalog";
+import { type PhaseColorKey } from "@/lib/phase-catalog";
+import { fallbackProjectColor, projectColorVar } from "@/lib/project-palette";
+import { ProjectColorPicker } from "@/components/project-color-picker";
 
 export type GanttOwner = "agencia" | "representado" | "productora";
 
@@ -19,6 +21,7 @@ export type GanttPhase = {
   productionTitle?: string;
   productionClient?: string | null;
   colorKey?: PhaseColorKey;
+  productionColor?: string | null;
 };
 
 export const GANTT_OWNER_LABEL: Record<GanttOwner, string> = {
@@ -79,12 +82,12 @@ function ProductionLink({ id, title, small = false }: { id?: string; title: stri
 
 export type GanttLegendItem = { name: string; colorKey: PhaseColorKey };
 
-export function GanttLegend({ items }: { items: GanttLegendItem[] }) {
+export function GanttLegend({ items }: { items: { name: string; color: string }[] }) {
   return (
     <div className="flex flex-wrap items-center gap-4 text-xs">
       {items.map((item) => (
         <span key={item.name} className="inline-flex items-center gap-2">
-          <span className={`h-3 w-6 rounded-[2px] ${PHASE_COLOR_CLASS[item.colorKey]}`} />
+          <span className="h-3 w-6 rounded-[2px]" style={{ background: projectColorVar(item.color) }} />
           {item.name}
         </span>
       ))}
@@ -158,10 +161,8 @@ export function ProductionGantt({
     </div>
   );
 
-  const Bar = ({ p, compact }: { p: GanttPhase; compact?: boolean }) => {
-    const left = pct(d(p.start));
-    const width = Math.max(pct(d(p.end) + DAY) - left, 1.2);
-    const color = PHASE_COLOR_CLASS[p.colorKey ?? "graphite"];
+  const Bar = ({ p, color }: { p: GanttPhase; color: string }) => {
+    const bg = projectColorVar(color);
     const title = `${p.name} · ${fmt(p.start)} – ${fmt(p.end)}${p.note ? ` · ${p.note}` : ""}`;
     if (p.milestone) {
       const date = new Date(`${p.start}T00:00:00`);
@@ -169,59 +170,66 @@ export function ProductionGantt({
       const weekLeft = pct(weekStart);
       const weekWidth = pct(weekStart + 7 * DAY) - weekLeft;
       const dayOffset = Math.max(0, Math.min(6, Math.round((d(p.start) - weekStart) / DAY)));
-      // La planificación trabaja visualmente de lunes a viernes: lunes se
-      // marca al inicio del cuadrante y viernes al final. El fin de semana
-      // permanece anclado al extremo derecho de esa misma semana.
       const markerLeft = 6 + (Math.min(dayOffset, 4) / 4) * 88;
       return (
+        <>
+          <div className="absolute inset-y-1 rounded-[3px]" style={{ left: `${weekLeft}%`, width: `${weekWidth}%`, background: bg }} title={title}>
+            <span
+              className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background shadow-sm"
+              style={{ left: `${markerLeft}%` }}
+              aria-hidden
+            />
+          </div>
+          <span className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap pl-1.5 text-[11px] font-medium text-foreground" style={{ left: `${weekLeft + weekWidth}%` }}>
+            {p.name}
+          </span>
+        </>
+      );
+    }
+    const left = pct(d(p.start));
+    const width = Math.max(pct(d(p.end) + DAY) - left, 1.2);
+    const days = Math.round((d(p.end) - d(p.start)) / DAY) + 1;
+    const inside = days >= 10 || width >= 8;
+    return (
+      <>
         <div
-          className={`absolute inset-y-1 ${color}`}
-          style={{ left: `${weekLeft}%`, width: `${weekWidth}%` }}
+          className="absolute inset-y-1 flex items-center overflow-hidden rounded-[3px] px-1.5"
+          style={{ left: `${left}%`, width: `${width}%`, background: bg, color: "var(--proj-fg)" }}
           title={title}
         >
-          <span
-            className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background shadow-sm"
-            style={{ left: `${markerLeft}%` }}
-            aria-hidden
-          />
+          {inside && <span className="truncate text-[11px] font-semibold">{p.name}</span>}
         </div>
-      );
-    }
-    if (compact) {
-      return (
-        <div
-          className={`absolute top-1/2 h-4 -translate-y-1/2 rounded-[3px] ${color}`}
-          style={{ left: `${left}%`, width: `${width}%` }}
-          title={title}
-        />
-      );
-    }
-    return (
-      <div className="relative" style={{ marginLeft: `${left}%`, width: `${width}%` }}>
-        <div className={`h-5 rounded-[3px] ${color}`} title={title} />
-        {p.note ? (
-          <p className="mt-1 truncate text-[11px] text-muted-foreground" title={p.note}>
-            {p.note}
-          </p>
-        ) : null}
-      </div>
+        {!inside && (
+          <span className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap pl-1.5 text-[11px] font-medium text-foreground" style={{ left: `${left + width}%` }}>
+            {p.name}
+          </span>
+        )}
+      </>
     );
   };
 
-  const productions = Array.from(
-    new Map(dated.map((p) => [p.productionId ?? "__", p.productionTitle ?? "Producción"])).entries(),
+  const groups = Array.from(
+    dated.reduce((map, p) => {
+      const key = p.productionId ?? "__";
+      if (!map.has(key)) map.set(key, { id: key, title: p.productionTitle ?? "Producción", client: p.productionClient ?? null, color: p.productionColor || fallbackProjectColor(key), rows: [] as GanttPhase[] });
+      map.get(key)!.rows.push(p);
+      return map;
+    }, new Map<string, { id: string; title: string; client: string | null; color: string; rows: GanttPhase[] }>()).values(),
   );
-  const multi = productions.length > 1;
+  groups.forEach((g) => g.rows.sort((a, b) => d(a.start) - d(b.start) || d(a.end) - d(b.end)));
+  void mode; void legendItems;
   const timelineWidth = Math.max(760, 224 + model.weeks.length * 72);
+  const TodayLine = () =>
+    todayPct >= 0 && todayPct <= 100 ? <div className="absolute inset-y-0 z-[1] w-[2px] bg-primary/70" style={{ left: `${todayPct}%` }} /> : null;
 
   return (
     <div className="space-y-4">
-      <GanttLegend items={legendItems} />
+      <GanttLegend items={groups.map((g) => ({ name: g.title, color: g.color }))} />
       <div ref={scrollRef} className="overflow-x-auto rounded-sm border border-border">
         <div style={{ minWidth: `${timelineWidth}px` }}>
           <div className="flex border-b border-border bg-muted/40">
             <div className="sticky left-0 z-20 w-56 shrink-0 bg-muted px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {mode === "lineal" ? "Producción" : "Fase"}
+              Proyecto · fase
             </div>
             <div className="relative flex-1">
               <div className="flex border-b border-border/60">
@@ -244,63 +252,33 @@ export function ProductionGantt({
             </div>
           </div>
 
-          {mode === "lineal"
-            ? productions.map(([pid, title]) => {
-                const rows = dated.filter((p) => (p.productionId ?? "__") === pid);
-                return (
-                  <div key={pid} className="flex border-b border-border/60 last:border-b-0">
-                    <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
-                      <ProductionLink id={pid} title={title} />
-                      <p className="mt-0.5 text-xs text-muted-foreground">{rows[0]?.productionClient ?? "Cliente pendiente"}</p>
-                      <p className="text-[11px] text-muted-foreground">{rows.length} fases</p>
-                    </div>
-                    <div className="relative min-h-[46px] flex-1 py-3">
-                      <Grid />
-                      {todayPct >= 0 && todayPct <= 100 && (
-                        <div className="absolute inset-y-0 w-[2px] bg-primary/70" style={{ left: `${todayPct}%` }} />
-                      )}
-                      {rows.map((p) => (
-                        <Bar key={p.id} p={p} compact />
-                      ))}
-                    </div>
+          {groups.map((g) => (
+            <div key={g.id} className="border-b-2 border-border last:border-b-0">
+              <div className="flex border-b border-border/60 bg-muted/20">
+                <div className="sticky left-0 z-10 flex w-56 shrink-0 items-start gap-2 bg-muted px-3 py-2">
+                  {g.id !== "__" ? <ProjectColorPicker productionId={g.id} value={g.color} /> : null}
+                  <div className="min-w-0">
+                    <ProductionLink id={g.id} title={g.title} />
+                    <p className="text-[11px] text-muted-foreground">{g.client ?? "Cliente pendiente"} · {g.rows.length} fases</p>
                   </div>
-                );
-              })
-            : (multi ? productions.map(([pid, title]) => ({ key: pid, label: title, rows: dated.filter((p) => (p.productionId ?? "__") === pid) }))
-                     : OWNER_ORDER.filter((o) => dated.some((p) => p.owner === o)).map((o) => ({ key: o, label: GANTT_OWNER_LABEL[o], rows: dated.filter((p) => p.owner === o) }))
-              ).map((group) => (
-                <div key={group.key}>
-                  <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-3 py-1.5">
-                    <span className="text-[11px] font-bold uppercase tracking-wide">{group.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{group.rows.length} procesos</span>
+                </div>
+                <div className="relative flex-1"><Grid /><TodayLine /></div>
+              </div>
+              {g.rows.map((p) => (
+                <div key={p.id} className="flex border-b border-border/40 last:border-b-0">
+                  <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-1.5 pl-9">
+                    <p className="truncate text-xs font-medium leading-tight" title={p.name}>{p.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{fmt(p.start)}{p.end !== p.start ? ` – ${fmt(p.end)}` : ""}</p>
                   </div>
-                  {group.rows
-                    .slice()
-                    .sort((a, b) => d(a.start) - d(b.start))
-                    .map((p) => (
-                      <div key={p.id} className="flex border-b border-border/60 last:border-b-0">
-                        <div className="sticky left-0 z-10 w-56 shrink-0 bg-background px-3 py-3">
-                          <p className="text-sm font-medium leading-tight">{p.name}</p>
-                          {p.productionTitle ? (
-                            <ProductionLink id={p.productionId} title={p.productionTitle} small />
-                          ) : null}
-                          <p className="text-xs text-muted-foreground">{p.productionClient ?? "Cliente pendiente"}</p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {multi ? `${GANTT_OWNER_LABEL[p.owner]} · ` : ""}
-                            {fmt(p.start)} – {fmt(p.end)}
-                          </p>
-                        </div>
-                        <div className="relative flex-1 py-3">
-                          <Grid />
-                          {todayPct >= 0 && todayPct <= 100 && (
-                            <div className="absolute inset-y-0 w-[2px] bg-primary/70" style={{ left: `${todayPct}%` }} />
-                          )}
-                          <Bar p={p} />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="relative h-9 flex-1">
+                    <Grid />
+                    <TodayLine />
+                    <Bar p={p} color={g.color} />
+                  </div>
                 </div>
               ))}
+            </div>
+          ))}
         </div>
       </div>
     </div>
