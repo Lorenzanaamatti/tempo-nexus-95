@@ -26,7 +26,12 @@ export function useCalendarBoardData({
       const byId = await supabase.from("people").select("id, full_name").eq("user_id", userId!).maybeSingle();
       if (byId.data) return byId.data;
       if (userEmail) {
-        const byEmail = await supabase.from("people").select("id, full_name").ilike("email", userEmail).maybeSingle();
+        // Puede haber fichas duplicadas con el mismo email: priorizamos la que tiene login.
+        const byEmail = await supabase
+          .from("people").select("id, full_name")
+          .ilike("email", userEmail!)
+          .order("user_id", { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle();
         return byEmail.data ?? null;
       }
       return null;
