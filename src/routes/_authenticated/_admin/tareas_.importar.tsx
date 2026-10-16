@@ -41,7 +41,7 @@ const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u
 function ImportTasksPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const myPersonId = useMyPersonId();
+  const myPersonId = useMyPersonId().data;
   const runImport = useServerFn(importTasks);
   const [text, setText] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
