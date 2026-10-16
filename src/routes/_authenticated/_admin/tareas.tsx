@@ -55,7 +55,6 @@ function TareasPage() {
   const respond = useRespondAssignment();
   const pendingAssignments = pendingQ.data ?? [];
 
-  const [mine, setMine] = useState(true);
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [q, setQ] = useState("");
@@ -67,7 +66,6 @@ function TareasPage() {
   // y limpiamos la marca para que no vuelva a interferir con los filtros.
   useEffect(() => {
     if (!lastCreatedTaskId) return;
-    setMine(true);
     setAreaFilter("all");
     setStatusFilter("all");
     setQ("");
@@ -87,10 +85,10 @@ function TareasPage() {
   });
 
   const tasksQ = useQuery({
-    queryKey: ["tasks", mine, personId, user?.id, areaFilter, statusFilter],
+    queryKey: ["tasks", personId, user?.id, areaFilter, statusFilter],
     queryFn: async () => {
       let query = (supabase as any).from("actions").select(SELECT).eq("kind", "tarea");
-      if (mine) {
+      {
         const filters = [
           personId ? `assignee_person_id.eq.${personId}` : null,
           user?.id ? `requester_user_id.eq.${user.id}` : null,
@@ -198,22 +196,7 @@ function TareasPage() {
       )}
 
       <div className="mb-4 flex flex-wrap items-end gap-2">
-        <div className="inline-flex overflow-hidden rounded-sm border border-border">
-          <button
-            type="button"
-            onClick={() => setMine(true)}
-            className={cn("px-3 py-1.5 text-xs smallcaps", mine ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
-          >
-            Mis tareas
-          </button>
-          <button
-            type="button"
-            onClick={() => setMine(false)}
-            className={cn("px-3 py-1.5 text-xs smallcaps", !mine ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
-          >
-            Todas
-          </button>
-        </div>
+        <span className="smallcaps text-xs text-muted-foreground pb-1.5">Mis tareas</span>
         <Select value={areaFilter} onValueChange={setAreaFilter}>
           <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -252,7 +235,7 @@ function TareasPage() {
           <Button size="sm" variant="outline" className="mt-3" onClick={() => tasksQ.refetch()}>Reintentar</Button>
         </div>
       ) : !rows.length ? (
-        <EmptyState icon={CheckCircle2} title="Todo al día" description="No hay tareas pendientes con los filtros actuales." action={{ label: "Nueva tarea", onClick: () => openNewTask() }} secondaryAction={mine ? { label: "Ver todas", onClick: () => setMine(false) } : undefined} />
+        <EmptyState icon={CheckCircle2} title="Todo al día" description="No hay tareas pendientes con los filtros actuales." action={{ label: "Nueva tarea", onClick: () => openNewTask() }} />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {rows.map((t) => {

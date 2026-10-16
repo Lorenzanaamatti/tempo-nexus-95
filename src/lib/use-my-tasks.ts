@@ -16,10 +16,22 @@ export function useMyPersonId() {
       if (byUser?.id) return byUser.id as string;
       const { data: prof } = await supabase
         .from("profiles").select("composer_id").eq("id", user!.id).maybeSingle();
-      if (!prof?.composer_id) return null;
-      const { data: byComp } = await (supabase as any)
-        .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
-      return (byComp?.id as string) ?? null;
+      if (prof?.composer_id) {
+        const { data: byComp } = await (supabase as any)
+          .from("people").select("id").eq("composer_id", prof.composer_id).maybeSingle();
+        if (byComp?.id) return byComp.id as string;
+      }
+      // Último recurso: ficha cuyo email coincide con el login
+      // (p. ej. Lourdes con lourdes@plus-music.com). Si hay fichas duplicadas
+      // con el mismo email, priorizamos la que ya tiene login enlazado.
+      const email = user!.email?.trim().toLowerCase();
+      if (!email) return null;
+      const { data: byEmail } = await (supabase as any)
+        .from("people").select("id")
+        .ilike("email", email)
+        .order("user_id", { ascending: false, nullsFirst: false })
+        .limit(1).maybeSingle();
+      return (byEmail?.id as string) ?? null;
     },
   });
 }
