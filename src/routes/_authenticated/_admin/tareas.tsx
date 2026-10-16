@@ -155,6 +155,11 @@ function TareasPage() {
             <div className="font-display text-2xl leading-none text-primary">{dueCount}</div>
             <div className="smallcaps text-[10px] text-muted-foreground">pendientes hoy</div>
           </div>
+          {pairs.length > 0 && (
+            <Button variant="outline" onClick={() => setDupOpen(true)} className="border-destructive/50 text-destructive">
+              <Copy className="mr-1 h-4 w-4" /> {pairs.length} posible{pairs.length > 1 ? "s" : ""} duplicado{pairs.length > 1 ? "s" : ""}
+            </Button>
+          )}
           <ExportRowsButton rows={rows} filename="tareas" sheetName="Tareas" />
           {canImportTasks(user?.email) && <Button variant="outline" asChild><Link to="/tareas/importar">Importar tareas</Link></Button>}
           <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
@@ -274,7 +279,9 @@ function TareasPage() {
                     onCheckedChange={(v) => patch(t.id, { status: v ? "hecha" : "pendiente" })}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm", t.done && "line-through")}>{t.title}</p>
+                    <button type="button" onClick={() => setEditId(t.id)} className={cn("text-left text-sm hover:underline", t.done && "line-through")}>{t.title}</button>
+                    {t.client && <span className="ml-2 text-xs text-muted-foreground">· {t.client}</span>}
+                    {t.notes && <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{t.notes}</p>}
                     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
                       {t.area && (
                         <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_AREA_TONE[t.area])}>
@@ -332,6 +339,10 @@ function TareasPage() {
                       className="h-7 w-[140px] text-xs"
                       title="Fecha de entrega"
                     />
+                    <Button variant="ghost" size="sm" aria-label="Editar tarea" title="Editar tarea" onClick={() => setEditId(t.id)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <ConfirmDeleteButton iconOnly title="¿Eliminar esta tarea?" description={t.title} onConfirm={() => removeTask(t.id)} />
                   </div>
                 </div>
               </li>
@@ -339,6 +350,8 @@ function TareasPage() {
           })}
         </ul>
       )}
+      <TaskEditDialog taskId={editId} onClose={() => setEditId(null)} />
+      <TaskDuplicatesDialog open={dupOpen} onClose={() => setDupOpen(false)} pairs={pairs} ignore={ignore} />
     </div>
   );
 }
