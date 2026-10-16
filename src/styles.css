@@ -244,3 +244,13 @@
 @utility portal-accent {
   color: var(--accent-coral);
 }
+
+/* Paleta de 25 tonos para el color de cada proyecto en el Gantt */
+:root {
+  --proj-fg: #ffffff;
+  --proj-1: #47353f; --proj-2: #6b4a5c; --proj-3: #8e3b5a; --proj-4: #b23a48; --proj-5: #c2553a;
+  --proj-6: #b55a30; --proj-7: #c77a2c; --proj-8: #a8842a; --proj-9: #9b892f; --proj-10: #7b8a2f;
+  --proj-11: #5b7f3a; --proj-12: #3f7a4f; --proj-13: #2f7a6a; --proj-14: #2a7480; --proj-15: #2f6690;
+  --proj-16: #3b5998; --proj-17: #4a4f9a; --proj-18: #634a9a; --proj-19: #7d4a94; --proj-20: #94467e;
+  --proj-21: #5a5a5a; --proj-22: #3d4a55; --proj-23: #6b5a48; --proj-24: #8a6a52; --proj-25: #4f6b5f;
+}
