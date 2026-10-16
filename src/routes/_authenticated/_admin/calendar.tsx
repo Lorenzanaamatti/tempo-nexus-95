@@ -77,56 +77,35 @@ function GlobalCalendar() {
         >
           ← Vistas
         </button>
-        {merged.keys.map((key) => {
+        {CAL_PICKER_KEYS.map((key) => {
           const v = CAL_VIEWS.find((x) => x.key === key)!;
+          const active = merged.keys.includes(key);
           return (
             <span
               key={key}
-              className="flex items-center gap-1 rounded-sm border border-foreground bg-foreground px-3 py-1 text-xs text-background"
+              className={
+                active
+                  ? "flex items-center gap-1 rounded-sm border border-foreground bg-foreground px-3 py-1 text-xs text-background"
+                  : "flex items-center gap-1 rounded-sm border border-border px-3 py-1 text-xs transition hover:border-primary hover:text-primary"
+              }
             >
-              {v.label}
-              {merged.keys.length > 1 && (
-                <button
-                  type="button"
-                  aria-label={`Quitar vista ${v.label}`}
-                  onClick={() => go(merged.keys.filter((k) => k !== key))}
-                  className="opacity-70 hover:opacity-100"
-                >
+              <button type="button" onClick={() => go([key])} title="Ver solo esta vista">{v.label}</button>
+              {active && merged.keys.length > 1 && (
+                <button type="button" aria-label={`Quitar vista ${v.label}`} onClick={() => go(merged.keys.filter((k) => k !== key))} className="opacity-70 hover:opacity-100">
                   <X className="h-3 w-3" />
+                </button>
+              )}
+              {!active && (
+                <button type="button" aria-label={`Combinar con ${v.label}`} title="Añadir a la vista actual" onClick={() => go([...merged.keys, key])} className="opacity-60 hover:opacity-100">
+                  <Plus className="h-3 w-3" />
                 </button>
               )}
             </span>
           );
         })}
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-1 rounded-sm border border-primary px-3 py-1 text-xs text-primary transition hover:bg-primary/10"
-            >
-              <Plus className="h-3.5 w-3.5" /> Añadir vista
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-56 p-1">
-            {CAL_PICKER_KEYS.filter((k) => !merged.keys.includes(k)).map((key) => {
-              const v = CAL_VIEWS.find((x) => x.key === key)!;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => go([...merged.keys, key])}
-                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-muted"
-                >
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  {v.label}
-                </button>
-              );
-            })}
-            {CAL_PICKER_KEYS.every((k) => merged.keys.includes(k)) && (
-              <p className="px-2 py-1.5 text-xs text-muted-foreground">Todas las vistas activas</p>
-            )}
-          </PopoverContent>
-        </Popover>
+        <Link to="/roster/ocupacion" search={{ c: undefined }} className="rounded-sm border border-primary px-3 py-1 text-xs text-primary hover:bg-primary/10">
+          Ocupación del roster
+        </Link>
       </div>
       <div className="mx-auto mt-3 flex max-w-[1400px] gap-2 px-6">
         <button
