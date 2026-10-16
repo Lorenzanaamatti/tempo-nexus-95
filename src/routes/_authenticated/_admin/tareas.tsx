@@ -19,6 +19,10 @@ import { Plus, CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { canImportTasks } from "@/lib/task-import";
+import { TaskEditDialog, deleteTask } from "@/components/task-edit-dialog";
+import { TaskDuplicatesDialog, useDuplicatePairs } from "@/components/task-duplicates-dialog";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { Pencil, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
   validateSearch: (s: Record<string, unknown>): { filter?: string } => ({
@@ -40,10 +44,12 @@ type Row = {
   assignee?: { id: string; full_name: string } | null;
   production_id: string | null;
   production?: { id: string; title: string } | null;
+  notes: string | null;
+  client: string | null;
 };
 
 const SELECT =
-  "id, title, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name), production_id, production:productions(id, title)";
+  "id, title, notes, client, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name), production_id, production:productions(id, title)";
 
 function TareasPage() {
   const { user } = useAuth();
@@ -108,8 +114,21 @@ function TareasPage() {
 
   const needle = q.trim().toLowerCase();
   const rows = (tasksQ.data ?? [])
-    .filter((t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    .filter((t) => !needle || [t.title, t.subarea, t.client, t.notes, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
     .filter((t) => !onlyToday || (t.due_date != null && t.due_date <= todayISO()));
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [dupOpen, setDupOpen] = useState(false);
+  const { pairs, ignore } = useDuplicatePairs(tasksQ.data ?? []);
+
+  async function removeTask(id: string) {
+    try {
+      await deleteTask(id);
+      toast.success("Tarea eliminada");
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["my-due-tasks"] });
+    } catch (e) { toast.error(e instanceof Error ? e.message : "No se ha podido eliminar"); }
+  }
 
   async function patch(id: string, values: Record<string, unknown>) {
     const { error } = await (supabase as any).from("actions").update(values).eq("id", id);
@@ -136,6 +155,11 @@ function TareasPage() {
             <div className="font-display text-2xl leading-none text-primary">{dueCount}</div>
             <div className="smallcaps text-[10px] text-muted-foreground">pendientes hoy</div>
           </div>
+          {pairs.length > 0 && (
+            <Button variant="outline" onClick={() => setDupOpen(true)} className="border-destructive/50 text-destructive">
+              <Copy className="mr-1 h-4 w-4" /> {pairs.length} posible{pairs.length > 1 ? "s" : ""} duplicado{pairs.length > 1 ? "s" : ""}
+            </Button>
+          )}
           <ExportRowsButton rows={rows} filename="tareas" sheetName="Tareas" />
           {canImportTasks(user?.email) && <Button variant="outline" asChild><Link to="/tareas/importar">Importar tareas</Link></Button>}
           <Button onClick={() => openNewTask()}><Plus className="mr-1 h-4 w-4" /> Nueva tarea</Button>
@@ -255,7 +279,9 @@ function TareasPage() {
                     onCheckedChange={(v) => patch(t.id, { status: v ? "hecha" : "pendiente" })}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm", t.done && "line-through")}>{t.title}</p>
+                    <button type="button" onClick={() => setEditId(t.id)} className={cn("text-left text-sm hover:underline", t.done && "line-through")}>{t.title}</button>
+                    {t.client && <span className="ml-2 text-xs text-muted-foreground">· {t.client}</span>}
+                    {t.notes && <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{t.notes}</p>}
                     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
                       {t.area && (
                         <span className={cn("rounded-sm px-1.5 py-0.5 smallcaps", TASK_AREA_TONE[t.area])}>
@@ -313,6 +339,10 @@ function TareasPage() {
                       className="h-7 w-[140px] text-xs"
                       title="Fecha de entrega"
                     />
+                    <Button variant="ghost" size="sm" aria-label="Editar tarea" title="Editar tarea" onClick={() => setEditId(t.id)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <ConfirmDeleteButton iconOnly title="¿Eliminar esta tarea?" description={t.title} onConfirm={() => removeTask(t.id)} />
                   </div>
                 </div>
               </li>
@@ -320,6 +350,8 @@ function TareasPage() {
           })}
         </ul>
       )}
+      <TaskEditDialog taskId={editId} onClose={() => setEditId(null)} />
+      <TaskDuplicatesDialog open={dupOpen} onClose={() => setDupOpen(false)} pairs={pairs} ignore={ignore} />
     </div>
   );
 }

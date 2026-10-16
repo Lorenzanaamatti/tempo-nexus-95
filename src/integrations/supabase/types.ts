@@ -22,6 +22,7 @@ export type Database = {
           assignee_person_id: string | null
           assignment_note: string | null
           assignment_status: string
+          client: string | null
           created_at: string
           done: boolean
           done_at: string | null
@@ -49,6 +50,7 @@ export type Database = {
           assignee_person_id?: string | null
           assignment_note?: string | null
           assignment_status?: string
+          client?: string | null
           created_at?: string
           done?: boolean
           done_at?: string | null
@@ -76,6 +78,7 @@ export type Database = {
           assignee_person_id?: string | null
           assignment_note?: string | null
           assignment_status?: string
+          client?: string | null
           created_at?: string
           done?: boolean
           done_at?: string | null

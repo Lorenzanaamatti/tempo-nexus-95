@@ -15,6 +15,7 @@ const inputSchema = z.object({
         notes: z.string().max(4000).nullable(),
         due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
         subarea: z.string().trim().max(200).nullable(),
+        client: z.string().trim().max(300).nullable().optional(),
       }),
     )
     .min(1)
@@ -32,6 +33,7 @@ export const importTasks = createServerFn({ method: "POST" })
       notes: r.notes,
       due_date: r.due_date,
       subarea: r.subarea,
+      client: r.client ?? null,
       area: data.area,
       assignee_person_id: data.assignee_person_id,
       kind: "tarea",
