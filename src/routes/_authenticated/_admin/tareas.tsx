@@ -19,6 +19,10 @@ import { Plus, CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatDateEs } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { canImportTasks } from "@/lib/task-import";
+import { TaskEditDialog, deleteTask } from "@/components/task-edit-dialog";
+import { TaskDuplicatesDialog, useDuplicatePairs } from "@/components/task-duplicates-dialog";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { Pencil, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/_admin/tareas")({
   validateSearch: (s: Record<string, unknown>): { filter?: string } => ({
@@ -40,10 +44,12 @@ type Row = {
   assignee?: { id: string; full_name: string } | null;
   production_id: string | null;
   production?: { id: string; title: string } | null;
+  notes: string | null;
+  client: string | null;
 };
 
 const SELECT =
-  "id, title, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name), production_id, production:productions(id, title)";
+  "id, title, notes, client, area, subarea, entry_date, due_date, status, done, assignee_person_id, assignee:people!actions_assignee_person_id_fkey(id, full_name), production_id, production:productions(id, title)";
 
 function TareasPage() {
   const { user } = useAuth();
@@ -108,8 +114,21 @@ function TareasPage() {
 
   const needle = q.trim().toLowerCase();
   const rows = (tasksQ.data ?? [])
-    .filter((t) => !needle || [t.title, t.subarea, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
+    .filter((t) => !needle || [t.title, t.subarea, t.client, t.notes, t.assignee?.full_name].some((v) => (v ?? "").toLowerCase().includes(needle)))
     .filter((t) => !onlyToday || (t.due_date != null && t.due_date <= todayISO()));
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [dupOpen, setDupOpen] = useState(false);
+  const { pairs, ignore } = useDuplicatePairs(tasksQ.data ?? []);
+
+  async function removeTask(id: string) {
+    try {
+      await deleteTask(id);
+      toast.success("Tarea eliminada");
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["my-due-tasks"] });
+    } catch (e) { toast.error(e instanceof Error ? e.message : "No se ha podido eliminar"); }
+  }
 
   async function patch(id: string, values: Record<string, unknown>) {
     const { error } = await (supabase as any).from("actions").update(values).eq("id", id);
