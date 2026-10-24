@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /** design: imagen del diseño original de la diapositiva (se muestra a pantalla completa). */
-export type OnboardingMedia = { url?: string; path?: string; kind: "image" | "video"; design?: boolean };
+/** box: posición original sobre el diseño (fracciones 0-1 del ancho/alto). */
+export type OnboardingMedia = {
+  url?: string;
+  path?: string;
+  kind: "image" | "video";
+  design?: boolean;
+  box?: { x: number; y: number; w: number; h: number; z?: number };
+};
 export type OnboardingSlide = {
   id: string;
   position: number;

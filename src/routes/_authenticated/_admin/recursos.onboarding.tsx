@@ -179,13 +179,24 @@ function SlideStage({ children }: { children: React.ReactNode }) {
 
 function SlideCanvas({ slide, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
   const design = slide.media.find((m) => m.design);
-  const anims = slide.media.filter((m) => !m.design && (m.kind === "video" || /\.gif/i.test(m.url ?? m.path ?? "")));
+  const allAnims = slide.media.filter((m) => !m.design && (m.kind === "video" || /\.gif/i.test(m.url ?? m.path ?? "")));
+  const placed = allAnims.filter((m) => m.box);
+  const anims = allAnims.filter((m) => !m.box);
   const [showAnim, setShowAnim] = useState(false);
   useEffect(() => setShowAnim(false), [slide.id]);
   if (design && !showAnim)
     return (
       <div className="relative h-full w-full bg-background">
         <OnboardingMediaGrid media={[design]} fill />
+        {[...placed].sort((a, b) => (a.box!.z ?? 0) - (b.box!.z ?? 0)).map((m, k) => (
+          <div
+            key={k}
+            className="absolute"
+            style={{ left: `${m.box!.x * 100}%`, top: `${m.box!.y * 100}%`, width: `${m.box!.w * 100}%`, height: `${m.box!.h * 100}%` }}
+          >
+            <OnboardingMediaGrid media={[m]} fill stretch />
+          </div>
+        ))}
         {anims.length > 0 && (
           <button
             onClick={() => setShowAnim(true)}
