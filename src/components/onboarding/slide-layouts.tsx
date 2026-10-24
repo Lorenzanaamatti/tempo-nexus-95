@@ -301,7 +301,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
                   {i > 0 && (plus ? <Plus className="h-14 w-14 shrink-0 text-rust" strokeWidth={3} /> : <ArrowRight className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} />)}
                   <div
                     className={`grid shrink-0 place-items-center rounded-full text-center font-display font-bold ${!plus && i === 1 ? "h-80 w-80 bg-aubergine text-primary-foreground" : "h-60 w-60 border-4 border-aubergine bg-card text-aubergine"}`}
-                    style={{ fontSize: !plus && i === 1 ? 50 : 34, lineHeight: 1.05, padding: 24 }}
+                    style={{ fontSize: !plus && i === 1 ? 50 : plus ? 28 : 34, lineHeight: 1.05, padding: 20 }}
                   >
                     {n.text}
                   </div>
