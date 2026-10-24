@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type OnboardingMedia = { url?: string; path?: string; kind: "image" | "video" };
+/** design: imagen del diseño original de la diapositiva (se muestra a pantalla completa). */
+export type OnboardingMedia = { url?: string; path?: string; kind: "image" | "video"; design?: boolean };
 export type OnboardingSlide = {
   id: string;
   position: number;
