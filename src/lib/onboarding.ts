@@ -18,6 +18,8 @@ export const ONBOARDING_BUCKET = "onboarding-media";
 export function useOnboardingSlides() {
   return useQuery({
     queryKey: ["onboarding-slides"],
+    staleTime: 0,
+    refetchOnMount: "always",
     queryFn: async (): Promise<OnboardingSlide[]> => {
       const { data, error } = await supabase
         .from("onboarding_slides")
