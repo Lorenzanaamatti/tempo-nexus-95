@@ -15,6 +15,7 @@ import {
   type OnboardingSlide,
 } from "@/lib/onboarding";
 import { OnboardingMediaGrid } from "@/components/onboarding/onboarding-media";
+import { SLIDE_LAYOUTS, SlideLayout } from "@/components/onboarding/slide-layouts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -178,104 +179,7 @@ function SlideStage({ children }: { children: React.ReactNode }) {
 }
 
 function SlideCanvas({ slide, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
-  const design = slide.media.find((m) => m.design);
-  const allAnims = slide.media.filter((m) => !m.design && (m.kind === "video" || /\.gif/i.test(m.url ?? m.path ?? "")));
-  const placed = allAnims.filter((m) => m.box);
-  const anims = allAnims.filter((m) => !m.box);
-  const [showAnim, setShowAnim] = useState(false);
-  useEffect(() => setShowAnim(false), [slide.id]);
-  if (design && !showAnim)
-    return (
-      <div className="relative h-full w-full bg-background">
-        <OnboardingMediaGrid media={[design]} fill />
-        {[...placed].sort((a, b) => (a.box!.z ?? 0) - (b.box!.z ?? 0)).map((m, k) => (
-          <div
-            key={k}
-            className="absolute"
-            style={{ left: `${m.box!.x * 100}%`, top: `${m.box!.y * 100}%`, width: `${m.box!.w * 100}%`, height: `${m.box!.h * 100}%` }}
-          >
-            <OnboardingMediaGrid media={[m]} fill stretch />
-          </div>
-        ))}
-        {anims.length > 0 && (
-          <button
-            onClick={() => setShowAnim(true)}
-            className="absolute bottom-8 right-8 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-xl"
-            style={{ fontSize: 26 }}
-          >
-            ▶ Ver animaciones
-          </button>
-        )}
-      </div>
-    );
-  const s = design ? { ...slide, media: slide.media.filter((m) => !m.design) } : slide;
-  if (design && showAnim)
-    return (
-      <div className="relative flex h-full flex-col px-24 py-16">
-        <button onClick={() => setShowAnim(false)} className="self-start font-mono text-rust" style={{ fontSize: 24 }}>← Volver a la diapositiva</button>
-        <div className="mt-8 min-h-0 flex-1"><OnboardingMediaGrid media={anims} fill /></div>
-      </div>
-    );
-  return <TextCanvas slide={s} index={index} total={total} />;
-}
-
-function TextCanvas({ slide: s, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
-  const paras = s.body.split(/\n{2,}/).filter(Boolean);
-  const isCover = !s.media.length && s.body.length < 120;
-  const mediaOnly = !s.body && s.media.length > 0;
-  const long = s.body.length > 1100;
-  const kicker = (
-    <p className="font-mono font-bold uppercase text-rust" style={{ fontSize: 24, letterSpacing: "0.16em" }}>
-      {s.chapter} · {index + 1}/{total}
-    </p>
-  );
-
-  if (isCover)
-    return (
-      <div className="flex h-full flex-col justify-center bg-primary px-40 text-primary-foreground">
-        <p className="font-mono font-bold uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.2em" }}>
-          {s.chapter}
-        </p>
-        <h1 className="mt-6 font-display uppercase text-primary-foreground" style={{ fontSize: 140, lineHeight: 0.95 }}>{s.title}</h1>
-        {s.body && <p className="mt-10 whitespace-pre-line opacity-90" style={{ fontSize: 44, lineHeight: 1.3 }}>{s.body}</p>}
-        {index === 0 && (
-          <p className="mt-20 font-mono uppercase opacity-70" style={{ fontSize: 24, letterSpacing: "0.14em" }}>
-            Pulsa «Empezar» abajo a la derecha →
-          </p>
-        )}
-      </div>
-    );
-
-  if (mediaOnly)
-    return (
-      <div className="flex h-full flex-col px-24 py-20">
-        {kicker}
-        <h1 className="mt-4 font-display uppercase text-aubergine" style={{ fontSize: 88, lineHeight: 1 }}>{s.title}</h1>
-        <div className="mt-10 min-h-0 flex-1">
-          <OnboardingMediaGrid media={s.media} fill />
-        </div>
-      </div>
-    );
-
-  return (
-    <div className="flex h-full flex-col px-24 py-20">
-      {kicker}
-      <h1 className="mt-4 font-display uppercase text-aubergine" style={{ fontSize: s.title.length > 40 ? 64 : 80, lineHeight: 1.02 }}>
-        {s.title}
-      </h1>
-      <div className={`mt-12 grid min-h-0 flex-1 gap-16 ${s.media.length ? "grid-cols-[1.2fr_1fr]" : ""}`}>
-        <div
-          className="text-foreground/90"
-          style={{ fontSize: long ? 25 : 31, lineHeight: 1.4, columnCount: !s.media.length && s.body.length > 450 ? 2 : 1, columnGap: 80 }}
-        >
-          {paras.map((p, k) => (
-            <p key={k} className="mb-5 whitespace-pre-line" style={{ breakInside: "avoid" }}>{p}</p>
-          ))}
-        </div>
-        {s.media.length > 0 && <OnboardingMediaGrid media={s.media} fill />}
-      </div>
-    </div>
-  );
+  return <SlideLayout slide={slide} index={index} total={total} />;
 }
 
 function Editor({ slides }: { slides: OnboardingSlide[] }) {
@@ -293,7 +197,7 @@ function Editor({ slides }: { slides: OnboardingSlide[] }) {
     setDraft(next);
     const { error } = await supabase
       .from("onboarding_slides")
-      .update({ title: next.title, body: next.body, chapter: next.chapter, media: next.media })
+      .update({ title: next.title, body: next.body, chapter: next.chapter, layout: next.layout, media: next.media })
       .eq("id", next.id);
     if (error) toast.error("No se ha podido guardar");
     else refresh();
@@ -374,7 +278,25 @@ function Editor({ slides }: { slides: OnboardingSlide[] }) {
           <label className="block text-sm font-semibold">Título
             <Input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} onBlur={() => save({})} />
           </label>
-          <label className="block text-sm font-semibold">Texto (deja una línea en blanco entre párrafos)
+          <label className="block text-sm font-semibold">Diseño
+            <select
+              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={draft.layout}
+              onChange={(e) => void save({ layout: e.target.value })}
+            >
+              {SLIDE_LAYOUTS.map((l) => (
+                <option key={l.key} value={l.key}>{l.label}</option>
+              ))}
+            </select>
+          </label>
+          <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+            Cómo escribir: <b>## Título</b> crea una tarjeta o columna · <b>- texto</b> es una viñeta · <b>&gt; texto</b> es un destacado ·
+            <b> @ nombres</b> es una etiqueta de responsables · <b>**texto**</b> va en negrita.
+          </div>
+          <div className="overflow-hidden rounded-lg border border-border">
+            <div className="relative aspect-video w-full"><PreviewThumb slide={draft} index={slides.findIndex((x) => x.id === draft.id)} total={slides.length} /></div>
+          </div>
+          <label className="block text-sm font-semibold">Texto
             <Textarea rows={16} value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} onBlur={() => save({})} />
           </label>
           <div>
@@ -409,6 +331,25 @@ function Editor({ slides }: { slides: OnboardingSlide[] }) {
           <p className="text-xs text-muted-foreground">Los cambios se guardan al salir de cada campo.</p>
         </main>
       )}
+    </div>
+  );
+}
+
+function PreviewThumb({ slide, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.3);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setScale(el.clientWidth / 1920));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="absolute inset-0 overflow-hidden">
+      <div style={{ width: 1920, height: 1080, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        <SlideLayout slide={slide} index={index} total={total} />
+      </div>
     </div>
   );
 }

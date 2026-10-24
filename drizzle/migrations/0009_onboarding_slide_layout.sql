@@ -1,0 +1,1 @@
+ALTER TABLE public.onboarding_slides ADD COLUMN IF NOT EXISTS layout text NOT NULL DEFAULT 'text';
