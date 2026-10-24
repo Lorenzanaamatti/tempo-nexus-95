@@ -25,3 +25,4 @@
 - [x] Lector de contratos/deal memos con IA que propone plazos de pago y los calendariza tras confirmar.
 - [x] Portal del artista: «Lo que hacemos por ti» con todas las gestiones de la agencia.
 - [x] Calendario: vistas de procesos, ventas, fichajes, facturación, contratos y subvenciones.
+- [x] Onboarding Plusmusic/IC editable (37 diapositivas, GIF, progreso, panel BIG C).
