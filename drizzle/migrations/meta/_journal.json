@@ -57,6 +57,13 @@
       "when": 1792867968103,
       "tag": "0007_onboarding_original_designs",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792868341704,
+      "tag": "0008_onboarding_gif_positions",
+      "breakpoints": true
     }
   ]
 }
