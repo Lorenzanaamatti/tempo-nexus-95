@@ -132,6 +132,7 @@ import { Route as AuthenticatedAdminProductionsProductionIdRouteImport } from '.
 import { Route as AuthenticatedAdminProvidersIndexRouteImport } from './routes/_authenticated/_admin/providers.index'
 import { Route as AuthenticatedAdminRecursosIndexRouteImport } from './routes/_authenticated/_admin/recursos.index'
 import { Route as AuthenticatedAdminRecursosBiRouteImport } from './routes/_authenticated/_admin/recursos.bi'
+import { Route as AuthenticatedAdminRecursosOnboardingRouteImport } from './routes/_authenticated/_admin/recursos.onboarding'
 import { Route as AuthenticatedAdminRecursosTutorialesRouteImport } from './routes/_authenticated/_admin/recursos.tutoriales'
 import { Route as AuthenticatedAdminRosterOcupacionRouteImport } from './routes/_authenticated/_admin/roster_.ocupacion'
 import { Route as AuthenticatedAdminTareasCalendarioRouteImport } from './routes/_authenticated/_admin/tareas_.calendario'
@@ -876,6 +877,12 @@ const AuthenticatedAdminRecursosBiRoute =
     path: '/recursos/bi',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRecursosOnboardingRoute =
+  AuthenticatedAdminRecursosOnboardingRouteImport.update({
+    id: '/recursos/onboarding',
+    path: '/recursos/onboarding',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRecursosTutorialesRoute =
   AuthenticatedAdminRecursosTutorialesRouteImport.update({
     id: '/recursos/tutoriales',
@@ -1115,6 +1122,7 @@ export interface FileRoutesByFullPath {
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
+  '/recursos/onboarding': typeof AuthenticatedAdminRecursosOnboardingRoute
   '/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
   '/roster/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
@@ -1259,6 +1267,7 @@ export interface FileRoutesByTo {
   '/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
+  '/recursos/onboarding': typeof AuthenticatedAdminRecursosOnboardingRoute
   '/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
   '/roster/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/tareas/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
@@ -1408,6 +1417,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/production-companies/$companyId': typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   '/_authenticated/_admin/productions/$productionId': typeof AuthenticatedAdminProductionsProductionIdRoute
   '/_authenticated/_admin/recursos/bi': typeof AuthenticatedAdminRecursosBiRoute
+  '/_authenticated/_admin/recursos/onboarding': typeof AuthenticatedAdminRecursosOnboardingRoute
   '/_authenticated/_admin/recursos/tutoriales': typeof AuthenticatedAdminRecursosTutorialesRoute
   '/_authenticated/_admin/roster_/ocupacion': typeof AuthenticatedAdminRosterOcupacionRoute
   '/_authenticated/_admin/tareas_/calendario': typeof AuthenticatedAdminTareasCalendarioRoute
@@ -1556,6 +1566,7 @@ export interface FileRouteTypes {
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/recursos/bi'
+    | '/recursos/onboarding'
     | '/recursos/tutoriales'
     | '/roster/ocupacion'
     | '/tareas/calendario'
@@ -1700,6 +1711,7 @@ export interface FileRouteTypes {
     | '/production-companies/$companyId'
     | '/productions/$productionId'
     | '/recursos/bi'
+    | '/recursos/onboarding'
     | '/recursos/tutoriales'
     | '/roster/ocupacion'
     | '/tareas/calendario'
@@ -1848,6 +1860,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/production-companies/$companyId'
     | '/_authenticated/_admin/productions/$productionId'
     | '/_authenticated/_admin/recursos/bi'
+    | '/_authenticated/_admin/recursos/onboarding'
     | '/_authenticated/_admin/recursos/tutoriales'
     | '/_authenticated/_admin/roster_/ocupacion'
     | '/_authenticated/_admin/tareas_/calendario'
@@ -2772,6 +2785,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRecursosBiRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/recursos/onboarding': {
+      id: '/_authenticated/_admin/recursos/onboarding'
+      path: '/recursos/onboarding'
+      fullPath: '/recursos/onboarding'
+      preLoaderRoute: typeof AuthenticatedAdminRecursosOnboardingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/recursos/tutoriales': {
       id: '/_authenticated/_admin/recursos/tutoriales'
       path: '/recursos/tutoriales'
@@ -3069,6 +3089,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductionCompaniesCompanyIdRoute: typeof AuthenticatedAdminProductionCompaniesCompanyIdRoute
   AuthenticatedAdminProductionsProductionIdRoute: typeof AuthenticatedAdminProductionsProductionIdRoute
   AuthenticatedAdminRecursosBiRoute: typeof AuthenticatedAdminRecursosBiRoute
+  AuthenticatedAdminRecursosOnboardingRoute: typeof AuthenticatedAdminRecursosOnboardingRoute
   AuthenticatedAdminRecursosTutorialesRoute: typeof AuthenticatedAdminRecursosTutorialesRoute
   AuthenticatedAdminRosterOcupacionRoute: typeof AuthenticatedAdminRosterOcupacionRoute
   AuthenticatedAdminTareasCalendarioRoute: typeof AuthenticatedAdminTareasCalendarioRoute
@@ -3237,6 +3258,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProductionsProductionIdRoute:
     AuthenticatedAdminProductionsProductionIdRoute,
   AuthenticatedAdminRecursosBiRoute: AuthenticatedAdminRecursosBiRoute,
+  AuthenticatedAdminRecursosOnboardingRoute:
+    AuthenticatedAdminRecursosOnboardingRoute,
   AuthenticatedAdminRecursosTutorialesRoute:
     AuthenticatedAdminRecursosTutorialesRoute,
   AuthenticatedAdminRosterOcupacionRoute:

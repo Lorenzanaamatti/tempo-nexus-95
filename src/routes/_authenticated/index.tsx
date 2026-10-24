@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentRole } from "@/lib/use-role";
 import { useAuth } from "@/lib/auth-context";
+import { OnboardingInvite } from "@/components/onboarding/onboarding-invite";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/brand-logo";
 import { NAV_GROUPS } from "@/lib/nav-tree";
@@ -127,6 +128,7 @@ function Bienvenida() {
   return (
     <main className="min-h-screen w-full overflow-hidden bg-background">
       <div className="h-1.5 w-full bg-primary" />
+      <OnboardingInvite />
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 pb-6 pt-8 sm:px-8 sm:pb-8 lg:px-12">
           <BrandLogo variant="noir" className="h-36 w-auto max-w-full object-contain sm:h-48 lg:h-56" />

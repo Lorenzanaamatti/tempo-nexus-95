@@ -43,6 +43,13 @@
       "when": 1792866388965,
       "tag": "0005_scope_five_sensitive_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792866952128,
+      "tag": "0006_onboarding_slides",
+      "breakpoints": true
     }
   ]
 }
