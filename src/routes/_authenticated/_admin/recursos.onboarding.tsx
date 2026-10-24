@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
