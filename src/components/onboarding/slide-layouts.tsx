@@ -192,7 +192,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
               {s.chapter} · {index + 1}/{total}
             </p>
             <div>
-              <p className="font-mono uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.14em" }}>Plusmusic</p>
+              <p className="font-mono uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.14em" }}>{s.chapter.toLowerCase().includes("agència") ? "Interesante Compañía" : "Plusmusic"}</p>
               <h1 className="mt-4 font-display font-bold text-primary-foreground" style={{ fontSize: s.title.length > 14 ? 76 : 110, lineHeight: 0.98 }}>{s.title}</h1>
             </div>
             {media[0] ? <div className="h-56"><OnboardingMediaGrid media={[media[0]]} fill stretch /></div> : <div className="h-3 w-40 bg-rust" />}
