@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,65 +96,141 @@ function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boole
 
   if (!slides.length) return <div className="p-10 text-muted-foreground">Todavía no hay diapositivas.</div>;
   const s = slides[i];
-  const separator = !s.body && s.media.length > 0;
   const pct = ((i + 1) / slides.length) * 100;
+  const last = i === slides.length - 1;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="h-1.5 w-full bg-muted">
-        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+    <div className="fixed inset-0 z-50 flex flex-col bg-muted">
+      <header className="flex shrink-0 items-center gap-4 border-b border-border bg-card px-4 py-2">
+        <Link to="/recursos/tutoriales" className="shrink-0 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-rust">
+          ← Salir
+        </Link>
+        <nav className="flex min-w-0 flex-1 justify-center gap-1 overflow-x-auto">
+          {chapters.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => setI(c.first)}
+              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold ${s.chapter === c.name ? "bg-primary text-primary-foreground" : "text-aubergine hover:bg-accent"}`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </nav>
+        {canEdit && (
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link to="/recursos/onboarding" search={{ edit: true }}>Editar</Link>
+          </Button>
+        )}
+      </header>
+      <div className="h-1 w-full shrink-0 bg-border">
+        <div className="h-full bg-rust transition-all" style={{ width: `${pct}%` }} />
       </div>
-      <div className="flex flex-1 flex-col lg:flex-row">
-        <aside className="border-b border-border bg-card p-4 lg:w-60 lg:border-b-0 lg:border-r">
-          <Link to="/recursos/tutoriales" className="text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-rust">
-            ← Tutoriales
-          </Link>
-          <nav className="mt-4 flex gap-2 overflow-x-auto lg:flex-col">
-            {chapters.map((c) => {
-              const active = s.chapter === c.name;
-              return (
-                <button
-                  key={c.name}
-                  onClick={() => setI(c.first)}
-                  className={`whitespace-nowrap rounded-md px-3 py-2 text-left text-sm font-semibold ${active ? "bg-primary text-primary-foreground" : "text-aubergine hover:bg-accent"}`}
-                >
-                  {c.name}
-                </button>
-              );
-            })}
-          </nav>
-          {canEdit && (
-            <Button asChild variant="outline" size="sm" className="mt-6">
-              <Link to="/recursos/onboarding" search={{ edit: true }}>Editar</Link>
-            </Button>
-          )}
-        </aside>
-        <main className="flex flex-1 flex-col px-6 py-8 sm:px-12">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-rust">
-            {s.chapter} · {i + 1}/{slides.length}
+
+      <SlideStage>
+        <SlideCanvas slide={s} index={i} total={slides.length} />
+      </SlideStage>
+
+      <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-border bg-card px-4 py-3">
+        <Button variant="outline" size="lg" disabled={i === 0} onClick={() => setI(i - 1)}>
+          <ArrowLeft className="mr-2 h-5 w-5" /> Anterior
+        </Button>
+        <span className="font-mono text-sm text-muted-foreground">
+          {i + 1} / {slides.length} · también con las flechas ← → del teclado
+        </span>
+        {!last ? (
+          <Button size="lg" onClick={() => setI(i + 1)} className={i === 0 ? "animate-pulse" : ""}>
+            {i === 0 ? "Empezar" : "Siguiente"} <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        ) : (
+          <Button asChild size="lg">
+            <Link to="/recursos/tutoriales">Terminar</Link>
+          </Button>
+        )}
+      </footer>
+    </div>
+  );
+}
+
+/** Escenario 1920x1080 que se escala para ocupar todo el espacio disponible. */
+function SlideStage({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const pad = 24;
+      setScale(Math.min((el.clientWidth - pad) / 1920, (el.clientHeight - pad) / 1080));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="relative min-h-0 flex-1 overflow-hidden">
+      <div
+        className="absolute left-1/2 top-1/2 overflow-hidden rounded-xl bg-background shadow-2xl"
+        style={{ width: 1920, height: 1080, marginLeft: -960, marginTop: -540, transform: `scale(${scale})` }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SlideCanvas({ slide: s, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
+  const paras = s.body.split(/\n{2,}/).filter(Boolean);
+  const isCover = !s.media.length && s.body.length < 120;
+  const mediaOnly = !s.body && s.media.length > 0;
+  const long = s.body.length > 1100;
+  const kicker = (
+    <p className="font-mono font-bold uppercase text-rust" style={{ fontSize: 24, letterSpacing: "0.16em" }}>
+      {s.chapter} · {index + 1}/{total}
+    </p>
+  );
+
+  if (isCover)
+    return (
+      <div className="flex h-full flex-col justify-center bg-primary px-40 text-primary-foreground">
+        <p className="font-mono font-bold uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.2em" }}>
+          {s.chapter}
+        </p>
+        <h1 className="mt-6 font-display uppercase text-primary-foreground" style={{ fontSize: 140, lineHeight: 0.95 }}>{s.title}</h1>
+        {s.body && <p className="mt-10 whitespace-pre-line opacity-90" style={{ fontSize: 44, lineHeight: 1.3 }}>{s.body}</p>}
+        {index === 0 && (
+          <p className="mt-20 font-mono uppercase opacity-70" style={{ fontSize: 24, letterSpacing: "0.14em" }}>
+            Pulsa «Empezar» abajo a la derecha →
           </p>
-          <h1 className={`mt-2 font-display uppercase leading-tight text-aubergine ${separator ? "text-5xl" : "text-3xl sm:text-4xl"}`}>
-            {s.title}
-          </h1>
-          <div className={`mt-6 grid flex-1 content-start gap-8 ${s.body && s.media.length ? "lg:grid-cols-2" : ""}`}>
-            {s.body && <Body text={s.body} />}
-            <OnboardingMediaGrid media={s.media} />
-          </div>
-          <div className="mt-8 flex items-center justify-between">
-            <Button variant="outline" disabled={i === 0} onClick={() => setI(i - 1)}>
-              <ArrowLeft className="mr-1 h-4 w-4" /> Anterior
-            </Button>
-            {i < slides.length - 1 ? (
-              <Button onClick={() => setI(i + 1)}>
-                Siguiente <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button asChild>
-                <Link to="/recursos/tutoriales">Terminar</Link>
-              </Button>
-            )}
-          </div>
-        </main>
+        )}
+      </div>
+    );
+
+  if (mediaOnly)
+    return (
+      <div className="flex h-full flex-col px-24 py-20">
+        {kicker}
+        <h1 className="mt-4 font-display uppercase text-aubergine" style={{ fontSize: 88, lineHeight: 1 }}>{s.title}</h1>
+        <div className="mt-10 min-h-0 flex-1">
+          <OnboardingMediaGrid media={s.media} fill />
+        </div>
+      </div>
+    );
+
+  return (
+    <div className="flex h-full flex-col px-24 py-20">
+      {kicker}
+      <h1 className="mt-4 font-display uppercase text-aubergine" style={{ fontSize: s.title.length > 40 ? 64 : 80, lineHeight: 1.02 }}>
+        {s.title}
+      </h1>
+      <div className={`mt-12 grid min-h-0 flex-1 gap-16 ${s.media.length ? "grid-cols-[1.2fr_1fr]" : ""}`}>
+        <div
+          className="text-foreground/90"
+          style={{ fontSize: long ? 25 : 31, lineHeight: 1.4, columnCount: !s.media.length && s.body.length > 450 ? 2 : 1, columnGap: 80 }}
+        >
+          {paras.map((p, k) => (
+            <p key={k} className="mb-5 whitespace-pre-line" style={{ breakInside: "avoid" }}>{p}</p>
+          ))}
+        </div>
+        {s.media.length > 0 && <OnboardingMediaGrid media={s.media} fill />}
       </div>
     </div>
   );
