@@ -269,6 +269,24 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
       );
 
     case "steps":
+      if (titled.length > 4) {
+        return (
+          <Frame s={s} index={index} total={total}>
+            <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-3 gap-8">
+              {titled.map((b, i) => (
+                <div key={i} className="relative flex min-h-0 min-w-0 flex-col rounded-3xl bg-card p-9 shadow-sm ring-1 ring-border">
+                  <div className="flex items-center gap-5">
+                    <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-aubergine font-display font-bold text-primary-foreground" style={{ fontSize: 30 }}>{i + 1}</span>
+                    <h2 className="font-display font-bold text-aubergine" style={{ fontSize: 36, lineHeight: 1.05 }}>{b.heading}</h2>
+                    {i < titled.length - 1 && <ArrowRight className="ml-auto h-10 w-10 shrink-0 text-rust" strokeWidth={2.5} />}
+                  </div>
+                  <AutoFit base={32} min={16} className="mt-5 flex-1"><Lines lines={b.lines} /></AutoFit>
+                </div>
+              ))}
+            </div>
+          </Frame>
+        );
+      }
       return (
         <Frame s={s} index={index} total={total}>
           <div className="flex min-h-0 flex-1 items-stretch gap-4">
