@@ -194,7 +194,7 @@ function SlideCanvas({ slide: s, index, total }: { slide: OnboardingSlide; index
         <p className="font-mono font-bold uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.2em" }}>
           {s.chapter}
         </p>
-        <h1 className="mt-6 font-display uppercase" style={{ fontSize: 140, lineHeight: 0.95 }}>{s.title}</h1>
+        <h1 className="mt-6 font-display uppercase text-primary-foreground" style={{ fontSize: 140, lineHeight: 0.95 }}>{s.title}</h1>
         {s.body && <p className="mt-10 whitespace-pre-line opacity-90" style={{ fontSize: 44, lineHeight: 1.3 }}>{s.body}</p>}
         {index === 0 && (
           <p className="mt-20 font-mono uppercase opacity-70" style={{ fontSize: 24, letterSpacing: "0.14em" }}>
