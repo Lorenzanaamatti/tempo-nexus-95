@@ -36,6 +36,13 @@
       "when": 1792155144556,
       "tag": "0004_actions_client",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792866388965,
+      "tag": "0005_scope_five_sensitive_read_policies",
+      "breakpoints": true
     }
   ]
 }
