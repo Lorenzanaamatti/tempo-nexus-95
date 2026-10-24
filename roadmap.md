@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Corregir cinco exposiciones críticas de lectura preservando datos y accesos legítimos; comprobar políticas y volver a analizar seguridad.
+
 - [x] Añadir categoría profesional obligatoria al crear perfiles “Otros”.
 - [x] Reparar el alta de nuevas obligaciones de Marketing.
 - [x] Añadir ingesta Excel/CSV y calendario completo a Premios y Festivales.
