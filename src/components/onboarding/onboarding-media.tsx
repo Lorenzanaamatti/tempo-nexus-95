@@ -14,7 +14,7 @@ export function OnboardingMediaGrid({ media }: { media: OnboardingMedia[] }) {
     return <One m={media[0]} className="h-full max-h-[60vh] w-full rounded-xl" />;
   const cols = media.length <= 2 ? "grid-cols-2" : media.length <= 4 ? "grid-cols-2" : "grid-cols-3 sm:grid-cols-4";
   return (
-    <div className={`grid gap-2 ${cols}`}>
+    <div className={`grid content-start gap-2 ${cols}`}>
       {media.map((m, i) => (
         <One key={i} m={m} className="aspect-video w-full rounded-lg" />
       ))}

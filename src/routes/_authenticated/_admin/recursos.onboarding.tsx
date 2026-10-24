@@ -136,7 +136,7 @@ function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boole
           <h1 className={`mt-2 font-display uppercase leading-tight text-aubergine ${separator ? "text-5xl" : "text-3xl sm:text-4xl"}`}>
             {s.title}
           </h1>
-          <div className={`mt-6 grid flex-1 gap-8 ${s.body && s.media.length ? "lg:grid-cols-2" : ""}`}>
+          <div className={`mt-6 grid flex-1 content-start gap-8 ${s.body && s.media.length ? "lg:grid-cols-2" : ""}`}>
             {s.body && <Body text={s.body} />}
             <OnboardingMediaGrid media={s.media} />
           </div>
