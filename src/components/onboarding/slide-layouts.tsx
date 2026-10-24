@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import type { OnboardingSlide } from "@/lib/onboarding";
 import { OnboardingMediaGrid } from "./onboarding-media";
 
@@ -316,7 +316,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
             <div className="flex items-center justify-center gap-6">
               {nodes.map((n, i) => (
                 <Fragment key={i}>
-                  {i > 0 && (plus ? <Plus className="h-14 w-14 shrink-0 text-rust" strokeWidth={3} /> : <ArrowRight className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} />)}
+                  {i > 0 && (plus ? <Plus className="h-14 w-14 shrink-0 text-rust" strokeWidth={3} /> : i === 1 ? <ArrowLeft className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} /> : <ArrowRight className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} />)}
                   <div
                     className={`grid shrink-0 place-items-center rounded-full text-center font-display font-bold ${!plus && i === 1 ? "h-80 w-80 bg-aubergine text-primary-foreground" : "h-60 w-60 border-4 border-aubergine bg-card text-aubergine"}`}
                     style={{ fontSize: !plus && i === 1 ? 50 : plus ? 28 : 34, lineHeight: 1.05, padding: 20 }}
@@ -327,7 +327,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
               ))}
               {result && (
                 <>
-                  <ArrowRight className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} />
+                  <ArrowLeft className="h-16 w-16 shrink-0 text-rust" strokeWidth={2.5} />
                   <div className="grid h-80 w-96 shrink-0 place-items-center rounded-[48px] bg-rust p-8 text-center font-display font-bold text-primary-foreground" style={{ fontSize: 40, lineHeight: 1.1 }}>
                     {result.text}
                   </div>
