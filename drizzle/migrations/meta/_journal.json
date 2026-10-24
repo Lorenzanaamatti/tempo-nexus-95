@@ -50,6 +50,13 @@
       "when": 1792866952128,
       "tag": "0006_onboarding_slides",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792867968103,
+      "tag": "0007_onboarding_original_designs",
+      "breakpoints": true
     }
   ]
 }

@@ -177,7 +177,38 @@ function SlideStage({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SlideCanvas({ slide: s, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
+function SlideCanvas({ slide, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
+  const design = slide.media.find((m) => m.design);
+  const anims = slide.media.filter((m) => !m.design && (m.kind === "video" || /\.gif/i.test(m.url ?? m.path ?? "")));
+  const [showAnim, setShowAnim] = useState(false);
+  useEffect(() => setShowAnim(false), [slide.id]);
+  if (design && !showAnim)
+    return (
+      <div className="relative h-full w-full bg-background">
+        <OnboardingMediaGrid media={[design]} fill />
+        {anims.length > 0 && (
+          <button
+            onClick={() => setShowAnim(true)}
+            className="absolute bottom-8 right-8 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-xl"
+            style={{ fontSize: 26 }}
+          >
+            ▶ Ver animaciones
+          </button>
+        )}
+      </div>
+    );
+  const s = design ? { ...slide, media: slide.media.filter((m) => !m.design) } : slide;
+  if (design && showAnim)
+    return (
+      <div className="relative flex h-full flex-col px-24 py-16">
+        <button onClick={() => setShowAnim(false)} className="self-start font-mono text-rust" style={{ fontSize: 24 }}>← Volver a la diapositiva</button>
+        <div className="mt-8 min-h-0 flex-1"><OnboardingMediaGrid media={anims} fill /></div>
+      </div>
+    );
+  return <TextCanvas slide={s} index={index} total={total} />;
+}
+
+function TextCanvas({ slide: s, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
   const paras = s.body.split(/\n{2,}/).filter(Boolean);
   const isCover = !s.media.length && s.body.length < 120;
   const mediaOnly = !s.body && s.media.length > 0;
