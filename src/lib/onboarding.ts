@@ -17,6 +17,7 @@ export type OnboardingSlide = {
   chapter: string;
   title: string;
   body: string;
+  layout: string;
   media: OnboardingMedia[];
 };
 
@@ -30,7 +31,7 @@ export function useOnboardingSlides() {
     queryFn: async (): Promise<OnboardingSlide[]> => {
       const { data, error } = await supabase
         .from("onboarding_slides")
-        .select("id, position, chapter, title, body, media")
+        .select("id, position, chapter, layout, title, body, media")
         .order("position");
       if (error) throw error;
       return (data ?? []).map((s) => ({ ...s, media: (s.media as OnboardingMedia[]) ?? [] }));
