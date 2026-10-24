@@ -10,8 +10,9 @@ function One({ m, className, contain }: { m: OnboardingMedia; className?: string
 }
 
 /** fill: ocupa todo el alto disponible (dentro de la diapositiva). */
-export function OnboardingMediaGrid({ media, fill, stretch }: { media: OnboardingMedia[]; fill?: boolean; stretch?: boolean }) {
+export function OnboardingMediaGrid({ media, fill, stretch, cover }: { media: OnboardingMedia[]; fill?: boolean; stretch?: boolean; cover?: boolean }) {
   if (!media.length) return null;
+  if (cover) return <One m={media[0]} className="h-full w-full" />;
   if (stretch) return <One m={media[0]} contain className="h-full w-full" />;
   if (media.length === 1)
     return <One m={media[0]} contain={fill} className={fill ? "h-full w-full rounded-2xl" : "aspect-video w-full rounded-lg"} />;

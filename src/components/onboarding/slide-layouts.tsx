@@ -153,7 +153,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
       return (
         <div className="relative flex h-full flex-col justify-center bg-aubergine px-40 text-primary-foreground">
           <p className="font-mono font-bold uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.2em" }}>Benvinguda</p>
-          <h1 className="mt-6 font-display font-bold" style={{ fontSize: 170, lineHeight: 0.92, letterSpacing: "-0.03em" }}>{s.title}</h1>
+          <h1 className="mt-6 font-display font-bold text-primary-foreground" style={{ fontSize: 170, lineHeight: 0.92, letterSpacing: "-0.03em" }}>{s.title}</h1>
           <p className="mt-10 opacity-90" style={{ fontSize: 48 }}>{s.body}</p>
           <div className="absolute bottom-0 left-0 h-6 w-full bg-rust" />
           {index === 0 && (
@@ -171,13 +171,13 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
             <p className="font-mono font-bold uppercase text-rust-soft" style={{ fontSize: 24, letterSpacing: "0.2em" }}>
               {s.chapter} · {index + 1}/{total}
             </p>
-            <h1 className="mt-6 font-display font-bold" style={{ fontSize: s.title.length > 25 ? 100 : 140, lineHeight: 0.95, letterSpacing: "-0.03em" }}>
+            <h1 className="mt-6 font-display font-bold text-primary-foreground" style={{ fontSize: s.title.length > 25 ? 100 : 140, lineHeight: 0.95, letterSpacing: "-0.03em" }}>
               {s.title}
             </h1>
             {s.body && <p className="mt-8 opacity-80" style={{ fontSize: 40 }}>{s.body}</p>}
           </div>
           {media.length > 0 ? (
-            <div className="h-[620px] overflow-hidden rounded-3xl bg-card shadow-2xl"><OnboardingMediaGrid media={media} fill stretch /></div>
+            <div className="h-[620px] overflow-hidden rounded-3xl"><OnboardingMediaGrid media={media} fill stretch /></div>
           ) : (
             <div className="h-full border-l-[24px] border-rust" />
           )}
@@ -193,12 +193,12 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
             </p>
             <div>
               <p className="font-mono uppercase opacity-70" style={{ fontSize: 26, letterSpacing: "0.14em" }}>Plusmusic</p>
-              <h1 className="mt-4 font-display font-bold" style={{ fontSize: s.title.length > 14 ? 76 : 110, lineHeight: 0.98 }}>{s.title}</h1>
+              <h1 className="mt-4 font-display font-bold text-primary-foreground" style={{ fontSize: s.title.length > 14 ? 76 : 110, lineHeight: 0.98 }}>{s.title}</h1>
             </div>
             {media[0] ? <div className="h-56"><OnboardingMediaGrid media={[media[0]]} fill stretch /></div> : <div className="h-3 w-40 bg-rust" />}
           </div>
           <div className="flex min-h-0 flex-col justify-center px-24 py-20">
-            <AutoFit base={36} className="flex flex-col justify-center"><Lines lines={loose} /></AutoFit>
+            <AutoFit base={42} className="flex flex-col justify-center"><Lines lines={loose} /></AutoFit>
           </div>
         </div>
       );
@@ -206,7 +206,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
     case "list":
       return (
         <Frame s={s} index={index} total={total}>
-          <AutoFit base={34} className="flex-1"><Lines lines={loose} numbered start={start} /></AutoFit>
+          <AutoFit base={42} className="flex-1"><Lines lines={loose} numbered start={start} /></AutoFit>
         </Frame>
       );
 
@@ -221,7 +221,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
                   <span className="font-mono font-bold text-rust" style={{ fontSize: 22 }}>{String(i + 1).padStart(2, "0")}</span>
                   <h2 className="font-display font-bold text-aubergine" style={{ fontSize: 38, lineHeight: 1.05 }}>{b.heading}</h2>
                 </div>
-                <AutoFit base={26} min={16} className="mt-5 flex-1"><Lines lines={b.lines} /></AutoFit>
+                <AutoFit base={32} min={16} className="mt-5 flex-1"><Lines lines={b.lines} /></AutoFit>
               </div>
             ))}
           </div>
@@ -243,7 +243,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
                   <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                     <h2 className="font-display font-bold text-aubergine" style={{ fontSize: 42, lineHeight: 1 }}>{name}</h2>
                     {role && <p className="mt-2 font-mono font-bold uppercase text-rust" style={{ fontSize: 20, letterSpacing: "0.1em" }}>{role}</p>}
-                    <AutoFit base={25} min={16} className="mt-4 flex-1"><Lines lines={b.lines} /></AutoFit>
+                    <AutoFit base={30} min={16} className="mt-4 flex-1"><Lines lines={b.lines} /></AutoFit>
                   </div>
                 </div>
               );
@@ -260,7 +260,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
             {titled.map((b, i) => (
               <div key={i} className="flex min-h-0 flex-col">
                 <h2 className="border-b-4 border-rust pb-4 font-display font-bold text-aubergine" style={{ fontSize: 40, lineHeight: 1.05 }}>{b.heading}</h2>
-                <AutoFit base={27} min={17} className="mt-6 flex-1"><Lines lines={b.lines} /></AutoFit>
+                <AutoFit base={34} min={17} className="mt-6 flex-1"><Lines lines={b.lines} /></AutoFit>
               </div>
             ))}
             {media.length > 0 && <div className="self-center"><div className="h-[420px]"><OnboardingMediaGrid media={media} fill stretch /></div></div>}
@@ -278,7 +278,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
                 <div className="flex min-h-0 flex-1 flex-col rounded-3xl bg-card p-9 shadow-sm ring-1 ring-border">
                   <span className="grid h-16 w-16 place-items-center rounded-full bg-aubergine font-display font-bold text-primary-foreground" style={{ fontSize: 30 }}>{i + 1}</span>
                   <h2 className="mt-6 font-display font-bold text-aubergine" style={{ fontSize: 34, lineHeight: 1.05 }}>{b.heading}</h2>
-                  <AutoFit base={25} min={16} className="mt-4 flex-1"><Lines lines={b.lines} /></AutoFit>
+                  <AutoFit base={32} min={16} className="mt-4 flex-1"><Lines lines={b.lines} /></AutoFit>
                 </div>
               </Fragment>
             ))}
@@ -316,7 +316,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
                 </>
               )}
             </div>
-            {notes.length > 0 && <div className="mx-auto max-w-[1300px]" style={{ fontSize: 30, lineHeight: 1.4 }}><Lines lines={notes} /></div>}
+            {notes.length > 0 && <div className="mx-auto max-w-[1300px]" style={{ fontSize: 36, lineHeight: 1.4 }}><Lines lines={notes} /></div>}
           </div>
         </Frame>
       );
@@ -327,7 +327,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
         <Frame s={s} index={index} total={total}>
           <div className={`grid min-h-0 flex-1 gap-16 ${s.body ? "grid-cols-[1fr_1.15fr]" : "grid-cols-1"}`}>
             {s.body && (
-              <AutoFit base={30} className="flex flex-col justify-center">
+              <AutoFit base={38} className="flex flex-col justify-center">
                 {loose.length > 0 && <Lines lines={loose} />}
                 {titled.map((b, i) => (
                   <div key={i} className="mt-[0.9em] first:mt-0">
@@ -343,7 +343,7 @@ export function SlideLayout({ slide: s, index, total }: { slide: OnboardingSlide
               ) : (
                 <div className="grid h-full grid-cols-3 gap-5">
                   {media.map((m, i) => (
-                    <div key={i} className="min-h-0 overflow-hidden rounded-2xl"><OnboardingMediaGrid media={[m]} fill /></div>
+                    <div key={i} className="min-h-0 overflow-hidden rounded-2xl"><OnboardingMediaGrid media={[m]} cover /></div>
                   ))}
                 </div>
               )}
