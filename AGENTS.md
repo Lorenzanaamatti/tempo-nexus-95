@@ -1,5 +1,7 @@
 ## Project rules
 
+- Sales-document compositions, items and outputs are read by staff; social assets and metrics are read by staff or through their RLS-visible parent post, so child rows cannot expose another artist's hidden post. Preserve existing write policies when tightening reads.
+
 - User account deletion is a BIG C-only server action that revalidates the exact email before deletion, preventing accidental or client-forged removals.- Roster occupancy is computed by the SQL function `roster_occupancy_months` (productions/phases/assignments, billing sprints, open pitches/candidacies); UI and the weekly `notify_roster_income_gaps` cron share it so alerts and screens never disagree.
 - Agency work for an artist is aggregated at read time (`fetchAgencyTimeline`) from pitches, candidacies, productions, press and the manual `composer_activity_log`; never duplicate those sources into the log.
 - AI-read contract payment terms are only suggestions; they become `production_billing_sprints` only after explicit human confirmation and never overwrite existing sprints.
