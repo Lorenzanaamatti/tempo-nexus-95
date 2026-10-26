@@ -3506,6 +3506,7 @@ export type Database = {
           chapter: string
           created_at: string
           id: string
+          lang: string
           layout: string
           media: Json
           position: number
@@ -3517,6 +3518,7 @@ export type Database = {
           chapter?: string
           created_at?: string
           id?: string
+          lang?: string
           layout?: string
           media?: Json
           position?: number
@@ -3528,6 +3530,7 @@ export type Database = {
           chapter?: string
           created_at?: string
           id?: string
+          lang?: string
           layout?: string
           media?: Json
           position?: number
