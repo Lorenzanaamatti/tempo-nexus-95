@@ -71,6 +71,13 @@
       "when": 1792868934069,
       "tag": "0009_onboarding_slide_layout",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793016282542,
+      "tag": "0010_onboarding_lang",
+      "breakpoints": true
     }
   ]
 }

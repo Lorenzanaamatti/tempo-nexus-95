@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useCurrentRole } from "@/lib/use-role";
-import { useMyOnboardingProgress, useOnboardingSlides } from "@/lib/onboarding";
+import { useMyOnboardingProgress, useOnboardingSlides, ONBOARDING_LABEL } from "@/lib/onboarding";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/_admin/recursos/tutoriales")({
@@ -33,7 +33,7 @@ function Tutoriales() {
     <div className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="font-display text-4xl uppercase text-aubergine">Tutoriales</h1>
       <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-rust">Onboarding</p>
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-rust">{ONBOARDING_LABEL.ca}</p>
         <h2 className="mt-1 font-display text-2xl uppercase text-aubergine">Benvinguda a Plusmusic / Interesante Compañía</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {slides.length} diapositives en 5 capítols: qui som, qui és qui, cultura, com es fa una peli i l’agència.
@@ -55,6 +55,7 @@ function Tutoriales() {
           )}
         </div>
       </div>
+      <CastCard isBigC={isBigC} />
       {isBigC && <ProgressPanel total={slides.length} />}
     </div>
   );
@@ -98,6 +99,29 @@ function ProgressPanel({ total }: { total: number }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function CastCard({ isBigC }: { isBigC: boolean }) {
+  const { data: slides = [] } = useOnboardingSlides("es");
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-rust">{ONBOARDING_LABEL.es}</p>
+      <h2 className="mt-1 font-display text-2xl uppercase text-aubergine">Bienvenida a Plusmusic / Interesante Compañía</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        La misma versión en castellano: {slides.length} diapositivas en 5 capítulos.
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button asChild>
+          <Link to="/recursos/onboarding" search={{ lang: "es" }}>Empezar</Link>
+        </Button>
+        {isBigC && (
+          <Button asChild variant="outline">
+            <Link to="/recursos/onboarding" search={{ edit: true, lang: "es" }}>Editar</Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
