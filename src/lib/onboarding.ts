@@ -23,15 +23,19 @@ export type OnboardingSlide = {
 
 export const ONBOARDING_BUCKET = "onboarding-media";
 
-export function useOnboardingSlides() {
+export type OnboardingLang = "ca" | "es";
+export const ONBOARDING_LABEL: Record<OnboardingLang, string> = { ca: "Onboarding CAT", es: "Onboarding CAST" };
+
+export function useOnboardingSlides(lang: OnboardingLang = "ca") {
   return useQuery({
-    queryKey: ["onboarding-slides"],
+    queryKey: ["onboarding-slides", lang],
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async (): Promise<OnboardingSlide[]> => {
       const { data, error } = await supabase
         .from("onboarding_slides")
         .select("id, position, chapter, layout, title, body, media")
+        .eq("lang", lang)
         .order("position");
       if (error) throw error;
       return (data ?? []).map((s) => ({ ...s, media: (s.media as OnboardingMedia[]) ?? [] }));

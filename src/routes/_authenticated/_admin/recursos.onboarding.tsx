@@ -13,6 +13,8 @@ import {
   useOnboardingSlides,
   type OnboardingMedia,
   type OnboardingSlide,
+  type OnboardingLang,
+  ONBOARDING_LABEL,
 } from "@/lib/onboarding";
 import { OnboardingMediaGrid } from "@/components/onboarding/onboarding-media";
 import { SLIDE_LAYOUTS, SlideLayout } from "@/components/onboarding/slide-layouts";
@@ -21,7 +23,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/_admin/recursos/onboarding")({
-  validateSearch: (s: Record<string, unknown>): { edit?: boolean } => ({ edit: s.edit === true || s.edit === "true" ? true : undefined }),
+  validateSearch: (s: Record<string, unknown>): { edit?: boolean; lang?: OnboardingLang } => ({
+    edit: s.edit === true || s.edit === "true" ? true : undefined,
+    lang: s.lang === "es" ? "es" : undefined,
+  }),
   component: Onboarding,
   head: () => ({
     meta: [
@@ -36,12 +41,12 @@ export const Route = createFileRoute("/_authenticated/_admin/recursos/onboarding
 });
 
 function Onboarding() {
-  const { edit } = Route.useSearch();
+  const { edit, lang = "ca" } = Route.useSearch();
   const { isBigC } = useCurrentRole();
-  const { data: slides = [], isLoading } = useOnboardingSlides();
+  const { data: slides = [], isLoading } = useOnboardingSlides(lang);
   if (isLoading) return <div className="p-10 text-muted-foreground">Cargando…</div>;
-  if (edit && isBigC) return <Editor slides={slides} />;
-  return <Viewer slides={slides} canEdit={isBigC} />;
+  if (edit && isBigC) return <Editor slides={slides} lang={lang} />;
+  return <Viewer slides={slides} canEdit={isBigC} lang={lang} />;
 }
 
 function Body({ text }: { text: string }) {
@@ -54,7 +59,7 @@ function Body({ text }: { text: string }) {
   );
 }
 
-function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boolean }) {
+function Viewer({ slides, canEdit, lang }: { slides: OnboardingSlide[]; canEdit: boolean; lang: OnboardingLang }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: progress, isFetched } = useMyOnboardingProgress(user?.id);
@@ -63,13 +68,13 @@ function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boole
 
   useEffect(() => {
     if (started || !isFetched || !slides.length) return;
-    const last = progress?.completed_at ? 0 : Math.max(0, (progress?.last_position ?? 1) - 1);
+    const last = lang !== "ca" || progress?.completed_at ? 0 : Math.max(0, (progress?.last_position ?? 1) - 1);
     setI(Math.min(last, slides.length - 1));
     setStarted(true);
   }, [isFetched, progress, slides.length, started]);
 
   useEffect(() => {
-    if (!started || !user || !slides.length) return;
+    if (!started || !user || !slides.length || lang !== "ca") return;
     const completed = i === slides.length - 1;
     if (progress?.completed_at && !completed) return;
     void saveOnboardingProgress(user.id, Math.max(i + 1, progress?.last_position ?? 0), completed).then(() =>
@@ -106,6 +111,7 @@ function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boole
         <Link to="/recursos/tutoriales" className="shrink-0 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-rust">
           ← Salir
         </Link>
+        <span className="shrink-0 rounded-full bg-accent px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-aubergine">{ONBOARDING_LABEL[lang]}</span>
         <nav className="flex min-w-0 flex-1 justify-center gap-1 overflow-x-auto">
           {chapters.map((c) => (
             <button
@@ -119,7 +125,7 @@ function Viewer({ slides, canEdit }: { slides: OnboardingSlide[]; canEdit: boole
         </nav>
         {canEdit && (
           <Button asChild variant="outline" size="sm" className="shrink-0">
-            <Link to="/recursos/onboarding" search={{ edit: true }}>Editar</Link>
+            <Link to="/recursos/onboarding" search={{ edit: true, lang: lang === "es" ? "es" : undefined }}>Editar</Link>
           </Button>
         )}
       </header>
@@ -182,7 +188,7 @@ function SlideCanvas({ slide, index, total }: { slide: OnboardingSlide; index: n
   return <SlideLayout slide={slide} index={index} total={total} />;
 }
 
-function Editor({ slides }: { slides: OnboardingSlide[] }) {
+function Editor({ slides, lang }: { slides: OnboardingSlide[]; lang: OnboardingLang }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [sel, setSel] = useState<string | undefined>(slides[0]?.id);
@@ -216,7 +222,7 @@ function Editor({ slides }: { slides: OnboardingSlide[] }) {
     const max = slides.reduce((m, x) => Math.max(m, x.position), 0);
     const { data, error } = await supabase
       .from("onboarding_slides")
-      .insert({ position: max + 1, chapter: s?.chapter ?? "", title: "Nova diapositiva" })
+      .insert({ lang, position: max + 1, chapter: s?.chapter ?? "", title: lang === "es" ? "Nueva diapositiva" : "Nova diapositiva" })
       .select("id")
       .single();
     if (error) return toast.error("No se ha podido crear");
@@ -245,7 +251,7 @@ function Editor({ slides }: { slides: OnboardingSlide[] }) {
       <aside className="border-b border-border bg-card p-4 lg:w-72 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <p className="font-display text-lg uppercase text-aubergine">Editar onboarding</p>
-          <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/recursos/onboarding", search: {} })} aria-label="Salir">
+          <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/recursos/onboarding", search: lang === "es" ? { lang: "es" } : {} })} aria-label="Salir">
             <X className="h-4 w-4" />
           </Button>
         </div>
