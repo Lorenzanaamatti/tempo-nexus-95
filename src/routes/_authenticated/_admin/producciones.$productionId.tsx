@@ -227,7 +227,8 @@ function ProduccionDetalle() {
   const finalized = stage === "finalizada";
   const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
   const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
-  const computedCommission = feeNum != null && pctNum != null ? (feeNum * pctNum) / 100 : null;
+  const realExpenses = (expensesQ.data ?? []).reduce((s, r) => s + Number(r.amount ?? 0), 0);
+  const computedCommission = computeAgencyCommission(feeNum, pctNum, (form.commission_basis || "precio") as CommissionBasis, realExpenses);
 
   return (
     <div className="mx-auto max-w-[1700px] px-6 py-10">
@@ -420,11 +421,11 @@ function ProduccionDetalle() {
             <ProductionInvoices productionId={productionId} />
           </Section>
 
-          <Section title="Datos económicos" description="Fee acordado y comisión IC de esta producción.">
+          <Section title="Datos económicos" description="Cuánto se factura a la productora y cómo cobra la agencia en este proyecto.">
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Label>Fee acordado (€)</Label>
+                <Label>Precio negociado con la productora (€)</Label>
                 <Input
                   key={`fee-${form.fee_amount}`}
                   defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
@@ -437,7 +438,24 @@ function ProduccionDetalle() {
                 {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
               </div>
               <div>
-                <Label>Comisión IC (%)</Label>
+                <Label>Modelo económico</Label>
+                <Select
+                  value={form.commission_basis || "precio"}
+                  onValueChange={(v) => {
+                    const auto = computeAgencyCommission(feeNum, pctNum, v as CommissionBasis, realExpenses);
+                    setForm({ ...form, commission_basis: v, ...(auto == null || !feeNum ? {} : { ic_commission: auto.toFixed(2) }) });
+                  }}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="precio">% sobre el precio negociado</SelectItem>
+                    <SelectItem value="margen">% sobre el margen del compositor</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">Se copia de la ficha del compositor/a; editable por proyecto.</p>
+              </div>
+              <div>
+                <Label>Comisión agencia (%)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -446,10 +464,8 @@ function ProduccionDetalle() {
                   value={form.ic_commission_pct}
                   onChange={(e) => {
                     const pct = e.target.value;
-                    const f = form.fee_amount === "" ? NaN : Number(form.fee_amount);
-                    // Solo recalculamos la comisión en euros si hay un fee válido:
-                    // nunca sobrescribimos con 0 una comisión pactada a mano.
-                    const auto = pct !== "" && Number.isFinite(f) && f > 0 ? (f * Number(pct)) / 100 : null;
+                    // Solo recalculamos si hay precio válido: nunca sobrescribimos con 0 una comisión pactada a mano.
+                    const auto = pct !== "" && feeNum ? computeAgencyCommission(feeNum, Number(pct), (form.commission_basis || "precio") as CommissionBasis, realExpenses) : null;
                     setForm({ ...form, ic_commission_pct: pct, ...(auto == null ? {} : { ic_commission: auto.toFixed(2) }) });
                   }}
                   placeholder="Ej. 15"
