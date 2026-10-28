@@ -78,6 +78,13 @@
       "when": 1793016282542,
       "tag": "0010_onboarding_lang",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793180679482,
+      "tag": "0011_expenses_budget_commission_basis",
+      "breakpoints": true
     }
   ]
 }
