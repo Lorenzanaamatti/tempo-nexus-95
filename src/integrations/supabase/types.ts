@@ -2191,6 +2191,8 @@ export type Database = {
           country: string | null
           created_at: string
           current_location: string | null
+          default_commission_basis: string | null
+          default_commission_pct: number | null
           email: string | null
           email_secondary: string | null
           fee_max: number | null
@@ -2247,6 +2249,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_location?: string | null
+          default_commission_basis?: string | null
+          default_commission_pct?: number | null
           email?: string | null
           email_secondary?: string | null
           fee_max?: number | null
@@ -2303,6 +2307,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_location?: string | null
+          default_commission_basis?: string | null
+          default_commission_pct?: number | null
           email?: string | null
           email_secondary?: string | null
           fee_max?: number | null
@@ -5684,6 +5690,7 @@ export type Database = {
       production_expenses: {
         Row: {
           amount: number
+          budget_amount: number | null
           composer_id: string | null
           concepto: string
           created_at: string
@@ -5696,6 +5703,7 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          budget_amount?: number | null
           composer_id?: string | null
           concepto: string
           created_at?: string
@@ -5708,6 +5716,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          budget_amount?: number | null
           composer_id?: string | null
           concepto?: string
           created_at?: string
@@ -5832,6 +5841,7 @@ export type Database = {
           actual_delivery_date: string | null
           award_date: string | null
           color: string | null
+          commission_basis: string | null
           composer_id: string | null
           contract_id: string | null
           country: string | null
@@ -5880,6 +5890,7 @@ export type Database = {
           actual_delivery_date?: string | null
           award_date?: string | null
           color?: string | null
+          commission_basis?: string | null
           composer_id?: string | null
           contract_id?: string | null
           country?: string | null
@@ -5928,6 +5939,7 @@ export type Database = {
           actual_delivery_date?: string | null
           award_date?: string | null
           color?: string | null
+          commission_basis?: string | null
           composer_id?: string | null
           contract_id?: string | null
           country?: string | null

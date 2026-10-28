@@ -1,3 +1,4 @@
+import { PartnerProductions } from "@/components/partner-productions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -176,6 +177,17 @@ function PartnerDetail() {
         <div className="grid gap-1.5"><Label>Website</Label><Input value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} placeholder="https://" /></div>
         <div className="grid gap-1.5"><Label>Relación con IC</Label><Textarea rows={3} value={form.relacion_ic ?? ""} onChange={(e) => set("relacion_ic", e.target.value)} /></div>
         <div className="grid gap-1.5"><Label>Notas</Label><Textarea rows={4} value={form.notas ?? ""} onChange={(e) => set("notas", e.target.value)} /></div>
+
+        {tipo === "Productora" && (
+          <div className="space-y-3 border-t border-border pt-6">
+            <h2 className="font-display text-2xl">Películas con nosotros</h2>
+            <p className="text-sm text-muted-foreground">Producciones en las que hemos trabajado con esta productora.</p>
+            <PartnerProductions
+              companyId={(detailQ.data as any).source_table === "production_companies" ? ((detailQ.data as any).source_id ?? null) : null}
+              name={detailQ.data.nombre}
+            />
+          </div>
+        )}
 
         <div className="space-y-3 border-t border-border pt-6">
           <h2 className="font-display text-2xl">Otros contactos</h2>
