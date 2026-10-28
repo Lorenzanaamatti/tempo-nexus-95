@@ -387,7 +387,7 @@ function ProduccionDetalle() {
       </Section>
 
       <Section title="Gastos de producción" description="Gastos por concepto: músicos, estudio, mezcla, copistería… Se reflejan en la ficha y el portal del compositor.">
-        <ProductionExpenses productionId={productionId} composerId={data.composer_id} feeAmount={data.fee_amount} />
+        <ProductionExpenses productionId={productionId} composerId={data.composer_id} feeAmount={data.fee_amount} commissionBasis={data.commission_basis} commissionPct={data.ic_commission_pct} />
       </Section>
 
       <Section title="Documentos vinculados" description="Presupuestos, deal memos, contratos de obra y adendas de PAPERWORK.">

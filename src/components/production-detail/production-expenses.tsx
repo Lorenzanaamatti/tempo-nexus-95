@@ -4,13 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { EmptyState } from "@/components/list-states";
 import { Money } from "@/components/money";
-import { formatDateEs } from "@/lib/dates";
 import { toast } from "sonner";
 import { Plus, Receipt } from "lucide-react";
+import { computeAgencyCommission, type CommissionBasis } from "@/lib/commission";
 
 const db = supabase as any;
 
@@ -23,7 +22,6 @@ export const EXPENSE_CONCEPTS = [
   "Copistería",
   "Licencias",
   "Viajes y dietas",
-  "Otros",
 ] as const;
 
 export type ProductionExpense = {
@@ -31,6 +29,7 @@ export type ProductionExpense = {
   concepto: string;
   description: string | null;
   amount: number | null;
+  budget_amount: number | null;
   expense_date: string | null;
   provider_name: string | null;
 };
@@ -41,63 +40,104 @@ export function useProductionExpenses(productionId: string) {
     queryFn: async () => {
       const { data, error } = await db
         .from("production_expenses")
-        .select("id, concepto, description, amount, expense_date, provider_name")
+        .select("id, concepto, description, amount, budget_amount, expense_date, provider_name")
         .eq("production_id", productionId)
-        .order("expense_date", { ascending: false, nullsFirst: false });
+        .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []) as ProductionExpense[];
     },
   });
 }
 
+/** Conceptos y proveedores ya usados en cualquier producción, para ofrecerlos en desplegable. */
+function useExpenseSuggestions() {
+  return useQuery({
+    queryKey: ["production-expenses-suggestions"],
+    queryFn: async () => {
+      const { data, error } = await db.from("production_expenses").select("concepto, provider_name").limit(5000);
+      if (error) throw error;
+      const uniq = (vals: (string | null)[]) => {
+        const m = new Map<string, string>();
+        vals.forEach((v) => { const t = v?.trim(); if (t && !m.has(t.toLowerCase())) m.set(t.toLowerCase(), t); });
+        return Array.from(m.values()).sort((a, b) => a.localeCompare(b, "es"));
+      };
+      return {
+        concepts: uniq([...EXPENSE_CONCEPTS, ...(data ?? []).map((r: any) => r.concepto)]),
+        providers: uniq((data ?? []).map((r: any) => r.provider_name)),
+      };
+    },
+  });
+}
+
+const parseNum = (s: string) => {
+  const t = s.trim().replace(/\./g, "").replace(",", ".");
+  if (!t) return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : NaN;
+};
+const pct = (v: number, total: number) => (total ? `${((v / total) * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %` : "—");
+
 export function ProductionExpenses({
   productionId,
   composerId,
   feeAmount,
+  commissionBasis,
+  commissionPct,
   readOnly = false,
 }: {
   productionId: string;
   composerId?: string | null;
   feeAmount?: number | null;
+  commissionBasis?: string | null;
+  commissionPct?: number | null;
   readOnly?: boolean;
 }) {
   const qc = useQueryClient();
   const listQ = useProductionExpenses(productionId);
-  const [concepto, setConcepto] = useState<string>(EXPENSE_CONCEPTS[0]);
-  const [customConcept, setCustomConcept] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [expenseDate, setExpenseDate] = useState("");
+  const sugQ = useExpenseSuggestions();
+  const [concepto, setConcepto] = useState("");
   const [provider, setProvider] = useState("");
+  const [budget, setBudget] = useState("");
+  const [real, setReal] = useState("");
 
   const rows = listQ.data ?? [];
-  const total = useMemo(() => rows.reduce((s, r) => s + Number(r.amount ?? 0), 0), [rows]);
-  const byConcept = useMemo(() => {
-    const map = new Map<string, number>();
-    rows.forEach((r) => map.set(r.concepto, (map.get(r.concepto) ?? 0) + Number(r.amount ?? 0)));
-    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-  }, [rows]);
+  const totalBudget = useMemo(() => rows.reduce((s, r) => s + Number(r.budget_amount ?? 0), 0), [rows]);
+  const totalReal = useMemo(() => rows.reduce((s, r) => s + Number(r.amount ?? 0), 0), [rows]);
+  const basis = (commissionBasis || "precio") as CommissionBasis;
+  const commission = computeAgencyCommission(feeAmount ?? null, commissionPct ?? null, basis, totalReal);
+  const margin = feeAmount != null ? Number(feeAmount) - totalReal : null;
 
   function invalidate() {
     qc.invalidateQueries({ queryKey: ["production-expenses", productionId] });
+    qc.invalidateQueries({ queryKey: ["production-expenses-suggestions"] });
     qc.invalidateQueries({ queryKey: ["composer-expenses"] });
   }
 
   async function add() {
-    const name = concepto === "Otros" && customConcept.trim() ? customConcept.trim() : concepto;
-    const value = Number(amount.replace(",", "."));
-    if (!name || Number.isNaN(value)) return toast.error("Indica un concepto y un importe válido");
+    const name = concepto.trim();
+    const b = parseNum(budget);
+    const r = parseNum(real);
+    if (!name) return toast.error("Escribe o elige un concepto");
+    if (Number.isNaN(b) || Number.isNaN(r)) return toast.error("Importe no válido");
+    if (b == null && r == null) return toast.error("Indica el importe presupuestado o el coste real");
     const { error } = await db.from("production_expenses").insert({
       production_id: productionId,
       composer_id: composerId || null,
       concepto: name,
-      description: description.trim() || null,
-      amount: value,
-      expense_date: expenseDate || null,
       provider_name: provider.trim() || null,
+      budget_amount: b,
+      amount: r ?? 0,
     });
     if (error) return toast.error(error.message);
-    setCustomConcept(""); setDescription(""); setAmount(""); setExpenseDate(""); setProvider("");
+    setConcepto(""); setProvider(""); setBudget(""); setReal("");
+    invalidate();
+  }
+
+  async function updateField(id: string, field: "budget_amount" | "amount", raw: string) {
+    const v = parseNum(raw);
+    if (Number.isNaN(v)) return toast.error("Importe no válido");
+    const { error } = await db.from("production_expenses").update({ [field]: field === "amount" ? (v ?? 0) : v }).eq("id", id);
+    if (error) return toast.error(error.message);
     invalidate();
   }
 
@@ -107,24 +147,22 @@ export function ProductionExpenses({
     invalidate();
   }
 
+  const fmt = (n: number | null) => (n == null ? "" : n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
   return (
     <div className="space-y-4">
       {!readOnly && (
-        <div className="grid gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[180px_1fr_120px_150px_150px_auto]">
-          <Select value={concepto} onValueChange={setConcepto}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {EXPENSE_CONCEPTS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          {concepto === "Otros" ? (
-            <Input value={customConcept} onChange={(e) => setCustomConcept(e.target.value)} placeholder="Concepto propio" />
-          ) : (
-            <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalle (opcional)" />
-          )}
-          <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Importe €" inputMode="decimal" />
-          <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
-          <Input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Proveedor" />
+        <div className="grid gap-2 rounded-sm border border-dashed border-border p-3 sm:grid-cols-[1fr_1fr_150px_150px_auto]">
+          <Input list={`concepts-${productionId}`} value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto (escribe o elige)" />
+          <datalist id={`concepts-${productionId}`}>
+            {(sugQ.data?.concepts ?? []).map((c) => <option key={c} value={c} />)}
+          </datalist>
+          <Input list={`providers-${productionId}`} value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Proveedor (escribe o elige)" />
+          <datalist id={`providers-${productionId}`}>
+            {(sugQ.data?.providers ?? []).map((c) => <option key={c} value={c} />)}
+          </datalist>
+          <Input value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Presupuestado €" inputMode="decimal" />
+          <Input value={real} onChange={(e) => setReal(e.target.value)} placeholder="Coste real €" inputMode="decimal" />
           <Button onClick={add}><Plus className="mr-1 h-4 w-4" /> Añadir</Button>
         </div>
       )}
@@ -134,64 +172,89 @@ export function ProductionExpenses({
       ) : listQ.error ? (
         <p className="text-sm text-destructive">{(listQ.error as any)?.message}</p>
       ) : !rows.length ? (
-        <EmptyState variant="inline" icon={Receipt} title="Sin gastos" description="Añade los gastos de producción con su concepto para ver el margen real." />
+        <EmptyState variant="inline" icon={Receipt} title="Sin gastos" description="Añade los gastos de producción con su concepto, proveedor, presupuesto y coste real." />
       ) : (
-        <>
-          <div className="overflow-x-auto rounded-sm border border-border">
-            <table className="w-full text-base">
-              <thead className="bg-muted/40 text-[10px] uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-2 text-left">Concepto</th>
-                  <th className="px-3 py-2 text-left">Detalle</th>
-                  <th className="px-3 py-2 text-left">Proveedor</th>
-                  <th className="px-3 py-2 text-left">Fecha</th>
-                  <th className="px-3 py-2 text-right">Importe</th>
-                  {!readOnly && <th className="px-3 py-2" />}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
+        <div className="overflow-x-auto rounded-sm border border-border">
+          <table className="w-full text-base">
+            <thead className="bg-muted/40 text-[10px] uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left">Concepto</th>
+                <th className="px-3 py-2 text-left">Proveedor</th>
+                <th className="px-3 py-2 text-right">Presupuestado (€)</th>
+                <th className="px-3 py-2 text-right">% presupuesto</th>
+                <th className="px-3 py-2 text-right">Coste real (€)</th>
+                <th className="px-3 py-2 text-right">% coste real</th>
+                <th className="px-3 py-2 text-right">Desviación (€)</th>
+                {!readOnly && <th className="px-3 py-2" />}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const b = Number(r.budget_amount ?? 0);
+                const c = Number(r.amount ?? 0);
+                const dev = c - b;
+                return (
                   <tr key={r.id} className="border-t border-border/60">
                     <td className="px-3 py-2 font-medium">{r.concepto}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.description ?? "—"}</td>
                     <td className="px-3 py-2 text-muted-foreground">{r.provider_name ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{formatDateEs(r.expense_date)}</td>
-                    <td className="px-3 py-2 text-right"><Money value={r.amount} /></td>
+                    <td className="px-3 py-1 text-right">
+                      {readOnly ? <Money value={r.budget_amount} /> : (
+                        <Input key={`b-${r.id}-${r.budget_amount}`} className="h-8 text-right" defaultValue={fmt(r.budget_amount)} onBlur={(e) => e.target.value !== fmt(r.budget_amount) && updateField(r.id, "budget_amount", e.target.value)} />
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(b, totalBudget)}</td>
+                    <td className="px-3 py-1 text-right">
+                      {readOnly ? <Money value={r.amount} /> : (
+                        <Input key={`a-${r.id}-${r.amount}`} className="h-8 text-right" defaultValue={fmt(r.amount)} onBlur={(e) => e.target.value !== fmt(r.amount) && updateField(r.id, "amount", e.target.value)} />
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(c, totalReal)}</td>
+                    <td className={`px-3 py-2 text-right ${dev > 0 ? "text-destructive" : ""}`}><Money value={dev} /></td>
                     {!readOnly && (
                       <td className="px-3 py-2 text-right">
                         <ConfirmDeleteButton iconOnly title="¿Eliminar este gasto?" onConfirm={() => remove(r.id)} />
                       </td>
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+              <tr className="border-t-2 border-border font-medium">
+                <td className="px-3 py-2" colSpan={2}>TOTAL</td>
+                <td className="px-3 py-2 text-right"><Money value={totalBudget} /></td>
+                <td className="px-3 py-2 text-right tabular-nums">{totalBudget ? "100 %" : "—"}</td>
+                <td className="px-3 py-2 text-right"><Money value={totalReal} /></td>
+                <td className="px-3 py-2 text-right tabular-nums">{totalReal ? "100 %" : "—"}</td>
+                <td className={`px-3 py-2 text-right ${totalReal - totalBudget > 0 ? "text-destructive" : ""}`}><Money value={totalReal - totalBudget} /></td>
+                {!readOnly && <td />}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-sm border border-border p-3">
-              <Label className="smallcaps text-[10px] text-muted-foreground">Total gastos</Label>
-              <p className="font-display text-2xl"><Money value={total} /></p>
-            </div>
-            {feeAmount != null && (
-              <div className="rounded-sm border border-border p-3">
-                <Label className="smallcaps text-[10px] text-muted-foreground">Margen sobre caché</Label>
-                <p className="font-display text-2xl"><Money value={Number(feeAmount) - total} /></p>
-              </div>
-            )}
-            <div className="rounded-sm border border-border p-3">
-              <Label className="smallcaps text-[10px] text-muted-foreground">Por concepto</Label>
-              <ul className="mt-1 space-y-0.5 text-xs">
-                {byConcept.map(([c, v]) => (
-                  <li key={c} className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">{c}</span>
-                    <Money value={v} />
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {feeAmount != null && (
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="rounded-sm border border-border p-3">
+            <Label className="smallcaps text-[10px] text-muted-foreground">Precio negociado</Label>
+            <p className="font-display text-2xl"><Money value={feeAmount} /></p>
           </div>
-        </>
+          <div className="rounded-sm border border-border p-3">
+            <Label className="smallcaps text-[10px] text-muted-foreground">Margen del compositor/a</Label>
+            <p className="font-display text-2xl"><Money value={margin} /></p>
+            <p className="text-xs text-muted-foreground">Precio − coste real</p>
+          </div>
+          <div className="rounded-sm border border-border p-3">
+            <Label className="smallcaps text-[10px] text-muted-foreground">Comisión agencia</Label>
+            <p className="font-display text-2xl">{commission == null ? "—" : <Money value={commission} />}</p>
+            <p className="text-xs text-muted-foreground">
+              {commissionPct == null ? "Falta el % en Datos económicos" : `${commissionPct} % sobre ${basis === "margen" ? "el margen" : "el precio negociado"}`}
+            </p>
+          </div>
+          <div className="rounded-sm border border-border p-3">
+            <Label className="smallcaps text-[10px] text-muted-foreground">Le queda al compositor/a</Label>
+            <p className="font-display text-2xl"><Money value={margin != null ? margin - (commission ?? 0) : null} /></p>
+          </div>
+        </div>
       )}
     </div>
   );
