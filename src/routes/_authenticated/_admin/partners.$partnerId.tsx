@@ -182,7 +182,7 @@ function PartnerDetail() {
             <h2 className="font-display text-2xl">Películas con nosotros</h2>
             <p className="text-sm text-muted-foreground">Producciones en las que hemos trabajado con esta productora.</p>
             <PartnerProductions
-              companyId={detailQ.data.source_table === "production_companies" ? (detailQ.data.source_id ?? null) : null}
+              companyId={(detailQ.data as any).source_table === "production_companies" ? ((detailQ.data as any).source_id ?? null) : null}
               name={detailQ.data.nombre}
             />
           </div>
