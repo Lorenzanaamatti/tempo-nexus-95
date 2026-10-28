@@ -15,9 +15,10 @@ import { ExternalLink, FileText, Link2, Trash2, Unlink, Upload } from "lucide-re
 const db = supabase as any;
 const BUCKET = "production-docs";
 
-type DocRow =
-  | { kind: "deal_memo" | "contrato"; id: string; title: string; status: string | null }
-  | { kind: "propio"; id: string; title: string; status: string | null; url: string | null; storage_path: string | null; docKind: string | null };
+type DocRow = {
+  kind: "deal_memo" | "contrato" | "propio"; id: string; title: string; status: string | null;
+  url?: string | null; storage_path?: string | null; docKind?: string | null;
+};
 
 const DOC_KINDS = ["Presupuesto", "Deal memo", "Contrato", "Adenda", "Guion", "Cue sheet", "Otro"];
 type Mode = "enlace" | "archivo" | "paperwork";
@@ -107,7 +108,7 @@ export function ProductionLinkedDocuments({ productionId }: { productionId: stri
     }
   }
 
-  async function openOwn(r: Extract<DocRow, { kind: "propio" }>) {
+  async function openOwn(r: DocRow) {
     if (r.url) return window.open(r.url, "_blank", "noopener");
     if (!r.storage_path) return;
     const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(r.storage_path, 300);
