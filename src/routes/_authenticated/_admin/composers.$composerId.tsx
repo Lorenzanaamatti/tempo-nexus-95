@@ -216,6 +216,8 @@ function Inner({
         fee_min: (c as { fee_min?: number | null }).fee_min ?? null,
         fee_max: (c as { fee_max?: number | null }).fee_max ?? null,
         fee_notes: (c as { fee_notes?: string | null }).fee_notes ?? null,
+        default_commission_basis: (c as { default_commission_basis?: string | null }).default_commission_basis ?? null,
+        default_commission_pct: (c as { default_commission_pct?: number | null }).default_commission_pct ?? null,
       })
       .eq("id", c.id);
     setSaving(false);
@@ -924,6 +926,32 @@ function Inner({
               value={(c as { fee_notes?: string | null }).fee_notes ?? ""}
               onChange={(e) => field("fee_notes", e.target.value || null)}
               placeholder="Ej. serie por capítulo, publicidad…"
+            />
+          </Field>
+        </div>
+      </Section>
+      <Section title="Modelo económico con la agencia">
+        <p className="text-xs text-muted-foreground">
+          Se copia automáticamente a cada proyecto nuevo; en cada proyecto se puede cambiar si hay un acuerdo específico.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="La agencia cobra un % sobre">
+            <select
+              className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm"
+              value={(c as { default_commission_basis?: string | null }).default_commission_basis ?? ""}
+              onChange={(e) => field("default_commission_basis" as never, (e.target.value || null) as never)}
+            >
+              <option value="">Sin definir</option>
+              <option value="precio">El precio negociado</option>
+              <option value="margen">El margen del compositor/a (precio − gastos)</option>
+            </select>
+          </Field>
+          <Field label="Comisión agencia (%)">
+            <Input
+              type="number"
+              step="0.01"
+              value={(c as { default_commission_pct?: number | null }).default_commission_pct ?? ""}
+              onChange={(e) => field("default_commission_pct" as never, (e.target.value === "" ? null : Number(e.target.value)) as never)}
             />
           </Field>
         </div>
