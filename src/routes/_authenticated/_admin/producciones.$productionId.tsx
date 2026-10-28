@@ -28,7 +28,8 @@ import { ProductionMilestonesEditor } from "@/components/production-detail/miles
 import { ProductionLinkedDocuments } from "@/components/production-detail/linked-documents";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
-import { ProductionExpenses } from "@/components/production-detail/production-expenses";
+import { ProductionExpenses, useProductionExpenses } from "@/components/production-detail/production-expenses";
+import { computeAgencyCommission, type CommissionBasis } from "@/lib/commission";
 import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/components/production-detail/closure-panel";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -60,12 +61,13 @@ type Form = {
   fee_amount: string;
   ic_commission_pct: string;
   ic_commission: string;
+  commission_basis: string;
 };
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
   country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", notes: "",
-  fee_amount: "", ic_commission_pct: "", ic_commission: "",
+  fee_amount: "", ic_commission_pct: "", ic_commission: "", commission_basis: "",
 };
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
@@ -83,6 +85,7 @@ function ProduccionDetalle() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { isBigC } = useCurrentRole();
+  const expensesQ = useProductionExpenses(productionId);
 
   const prodQ = useQuery({
     queryKey: ["produccion", productionId],
@@ -152,6 +155,7 @@ function ProduccionDetalle() {
       fee_amount: data.fee_amount != null ? String(data.fee_amount) : "",
       ic_commission_pct: data.ic_commission_pct != null ? String(data.ic_commission_pct) : "",
       ic_commission: data.ic_commission != null ? String(data.ic_commission) : "",
+      commission_basis: data.commission_basis ?? "",
     };
     setForm(hydrated);
     markClean(hydrated);
@@ -177,6 +181,7 @@ function ProduccionDetalle() {
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
       ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
+      commission_basis: form.commission_basis || null,
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
