@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { computeAgencyCommission } from "./commission";
+import { describe, it, expect } from "bun:test";
+import { computeAgencyCommission } from "@/lib/commission";
 
 describe("computeAgencyCommission", () => {
   it("sobre precio negociado ignora los gastos", () => {
