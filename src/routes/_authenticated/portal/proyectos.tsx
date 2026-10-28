@@ -143,7 +143,7 @@ function Section({ title, items, muted }: { title: string; items: any[]; muted?:
             {!muted && (
               <div className="mt-4">
                 <p className="smallcaps mb-2 text-xs text-muted-foreground">Gastos de producción</p>
-                <ProductionExpenses productionId={p.id} composerId={p.composer_id} feeAmount={p.fee_amount} readOnly />
+                <ProductionExpenses productionId={p.id} composerId={p.composer_id} feeAmount={p.fee_amount} commissionBasis={p.commission_basis} commissionPct={p.ic_commission_pct} readOnly />
               </div>
             )}
             {p.notes && (
