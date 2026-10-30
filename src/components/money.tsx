@@ -28,5 +28,6 @@ export function Money({ value, moneda, compact, emptyLabel, className }: MoneyPr
       : compact
         ? formatEUR0(value)
         : formatEUR(value);
-  return <span className={`tabular-nums ${amountClass(value)} ${className ?? ""}`.trim()}>{text}</span>;
+  // El rojo de los negativos (amountClass) siempre gana al color pasado por className.
+  return <span className={`tabular-nums ${className ?? ""} ${amountClass(value)}`.trim()}>{text}</span>;
 }
