@@ -24,6 +24,15 @@ import { SuggestInput } from "@/components/suggest-input";
 import { SocialActivityPanel } from "@/components/social-activity-panel";
 import { IcStaffEditor } from "@/components/production-detail/ic-staff-editor";
 import {
+  ChangeReasonDialog, ProductionChangeLog, invalidateProductionTimelines, logProductionChanges, useSiblingProductions, type PendingChange,
+} from "@/components/production-detail/change-reason-dialog";
+
+/** Fechas de la ficha cuyo cambio (no la primera vez) pide motivo y queda registrado. */
+const TRACKED_DATES: Record<string, string> = {
+  start_date: "Fecha inicio rodaje", delivery_date: "Fecha de entrega estimada", actual_delivery_date: "Fecha de entrega real",
+  premiere_date: "Fecha de estreno", nomination_date: "Fecha de nominación", award_date: "Fecha de premio",
+};
+import {
   PRODUCTION_STAGE_LABEL, PRODUCTION_STAGE_TONE, STAGE_DEFAULT_STATUS, stageOf,
   type ProductionStage,
 } from "@/lib/production-lifecycle";
@@ -174,6 +183,8 @@ function ProduccionDetalle() {
   const personOptions = (peopleAllQ.data ?? []).map((p: any) => ({ id: p.id, label: p.full_name, hint: p.role }));
 
   const [form, setForm] = useState<Form>(EMPTY);
+  const siblingListQ = useSiblingProductions(productionId);
+  const [dateChange, setDateChange] = useState<(PendingChange & { prev: Record<string, string | null> }) | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmFinalize, setConfirmFinalize] = useState(false);
   const [closureGate, setClosureGate] = useState<ProductionStage | null>(null);
@@ -215,6 +226,41 @@ function ProduccionDetalle() {
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
   }
   const stage: ProductionStage = stageOf(data?.status);
+
+  async function confirmDateChange(reason: string, siblingIds: string[]) {
+    const p = dateChange;
+    setDateChange(null);
+    if (!p) return;
+    try {
+      const patch = Object.fromEntries(p.changes.map((c) => [c.field, c.next]));
+      const sibs = siblingListQ.data ?? [];
+      const applied = sibs.filter((s) => siblingIds.includes(s.id));
+      if (applied.length) {
+        const { error } = await (supabase as any).from("productions").update(patch).in("id", applied.map((s) => s.id));
+        if (error) throw error;
+      }
+      const also = applied.map((s) => s.label).join(", ") || null;
+      await logProductionChanges([
+        ...p.changes.map((c) => ({ production_id: productionId, subject: "Ficha", field: c.label, old_value: c.old, new_value: c.next, reason, also_applied_to: also })),
+        ...applied.flatMap((s) => p.changes.map((c) => ({ production_id: s.id, subject: "Ficha", field: c.label, old_value: c.old, new_value: c.next, reason, also_applied_to: "Cambio hecho desde otra ficha de la película" }))),
+      ]);
+      toast.success(also ? `Cambio registrado y aplicado también en la ficha de ${also}` : "Cambio registrado");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo registrar el cambio");
+    }
+    invalidateProductionTimelines(qc);
+  }
+
+  /** Cancelar: se vuelve a las fechas anteriores. */
+  async function cancelDateChange() {
+    const p = dateChange;
+    setDateChange(null);
+    if (!p) return;
+    const { error } = await (supabase as any).from("productions").update(p.prev).eq("id", productionId);
+    if (error) return toast.error(error.message);
+    toast.info("Cambio de fecha anulado");
+    invalidateProductionTimelines(qc);
+  }
 
   useEffect(() => {
     if (!data) return;
@@ -300,10 +346,24 @@ function ProduccionDetalle() {
     if (error) return toast.error(error.message);
     if (siblings.length && savedRef.current) {
       const prev = savedRef.current as Record<string, any>;
-      const changed = Object.keys(payload).filter((k) => (form as any)[k] !== prev[k]);
+      const changed = Object.keys(payload).filter((k) => (form as any)[k] !== prev[k] && !(k in TRACKED_DATES && prev[k]));
       if (changed.length) setPendingSync((cur) => ({ ...cur, ...Object.fromEntries(changed.map((k) => [k, payload[k]])) }));
     }
+    if (savedRef.current) {
+      const prev = savedRef.current as Record<string, any>;
+      const changes = Object.keys(TRACKED_DATES)
+        .filter((k) => prev[k] && (form as any)[k] !== prev[k])
+        .map((k) => ({ field: k, label: TRACKED_DATES[k], old: prev[k] || null, next: (form as any)[k] || null }));
+      if (changes.length) {
+        setDateChange((cur) => {
+          const merged = new Map((cur?.changes ?? []).map((c) => [c.field, c]));
+          changes.forEach((c) => merged.set(c.field, { ...c, old: merged.get(c.field)?.old ?? c.old }));
+          return { title: "Fechas de la ficha", changes: [...merged.values()], prev: { ...(cur?.prev ?? {}), ...Object.fromEntries(changes.map((c) => [c.field, cur?.prev?.[c.field] ?? c.old])) } };
+        });
+      }
+    }
     savedRef.current = form;
+    invalidateProductionTimelines(qc);
     await syncPrimaryCompanyLink();
     await syncPrimaryDirectorLink();
     toast.success("Guardado");
@@ -697,6 +757,12 @@ function ProduccionDetalle() {
       <Section title="Actividad en redes sociales">
         <SocialActivityPanel productionId={productionId} />
       </Section>
+
+      <Section title="Registro de cambios" description="Cambios de fechas y procesos con su motivo, la fecha del cambio y las iniciales de quien lo hizo.">
+        <ProductionChangeLog productionId={productionId} />
+      </Section>
+
+      <ChangeReasonDialog pending={dateChange} siblings={siblingListQ.data ?? []} onConfirm={confirmDateChange} onCancel={cancelDateChange} />
 
       <Section title="Tareas vinculadas">
         <ProductionTasks productionId={productionId} productionTitle={form.title} />
