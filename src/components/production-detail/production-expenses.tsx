@@ -249,12 +249,12 @@ export function ProductionExpenses({
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Total gastos</Label>
-            <p className="font-display text-2xl"><Money value={totalReal} /></p>
+            <p className="font-display text-2xl"><Money value={totalReal} className="text-destructive" /></p>
             <p className="text-xs text-muted-foreground">Coste real</p>
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Margen del compositor/a</Label>
-            <p className="font-display text-2xl"><Money value={margin} /></p>
+            <p className="font-display text-2xl"><Money value={margin} className="text-success" /></p>
             <p className="text-xs text-muted-foreground">Precio − coste real</p>
           </div>
           <div className="rounded-sm border border-border p-3">
@@ -266,7 +266,7 @@ export function ProductionExpenses({
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Le queda al compositor/a</Label>
-            <p className="font-display text-2xl"><Money value={margin != null ? margin - (commission ?? 0) : null} /></p>
+            <p className="font-display text-2xl"><Money value={margin != null ? margin - (commission ?? 0) : null} className="text-success" /></p>
           </div>
         </div>
       )}
