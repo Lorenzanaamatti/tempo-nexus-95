@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { EmptyState } from "@/components/list-states";
 import { Money } from "@/components/money";
+import { formatNumberEs } from "@/lib/money";
 import { toast } from "sonner";
 import { Plus, Receipt } from "lucide-react";
 import { computeAgencyCommission, type CommissionBasis } from "@/lib/commission";
@@ -76,7 +77,7 @@ const parseNum = (s: string) => {
   return Number.isFinite(n) ? n : NaN;
 };
 const devCls = (d: number) => (d > 0 ? "text-destructive" : d < 0 ? "text-success" : "text-muted-foreground");
-const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${Math.abs(d).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any })} €`;
+const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${formatNumberEs(Math.abs(d))} €`;
 const pct = (v: number, total: number) => (total ? `${((v / total) * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %` : "—");
 
 export function ProductionExpenses({
