@@ -225,9 +225,9 @@ export function ProductionGantt({
   return (
     <div className="space-y-4">
       <GanttLegend items={groups.map((g) => ({ name: g.title, color: g.color }))} />
-      <div ref={scrollRef} className="overflow-x-auto rounded-sm border border-border">
+      <div ref={scrollRef} className="max-h-[70vh] overflow-auto rounded-sm border border-border">
         <div style={{ minWidth: `${timelineWidth}px` }}>
-          <div className="flex border-b border-border bg-muted/40">
+          <div className="sticky top-0 z-30 flex border-b border-border bg-muted">
             <div className="sticky left-0 z-20 w-56 shrink-0 bg-muted px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               Proyecto · fase
             </div>
