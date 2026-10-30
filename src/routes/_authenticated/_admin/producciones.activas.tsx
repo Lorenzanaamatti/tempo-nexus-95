@@ -119,16 +119,8 @@ function NewProductionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
     }).select("id").single();
     if (error) { setSaving(false); return toast.error(error.message); }
 
-    // El compositor elegido debe quedar vinculado como representado de la ficha.
-    if (composerId) {
-      const { error: linkErr } = await supabase.from("production_assignments").insert({
-        production_id: created.id,
-        composer_id: composerId,
-        role_in_project: "compositor_principal",
-      });
-      if (linkErr) toast.message("Producción creada, pero no se pudo vincular el compositor: " + linkErr.message);
-      qc.invalidateQueries({ queryKey: ["production-representados", created.id] });
-    }
+    // El vínculo compositor ↔ ficha lo crea la base de datos al guardar.
+    qc.invalidateQueries({ queryKey: ["production-representados", created.id] });
 
 
     try {
