@@ -2,7 +2,6 @@ import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Money } from "@/components/money";
 import { supabase } from "@/integrations/supabase/client";
-import { formatEUR } from "@/lib/money";
 
 function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -37,17 +36,43 @@ export function ProductionEconomics({
     },
   });
 
-  const approved = q.data?.approved || Number(feeAmount ?? 0);
+  const price = Number(feeAmount ?? 0);
+  const memoTotal = q.data?.approved ?? 0;
   const invoiced = q.data?.invoiced ?? 0;
   const paid = q.data?.paid ?? 0;
-  const margin = approved > 0 && commission != null ? (Number(commission) / approved) * 100 : null;
+  const margin = price > 0 && commission != null ? (Number(commission) / price) * 100 : null;
+  const both = price > 0 && memoTotal > 0;
+  const diff = Math.abs(price - memoTotal);
+
+  let note: React.ReactNode;
+  if (price <= 0) {
+    note = <span className="text-destructive">Falta el precio de venta en «Datos principales»: sin él no se puede cruzar con el deal memo ni calcular el margen.</span>;
+  } else if (both && diff > 0.005) {
+    note = (
+      <span className="text-destructive">
+        El precio de venta de la ficha y el deal memo cerrado no coinciden: <Money value={price} /> frente a <Money value={memoTotal} /> (diferencia <Money value={diff} />).
+      </span>
+    );
+  } else if (both) {
+    note = <span className="text-muted-foreground">El precio de venta de la ficha coincide con el deal memo cerrado.</span>;
+  } else {
+    note = <span className="text-muted-foreground">Sin deal memo cerrado: se usa el precio de venta de la ficha.</span>;
+  }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <Kpi label="Presupuesto aprobado" value={<Money value={approved} />} />
-      <Kpi label="Facturado" value={<Money value={invoiced} />} />
-      <Kpi label="Cobrado" value={<Money value={paid} />} />
-      <Kpi label="Margen estimado" value={margin == null ? "—" : `${margin.toFixed(1)} %`} />
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Kpi label="Precio de venta (ficha)" value={price > 0 ? <Money value={price} /> : "—"} />
+        <Kpi label="Deal memo cerrado" value={memoTotal > 0 ? <Money value={memoTotal} /> : "—"} />
+        <Kpi label="Facturado" value={<Money value={invoiced} />} />
+        <Kpi label="Cobrado" value={<Money value={paid} />} />
+      </div>
+      <p className="text-sm">{note}</p>
+      {margin != null && (
+        <p className="text-xs text-muted-foreground">
+          Margen estimado de la agencia: {margin.toFixed(1)} % sobre el precio de venta.
+        </p>
+      )}
     </div>
   );
 }

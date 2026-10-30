@@ -60,7 +60,7 @@ const SYNC_LABEL: Record<string, string> = {
   director_id: "director", director: "director", country: "país", original_language: "idioma",
   year: "año", start_date: "fecha inicio rodaje", delivery_date: "fecha de entrega",
   actual_delivery_date: "fecha de entrega real", delivery_delay_reason: "motivo del cambio de entrega", premiere_date: "fecha de estreno", notes: "notas", status: "estado", imdb_url: "IMDb", nomination_date: "fecha de nominación", award_date: "fecha de premio", negotiator_person_id: "responsable de negociación", production_director_name: "director de producción", postproduction_supervisor_name: "responsable de postproducción", music_supervisor_name: "supervisor musical", other_responsibles: "otros responsables", project_type_note: "aclaración",
-  fee_amount: "precio", ic_commission_pct: "% comisión", ic_commission: "comisión", commission_basis: "modelo de comisión",
+  fee_amount: "precio de venta", ic_commission_pct: "% comisión", ic_commission: "comisión", commission_basis: "modelo de comisión",
 };
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/$productionId")({
@@ -594,6 +594,21 @@ function ProduccionDetalle() {
             </Select>
           </div>
           <div>
+            <Label>Precio de venta (€)</Label>
+            <Input
+              key={`fee-main-${form.fee_amount}`}
+              defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
+              placeholder="0,00"
+              onBlur={(e) => {
+                const v = parseAmount(e.target.value);
+                setForm({ ...form, fee_amount: v == null ? "" : String(v) });
+              }}
+            />
+            {feeNum != null
+              ? <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>
+              : <p className="mt-1 text-xs text-muted-foreground">Se cruza con el apartado «Económico» más abajo.</p>}
+          </div>
+          <div>
             <Label>Cliente / Productora</Label>
             <CreatableSelect
               value={(companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? ""}
@@ -785,7 +800,7 @@ function ProduccionDetalle() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Label>Precio negociado con la productora (€)</Label>
+                <Label>Precio de venta (€)</Label>
                 <Input
                   key={`fee-${form.fee_amount}`}
                   defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
@@ -796,6 +811,7 @@ function ProduccionDetalle() {
                   }}
                 />
                 {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
+                <p className="mt-1 text-xs text-muted-foreground">Mismo dato que «Precio de venta» en Datos principales.</p>
               </div>
               <div>
                 <Label>Modelo económico</Label>
