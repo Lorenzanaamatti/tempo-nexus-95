@@ -14,10 +14,25 @@ export function PartnerProductions({ companyId, name }: { companyId: string | nu
       const sel = "id, title, year, status, composer:composers!productions_composer_fk(id, full_name)";
       const clean = name.trim().replace(/[%_,()]/g, "");
       const ors = [clean ? `production_company.ilike.${clean}` : null, companyId ? `partner_company_id.eq.${companyId}` : null].filter(Boolean);
-      if (!ors.length) return [];
-      const { data, error } = await db.from("productions").select(sel).or(ors.join(",")).order("year", { ascending: false, nullsFirst: false });
-      if (error) throw error;
-      return data ?? [];
+
+      // Por vínculo principal / nombre escrito en la producción.
+      const byName = ors.length
+        ? ((await db.from("productions").select(sel).or(ors.join(",")).order("year", { ascending: false, nullsFirst: false })).data ?? [])
+        : [];
+
+      // Y las producciones donde esta productora aparece como una más de varias.
+      let byLink: any[] = [];
+      if (companyId) {
+        const links = await db.from("production_partner_companies").select("production_id").eq("company_id", companyId);
+        if (links.error) throw links.error;
+        const ids = (links.data ?? []).map((r: any) => r.production_id).filter(Boolean);
+        if (ids.length) {
+          byLink = (await db.from("productions").select(sel).in("id", ids).order("year", { ascending: false, nullsFirst: false })).data ?? [];
+        }
+      }
+
+      const seen = new Set<string>();
+      return [...byName, ...byLink].filter((p: any) => !seen.has(p.id) && (seen.add(p.id), true));
     },
   });
 

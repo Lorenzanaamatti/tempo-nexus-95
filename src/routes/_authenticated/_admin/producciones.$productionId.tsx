@@ -26,6 +26,7 @@ import {
 import { ProductionRepresentadosEditor } from "@/components/production-detail/representados-editor";
 import { ProductionMilestonesEditor } from "@/components/production-detail/milestones-editor";
 import { ProductionLinkedDocuments } from "@/components/production-detail/linked-documents";
+import { ProductionCompaniesEditor } from "@/components/production-detail/production-companies-editor";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
 import { ProductionExpenses, useProductionExpenses } from "@/components/production-detail/production-expenses";
@@ -185,10 +186,36 @@ function ProduccionDetalle() {
     }).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
+    await syncPrimaryCompanyLink();
     toast.success("Guardado");
     markClean(form);
     qc.invalidateQueries({ queryKey: ["produccion", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
+    qc.invalidateQueries({ queryKey: ["production-companies-link", productionId] });
+  }
+
+  /** La productora principal del formulario manda también en el listado de varias productoras. */
+  async function syncPrimaryCompanyLink() {
+    const db = supabase as any;
+    if (form.partner_company_id) {
+      const { error } = await db
+        .from("production_partner_companies")
+        .upsert(
+          { production_id: productionId, company_id: form.partner_company_id, is_primary: true },
+          { onConflict: "production_id,company_id" },
+        );
+      if (error) toast.message("Productora principal guardada, pero no se pudo actualizar el listado de productoras.");
+      await db
+        .from("production_partner_companies")
+        .update({ is_primary: false })
+        .eq("production_id", productionId)
+        .neq("company_id", form.partner_company_id);
+    } else {
+      await db
+        .from("production_partner_companies")
+        .update({ is_primary: false })
+        .eq("production_id", productionId);
+    }
   }
 
   async function applyStage(next: ProductionStage) {
@@ -370,6 +397,13 @@ function ProduccionDetalle() {
           <div className="sm:col-span-2">
             <Label>Notas internas</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </div>
+          <div className="sm:col-span-2">
+            <ProductionCompaniesEditor
+              productionId={productionId}
+              primaryCompanyId={form.partner_company_id || null}
+              primaryCompanyName={(companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? null}
+            />
           </div>
         </div>
       </Section>
