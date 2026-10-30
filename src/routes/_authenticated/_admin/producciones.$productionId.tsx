@@ -68,6 +68,7 @@ type Form = {
   start_date: string;
   delivery_date: string;
   actual_delivery_date: string;
+  delivery_delay_reason: string;
   premiere_date: string;
   notes: string;
   fee_amount: string;
@@ -78,7 +79,7 @@ type Form = {
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
-  country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", premiere_date: "", notes: "",
+  country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", delivery_delay_reason: "", premiere_date: "", notes: "",
   fee_amount: "", ic_commission_pct: "", ic_commission: "", commission_basis: "",
 };
 
@@ -195,6 +196,7 @@ function ProduccionDetalle() {
       start_date: data.start_date ?? "",
       delivery_date: data.delivery_date ?? "",
       actual_delivery_date: data.actual_delivery_date ?? "",
+      delivery_delay_reason: (data as any).delivery_delay_reason ?? "",
       premiere_date: data.premiere_date ?? "",
       notes: data.notes ?? "",
       fee_amount: data.fee_amount != null ? String(data.fee_amount) : "",
@@ -224,6 +226,7 @@ function ProduccionDetalle() {
       start_date: form.start_date || null,
       delivery_date: form.delivery_date || null,
       actual_delivery_date: form.actual_delivery_date || null,
+      delivery_delay_reason: form.delivery_delay_reason || null,
       premiere_date: form.premiere_date || null,
       notes: form.notes || null,
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
@@ -499,7 +502,26 @@ function ProduccionDetalle() {
           <div><Label>Año de estreno / entrega</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
           <div><Label>Fecha inicio rodaje</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
           <div><Label>Fecha de entrega estimada</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>
-          <div><Label>Fecha de entrega real</Label><Input type="date" value={form.actual_delivery_date} onChange={(e) => setForm({ ...form, actual_delivery_date: e.target.value })} /></div>
+          <div>
+            <Label>Fecha de entrega real</Label>
+            <Input type="date" value={form.actual_delivery_date} onChange={(e) => setForm({ ...form, actual_delivery_date: e.target.value })} />
+            {(() => {
+              if (!form.delivery_date || !form.actual_delivery_date) return null;
+              const d = Math.round((Date.parse(form.actual_delivery_date) - Date.parse(form.delivery_date)) / 86400000);
+              if (d === 0) return <p className="mt-1 text-xs text-muted-foreground">Entregada en la fecha prevista</p>;
+              return (
+                <p className="mt-1 text-xs font-medium text-destructive">
+                  {d > 0 ? `+${d}` : d} {Math.abs(d) === 1 ? "día" : "días"} {d > 0 ? "de retraso" : "de adelanto"} respecto a la estimada
+                </p>
+              );
+            })()}
+          </div>
+          {form.delivery_date && form.actual_delivery_date && form.delivery_date !== form.actual_delivery_date && (
+            <div className="sm:col-span-2 rounded-md border border-destructive/40 p-3">
+              <Label className="text-destructive">¿Por qué ha cambiado la fecha de entrega?</Label>
+              <Textarea rows={2} placeholder="Explica la razón del cambio" value={form.delivery_delay_reason} onChange={(e) => setForm({ ...form, delivery_delay_reason: e.target.value })} />
+            </div>
+          )}
           <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
           <div className="sm:col-span-2">
             <Label>Notas internas</Label>
