@@ -24,7 +24,7 @@ export function DealMemoForm({ dm, onSaved }: { dm: any; onSaved: () => void }) 
     destinatario_final_email: dm.destinatario_final_email,
     importe_propuesto: dm.importe_propuesto == null
       ? ""
-      : new Intl.NumberFormat("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(dm.importe_propuesto)),
+      : new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any }).format(Number(dm.importe_propuesto)),
     moneda: dm.moneda ?? "EUR",
     plantilla_id: dm.plantilla_id ?? "",
     validador_interno_id: dm.validador_interno_id ?? "",

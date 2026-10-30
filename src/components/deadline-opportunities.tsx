@@ -1,3 +1,4 @@
+import { formatEUR } from "@/lib/money";
 import { ExportRowsButton } from "@/components/export-rows-button";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -158,7 +159,7 @@ export function DeadlineOpportunities({
                         {c.type === "date"
                           ? formatDateEs(r[c.key])
                           : c.type === "money"
-                            ? (r[c.key] != null ? `${Number(r[c.key]).toLocaleString("es-ES")} €` : "—")
+                            ? (r[c.key] != null ? formatEUR(r[c.key]) : "—")
                             : (r[c.key] || "—")}
                       </td>
                     ))}

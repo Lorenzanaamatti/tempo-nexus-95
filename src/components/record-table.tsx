@@ -1,3 +1,4 @@
+import { formatEUR } from "@/lib/money";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -186,7 +187,7 @@ export function RecordTable({
 
 function CellValue({ col, value }: { col: RecordColumn; value: any }) {
   if (col.type === "date") return <>{formatDateEs(value)}</>;
-  if (col.type === "money") return <>{value != null ? `${Number(value).toLocaleString("es-ES")} €` : "—"}</>;
+  if (col.type === "money") return <>{value != null ? formatEUR(value) : "—"}</>;
   if (col.type === "boolean") return <>{value ? "Sí" : "No"}</>;
   if (col.type === "tags") {
     const arr = Array.isArray(value) ? value : [];
