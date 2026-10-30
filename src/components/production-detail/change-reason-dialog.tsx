@@ -21,13 +21,15 @@ export function useSiblingProductions(productionId: string) {
       if (!me?.sibling_group_id) return [];
       const { data: rows } = await db
         .from("productions")
-        .select("id, composer:composers(full_name, artistic_name)")
+        .select("id, composer_id")
         .eq("sibling_group_id", me.sibling_group_id)
         .neq("id", productionId);
-      return ((rows ?? []) as any[]).map((r) => ({
-        id: r.id,
-        label: r.composer?.artistic_name || r.composer?.full_name || "otro representado",
-      }));
+      const cids = ((rows ?? []) as any[]).map((r) => r.composer_id).filter(Boolean);
+      const { data: cs } = cids.length
+        ? await db.from("composers").select("id, full_name, artistic_name").in("id", cids)
+        : { data: [] };
+      const byId = new Map(((cs ?? []) as any[]).map((c) => [c.id, c.artistic_name || c.full_name]));
+      return ((rows ?? []) as any[]).map((r) => ({ id: r.id, label: byId.get(r.composer_id) ?? "otro representado" }));
     },
   });
 }
