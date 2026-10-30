@@ -368,6 +368,7 @@ function ProduccionDetalle() {
       .update({ status: STAGE_DEFAULT_STATUS[next] })
       .eq("id", productionId);
     if (error) return toast.error(error.message);
+    setForm((f) => ({ ...f, status: STAGE_DEFAULT_STATUS[next] }));
     toast.success(`Estado: ${PRODUCTION_STAGE_LABEL[next]}`);
     qc.invalidateQueries({ queryKey: ["produccion", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
