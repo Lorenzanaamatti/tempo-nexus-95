@@ -73,8 +73,20 @@ export async function fetchComposerRelations(composerId: string) {
           role: f.composer_person_id === personRow.id ? "Compositor BSO" : "Supervisor musical",
         }));
       }
+
+      // Estilos del catálogo de la app asignados a cada pista (demo)
+      const { data: demoStyleRows } = await supabase
+        .from("composer_demo_styles")
+        .select("demo_id, style_id")
+        .eq("composer_id", composerId);
+      const demoStyleLinks: Record<string, string[]> = {};
+      (demoStyleRows ?? []).forEach((r: any) => {
+        demoStyleLinks[r.demo_id] = [...(demoStyleLinks[r.demo_id] ?? []), r.style_id];
+      });
+
       return {
         demos: demos.data ?? [],
+        demoStyleLinks,
         films: films.data ?? [],
         awards: awards.data ?? [],
         styleIds: new Set((styles.data ?? []).map((r: any) => r.style_id)),

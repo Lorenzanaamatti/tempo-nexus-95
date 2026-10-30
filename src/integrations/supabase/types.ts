@@ -1649,6 +1649,52 @@ export type Database = {
           },
         ]
       }
+      composer_demo_styles: {
+        Row: {
+          composer_id: string
+          created_at: string
+          demo_id: string
+          id: string
+          style_id: string
+        }
+        Insert: {
+          composer_id: string
+          created_at?: string
+          demo_id: string
+          id?: string
+          style_id: string
+        }
+        Update: {
+          composer_id?: string
+          created_at?: string
+          demo_id?: string
+          id?: string
+          style_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composer_demo_styles_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_demo_styles_demo_id_fkey"
+            columns: ["demo_id"]
+            isOneToOne: false
+            referencedRelation: "composer_demos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composer_demo_styles_style_id_fkey"
+            columns: ["style_id"]
+            isOneToOne: false
+            referencedRelation: "music_styles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composer_demos: {
         Row: {
           category: string | null
@@ -1658,6 +1704,7 @@ export type Database = {
           duration_seconds: number | null
           id: string
           position: number
+          style_tags: string[]
           title: string
           url: string | null
         }
@@ -1669,6 +1716,7 @@ export type Database = {
           duration_seconds?: number | null
           id?: string
           position?: number
+          style_tags?: string[]
           title: string
           url?: string | null
         }
@@ -1680,6 +1728,7 @@ export type Database = {
           duration_seconds?: number | null
           id?: string
           position?: number
+          style_tags?: string[]
           title?: string
           url?: string | null
         }

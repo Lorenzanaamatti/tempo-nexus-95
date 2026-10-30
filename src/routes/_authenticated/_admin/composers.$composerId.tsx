@@ -165,6 +165,7 @@ function Inner({
   const productionsRel: any[] = initialRelations.productions ?? [];
   const contractsRel: any[] = initialRelations.contracts ?? [];
   const spanishFilms: any[] = initialRelations.spanishFilms ?? [];
+  const demoStyleLinks: Record<string, string[]> = initialRelations.demoStyleLinks ?? {};
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<FichaTab | null>(null);
 
@@ -1059,7 +1060,20 @@ function Inner({
             { key: "url", label: "URL", type: "url", audio: true },
             { key: "duration_seconds", label: "Duración (s)", type: "number" },
             { key: "description", label: "Notas", type: "textarea", className: "sm:col-span-2" },
+            {
+              key: "style_tags",
+              label: "Etiquetas de estilo",
+              type: "tags",
+              className: "sm:col-span-2",
+              placeholder: "Ánimo, textura, tempo, tono… y Enter",
+            },
           ]}
+          styles={{
+            table: "composer_demo_styles",
+            rowKey: "demo_id",
+            options: styleOpts,
+            linkedByRow: demoStyleLinks,
+          }}
         />
       </Section>
 
