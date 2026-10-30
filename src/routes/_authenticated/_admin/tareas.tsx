@@ -217,7 +217,7 @@ function TareasPage() {
         </section>
       )}
 
-      <div className="mb-4 flex flex-wrap items-end gap-2">
+      <div className="sticky top-0 z-30 -mx-6 mb-4 flex flex-wrap items-end gap-2 border-b border-border bg-background px-6 py-2">
         <span className="smallcaps text-xs text-muted-foreground pb-1.5">Mis tareas</span>
         <Select value={areaFilter} onValueChange={setAreaFilter}>
           <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>

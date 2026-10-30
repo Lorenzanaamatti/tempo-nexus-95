@@ -199,7 +199,7 @@ function CalendarioGeneral() {
         </p>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center gap-2">
+      <div className="sticky top-0 z-30 -mx-6 mb-5 flex flex-wrap items-center gap-2 border-b border-border bg-background px-6 py-2">
         <Button size="sm" variant={display === "gantt" ? "default" : "outline"} onClick={() => setDisplay("gantt")}>
           <GanttChartSquare className="mr-1 h-4 w-4" />
           Gantt
