@@ -811,6 +811,7 @@ function ProduccionDetalle() {
                   }}
                 />
                 {feeNum != null && <p className="mt-1 text-xs text-muted-foreground"><Money value={feeNum} /></p>}
+                <p className="mt-1 text-xs text-muted-foreground">Mismo dato que «Precio de venta» en Datos principales.</p>
               </div>
               <div>
                 <Label>Modelo económico</Label>
