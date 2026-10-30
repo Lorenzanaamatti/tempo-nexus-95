@@ -6022,6 +6022,7 @@ export type Database = {
           project_type: Database["public"]["Enums"]["production_kind"] | null
           project_type_note: string | null
           referido_por_composer_id: string | null
+          sibling_group_id: string | null
           source_opportunity_id: string | null
           spanish_film_id: string | null
           start_date: string | null
@@ -6071,6 +6072,7 @@ export type Database = {
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
           referido_por_composer_id?: string | null
+          sibling_group_id?: string | null
           source_opportunity_id?: string | null
           spanish_film_id?: string | null
           start_date?: string | null
@@ -6120,6 +6122,7 @@ export type Database = {
           project_type?: Database["public"]["Enums"]["production_kind"] | null
           project_type_note?: string | null
           referido_por_composer_id?: string | null
+          sibling_group_id?: string | null
           source_opportunity_id?: string | null
           spanish_film_id?: string | null
           start_date?: string | null
@@ -8273,6 +8276,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      split_production_for_composer: {
+        Args: { _composer_id: string; _production_id: string }
+        Returns: string
+      }
     }
     Enums: {
       action_area:
