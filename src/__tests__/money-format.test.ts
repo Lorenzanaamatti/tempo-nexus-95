@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { formatEUR, formatEUR0, formatNumberEs } from "@/lib/money";
 
 describe("formato de cifras", () => {
