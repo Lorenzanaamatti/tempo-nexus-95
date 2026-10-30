@@ -126,7 +126,7 @@ export function ProductionClosurePanel({
       setForm((p) => ({ ...p, presupuesto_documento_id: data.id }));
       setBudgetUrl("");
       qc.invalidateQueries({ queryKey: ["closure-production-documents", productionId] });
-      qc.invalidateQueries({ queryKey: ["production-linked-docs", productionId] });
+      qc.invalidateQueries({ queryKey: ["production-documents-linked", productionId] });
       toast.success("Presupuesto vinculado");
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo vincular el presupuesto");
