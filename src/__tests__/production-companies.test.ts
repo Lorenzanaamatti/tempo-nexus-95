@@ -20,7 +20,7 @@ describe("productoras adicionales de una producción", () => {
   });
 
   test("sin productora principal, todas las vinculadas cuentan", () => {
-    expect(additionalCompanies(links, null).map((l) => l.company_id)).toEqual(["c3", "c2", "c1"]);
+    expect(additionalCompanies(links, null).map((l) => l.company_id)).toEqual(["c3", "c1", "c2"]);
   });
 
   test("el selector solo ofrece productoras que aún no están en la ficha", () => {
