@@ -45,6 +45,7 @@ export function CreatableSelect({ value, options, placeholder, onPick, onCreate,
     [q, options],
   );
   const exact = options.some((o) => o.label.trim().toLowerCase() === q);
+  if (options.some((o) => !o.label)) console.warn("BAD_OPTIONS", JSON.stringify(options).slice(0, 400));
 
   async function create() {
     const label = text.trim();
