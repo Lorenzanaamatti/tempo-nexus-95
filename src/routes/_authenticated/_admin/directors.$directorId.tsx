@@ -70,13 +70,34 @@ function DirectorDetail() {
   const historyQ = useQuery({
     queryKey: ["director-history", directorId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const sel = "id, title, year, project_type, premiere_date, imdb_url, external_composer, partner_company:production_companies(name), platform:platforms(name), composer:composers!productions_composer_fk(full_name, artistic_name)";
+      const byPrimary = await supabase
         .from("productions")
-        .select("id, title, year, project_type, premiere_date, imdb_url, external_composer, partner_company:production_companies(name), platform:platforms(name), composer:composers!productions_composer_fk(full_name, artistic_name)")
+        .select(sel)
         .eq("director_id", directorId)
         .order("year", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
+      if (byPrimary.error) throw byPrimary.error;
+
+      // Y las producciones donde esta dirección aparece como una más de varias.
+      const links = await (supabase as any)
+        .from("production_directors")
+        .select("production_id")
+        .eq("director_id", directorId);
+      if (links.error) throw links.error;
+      const ids = (links.data ?? []).map((r: any) => r.production_id).filter(Boolean);
+      let byLink: any[] = [];
+      if (ids.length) {
+        const linked = await supabase
+          .from("productions")
+          .select(sel)
+          .in("id", ids)
+          .order("year", { ascending: false });
+        if (linked.error) throw linked.error;
+        byLink = linked.data ?? [];
+      }
+
+      const seen = new Set<string>();
+      return [...(byPrimary.data ?? []), ...byLink].filter((p: any) => !seen.has(p.id) && (seen.add(p.id), true));
     },
   });
 

@@ -27,6 +27,7 @@ import { ProductionRepresentadosEditor } from "@/components/production-detail/re
 import { ProductionMilestonesEditor } from "@/components/production-detail/milestones-editor";
 import { ProductionLinkedDocuments } from "@/components/production-detail/linked-documents";
 import { ProductionCompaniesEditor } from "@/components/production-detail/production-companies-editor";
+import { ProductionDirectorsEditor } from "@/components/production-detail/production-directors-editor";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
 import { ProductionExpenses, useProductionExpenses } from "@/components/production-detail/production-expenses";
@@ -187,11 +188,13 @@ function ProduccionDetalle() {
     setSaving(false);
     if (error) return toast.error(error.message);
     await syncPrimaryCompanyLink();
+    await syncPrimaryDirectorLink();
     toast.success("Guardado");
     markClean(form);
     qc.invalidateQueries({ queryKey: ["produccion", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
     qc.invalidateQueries({ queryKey: ["production-companies-link", productionId] });
+    qc.invalidateQueries({ queryKey: ["production-directors-link", productionId] });
   }
 
   /** La productora principal del formulario manda también en el listado de varias productoras. */
@@ -213,6 +216,30 @@ function ProduccionDetalle() {
     } else {
       await db
         .from("production_partner_companies")
+        .update({ is_primary: false })
+        .eq("production_id", productionId);
+    }
+  }
+
+  /** La dirección principal del formulario manda también en el listado de varias. */
+  async function syncPrimaryDirectorLink() {
+    const db = supabase as any;
+    if (form.director_id) {
+      const { error } = await db
+        .from("production_directors")
+        .upsert(
+          { production_id: productionId, director_id: form.director_id, is_primary: true },
+          { onConflict: "production_id,director_id" },
+        );
+      if (error) toast.message("Dirección principal guardada, pero no se pudo actualizar el listado de direcciones.");
+      await db
+        .from("production_directors")
+        .update({ is_primary: false })
+        .eq("production_id", productionId)
+        .neq("director_id", form.director_id);
+    } else {
+      await db
+        .from("production_directors")
         .update({ is_primary: false })
         .eq("production_id", productionId);
     }
@@ -403,6 +430,15 @@ function ProduccionDetalle() {
               productionId={productionId}
               primaryCompanyId={form.partner_company_id || null}
               primaryCompanyName={(companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? null}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <ProductionDirectorsEditor
+              productionId={productionId}
+              primaryDirectorId={form.director_id || null}
+              primaryDirectorName={
+                (directorsQ.data ?? []).find((d: any) => d.id === form.director_id)?.full_name ?? (form.director || null)
+              }
             />
           </div>
         </div>

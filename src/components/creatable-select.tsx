@@ -41,10 +41,10 @@ export function CreatableSelect({ value, options, placeholder, onPick, onCreate,
 
   const q = text.trim().toLowerCase();
   const matches = useMemo(
-    () => (q ? options.filter((o) => o.label.toLowerCase().includes(q)) : options).slice(0, 8),
+    () => (q ? options.filter((o) => (o.label ?? "").toLowerCase().includes(q)) : options).slice(0, 8),
     [q, options],
   );
-  const exact = options.some((o) => o.label.trim().toLowerCase() === q);
+  const exact = options.some((o) => (o.label ?? "").trim().toLowerCase() === q);
 
   async function create() {
     const label = text.trim();
