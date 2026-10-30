@@ -150,7 +150,7 @@ export function ProductionExpenses({
     invalidate();
   }
 
-  const fmt = (n: number | null) => (n == null ? "" : n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any }));
+  const fmt = (n: number | null) => (n == null ? "" : formatNumberEs(n));
 
   return (
     <div className="space-y-4">
