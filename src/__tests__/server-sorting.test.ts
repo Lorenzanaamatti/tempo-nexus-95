@@ -86,7 +86,7 @@ describe("ordenación y paginación en servidor", () => {
 
 const LISTS = [
   "routes/_authenticated/_admin/productions.index.tsx",
-  "routes/_authenticated/_admin/opportunities.index.tsx",
+  "components/opportunities-list.tsx",
   "routes/_authenticated/_admin/contracts.index.tsx",
   "routes/_authenticated/_admin/providers.index.tsx",
   "routes/_authenticated/_admin/people.index.tsx",
