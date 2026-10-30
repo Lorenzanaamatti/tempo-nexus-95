@@ -169,6 +169,13 @@
       "when": 1793381148976,
       "tag": "0023_change_log_initials_by_user",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793386870769,
+      "tag": "0024_production_finance_lines",
+      "breakpoints": true
     }
   ]
 }

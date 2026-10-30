@@ -5909,6 +5909,94 @@ export type Database = {
           },
         ]
       }
+      production_finance_lines: {
+        Row: {
+          amount_final: number | null
+          amount_initial: number | null
+          composer_id: string | null
+          concept: string
+          counterparty_id: string | null
+          counterparty_name: string | null
+          counterparty_type: string | null
+          created_at: string
+          id: string
+          invoice_issued: boolean
+          invoice_settled: boolean
+          is_sale_price: boolean
+          kind: string
+          legacy_expense_id: string | null
+          notes: string | null
+          period: string | null
+          position: number
+          production_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_final?: number | null
+          amount_initial?: number | null
+          composer_id?: string | null
+          concept?: string
+          counterparty_id?: string | null
+          counterparty_name?: string | null
+          counterparty_type?: string | null
+          created_at?: string
+          id?: string
+          invoice_issued?: boolean
+          invoice_settled?: boolean
+          is_sale_price?: boolean
+          kind: string
+          legacy_expense_id?: string | null
+          notes?: string | null
+          period?: string | null
+          position?: number
+          production_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_final?: number | null
+          amount_initial?: number | null
+          composer_id?: string | null
+          concept?: string
+          counterparty_id?: string | null
+          counterparty_name?: string | null
+          counterparty_type?: string | null
+          created_at?: string
+          id?: string
+          invoice_issued?: boolean
+          invoice_settled?: boolean
+          is_sale_price?: boolean
+          kind?: string
+          legacy_expense_id?: string | null
+          notes?: string | null
+          period?: string | null
+          position?: number
+          production_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_finance_lines_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_finance_lines_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_finance_lines_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_partner_companies: {
         Row: {
           company_id: string
@@ -6059,6 +6147,12 @@ export type Database = {
           gantt_color: string | null
           ic_commission: number | null
           ic_commission_pct: number | null
+          ic_fee_fixed_final: number | null
+          ic_fee_fixed_initial: number | null
+          ic_fee_invoiced: boolean
+          ic_fee_mode: string
+          ic_fee_paid: boolean
+          ic_fee_pct_initial: number | null
           id: string
           imdb_url: string | null
           is_historical: boolean
@@ -6110,6 +6204,12 @@ export type Database = {
           gantt_color?: string | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
+          ic_fee_fixed_final?: number | null
+          ic_fee_fixed_initial?: number | null
+          ic_fee_invoiced?: boolean
+          ic_fee_mode?: string
+          ic_fee_paid?: boolean
+          ic_fee_pct_initial?: number | null
           id?: string
           imdb_url?: string | null
           is_historical?: boolean
@@ -6161,6 +6261,12 @@ export type Database = {
           gantt_color?: string | null
           ic_commission?: number | null
           ic_commission_pct?: number | null
+          ic_fee_fixed_final?: number | null
+          ic_fee_fixed_initial?: number | null
+          ic_fee_invoiced?: boolean
+          ic_fee_mode?: string
+          ic_fee_paid?: boolean
+          ic_fee_pct_initial?: number | null
           id?: string
           imdb_url?: string | null
           is_historical?: boolean
