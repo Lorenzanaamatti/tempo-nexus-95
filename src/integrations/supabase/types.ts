@@ -5800,6 +5800,52 @@ export type Database = {
           },
         ]
       }
+      production_partner_companies: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          production_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          production_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          production_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_partner_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_partner_companies_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_partner_companies_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_phases: {
         Row: {
           catalog_id: string | null
