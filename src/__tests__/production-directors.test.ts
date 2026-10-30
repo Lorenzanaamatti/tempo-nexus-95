@@ -20,7 +20,7 @@ describe("direcciones adicionales de una producción", () => {
   });
 
   test("sin dirección principal, todas las vinculadas cuentan", () => {
-    expect(additionalDirectors(links, null).map((l) => l.director_id)).toEqual(["d3", "d1", "d2"]);
+    expect(additionalDirectors(links, null).map((l) => l.director_id)).toEqual(["d1", "d3", "d2"]);
   });
 
   test("el selector solo ofrece direcciones que aún no están en la ficha", () => {

@@ -74,7 +74,7 @@ export function ProductionLinksEditor({
   const crmQ = useQuery({
     queryKey: cfg.crmQueryKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from(cfg.crmTable)
         .select(`id, ${cfg.crmNameColumn}`)
         .order(cfg.crmNameColumn);
