@@ -61,7 +61,7 @@ export function ProductionGanttPanel({
       const ids = await loadProductionIds({ productionIds, composerId });
       if (!ids.length) return { rows: [] as Row[], legend: [] as GanttLegendItem[] };
       const [prods, assignments, phases, catalog, evSubject, evSource] = await Promise.all([
-        db.from("productions").select("id, title, gantt_color, composer_id, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
+        db.from("productions").select("id, title, gantt_color, composer_id, start_date, actual_delivery_date, production_company, partner, platform, partner_company:production_companies(name), platform_ref:platforms(name)").in("id", ids),
         db.from("production_assignments").select("production_id, partner_company:production_companies(name)").in("production_id", ids).not("partner_company_id", "is", null),
         db
           .from("production_phases")
@@ -175,7 +175,29 @@ export function ProductionGanttPanel({
         })
         .filter((r) => !!r.productionId && meta.has(r.productionId));
 
-      return { rows: [...phaseRows, ...eventRows], legend: catalogRows.map((c) => ({ name: c.name, colorKey: c.color_key })) };
+      // Fechas de la ficha que no generan evento de calendario: inicio de rodaje y entrega real.
+      const fichaRows: Row[] = ((prods.data ?? []) as any[]).flatMap((p) => {
+        const m = meta.get(p.id);
+        const base = {
+          owner: "agencia" as GanttOwner,
+          status: "planificada" as GanttPhase["status"],
+          note: null,
+          milestone: true,
+          productionId: p.id,
+          productionTitle: m?.title ?? "Producción",
+          productionClient: m?.client ?? null,
+          productionColor: m?.color ?? null,
+          composerId: m?.composer_id ?? null,
+          composerName: m?.composer_id ? names.get(m.composer_id) ?? null : null,
+          colorKey: "graphite" as PhaseColorKey,
+        };
+        const out: Row[] = [];
+        if (p.start_date) out.push({ ...base, id: `ficha-rodaje-${p.id}`, name: "Inicio rodaje", start: p.start_date, end: p.start_date } as Row);
+        if (p.actual_delivery_date) out.push({ ...base, id: `ficha-entrega-real-${p.id}`, name: "Entrega real", start: p.actual_delivery_date, end: p.actual_delivery_date } as Row);
+        return out;
+      });
+
+      return { rows: [...fichaRows, ...phaseRows, ...eventRows], legend: catalogRows.map((c) => ({ name: c.name, colorKey: c.color_key })) };
     },
   });
 
