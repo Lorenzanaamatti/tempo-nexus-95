@@ -5328,6 +5328,7 @@ export type Database = {
           composer_id: string | null
           created_at: string
           end_date: string | null
+          external_name: string | null
           id: string
           note: string | null
           partner_company_id: string | null
@@ -5340,6 +5341,7 @@ export type Database = {
           composer_id?: string | null
           created_at?: string
           end_date?: string | null
+          external_name?: string | null
           id?: string
           note?: string | null
           partner_company_id?: string | null
@@ -5352,6 +5354,7 @@ export type Database = {
           composer_id?: string | null
           created_at?: string
           end_date?: string | null
+          external_name?: string | null
           id?: string
           note?: string | null
           partner_company_id?: string | null
