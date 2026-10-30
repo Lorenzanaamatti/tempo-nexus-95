@@ -3,16 +3,15 @@ const EUR = new Intl.NumberFormat("es-ES", {
   currency: "EUR",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
+  useGrouping: "always" as any,
 });
 const NUM = new Intl.NumberFormat("es-ES", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
+  useGrouping: "always" as any,
 });
-const EUR0 = new Intl.NumberFormat("es-ES", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+// Todas las cifras: separador de miles siempre (también en 4 cifras: 3.000,00) y dos decimales.
+const EUR0 = EUR;
 
 export function formatEUR(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
@@ -21,11 +20,11 @@ export function formatEUR(value: number | string | null | undefined): string {
   return EUR.format(n);
 }
 
-/** Importe en euros sin decimales: "1.234 €". Para KPIs y totales. */
+/** Importe en euros para KPIs y totales (con dos decimales, como el resto de cifras). */
 export function formatEUR0(value: number | string | null | undefined): string {
-  if (value === null || value === undefined || value === "") return "0 €";
+  if (value === null || value === undefined || value === "") return EUR.format(0);
   const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(n)) return "0 €";
+  if (!Number.isFinite(n)) return EUR.format(0);
   return EUR0.format(n);
 }
 
@@ -43,14 +42,15 @@ export function formatMoneyEs(
   const n = typeof amount === "string" ? Number(amount) : amount;
   if (!Number.isFinite(n)) return emptyLabel;
   const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  const withDecimals = options?.alwaysDecimals === true || Math.round(n) !== n;
+  const withDecimals = true;
   return `${new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: withDecimals ? 2 : 0,
     maximumFractionDigits: 2,
+    useGrouping: "always" as any,
   }).format(n)} ${symbol}`;
 }
 
-const INT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
+const INT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0, useGrouping: "always" as any });
 
 /** Número entero con separador de miles: "1.234". Para contadores y KPIs de unidades. */
 export function formatIntEs(value: number | string | null | undefined): string {

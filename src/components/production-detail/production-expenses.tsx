@@ -76,7 +76,7 @@ const parseNum = (s: string) => {
   return Number.isFinite(n) ? n : NaN;
 };
 const devCls = (d: number) => (d > 0 ? "text-destructive" : d < 0 ? "text-success" : "text-muted-foreground");
-const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${Math.abs(d).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${Math.abs(d).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any })} €`;
 const pct = (v: number, total: number) => (total ? `${((v / total) * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %` : "—");
 
 export function ProductionExpenses({
@@ -149,7 +149,7 @@ export function ProductionExpenses({
     invalidate();
   }
 
-  const fmt = (n: number | null) => (n == null ? "" : n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  const fmt = (n: number | null) => (n == null ? "" : n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any }));
 
   return (
     <div className="space-y-4">

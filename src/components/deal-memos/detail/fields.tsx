@@ -81,7 +81,7 @@ export function ImporteInput({ value, onChange, disabled }: {
         if (value === "") return;
         const n = Number(value.replace(/\./g, "").replace(",", "."));
         if (Number.isFinite(n)) {
-          onChange(new Intl.NumberFormat("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n));
+          onChange(new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any }).format(n));
         }
       }}
     />
