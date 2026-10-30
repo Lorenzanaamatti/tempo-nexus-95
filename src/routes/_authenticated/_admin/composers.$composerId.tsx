@@ -1056,7 +1056,7 @@ function Inner({
           fields={[
             { key: "title", label: "Título" },
             { key: "category", label: "Categoría", placeholder: "p.ej. Drama, Acción" },
-            { key: "url", label: "URL", type: "url" },
+            { key: "url", label: "URL", type: "url", audio: true },
             { key: "duration_seconds", label: "Duración (s)", type: "number" },
             { key: "description", label: "Notas", type: "textarea", className: "sm:col-span-2" },
           ]}

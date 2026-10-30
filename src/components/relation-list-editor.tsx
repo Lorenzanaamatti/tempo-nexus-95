@@ -15,7 +15,14 @@ export type FieldDef = {
   type?: "text" | "number" | "textarea" | "url";
   placeholder?: string;
   className?: string;
+  audio?: boolean;
 };
+
+const AUDIO_EXT = /\.(mp3|wav|m4a|aac|ogg|oga|flac|webm|opus)(\?|$)/i;
+
+function isAudioUrl(value: unknown) {
+  return typeof value === "string" && AUDIO_EXT.test(value.trim());
+}
 
 export function RelationListEditor<T extends { id: string; position: number }>({
   title,
@@ -99,17 +106,27 @@ export function RelationListEditor<T extends { id: string; position: number }>({
                         }
                       />
                     ) : (
-                      <Input
-                        type={f.type === "number" ? "number" : f.type === "url" ? "url" : "text"}
-                        defaultValue={(r as any)[f.key] ?? ""}
-                        placeholder={f.placeholder}
-                        onBlur={(e) => {
-                          const raw = e.target.value;
-                          const v =
-                            f.type === "number" ? (raw ? Number(raw) : null) : raw || null;
-                          if (v !== ((r as any)[f.key] ?? null)) update(r.id, { [f.key]: v });
-                        }}
-                      />
+                      <>
+                        <Input
+                          type={f.type === "number" ? "number" : f.type === "url" ? "url" : "text"}
+                          defaultValue={(r as any)[f.key] ?? ""}
+                          placeholder={f.placeholder}
+                          onBlur={(e) => {
+                            const raw = e.target.value;
+                            const v =
+                              f.type === "number" ? (raw ? Number(raw) : null) : raw || null;
+                            if (v !== ((r as any)[f.key] ?? null)) update(r.id, { [f.key]: v });
+                          }}
+                        />
+                        {f.audio && isAudioUrl((r as any)[f.key]) && (
+                          <audio
+                            controls
+                            preload="none"
+                            src={String((r as any)[f.key]).trim()}
+                            className="mt-2 w-full"
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
