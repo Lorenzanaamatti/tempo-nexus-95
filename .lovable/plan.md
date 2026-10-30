@@ -27,7 +27,7 @@ Propuesta (sin borrar nada; la tabla antigua se queda como copia de seguridad):
 - Respetando la autorización de la ficha, el aviso de cambio de motivos no aplica a estos importes salvo que lo pidas.
 
 ## Dudas (respóndelas cuando veas la imagen)
-1. El «Fee agencia» que hoy está como gasto en algunas producciones: ¿lo paso a la fila d o lo dejo como gasto?
+1. Decidido: el «Fee agencia» que hoy está como gasto pasa a la fila d (Fee agencia IC).
 2. El «Precio de venta» de Datos principales: ¿debe ser igual a Fee composición (se sincronizan) o son cosas distintas?
 3. Ficha hermana (varios representados): ¿cada ficha tiene su propia tabla, como ahora el dinero? Supongo que sí.
 4. «Cliente» en ingresos: ¿se elige entre productoras/partners y cuentas, o queréis un CRM de clientes propio?
