@@ -26,7 +26,7 @@ export type FinanceLineRow = {
   kind: "ingreso" | "gasto";
   concept: string;
   counterparty_name: string | null;
-  counterparty_type: "partner" | "productora" | "cuenta" | "manual" | null;
+  counterparty_type: "partner" | "productora" | "cuenta" | "proveedor" | "manual" | null;
   counterparty_id: string | null;
   amount_initial: number | null;
   amount_final: number | null;
@@ -76,25 +76,27 @@ function useFinanceProduction(productionId: string) {
   });
 }
 
-type CpOption = { id: string; name: string; type: "partner" | "productora" | "cuenta" };
+type CpOption = { id: string; name: string; type: "partner" | "productora" | "cuenta" | "proveedor" };
 function useCounterparties(enabled: boolean) {
   return useQuery({
     enabled,
     queryKey: ["finance-counterparties"],
     queryFn: async () => {
-      const [p, c, a, l] = await Promise.all([
+      const [p, c, a, l, pv] = await Promise.all([
         db.from("partners").select("id, nombre").limit(2000),
         db.from("production_companies").select("id, name").limit(2000),
         db.from("target_accounts").select("id, name").limit(2000),
         db.from("production_finance_lines").select("concept, kind").limit(5000),
+        db.from("providers").select("id, name").limit(2000),
       ]);
       const opts: CpOption[] = [
         ...(p.data ?? []).map((r: any) => ({ id: r.id, name: r.nombre, type: "partner" as const })),
         ...(c.data ?? []).map((r: any) => ({ id: r.id, name: r.name, type: "productora" as const })),
         ...(a.data ?? []).map((r: any) => ({ id: r.id, name: r.name, type: "cuenta" as const })),
       ].filter((o) => o.name);
+      const providers: CpOption[] = (pv.data ?? []).map((r: any) => ({ id: r.id, name: r.name, type: "proveedor" as const })).filter((o: CpOption) => o.name);
       const uniq = (k: string) => Array.from(new Set((l.data ?? []).filter((r: any) => r.kind === k).map((r: any) => (r.concept || "").trim()).filter(Boolean))).sort((x: any, y: any) => x.localeCompare(y, "es")) as string[];
-      return { opts, incomeConcepts: uniq("ingreso"), expenseConcepts: uniq("gasto") };
+      return { opts, providers, incomeConcepts: uniq("ingreso"), expenseConcepts: uniq("gasto") };
     },
   });
 }
@@ -109,7 +111,7 @@ const parseNum = (s: string) => {
   const v = Number(t);
   return Number.isFinite(v) ? v : NaN;
 };
-const TYPE_LABEL: Record<string, string> = { partner: "Partner", productora: "Productora", cuenta: "Cuenta" };
+const TYPE_LABEL: Record<string, string> = { partner: "Partner", productora: "Productora", cuenta: "Cuenta", proveedor: "Proveedor" };
 
 function feeConfig(p: FinanceProduction | undefined): IcFeeConfig {
   return {
@@ -205,6 +207,18 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
   }
 
   async function saveCounterparty(line: FinanceLineRow, name: string) {
+    name = name.trim();
+    if (line.kind === "gasto") {
+      if (!name) return updateLine(line, { counterparty_name: null, counterparty_type: null, counterparty_id: null });
+      let prov = (cpQ.data?.providers ?? []).find((o) => o.name.toLowerCase() === name.toLowerCase());
+      if (!prov) {
+        const { data, error } = await db.from("providers").insert({ name, kind: "otros", notes: `Alta desde ${prod?.title ?? "producción"}` }).select("id, name").single();
+        if (error) return toast.error(error.message);
+        prov = { id: data.id, name: data.name, type: "proveedor" };
+        toast.success(`Ficha de proveedor «${name}» creada`);
+      }
+      return updateLine(line, { counterparty_name: prov.name, counterparty_type: "proveedor", counterparty_id: prov.id });
+    }
     const match = (cpQ.data?.opts ?? []).find((o) => o.name.toLowerCase() === name.toLowerCase());
     await updateLine(line, match
       ? { counterparty_name: match.name, counterparty_type: match.type, counterparty_id: match.id }
@@ -245,11 +259,11 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
 
   const cpCell = (l: FinanceLineRow) => (
     <div className="flex items-center gap-1">
-      <TextCell value={l.counterparty_name ?? ""} readOnly={readOnly} list="finance-cp" placeholder={l.kind === "ingreso" ? "Cliente" : "Proveedor"} onSave={(v) => saveCounterparty(l, v)} />
+      <TextCell value={l.counterparty_name ?? ""} readOnly={readOnly} list={l.kind === "gasto" ? "finance-prov" : "finance-cp"} placeholder={l.kind === "ingreso" ? "Cliente" : "Proveedor"} onSave={(v) => saveCounterparty(l, v)} />
       {!readOnly && l.counterparty_type && l.counterparty_type !== "manual" && (
         <span className="smallcaps text-[10px] text-muted-foreground">{TYPE_LABEL[l.counterparty_type]}</span>
       )}
-      {!readOnly && l.counterparty_type === "manual" && l.counterparty_name && (
+      {!readOnly && l.kind === "ingreso" && l.counterparty_type === "manual" && l.counterparty_name && (
         <button type="button" className="whitespace-nowrap text-[11px] text-primary underline" onClick={() => createCrmCard(l)}>Crear ficha</button>
       )}
     </div>
@@ -373,6 +387,7 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
   return (
     <>
       <datalist id="finance-cp">{(cpQ.data?.opts ?? []).map((o) => <option key={`${o.type}-${o.id}`} value={o.name}>{TYPE_LABEL[o.type]}</option>)}</datalist>
+      <datalist id="finance-prov">{(cpQ.data?.providers ?? []).map((o) => <option key={o.id} value={o.name} />)}</datalist>
       <datalist id="finance-inc-concepts">{["Fee composición", "Fee producción", ...(cpQ.data?.incomeConcepts ?? [])].filter((v, i, a) => a.indexOf(v) === i).map((c) => <option key={c} value={c} />)}</datalist>
       <datalist id="finance-exp-concepts">{(cpQ.data?.expenseConcepts ?? []).map((c) => <option key={c} value={c} />)}</datalist>
       {full ? (

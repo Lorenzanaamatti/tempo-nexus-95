@@ -1,0 +1,2 @@
+ALTER TABLE public.production_finance_lines DROP CONSTRAINT IF EXISTS production_finance_lines_counterparty_type_check;
+ALTER TABLE public.production_finance_lines ADD CONSTRAINT production_finance_lines_counterparty_type_check CHECK (counterparty_type IN ('partner','productora','cuenta','manual','proveedor'));
