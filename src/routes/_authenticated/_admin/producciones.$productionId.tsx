@@ -450,7 +450,7 @@ function ProduccionDetalle() {
         </div>
       </Section>
 
-      <Section title="Representados vinculados" description="Compositores y artistas del roster implicados en esta producción. Aparece automáticamente en su ficha y en Filmografía IC.">
+      <Section title="Compositores y equipo" description="Compositores, supervisores musicales, clientes… representados o no. Los representados aparecen también en su ficha y en Filmografía IC.">
         <ProductionRepresentadosEditor productionId={productionId} />
       </Section>
 
