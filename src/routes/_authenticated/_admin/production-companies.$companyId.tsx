@@ -198,7 +198,7 @@ function CompanyDetail() {
                   <tr key={p.id} className="hover:bg-muted/30">
                     <td className="px-3 py-2">{p.year ?? "—"}</td>
                     <td className="px-3 py-2">
-                      <Link to="/productions/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
+                      <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">{p.composer?.artistic_name || p.composer?.full_name || "—"}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.negotiator?.full_name || "—"}</td>

@@ -55,7 +55,7 @@ function DirectorDetail() {
     toast.success("Producción creada");
     qc.invalidateQueries({ queryKey: ["director-history", directorId] });
     if (openAfter && data?.id) {
-      navigate({ to: "/productions/$productionId", params: { productionId: data.id } });
+      navigate({ to: "/producciones/$productionId", params: { productionId: data.id } });
     }
   }
 
@@ -235,7 +235,7 @@ function DirectorDetail() {
                     <tr key={p.id} className="hover:bg-muted/30">
                       <td className="px-3 py-2 text-muted-foreground">{p.year ?? "—"}</td>
                       <td className="px-3 py-2">
-                        <Link to="/productions/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
+                        <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="font-display hover:underline">{p.title}</Link>
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">{p.project_type ? PRODUCTION_KIND_LABEL[p.project_type as ProductionKind] : "—"}</td>
                       <td className="px-3 py-2 text-muted-foreground">{p.partner_company?.name ?? "—"}</td>

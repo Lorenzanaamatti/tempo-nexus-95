@@ -118,7 +118,7 @@ function ProductionsIndex() {
           {(data ?? []).map((p: any) => (
             <Link
               key={p.id}
-              to="/productions/$productionId"
+              to="/producciones/$productionId"
               params={{ productionId: p.id }}
               className="flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-muted/40"
             >

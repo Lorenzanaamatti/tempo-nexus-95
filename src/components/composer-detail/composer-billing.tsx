@@ -90,7 +90,7 @@ export function ComposerBilling({ productions, composerId }: { productions: any[
               return (
                 <tr key={s.id} className={`border-t border-border ${vencido ? "bg-amber-500/5" : ""}`}>
                   <td className="px-3 py-2">
-                    <Link to="/productions/$productionId" params={{ productionId: s.production_id }} className="hover:underline">
+                    <Link to="/producciones/$productionId" params={{ productionId: s.production_id }} className="hover:underline">
                       {s.production_title}
                     </Link>
                   </td>

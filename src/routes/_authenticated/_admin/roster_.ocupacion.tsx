@@ -161,7 +161,7 @@ function Ocupacion() {
                   </td>
                   <td className="max-w-[220px] px-3 py-2 text-xs">
                     {current.length ? current.slice(0, 2).map((p: any) => (
-                      <Link key={p.id} to="/productions/$productionId" params={{ productionId: p.id }} className="block truncate hover:underline">{p.title}</Link>
+                      <Link key={p.id} to="/producciones/$productionId" params={{ productionId: p.id }} className="block truncate hover:underline">{p.title}</Link>
                     )) : <span className="text-muted-foreground">Sin producción</span>}
                   </td>
                   {cells.map((cell, i) => {

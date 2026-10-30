@@ -561,7 +561,7 @@ function Inner({
               <li key={p.id} className="flex items-baseline justify-between rounded-sm border border-border bg-card/50 px-4 py-3">
                 <div>
                   <div className="text-sm">
-                    <Link to="/productions/$productionId" params={{ productionId: p.id }} className="hover:underline">
+                    <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="hover:underline">
                       {p.title}
                     </Link>
                   </div>
@@ -615,7 +615,7 @@ function Inner({
             {finalizedProductions.map((p: any) => (
               <li key={p.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
                 <div className="min-w-0">
-                  <Link to="/productions/$productionId" params={{ productionId: p.id }} className="text-sm hover:underline">{p.title}</Link>
+                  <Link to="/producciones/$productionId" params={{ productionId: p.id }} className="text-sm hover:underline">{p.title}</Link>
                   <div className="text-xs text-muted-foreground">
                     {[p.status, p.platform, p.director, p.year].filter(Boolean).join(" · ")}
                   </div>

@@ -19,7 +19,10 @@ import { SaveButton } from "@/components/save-button";
 import { useDirtyForm } from "@/lib/use-dirty-form";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
-import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { PRODUCTION_KIND_LABEL, PRODUCTION_STATUS_LABEL, type ProductionKind } from "@/lib/production-constants";
+import { SuggestInput } from "@/components/suggest-input";
+import { SocialActivityPanel } from "@/components/social-activity-panel";
+import { IcStaffEditor } from "@/components/production-detail/ic-staff-editor";
 import {
   PRODUCTION_STAGE_LABEL, PRODUCTION_STAGE_TONE, STAGE_DEFAULT_STATUS, stageOf,
   type ProductionStage,
@@ -47,7 +50,7 @@ const SYNC_LABEL: Record<string, string> = {
   title: "título", project_type: "tipo", partner_company_id: "productora", platform_id: "plataforma",
   director_id: "director", director: "director", country: "país", original_language: "idioma",
   year: "año", start_date: "fecha inicio rodaje", delivery_date: "fecha de entrega",
-  actual_delivery_date: "fecha de entrega real", delivery_delay_reason: "motivo del cambio de entrega", premiere_date: "fecha de estreno", notes: "notas",
+  actual_delivery_date: "fecha de entrega real", delivery_delay_reason: "motivo del cambio de entrega", premiere_date: "fecha de estreno", notes: "notas", status: "estado", imdb_url: "IMDb", nomination_date: "fecha de nominación", award_date: "fecha de premio", negotiator_person_id: "responsable de negociación", production_director_name: "director de producción", postproduction_supervisor_name: "responsable de postproducción", music_supervisor_name: "supervisor musical", other_responsibles: "otros responsables", project_type_note: "aclaración",
   fee_amount: "precio", ic_commission_pct: "% comisión", ic_commission: "comisión", commission_basis: "modelo de comisión",
 };
 
@@ -75,12 +78,26 @@ type Form = {
   ic_commission_pct: string;
   ic_commission: string;
   commission_basis: string;
+  status: string;
+  project_type_note: string;
+  negotiator_person_id: string;
+  nomination_date: string;
+  award_date: string;
+  imdb_url: string;
+  production_director_name: string;
+  production_director_person_id: string;
+  postproduction_supervisor_name: string;
+  postproduction_supervisor_person_id: string;
+  music_supervisor_name: string;
+  music_supervisor_person_id: string;
+  other_responsibles: string;
 };
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
   country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", delivery_delay_reason: "", premiere_date: "", notes: "",
   fee_amount: "", ic_commission_pct: "", ic_commission: "", commission_basis: "",
+  status: "", project_type_note: "", negotiator_person_id: "", nomination_date: "", award_date: "", imdb_url: "", production_director_name: "", production_director_person_id: "", postproduction_supervisor_name: "", postproduction_supervisor_person_id: "", music_supervisor_name: "", music_supervisor_person_id: "", other_responsibles: "",
 };
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
@@ -137,6 +154,24 @@ function ProduccionDetalle() {
       return data ?? [];
     },
   });
+
+  const peopleIcQ = useQuery({
+    queryKey: ["people-ic"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("people").select("id, full_name, role").eq("role", "ic_team").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const peopleAllQ = useQuery({
+    queryKey: ["people-all-mini"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("people").select("id, full_name, role").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const personOptions = (peopleAllQ.data ?? []).map((p: any) => ({ id: p.id, label: p.full_name, hint: p.role }));
 
   const [form, setForm] = useState<Form>(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -203,6 +238,19 @@ function ProduccionDetalle() {
       ic_commission_pct: data.ic_commission_pct != null ? String(data.ic_commission_pct) : "",
       ic_commission: data.ic_commission != null ? String(data.ic_commission) : "",
       commission_basis: data.commission_basis ?? "",
+      status: (data as any).status ?? "",
+      project_type_note: (data as any).project_type_note ?? "",
+      negotiator_person_id: (data as any).negotiator_person_id ?? "",
+      nomination_date: (data as any).nomination_date ?? "",
+      award_date: (data as any).award_date ?? "",
+      imdb_url: (data as any).imdb_url ?? "",
+      production_director_name: (data as any).production_director_name ?? "",
+      production_director_person_id: (data as any).production_director_person_id ?? "",
+      postproduction_supervisor_name: (data as any).postproduction_supervisor_name ?? "",
+      postproduction_supervisor_person_id: (data as any).postproduction_supervisor_person_id ?? "",
+      music_supervisor_name: (data as any).music_supervisor_name ?? "",
+      music_supervisor_person_id: (data as any).music_supervisor_person_id ?? "",
+      other_responsibles: (data as any).other_responsibles ?? "",
     };
     setForm(hydrated);
     markClean(hydrated);
@@ -233,6 +281,19 @@ function ProduccionDetalle() {
       ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
       commission_basis: form.commission_basis || null,
+      status: form.status || null,
+      negotiator_person_id: form.negotiator_person_id || null,
+      nomination_date: form.nomination_date || null,
+      award_date: form.award_date || null,
+      imdb_url: form.imdb_url || null,
+      production_director_name: form.production_director_name || null,
+      production_director_person_id: form.production_director_person_id || null,
+      postproduction_supervisor_name: form.postproduction_supervisor_name || null,
+      postproduction_supervisor_person_id: form.postproduction_supervisor_person_id || null,
+      music_supervisor_name: form.music_supervisor_name || null,
+      music_supervisor_person_id: form.music_supervisor_person_id || null,
+      other_responsibles: form.other_responsibles || null,
+      project_type_note: form.project_type === "produccion_especial" ? (form.project_type_note || null) : null,
     };
     const { error } = await (supabase as any).from("productions").update(payload).eq("id", productionId);
     setSaving(false);
@@ -307,6 +368,7 @@ function ProduccionDetalle() {
       .update({ status: STAGE_DEFAULT_STATUS[next] })
       .eq("id", productionId);
     if (error) return toast.error(error.message);
+    setForm((f) => ({ ...f, status: STAGE_DEFAULT_STATUS[next] }));
     toast.success(`Estado: ${PRODUCTION_STAGE_LABEL[next]}`);
     qc.invalidateQueries({ queryKey: ["produccion", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
@@ -442,6 +504,34 @@ function ProduccionDetalle() {
                 {Object.entries(PRODUCTION_KIND_LABEL).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
               </SelectContent>
             </Select>
+            {form.project_type === "produccion_especial" && (
+              <div className="mt-2">
+                <Label className="text-xs text-muted-foreground">Aclaración (producción especial)</Label>
+                <Input value={form.project_type_note} onChange={(e) => setForm({ ...form, project_type_note: e.target.value })} placeholder="Ej. instalación, espectáculo en directo, contenido inmersivo…" />
+              </div>
+            )}
+          </div>
+          <div>
+            <Label>Estado detallado</Label>
+            <Select value={form.status || undefined} onValueChange={(v) => setForm({ ...form, status: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona estado…" /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(PRODUCTION_STATUS_LABEL)
+                  .filter(([k]) => stageOf(k) === stage)
+                  .map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">Detalle dentro de la etapa «{PRODUCTION_STAGE_LABEL[stage]}». Para cambiar de etapa usa el selector de arriba.</p>
+          </div>
+          <div>
+            <Label>Responsable de negociación</Label>
+            <Select value={form.negotiator_person_id || "__none"} onValueChange={(v) => setForm({ ...form, negotiator_person_id: v === "__none" ? "" : v })}>
+              <SelectTrigger><SelectValue placeholder="Selecciona persona…" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">Sin asignar</SelectItem>
+                {(peopleIcQ.data ?? []).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Cliente / Productora</Label>
@@ -523,6 +613,25 @@ function ProduccionDetalle() {
             </div>
           )}
           <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
+          <div><Label>Fecha de nominación</Label><Input type="date" value={form.nomination_date} onChange={(e) => setForm({ ...form, nomination_date: e.target.value })} /></div>
+          <div><Label>Fecha de premio</Label><Input type="date" value={form.award_date} onChange={(e) => setForm({ ...form, award_date: e.target.value })} /></div>
+          <div className="sm:col-span-2"><Label>Enlace IMDb</Label><Input value={form.imdb_url} onChange={(e) => setForm({ ...form, imdb_url: e.target.value })} placeholder="https://www.imdb.com/title/…" /></div>
+          <div>
+            <Label>Director de producción</Label>
+            <SuggestInput value={form.production_director_name} placeholder="Nombre (sugerencias del CRM)" options={personOptions}
+              onChange={(v, picked) => setForm({ ...form, production_director_name: v, production_director_person_id: picked?.id ?? "" })} />
+          </div>
+          <div>
+            <Label>Responsable de postproducción</Label>
+            <SuggestInput value={form.postproduction_supervisor_name} placeholder="Nombre (sugerencias del CRM)" options={personOptions}
+              onChange={(v, picked) => setForm({ ...form, postproduction_supervisor_name: v, postproduction_supervisor_person_id: picked?.id ?? "" })} />
+          </div>
+          <div>
+            <Label>Supervisor musical</Label>
+            <SuggestInput value={form.music_supervisor_name} placeholder="Nombre (sugerencias del CRM)" options={personOptions}
+              onChange={(v, picked) => setForm({ ...form, music_supervisor_name: v, music_supervisor_person_id: picked?.id ?? "" })} />
+          </div>
+          <div className="sm:col-span-2"><Label>Otros responsables</Label><Textarea rows={2} value={form.other_responsibles} onChange={(e) => setForm({ ...form, other_responsibles: e.target.value })} placeholder="Cualquier otro responsable o contacto relevante" /></div>
           <div className="sm:col-span-2">
             <Label>Notas internas</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -548,6 +657,10 @@ function ProduccionDetalle() {
 
       <Section title="Compositores y equipo" description="Compositores, supervisores musicales, clientes… representados o no. Los representados aparecen también en su ficha y en Filmografía IC.">
         <ProductionRepresentadosEditor productionId={productionId} />
+      </Section>
+
+      <Section title="Personal IC asignado" description="Personas del equipo IC que trabajan en esta producción, con su función y fechas.">
+        <IcStaffEditor productionId={productionId} />
       </Section>
 
       <Section title="Procesos de la producción" description="Define cada proceso con su responsable y sus fechas de inicio y fin: composición, grabación, mezcla, máster, entregas…">
@@ -579,6 +692,10 @@ function ProduccionDetalle() {
         ) : (
           <p className="text-sm text-muted-foreground">Esta producción no procede de una oportunidad registrada.</p>
         )}
+      </Section>
+
+      <Section title="Actividad en redes sociales">
+        <SocialActivityPanel productionId={productionId} />
       </Section>
 
       <Section title="Tareas vinculadas">

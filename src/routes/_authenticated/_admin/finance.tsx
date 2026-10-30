@@ -257,7 +257,7 @@ function BudgetTable({ composerId }: { composerId: string | null }) {
               <tr key={r.id} className="hover:bg-muted/30">
                 <td className="px-3 py-2 text-muted-foreground">{r.year ?? "—"}</td>
                 <td className="px-3 py-2">
-                  <Link to="/productions/$productionId" params={{ productionId: r.id }} className="font-display hover:underline">{r.title}</Link>
+                  <Link to="/producciones/$productionId" params={{ productionId: r.id }} className="font-display hover:underline">{r.title}</Link>
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">{r.composers?.artistic_name || r.composers?.full_name || "—"}</td>
                 <td className="px-3 py-2 text-right"><Money value={r.fee_amount} /></td>

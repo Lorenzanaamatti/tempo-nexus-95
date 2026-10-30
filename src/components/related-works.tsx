@@ -93,7 +93,7 @@ export function RelatedWorks({
           {data.prod.map((p: any) => (
             <li key={p.id} className="flex items-center justify-between gap-3 py-1.5">
               <Link
-                to="/productions/$productionId"
+                to="/producciones/$productionId"
                 params={{ productionId: p.id }}
                 className="hover:underline"
               >

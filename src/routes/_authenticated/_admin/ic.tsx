@@ -245,7 +245,7 @@ function ICActiveProductionsSection() {
                 <tr key={r.id} className="border-b border-border/60 last:border-0">
                   <td className="px-3 py-2">
                     <Link
-                      to="/productions/$productionId"
+                      to="/producciones/$productionId"
                       params={{ productionId: r.id }}
                       className="font-medium hover:text-primary"
                     >
@@ -320,7 +320,7 @@ function CombinedFilmographyBody() {
             kind: p.project_type ?? "—",
             composer: { id: c.id, name: c.artistic_name || c.full_name },
             inSpanishFilms: !!p.spanish_film_id,
-            href: { to: "/productions/$productionId", params: { productionId: p.id } },
+            href: { to: "/producciones/$productionId", params: { productionId: p.id } },
           };
         });
       rows.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
