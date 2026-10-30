@@ -397,6 +397,13 @@ function ProduccionDetalle() {
             <Label>Notas internas</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
+          <div className="sm:col-span-2">
+            <ProductionCompaniesEditor
+              productionId={productionId}
+              primaryCompanyId={form.partner_company_id || null}
+              primaryCompanyName={(companiesQ.data ?? []).find((c: any) => c.id === form.partner_company_id)?.name ?? null}
+            />
+          </div>
         </div>
       </Section>
 
