@@ -1,52 +1,38 @@
-# Una sola ficha de producción
+# Seguimiento económico y financiero (sustituye a «Gastos de producción»)
 
-## Qué pasa ahora
+Sigo tu orden de entrega: primero el diseño, después la migración y al final la implementación. Cada paso espera tu aprobación.
 
-Desde la ficha del compositor (Proyectos y oportunidades > Activas) se abre una **pantalla antigua** de la producción. Desde Producciones > Producciones activas se abre la **pantalla nueva**. Las dos muestran el mismo proyecto y guardan los mismos datos, pero cada una enseña cosas distintas.
+## Paso 1 — Imagen a pantalla completa (lo primero, sin tocar la app)
+- Una imagen fiel de la tabla a pantalla completa (sin menú lateral), con datos de ejemplo: bloques a–e, columnas A–I, cabeceras grises, «Importe final» en negrita, totales en negrita, todo en negro, 30.000,00 € y 26,4 %.
+- Fila «Fee agencia IC» con selector de base, % editable y casillas «Facturado/Pagado».
+- Te la enseño y espero tu visto bueno.
 
-## Diferencias
+## Paso 2 — Datos actuales y propuesta de migración
+Hoy en «Gastos de producción» hay **22 líneas en 6 producciones**. Cada línea guarda: concepto, descripción, presupuestado, coste real, fecha, proveedor (texto libre) y compositor.
+Propuesta (sin borrar nada; la tabla antigua se queda como copia de seguridad):
+- Cada línea pasa a ser un gasto: concepto → A, proveedor → B (enlazado a la ficha del proveedor; se crea si no existe), presupuestado → Importe inicial, coste real → Importe final, fecha → mes/año, descripción → notas de la línea.
+- «Fee agencia» como gasto: propongo pasarlo a la fila d (Fee agencia IC) en vez de dejarlo como gasto. (Ver dudas.)
+- El precio de venta actual de cada producción → «Fee composición» (inicial y final).
+- Fra. recibida / pagada empiezan sin marcar.
+- La base y el % de comisión que ya hay en la ficha (precio/margen) se traducen a «% s/ ingresos» / «% s/ margen operativo».
 
-| Apartado | Pantalla antigua (desde el compositor) | Pantalla nueva (Producciones activas) |
-|---|---|---|
-| Estado del proyecto | Desplegable «Estado» | Etapa (activa / finalizada) con cierre de producción |
-| Representado | Un único «Representado principal» | «Compositores y equipo»: varios, representados o no, y una ficha propia por representado |
-| Productora | Una sola | Varias, con una principal |
-| Director | Uno solo | Varios, con uno principal |
-| Fechas | Entrega, estreno, nominación, premio | Inicio de rodaje, entrega estimada, entrega real, estreno |
-| País e idioma | No | Sí |
-| Enlace IMDb | Sí | No |
-| Compositor externo (texto) | Sí | Se sustituye por «Compositores y equipo» (no representado) |
-| Director de producción, responsable de postproducción, supervisor musical, otros responsables | Sí | No (el supervisor se puede añadir en «Compositores y equipo») |
-| Responsable de negociación | Sí | No |
-| Aclaración de producción especial | Sí | No |
-| Dinero | Fee, % y comisión IC | Precio negociado, modelo (sobre precio o sobre margen), %, comisión calculada |
-| Gastos de producción | No | Sí, con presupuesto, coste real y desviación |
-| Facturas y sprints de facturación | No | Sí |
-| Procesos y Gantt | Sí | Sí, con paleta de color por película |
-| Personal IC asignado (con fechas) | Sí | No |
-| Documentos | Documentos asociados | Documentos vinculados: enlaces, archivos, contratos y deal memos |
-| Tareas vinculadas | No | Sí |
-| Oportunidad de origen | No | Sí |
-| Eventos en el calendario | Sí | Sí |
-| Actividad en redes sociales | Sí | No |
-| Autoguardado y aviso de «otra ficha» | Solo autoguardado | Sí, los dos |
+## Paso 3 — Implementación (tras aprobar 1 y 2)
+- Tabla nueva en todas las producciones, botón de pantalla completa, columna A fija y desplazamiento horizontal.
+- Cada línea es un registro propio vinculado a producción, compositor, cliente/proveedor, concepto y mes/año (editable en el detalle).
+- Catálogo de conceptos de gasto; alta rápida de clientes y proveedores.
+- Fee IC en ambos sentidos (% ↔ importe), recordando el último dato tecleado.
+- Ficha de proveedor: «Historial de servicios». Ficha de cliente: «Historial de ingresos». Con filtros por año, producción y compositor, totales y enlace a la producción. Editables desde ahí.
+- Ficha del compositor: resumen por producción (inicial y final).
+- Borrar una línea pide confirmación.
+- Respetando la autorización de la ficha, el aviso de cambio de motivos no aplica a estos importes salvo que lo pidas.
 
-## Propuesta
+## Dudas (respóndelas cuando veas la imagen)
+1. El «Fee agencia» que hoy está como gasto en algunas producciones: ¿lo paso a la fila d o lo dejo como gasto?
+2. El «Precio de venta» de Datos principales: ¿debe ser igual a Fee composición (se sincronizan) o son cosas distintas?
+3. Ficha hermana (varios representados): ¿cada ficha tiene su propia tabla, como ahora el dinero? Supongo que sí.
+4. «Cliente» en ingresos: ¿se elige entre productoras/partners y cuentas, o queréis un CRM de clientes propio?
+5. Hoy la parte económica solo la ve BIG C. ¿La nueva tabla también solo BIG C, o la ve Team? ¿Y los historiales en proveedores/clientes?
+6. Este cambio deja de pintar rojo/verde aquí, y otras pantallas siguen con negativos en rojo. ¿Solo esta tabla en negro, verdad?
 
-1. Los enlaces de la ficha del compositor (y de cualquier otro sitio) abrirán la pantalla nueva.
-2. A la pantalla nueva se le añaden los campos útiles que hoy solo están en la antigua:
-   - Enlace IMDb
-   - Fechas de nominación y de premio
-   - Responsable de negociación
-   - Director de producción, responsable de postproducción y otros responsables
-   - Aclaración de producción especial
-   - Personal IC asignado
-   - Actividad en redes sociales
-3. La pantalla antigua deja de usarse. Si alguien entra por un enlace guardado, se le lleva automáticamente a la nueva. No se borra ningún dato: todos esos campos ya están guardados en el mismo proyecto.
-
-## Detalles técnicos
-
-- Cambiar los enlaces `/productions/$productionId` por `/producciones/$productionId` en la ficha del compositor y en el resto de la app (buscar en todo el código).
-- En `producciones.$productionId.tsx`, añadir al formulario y al guardado: `imdb_url`, `nomination_date`, `award_date`, el responsable de negociación, los responsables de producción y postproducción, `other_responsibles` y la aclaración. Añadir también los apartados «Personal asignado» y «Actividad en redes sociales», reutilizando los componentes de la ruta antigua.
-- `productions.$productionId.tsx`: redirigir a la ruta nueva conservando el id.
-- Los campos nuevos también entran en la pregunta de «¿actualizar también en la otra ficha?».
+## Detalle técnico
+- Nueva tabla de líneas (tipo ingreso/gasto, subtipo fee composición/producción/otros, nombre, client_id, provider_id, concept_id, importes inicial/final, period date, flags fra.), tabla de catálogo de conceptos, campos en producción para base/% inicial/final y «último dato manual». Migración aditiva desde `production_expenses`, que se marca como obsoleta sin borrarla.
