@@ -46,15 +46,10 @@ export function formatMoneyEs(
   const n = typeof amount === "string" ? Number(amount) : amount;
   if (!Number.isFinite(n)) return emptyLabel;
   const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  const withDecimals = true;
-  return `${new Intl.NumberFormat("es-ES", {
-    minimumFractionDigits: withDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
-    useGrouping: "always" as any,
-  }).format(n)} ${symbol}`;
+  return `${decimalsEs(n, 2)} ${symbol}`;
 }
 
-const INT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0, useGrouping: "always" as any });
+const INT = { format: (n: number) => decimalsEs(n, 0) };
 
 /** Número entero con separador de miles: "1.234". Para contadores y KPIs de unidades. */
 export function formatIntEs(value: number | string | null | undefined): string {
