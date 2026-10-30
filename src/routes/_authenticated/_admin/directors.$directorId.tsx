@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { EmptyState } from "@/components/list-states";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -121,6 +122,7 @@ function DirectorDetail() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  useAutosave(form, save);
   async function save() {
     if (!form["full_name"]?.trim()) return toast.error("El nombre es obligatorio");
     setSaving(true);

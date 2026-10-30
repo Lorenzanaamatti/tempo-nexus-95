@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -74,6 +75,7 @@ function ProspectDetailPage() {
     },
   });
 
+  useAutosave(form, save);
   async function save() {
     if (!form) return;
     setSaving(true);

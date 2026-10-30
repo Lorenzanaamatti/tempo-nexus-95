@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -175,6 +176,7 @@ function PitchDetail() {
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
   const setP = (k: string, v: any) => setProj((p) => ({ ...p, [k]: v }));
 
+  useAutosave([form, proj, composerIds], save);
   async function save() {
     const titulo = String(form.titulo ?? "").trim();
     if (!titulo) return toast.error("El título es obligatorio");

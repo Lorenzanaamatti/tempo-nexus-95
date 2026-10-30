@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -143,6 +144,7 @@ function TargetAccountDetail() {
     setDirty(true);
   }
 
+  useAutosave(form, save);
   async function save() {
     if (!form) return;
     setSaving(true);

@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -166,6 +167,7 @@ function ProduccionDetalle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const { error } = await (supabase as any).from("productions").update({

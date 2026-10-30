@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Clapperboard } from "lucide-react";
 import { CompanyContacts } from "@/components/company-contacts";
@@ -72,6 +73,7 @@ function CompanyDetail() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  useAutosave(form, save);
   async function save() {
     if (!form["name"]?.trim()) return toast.error("El nombre es obligatorio");
     setSaving(true);

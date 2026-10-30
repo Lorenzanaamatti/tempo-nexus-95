@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Money } from "@/components/money";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -187,6 +188,7 @@ function ProductionEdit() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const { error } = await supabase.from("productions").update({

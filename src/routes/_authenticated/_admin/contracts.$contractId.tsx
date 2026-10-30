@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -108,6 +109,7 @@ function ContractDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q.data]);
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const type = form.contract_type === "__custom__" ? (form.contract_type_custom.trim() || null) : (form.contract_type || null);

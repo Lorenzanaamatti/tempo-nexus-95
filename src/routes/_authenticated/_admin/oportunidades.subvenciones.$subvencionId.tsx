@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +38,7 @@ function GrantDetailPage(){
   useEffect(()=>{if(q.data)setForm({...q.data});},[q.data]);
   if(q.isLoading||!form)return <div className="mx-auto max-w-[1700px] p-8"><ListSkeleton rows={8}/></div>;
   const set=(key:string,value:any)=>setForm((f:any)=>({...f,[key]:value}));
+  useAutosave(form, save);
   async function save(){setSaving(true);const payload={...form};delete payload.id;delete payload.created_at;delete payload.updated_at;for(const k of Object.keys(payload))if(payload[k]==="")payload[k]=null;const{error}=await db.from("oportunidades_subvenciones").update(payload).eq("id",subvencionId);setSaving(false);if(error)return toast.error(error.message);toast.success("Expediente guardado");qc.invalidateQueries({queryKey:["subvencion",subvencionId]});qc.invalidateQueries({queryKey:["subvenciones"]});qc.invalidateQueries({queryKey:["subvencion-versiones",subvencionId]});}
   async function remove(){const{error}=await db.from("oportunidades_subvenciones").delete().eq("id",subvencionId);if(error)return toast.error(error.message);navigate({to:"/oportunidades/subvenciones"});}
   return <div className="mx-auto max-w-[1700px] px-6 py-8">
