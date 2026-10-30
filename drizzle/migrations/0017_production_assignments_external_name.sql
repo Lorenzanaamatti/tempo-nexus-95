@@ -1,0 +1,2 @@
+ALTER TABLE public.production_assignments ADD COLUMN IF NOT EXISTS external_name text;
+COMMENT ON COLUMN public.production_assignments.external_name IS 'Nombre escrito a mano para personas no representadas (sin composer_id).';
