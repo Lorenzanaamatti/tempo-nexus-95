@@ -12,7 +12,7 @@ function decimalsEs(n: number, digits: number): string {
   return `${n < 0 ? "-" : ""}${groupEs(intPart)}${digits > 0 ? `,${decPart}` : ""}`;
 }
 
-const EUR = { format: (n: number) => `${decimalsEs(n, 2)} €` };
+const EUR = { format: (n: number) => `${decimalsEs(n, 2)} €` };
 const NUM = { format: (n: number) => decimalsEs(n, 2) };
 // Todas las cifras: separador de miles siempre (también en 4 cifras: 3.000,00) y dos decimales.
 const EUR0 = EUR;
