@@ -155,7 +155,7 @@ function ComisionesPorProyecto() {
             <div key={r.p.id} className="border border-border p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <div>
-                  <Link to="/productions/$productionId" params={{ productionId: r.p.id }} className="font-display text-lg text-primary hover:underline">
+                  <Link to="/producciones/$productionId" params={{ productionId: r.p.id }} className="font-display text-lg text-primary hover:underline">
                     {r.p.title}
                   </Link>
                   <div className="text-xs text-muted-foreground">

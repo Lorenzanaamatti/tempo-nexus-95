@@ -36,7 +36,7 @@ export const SUBJECT_GROUP_LABEL: Record<string, string> = {
 
 export const SUBJECT_LINK: Record<string, { to: string; param: string }> = {
   composer: { to: "/composers/$composerId", param: "composerId" },
-  production: { to: "/productions/$productionId", param: "productionId" },
+  production: { to: "/producciones/$productionId", param: "productionId" },
   opportunity: { to: "/opportunities/$opportunityId", param: "opportunityId" },
   contract: { to: "/contracts/$contractId", param: "contractId" },
   person: { to: "/people/$personId", param: "personId" },
@@ -267,7 +267,7 @@ export function buildCalendarModel(input: CalendarModelInput): {
       const p = productionsMap.get(subject_id);
       if (p) {
         label = p.title;
-        toPath = "/productions/$productionId";
+        toPath = "/producciones/$productionId";
         params = { productionId: p.id };
       }
     } else if (subject_type === "opportunity") {

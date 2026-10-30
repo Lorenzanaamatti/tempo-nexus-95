@@ -112,7 +112,6 @@ export function IcStaffEditor({ productionId }: { productionId: string }) {
           {(assignsQ.data ?? []).map((a: any) => (
             <div key={a.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
               <span className="font-display">{a.people?.full_name || a.composers?.artistic_name || a.composers?.full_name}</span>
-              {a.composer_id && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Asignación anterior de cliente</span>}
               {a.role_in_project && <span className="text-xs text-muted-foreground">{IC_FUNCTION_LABEL[a.role_in_project as IcTeamFunction] ?? a.role_in_project}</span>}
               {(a.start_date || a.end_date) && (
                 <span className="text-xs text-muted-foreground">Inicio: {a.start_date ? formatDateEs(a.start_date) : "—"} · Final: {a.end_date ? formatDateEs(a.end_date) : "—"}</span>
