@@ -18,7 +18,7 @@ describe("orden alfabético de producciones por título", () => {
   });
 
   test("ignora mayúsculas y minúsculas al comparar", () => {
-    expect(titles([{ title: "boda real" }, { title: "Bosque" }])).toEqual(["Bosque", "boda real"]);
+    expect(titles([{ title: "zeta" }, { title: "Alfa" }, { title: "Bosque" }])).toEqual(["Alfa", "Bosque", "zeta"]);
   });
 
   test("los títulos vacíos van al final", () => {
