@@ -5991,6 +5991,7 @@ export type Database = {
           country: string | null
           created_at: string
           delivery_date: string | null
+          delivery_delay_reason: string | null
           director: string | null
           director_id: string | null
           external_composer: string | null
@@ -6041,6 +6042,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           delivery_date?: string | null
+          delivery_delay_reason?: string | null
           director?: string | null
           director_id?: string | null
           external_composer?: string | null
@@ -6091,6 +6093,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           delivery_date?: string | null
+          delivery_delay_reason?: string | null
           director?: string | null
           director_id?: string | null
           external_composer?: string | null
