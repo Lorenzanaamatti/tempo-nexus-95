@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { EmptyState } from "@/components/list-states";
@@ -15,7 +16,8 @@ import { Plus, Users } from "lucide-react";
 
 export type LinkedRepresentado = {
   id: string;
-  composer_id: string;
+  composer_id: string | null;
+  external_name?: string | null;
   role_in_project: string | null;
   composers?: { id: string; full_name: string | null; artistic_name: string | null; roster_role?: string | null } | null;
 };
@@ -26,9 +28,10 @@ export function useProductionRepresentados(productionId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("production_assignments")
-        .select("id, composer_id, role_in_project, composers(id, full_name, artistic_name, roster_role)")
+        .select("id, composer_id, external_name, role_in_project, composers(id, full_name, artistic_name, roster_role)")
         .eq("production_id", productionId)
-        .not("composer_id", "is", null);
+        .or("composer_id.not.is.null,external_name.not.is.null")
+        .order("created_at");
       if (error) throw error;
       return (data ?? []) as unknown as LinkedRepresentado[];
     },
@@ -36,7 +39,7 @@ export function useProductionRepresentados(productionId: string) {
 }
 
 export function representadoName(r: LinkedRepresentado) {
-  return r.composers?.artistic_name || r.composers?.full_name || "—";
+  return r.composers?.artistic_name || r.composers?.full_name || r.external_name || "—";
 }
 
 export function ProductionRepresentadosEditor({ productionId }: { productionId: string }) {
@@ -48,6 +51,8 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
   const [customRole, setCustomRole] = useState("");
   const [rosterFilter, setRosterFilter] = useState<string>("all");
   const [picked, setPicked] = useState<string>("");
+  const [represented, setRepresented] = useState(true);
+  const [externalName, setExternalName] = useState("");
 
   const rosterQ = useQuery({
     queryKey: ["composers-mini-roles"],
@@ -79,17 +84,18 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
   ];
 
   async function link() {
-    if (!picked) return;
+    if (represented ? !picked : !externalName.trim()) return;
     const finalRole = role === "otro" ? customRole.trim() : role;
     if (role === "otro" && !finalRole) return toast.error("Indica el rol");
     const { error } = await supabase.from("production_assignments").insert({
       production_id: productionId,
-      composer_id: picked,
+      composer_id: represented ? picked : null,
+      external_name: represented ? null : externalName.trim(),
       role_in_project: finalRole,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success("Representado vinculado");
-    setOpen(false); setPicked(""); setQ(""); setCustomRole("");
+    setOpen(false); setPicked(""); setQ(""); setCustomRole(""); setExternalName("");
     qc.invalidateQueries({ queryKey: ["production-representados", productionId] });
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
   }
@@ -106,18 +112,25 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
     <div className="space-y-3">
       <div className="flex justify-end">
         <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-          <Plus className="mr-1 h-4 w-4" /> Vincular representado
+          <Plus className="mr-1 h-4 w-4" /> Añadir persona
         </Button>
       </div>
       {!rows.length ? (
-        <EmptyState variant="inline" icon={Users} title="Sin representados vinculados" description="Vincula compositores o artistas del roster a esta producción." />
+        <EmptyState variant="inline" icon={Users} title="Sin personas vinculadas" description="Añade compositores, supervisores, clientes… representados o no." />
       ) : (
         <ul className="divide-y divide-border rounded-sm border border-border">
           {rows.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
-              <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="font-display hover:underline">
-                {representadoName(r)}
-              </Link>
+              {r.composer_id ? (
+                <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="font-display hover:underline">
+                  {representadoName(r)}
+                </Link>
+              ) : (
+                <span className="font-display">{representadoName(r)}</span>
+              )}
+              <span className={`text-[10px] uppercase tracking-wide ${r.composer_id ? "text-primary" : "text-muted-foreground"}`}>
+                {r.composer_id ? "Representado" : "No representado"}
+              </span>
               <span className="rounded-sm bg-muted px-1.5 py-0.5 text-[10px] smallcaps">
                 {REPRESENTADO_ROLE_LABEL[r.role_in_project ?? ""] ?? r.role_in_project ?? "Sin rol"}
               </span>
@@ -126,9 +139,11 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
                   {ROSTER_ROLE_LABEL[r.composers.roster_role] ?? r.composers.roster_role}
                 </span>
               )}
-              <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="text-xs text-muted-foreground hover:underline">
-                ver ficha →
-              </Link>
+              {r.composer_id && (
+                <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="text-xs text-muted-foreground hover:underline">
+                  ver ficha →
+                </Link>
+              )}
               <span className="ml-auto">
                 <ConfirmDeleteButton iconOnly title="¿Desvincular representado?" label="Desvincular" confirmLabel="Desvincular" onConfirm={() => unlink(r.id)} />
               </span>
@@ -139,8 +154,18 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Vincular representado</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Añadir persona a la producción</DialogTitle></DialogHeader>
           <div className="grid gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={represented} onCheckedChange={(v) => setRepresented(v === true)} />
+              Representado por la agencia
+            </label>
+            {!represented ? (
+              <div>
+                <Label className="text-xs">Nombre</Label>
+                <Input value={externalName} onChange={(e) => setExternalName(e.target.value)} placeholder="Escribe el nombre…" maxLength={200} />
+              </div>
+            ) : (<>
             <div className="flex flex-wrap gap-1">
               {rosterTabs.map((t) => (
                 <button
@@ -173,6 +198,7 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
               ))}
               {!candidates.length && <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados.</p>}
             </div>
+            </>)}
             <div>
               <Label className="text-xs">Rol en la producción</Label>
               <Select value={role} onValueChange={setRole}>
@@ -188,7 +214,7 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={link} disabled={!picked}>Vincular</Button>
+            <Button onClick={link} disabled={represented ? !picked : !externalName.trim()}>Añadir</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

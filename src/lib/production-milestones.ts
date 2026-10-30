@@ -58,6 +58,7 @@ export const REPRESENTADO_ROLES_EXTRA = [
   { value: "especialista", label: "Especialista" },
   { value: "curador", label: "Curador musical" },
   { value: "asesor", label: "Asesor / consultor" },
+  { value: "cliente", label: "Cliente" },
   { value: "otro", label: "Otro (especificar)" },
 ] as const;
 
