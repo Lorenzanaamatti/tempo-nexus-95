@@ -59,6 +59,7 @@ type Form = {
   start_date: string;
   delivery_date: string;
   actual_delivery_date: string;
+  premiere_date: string;
   notes: string;
   fee_amount: string;
   ic_commission_pct: string;
@@ -68,7 +69,7 @@ type Form = {
 
 const EMPTY: Form = {
   title: "", project_type: "", partner_company_id: "", platform_id: "", director_id: "", director: "",
-  country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", notes: "",
+  country: "", original_language: "", year: "", start_date: "", delivery_date: "", actual_delivery_date: "", premiere_date: "", notes: "",
   fee_amount: "", ic_commission_pct: "", ic_commission: "", commission_basis: "",
 };
 
@@ -153,6 +154,7 @@ function ProduccionDetalle() {
       start_date: data.start_date ?? "",
       delivery_date: data.delivery_date ?? "",
       actual_delivery_date: data.actual_delivery_date ?? "",
+      premiere_date: data.premiere_date ?? "",
       notes: data.notes ?? "",
       fee_amount: data.fee_amount != null ? String(data.fee_amount) : "",
       ic_commission_pct: data.ic_commission_pct != null ? String(data.ic_commission_pct) : "",
@@ -179,6 +181,7 @@ function ProduccionDetalle() {
       start_date: form.start_date || null,
       delivery_date: form.delivery_date || null,
       actual_delivery_date: form.actual_delivery_date || null,
+      premiere_date: form.premiere_date || null,
       notes: form.notes || null,
       fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
       ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
@@ -421,6 +424,7 @@ function ProduccionDetalle() {
           <div><Label>Fecha inicio rodaje</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
           <div><Label>Fecha de entrega estimada</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>
           <div><Label>Fecha de entrega real</Label><Input type="date" value={form.actual_delivery_date} onChange={(e) => setForm({ ...form, actual_delivery_date: e.target.value })} /></div>
+          <div><Label>Fecha de estreno</Label><Input type="date" value={form.premiere_date} onChange={(e) => setForm({ ...form, premiere_date: e.target.value })} /></div>
           <div className="sm:col-span-2">
             <Label>Notas internas</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
