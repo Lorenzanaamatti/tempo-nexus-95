@@ -43,7 +43,7 @@ import { ProductionCompaniesEditor } from "@/components/production-detail/produc
 import { ProductionDirectorsEditor } from "@/components/production-detail/production-directors-editor";
 import { ProductionTasks } from "@/components/production-detail/production-tasks";
 import { ProductionEconomics } from "@/components/production-detail/production-economics";
-import { ProductionExpenses, useProductionExpenses } from "@/components/production-detail/production-expenses";
+import { ProductionFinance, useFinanceLines } from "@/components/production-detail/production-finance";
 import { computeAgencyCommission, type CommissionBasis } from "@/lib/commission";
 import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 import { ProductionClosurePanel, useClosure, isClosureComplete } from "@/components/production-detail/closure-panel";
@@ -124,7 +124,7 @@ function ProduccionDetalle() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { isBigC } = useCurrentRole();
-  const expensesQ = useProductionExpenses(productionId);
+  const expensesQ = useFinanceLines(productionId);
 
   const prodQ = useQuery({
     queryKey: ["produccion", productionId],
@@ -464,7 +464,7 @@ function ProduccionDetalle() {
   const finalized = stage === "finalizada";
   const feeNum = form.fee_amount === "" ? null : Number(form.fee_amount);
   const pctNum = form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct);
-  const realExpenses = (expensesQ.data ?? []).reduce((s, r) => s + Number(r.amount ?? 0), 0);
+  const realExpenses = (expensesQ.data ?? []).filter((r) => r.kind === "gasto").reduce((s, r) => s + Number(r.amount_final ?? 0), 0);
   const computedCommission = computeAgencyCommission(feeNum, pctNum, (form.commission_basis || "precio") as CommissionBasis, realExpenses);
 
   return (
@@ -746,8 +746,8 @@ function ProduccionDetalle() {
         <ProductionGanttPanel productionIds={[productionId]} />
       </Section>
 
-      <Section title="Gastos de producción" description="Gastos por concepto: músicos, estudio, mezcla, copistería… Se reflejan en la ficha y el portal del compositor.">
-        <ProductionExpenses productionId={productionId} composerId={data.composer_id} feeAmount={data.fee_amount} commissionBasis={data.commission_basis} commissionPct={data.ic_commission_pct} />
+      <Section title="Seguimiento económico y financiero" description="Ingresos, gastos, margen, fee agencia IC y resultado composer. Se ve igual en el portal del compositor.">
+        <ProductionFinance productionId={productionId} />
       </Section>
 
       <Section title="Documentos vinculados" description="Presupuestos, deal memos, contratos de obra y adendas de PAPERWORK.">

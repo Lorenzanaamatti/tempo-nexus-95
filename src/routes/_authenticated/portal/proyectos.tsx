@@ -7,7 +7,7 @@ import { usePortalComposer } from "@/lib/use-portal-composer";
 import { PRODUCTION_STATUS_LABEL, PRODUCTION_KIND_LABEL, type ProductionStatus, type ProductionKind } from "@/lib/production-constants";
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
-import { ProductionExpenses } from "@/components/production-detail/production-expenses";
+import { ProductionFinance } from "@/components/production-detail/production-finance";
 import { ProductionGanttPanel } from "@/components/production-gantt-panel";
 
 export const Route = createFileRoute("/_authenticated/portal/proyectos")({
@@ -142,8 +142,8 @@ function Section({ title, items, muted }: { title: string; items: any[]; muted?:
             </div>
             {!muted && (
               <div className="mt-4">
-                <p className="smallcaps mb-2 text-xs text-muted-foreground">Gastos de producción</p>
-                <ProductionExpenses productionId={p.id} composerId={p.composer_id} feeAmount={p.fee_amount} commissionBasis={p.commission_basis} commissionPct={p.ic_commission_pct} readOnly />
+                <p className="smallcaps mb-2 text-xs text-muted-foreground">Liquidación · seguimiento económico</p>
+                <ProductionFinance productionId={p.id} readOnly />
               </div>
             )}
             {p.notes && (
