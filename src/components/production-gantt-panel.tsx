@@ -56,6 +56,7 @@ export function ProductionGanttPanel({
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["gantt-phases", productionIds ?? null, composerId ?? null],
+    refetchOnMount: "always",
     staleTime: 30_000,
     queryFn: async () => {
       const ids = await loadProductionIds({ productionIds, composerId });
@@ -211,7 +212,16 @@ export function ProductionGanttPanel({
 
   const productionOptions = useMemo(() => {
     const map = new Map<string, string>();
-    rows.forEach((r) => { if (r.productionId) map.set(r.productionId, r.productionTitle ?? "Producción"); });
+    const info = new Map<string, { title: string; composer: string | null }>();
+    rows.forEach((r) => { if (r.productionId) info.set(r.productionId, { title: r.productionTitle ?? "Producción", composer: r.composerName ?? null }); });
+    const titleCount = new Map<string, number>();
+    info.forEach((v) => titleCount.set(v.title.trim().toLowerCase(), (titleCount.get(v.title.trim().toLowerCase()) ?? 0) + 1));
+    const initials = (n: string) => n.split(/[\s.-]+/).filter(Boolean).map((w) => w[0]!.toUpperCase()).join("");
+    // Películas con varias fichas (una por representado): «Título (AB)» para distinguirlas.
+    info.forEach((v, id) => {
+      const dup = (titleCount.get(v.title.trim().toLowerCase()) ?? 0) > 1;
+      map.set(id, dup && v.composer ? `${v.title} (${initials(v.composer)})` : v.title);
+    });
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [rows]);
 
