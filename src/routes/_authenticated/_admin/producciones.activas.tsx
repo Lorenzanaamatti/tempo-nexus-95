@@ -16,6 +16,7 @@ import { ProductionSearch, ProductionsTable, useProductions } from "@/components
 import { isFinalized, PRODUCTION_STAGE_LABEL, STAGE_DEFAULT_STATUS, type ProductionStage } from "@/lib/production-lifecycle";
 import { PRODUCTION_KIND_LABEL, type ProductionKind } from "@/lib/production-constants";
 import { seedProductionPhases, templateForKind } from "@/lib/production-phase-templates";
+import { byTitleEs } from "@/lib/production-sort";
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/activas")({
   component: ProduccionesActivas,
@@ -32,7 +33,8 @@ function ProduccionesActivas() {
     const needle = q.trim().toLowerCase();
     return (productionsQ.data ?? [])
       .filter((p) => !isFinalized(p.status))
-      .filter((p) => !needle || p.title.toLowerCase().includes(needle));
+      .filter((p) => !needle || p.title.toLowerCase().includes(needle))
+      .sort(byTitleEs);
   }, [productionsQ.data, q]);
 
   return (
