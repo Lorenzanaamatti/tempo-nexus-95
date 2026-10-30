@@ -418,7 +418,7 @@ function ProduccionDetalle() {
           <div><Label>País de producción</Label><Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></div>
           <div><Label>Idioma original</Label><Input value={form.original_language} onChange={(e) => setForm({ ...form, original_language: e.target.value })} /></div>
           <div><Label>Año de estreno / entrega</Label><Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} /></div>
-          <div><Label>Fecha inicio de producción</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
+          <div><Label>Fecha inicio rodaje</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
           <div><Label>Fecha de entrega estimada</Label><Input type="date" value={form.delivery_date} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} /></div>
           <div><Label>Fecha de entrega real</Label><Input type="date" value={form.actual_delivery_date} onChange={(e) => setForm({ ...form, actual_delivery_date: e.target.value })} /></div>
           <div className="sm:col-span-2">
