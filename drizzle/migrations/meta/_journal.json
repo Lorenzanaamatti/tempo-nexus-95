@@ -176,6 +176,13 @@
       "when": 1793386870769,
       "tag": "0024_production_finance_lines",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793387579948,
+      "tag": "0025_finance_counterparty_proveedor",
+      "breakpoints": true
     }
   ]
 }
