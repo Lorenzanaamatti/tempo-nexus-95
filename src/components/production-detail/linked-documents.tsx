@@ -101,6 +101,7 @@ export function ProductionLinkedDocuments({ productionId }: { productionId: stri
       toast.success("Documento vinculado");
       reset();
       qc.invalidateQueries({ queryKey: key });
+      qc.invalidateQueries({ queryKey: ["closure-production-documents", productionId] });
     } catch (e: any) {
       toast.error(e?.message ?? "No se pudo vincular");
     } finally {
