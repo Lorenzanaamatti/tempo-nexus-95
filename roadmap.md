@@ -32,3 +32,7 @@
 - [x] Reproducir los demos de compositor directamente en su ficha.
 - [x] Permitir varias productoras por producción en Datos principales (añadir/quitar, con principal marcada).
 - [x] Permitir varias direcciones (directores) por producción en Datos principales, igual que las productoras.
+
+- [x] Seguimiento económico y financiero por producción (ingresos, gastos, margen, fee IC, resultado composer), con exportación Excel/PDF, orden de facturación a Maggy y lectura en el portal del composer; gastos antiguos pasados sin borrar.
+- [ ] Historial de servicios/ingresos en las fichas de clientes y proveedores del CRM, sincronizado con las líneas de cada producción.
+- [ ] Totales de ingresos y gastos en la vista financiera de cada composer y de cada cliente.
