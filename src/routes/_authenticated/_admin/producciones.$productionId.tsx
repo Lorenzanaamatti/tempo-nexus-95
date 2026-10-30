@@ -47,7 +47,7 @@ const SYNC_LABEL: Record<string, string> = {
   title: "título", project_type: "tipo", partner_company_id: "productora", platform_id: "plataforma",
   director_id: "director", director: "director", country: "país", original_language: "idioma",
   year: "año", start_date: "fecha inicio rodaje", delivery_date: "fecha de entrega",
-  actual_delivery_date: "fecha de entrega real", premiere_date: "fecha de estreno", notes: "notas",
+  actual_delivery_date: "fecha de entrega real", delivery_delay_reason: "motivo del cambio de entrega", premiere_date: "fecha de estreno", notes: "notas",
   fee_amount: "precio", ic_commission_pct: "% comisión", ic_commission: "comisión", commission_basis: "modelo de comisión",
 };
 
