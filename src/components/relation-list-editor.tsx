@@ -158,14 +158,14 @@ export function RelationListEditor<T extends { id: string; position: number }>({
       [rowId]: has ? current.filter((x) => x !== styleId) : [...current, styleId],
     }));
     if (has) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from(styles.table)
         .delete()
         .eq(styles.rowKey, rowId)
         .eq("style_id", styleId);
       if (error) toast.error(error.message);
     } else {
-      const { error } = await supabase.from(styles.table).insert({
+      const { error } = await (supabase as any).from(styles.table).insert({
         [styles.rowKey]: rowId,
         composer_id: composerId,
         style_id: styleId,
