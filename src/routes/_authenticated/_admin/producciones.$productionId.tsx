@@ -1,6 +1,6 @@
 import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductionInvoices } from "@/components/billing/production-invoices";
@@ -42,6 +42,14 @@ import { Money } from "@/components/money";
 import { formatNumberEs, parseAmount } from "@/lib/money";
 import { BillingSprintsEditor } from "@/components/billing-sprints-editor";
 import { ProductionEventsEditor } from "@/components/person-events-editor";
+
+const SYNC_LABEL: Record<string, string> = {
+  title: "título", project_type: "tipo", partner_company_id: "productora", platform_id: "plataforma",
+  director_id: "director", director: "director", country: "país", original_language: "idioma",
+  year: "año", start_date: "fecha inicio rodaje", delivery_date: "fecha de entrega",
+  actual_delivery_date: "fecha de entrega real", premiere_date: "fecha de estreno", notes: "notas",
+  fee_amount: "precio", ic_commission_pct: "% comisión", ic_commission: "comisión", commission_basis: "modelo de comisión",
+};
 
 export const Route = createFileRoute("/_authenticated/_admin/producciones/$productionId")({
   component: ProduccionDetalle,
@@ -138,6 +146,33 @@ function ProduccionDetalle() {
   const closureReady = isClosureComplete(closureQ.data);
 
   const data = prodQ.data;
+  const savedRef = useRef<Form | null>(null);
+  const [pendingSync, setPendingSync] = useState<Record<string, any>>({});
+  const siblingsQ = useQuery({
+    queryKey: ["production-siblings", productionId, (data as any)?.sibling_group_id ?? null],
+    enabled: !!(data as any)?.sibling_group_id,
+    queryFn: async () => {
+      const { data: rows, error } = await (supabase as any)
+        .from("productions")
+        .select("id, composer:composers(full_name, artistic_name)")
+        .eq("sibling_group_id", (data as any).sibling_group_id)
+        .neq("id", productionId);
+      if (error) throw error;
+      return (rows ?? []) as { id: string; composer: { full_name: string | null; artistic_name: string | null } | null }[];
+    },
+  });
+  const siblings = siblingsQ.data ?? [];
+  const siblingNames = siblings.map((x) => x.composer?.artistic_name || x.composer?.full_name || "otro representado").join(", ");
+
+  async function applySync(yes: boolean) {
+    const payload = pendingSync;
+    setPendingSync({});
+    if (!yes || !siblings.length) return;
+    const { error } = await (supabase as any).from("productions").update(payload).in("id", siblings.map((x) => x.id));
+    if (error) return toast.error("No se pudo actualizar la otra ficha: " + error.message);
+    toast.success(`Actualizado también en la ficha de ${siblingNames}`);
+    qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
+  }
   const stage: ProductionStage = stageOf(data?.status);
 
   useEffect(() => {
@@ -164,13 +199,14 @@ function ProduccionDetalle() {
     };
     setForm(hydrated);
     markClean(hydrated);
+    savedRef.current = hydrated;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useAutosave(form, save);
   async function save() {
     setSaving(true);
-    const { error } = await (supabase as any).from("productions").update({
+    const payload: Record<string, any> = {
       title: form.title,
       project_type: form.project_type || null,
       partner_company_id: form.partner_company_id || null,
@@ -189,9 +225,16 @@ function ProduccionDetalle() {
       ic_commission_pct: form.ic_commission_pct === "" ? null : Number(form.ic_commission_pct),
       ic_commission: form.ic_commission === "" ? null : Number(form.ic_commission),
       commission_basis: form.commission_basis || null,
-    }).eq("id", productionId);
+    };
+    const { error } = await (supabase as any).from("productions").update(payload).eq("id", productionId);
     setSaving(false);
     if (error) return toast.error(error.message);
+    if (siblings.length && savedRef.current) {
+      const prev = savedRef.current as Record<string, any>;
+      const changed = Object.keys(payload).filter((k) => (form as any)[k] !== prev[k]);
+      if (changed.length) setPendingSync((cur) => ({ ...cur, ...Object.fromEntries(changed.map((k) => [k, payload[k]])) }));
+    }
+    savedRef.current = form;
     await syncPrimaryCompanyLink();
     await syncPrimaryDirectorLink();
     toast.success("Guardado");
@@ -305,6 +348,32 @@ function ProduccionDetalle() {
         <ArrowLeft className="h-3.5 w-3.5" />
         {finalized ? "Producciones finalizadas" : "Producciones activas"}
       </Link>
+
+      {siblings.length > 0 && (
+        <div className="mt-3 rounded-sm border border-border bg-muted/50 px-4 py-3 text-sm">
+          <p>
+            Esta película tiene también ficha para{" "}
+            {siblings.map((x, i) => (
+              <span key={x.id}>
+                {i > 0 && ", "}
+                <Link to="/producciones/$productionId" params={{ productionId: x.id }} className="font-semibold text-primary hover:underline">
+                  {x.composer?.artistic_name || x.composer?.full_name || "otro representado"}
+                </Link>
+              </span>
+            ))}
+            . Dinero, calendario y documentos se gestionan por separado.
+          </p>
+          {Object.keys(pendingSync).length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2">
+              <span>
+                Has cambiado <strong>{Object.keys(pendingSync).map((k) => SYNC_LABEL[k] ?? k).join(", ")}</strong>. ¿Actualizarlo también en la ficha de {siblingNames}?
+              </span>
+              <Button size="sm" onClick={() => applySync(true)}>Sí</Button>
+              <Button size="sm" variant="outline" onClick={() => applySync(false)}>No</Button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
         <div className="min-w-0 flex-1">
