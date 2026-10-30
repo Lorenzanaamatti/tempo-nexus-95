@@ -224,9 +224,9 @@ export function ProductionExpenses({
               })}
               <tr className="border-t-2 border-border font-medium">
                 <td className="px-3 py-2" colSpan={2}>TOTAL</td>
-                <td className="px-3 py-2 text-right"><Money value={totalBudget} /></td>
+                <td className="px-3 py-2 text-right"><Money value={totalBudget} className="text-destructive" /></td>
                 <td className="px-3 py-2 text-right tabular-nums">{pct(totalBudget, Number(feeAmount ?? 0))}</td>
-                <td className="px-3 py-2 text-right"><Money value={totalReal} /></td>
+                <td className="px-3 py-2 text-right"><Money value={totalReal} className="text-destructive" /></td>
                 <td className="px-3 py-2 text-right tabular-nums">{pct(totalReal, Number(feeAmount ?? 0))}</td>
                 <td className={`px-3 py-2 text-right tabular-nums ${devCls(totalReal - totalBudget)}`}>{devTxt(totalReal - totalBudget)}</td>
                 {!readOnly && <td />}
@@ -245,7 +245,7 @@ export function ProductionExpenses({
         <div className="grid gap-3 sm:grid-cols-5">
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Precio negociado</Label>
-            <p className="font-display text-2xl"><Money value={feeAmount} /></p>
+            <p className="font-display text-2xl"><Money value={feeAmount} className="text-success" /></p>
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Total gastos</Label>
