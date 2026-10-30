@@ -202,14 +202,14 @@ export function ProductionExpenses({
                     <td className="px-3 py-2 font-medium">{r.concepto}</td>
                     <td className="px-3 py-2 text-muted-foreground">{r.provider_name ?? "—"}</td>
                     <td className="px-3 py-1 text-right">
-                      {readOnly ? <Money value={r.budget_amount} /> : (
-                        <Input key={`b-${r.id}-${r.budget_amount}`} className="ml-auto h-8 w-28 text-right" defaultValue={fmt(r.budget_amount)} onBlur={(e) => e.target.value !== fmt(r.budget_amount) && updateField(r.id, "budget_amount", e.target.value)} />
+                      {readOnly ? <Money value={r.budget_amount} className="text-destructive" /> : (
+                        <Input key={`b-${r.id}-${r.budget_amount}`} className="ml-auto h-8 w-28 text-right text-destructive" defaultValue={fmt(r.budget_amount)} onBlur={(e) => e.target.value !== fmt(r.budget_amount) && updateField(r.id, "budget_amount", e.target.value)} />
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(b, Number(feeAmount ?? 0))}</td>
                     <td className="px-3 py-1 text-right">
-                      {readOnly ? <Money value={r.amount} /> : (
-                        <Input key={`a-${r.id}-${r.amount}`} className="ml-auto h-8 w-28 text-right" defaultValue={fmt(r.amount)} onBlur={(e) => e.target.value !== fmt(r.amount) && updateField(r.id, "amount", e.target.value)} />
+                      {readOnly ? <Money value={r.amount} className="text-destructive" /> : (
+                        <Input key={`a-${r.id}-${r.amount}`} className="ml-auto h-8 w-28 text-right text-destructive" defaultValue={fmt(r.amount)} onBlur={(e) => e.target.value !== fmt(r.amount) && updateField(r.id, "amount", e.target.value)} />
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(c, Number(feeAmount ?? 0))}</td>
