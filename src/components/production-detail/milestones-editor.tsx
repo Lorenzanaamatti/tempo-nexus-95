@@ -22,7 +22,16 @@ import {
 } from "@/lib/production-phase-templates";
 import { addToPhaseCatalog, findCatalogByName, PHASE_COLOR_CLASS, PHASE_COLOR_KEYS, PHASE_COLOR_LABEL, useInvalidatePhaseCatalog, usePhaseCatalog, type PhaseColorKey } from "@/lib/phase-catalog";
 import { toast } from "sonner";
-import { Plus, Flag, AlertTriangle, Sparkles, Star, PartyPopper } from "lucide-react";
+import { Plus, Flag, AlertTriangle, Sparkles, Star, PartyPopper, Trash2 } from "lucide-react";
+import {
+  ChangeReasonDialog, invalidateProductionTimelines, logProductionChanges, useSiblingProductions, type PendingChange,
+} from "@/components/production-detail/change-reason-dialog";
+
+const FIELD_LABEL: Record<string, string> = {
+  name: "Nombre", owner: "Responsable", start_date: "Desde", end_date: "Hasta", status: "Estado",
+  is_milestone: "Entrega destacada", is_premiere: "Estreno", detail: "Qué", place: "Dónde", people: "Quién",
+};
+const asText = (v: unknown) => (v == null || v === "" ? null : typeof v === "boolean" ? (v ? "sí" : "no") : String(v));
 
 const db = supabase as any;
 const MANUAL = "__manual__";
@@ -90,7 +99,13 @@ export function ProductionMilestonesEditor({
   const showDetail = picked ? picked.requires_detail : true;
   const showPlace = picked ? picked.requires_place : true;
 
+  const siblingsQ = useSiblingProductions(productionId);
+  const siblings = siblingsQ.data ?? [];
+  const [pending, setPending] = useState<(PendingChange & { m: Milestone; patch: Partial<Milestone> }) | null>(null);
+  const [rev, setRev] = useState(0);
+
   function invalidate() {
+    invalidateProductionTimelines(qc);
     qc.invalidateQueries({ queryKey: key });
     qc.invalidateQueries({ queryKey: ["production-phases", productionId] });
     qc.invalidateQueries({ queryKey: ["gantt-phases"] });
@@ -150,16 +165,78 @@ export function ProductionMilestonesEditor({
     }
   }
 
-  async function update(id: string, patch: Partial<Milestone>) {
-    const { error } = await db.from("production_phases").update(patch).eq("id", id);
+  /** Primera vez que se rellena un dato: se guarda sin preguntar. Si se cambia un dato existente: motivo + fichas hermanas. */
+  async function update(m: Milestone, patch: Partial<Milestone>) {
+    const changes = Object.entries(patch)
+      .filter(([k, v]) => asText((m as any)[k]) !== asText(v))
+      .map(([k, v]) => ({ field: k, label: FIELD_LABEL[k] ?? k, old: asText((m as any)[k]), next: asText(v) }));
+    if (!changes.length) return;
+    const isChange = changes.some((c) => c.old != null);
+    if (isChange) {
+      setPending({ m, patch, changes, title: `Proceso «${m.name}»` });
+      return;
+    }
+    const { error } = await db.from("production_phases").update(patch).eq("id", m.id);
     if (error) return toast.error(error.message);
     invalidate();
   }
 
-  async function remove(id: string) {
-    const { error } = await db.from("production_phases").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+  function remove(m: Milestone) {
+    setPending({ m, patch: {}, isDelete: true, title: `Proceso «${m.name}»`,
+      changes: [{ field: "proceso", label: "Proceso", old: `${m.name} (${m.start_date ?? "sin fecha"} – ${m.end_date ?? "sin fecha"})`, next: null }] });
+  }
+
+  /** Busca el mismo proceso en otra ficha de la película: mismo nombre y, si hay varios, misma fecha de inicio. */
+  async function findSiblingPhase(siblingId: string, m: Milestone): Promise<string | null> {
+    const { data } = await db.from("production_phases").select("id, name, start_date").eq("production_id", siblingId);
+    const same = ((data ?? []) as any[]).filter((p) => String(p.name).trim().toLowerCase() === m.name.trim().toLowerCase());
+    if (!same.length) return null;
+    return (same.find((p) => p.start_date === m.start_date) ?? same[0]).id;
+  }
+
+  async function confirmPending(reason: string, siblingIds: string[]) {
+    const p = pending;
+    setPending(null);
+    if (!p) return;
+    try {
+      const run = async (phaseId: string) => {
+        const res = p.isDelete
+          ? await db.from("production_phases").delete().eq("id", phaseId)
+          : await db.from("production_phases").update(p.patch).eq("id", phaseId);
+        if (res.error) throw res.error;
+      };
+      await run(p.m.id);
+      const applied: { id: string; label: string; phaseId: string }[] = [];
+      const missing: string[] = [];
+      for (const sid of siblingIds) {
+        const label = siblings.find((s) => s.id === sid)?.label ?? "otra ficha";
+        const phaseId = await findSiblingPhase(sid, p.m);
+        if (!phaseId) { missing.push(label); continue; }
+        await run(phaseId);
+        applied.push({ id: sid, label, phaseId });
+      }
+      const also = applied.map((a) => a.label).join(", ") || null;
+      const rows = p.changes.map((c) => ({
+        production_id: productionId, phase_id: p.isDelete ? null : p.m.id, subject: `Proceso «${p.m.name}»`,
+        field: p.isDelete ? "eliminado" : c.label, old_value: c.old, new_value: p.isDelete ? null : c.next, reason, also_applied_to: also,
+      }));
+      const siblingRows = applied.flatMap((a) => p.changes.map((c) => ({
+        production_id: a.id, phase_id: p.isDelete ? null : a.phaseId, subject: `Proceso «${p.m.name}»`,
+        field: p.isDelete ? "eliminado" : c.label, old_value: c.old, new_value: p.isDelete ? null : c.next, reason,
+        also_applied_to: "Cambio hecho desde otra ficha de la película",
+      })));
+      await logProductionChanges([...rows, ...siblingRows]);
+      toast.success(also ? `Guardado también en la ficha de ${also}` : "Cambio guardado");
+      if (missing.length) toast.warning(`No se encontró este proceso en la ficha de ${missing.join(", ")}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar el cambio");
+    }
     invalidate();
+  }
+
+  function cancelPending() {
+    setPending(null);
+    setRev((r) => r + 1);
   }
 
   const rows = listQ.data ?? [];
@@ -275,11 +352,11 @@ export function ProductionMilestonesEditor({
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="min-w-[180px] flex-1">
                     <Label className="smallcaps text-[10px] text-muted-foreground">Proceso</Label>
-                    <Input value={m.name} onChange={(e) => update(m.id, { name: e.target.value })} />
+                    <Input key={`n-${m.id}-${m.name}-${rev}`} defaultValue={m.name} onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== m.name) update(m, { name: v }); }} />
                   </div>
                   <div className="w-44">
                     <Label className="smallcaps text-[10px] text-muted-foreground">Responsable</Label>
-                    <Select value={(m.owner ?? "agencia") as string} onValueChange={(v) => update(m.id, { owner: v })}>
+                    <Select value={(m.owner ?? "agencia") as string} onValueChange={(v) => update(m, { owner: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {(Object.keys(GANTT_OWNER_LABEL) as GanttOwner[]).map((o) => (
@@ -290,15 +367,15 @@ export function ProductionMilestonesEditor({
                   </div>
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Desde</Label>
-                    <Input type="date" value={m.start_date ?? ""} onChange={(e) => update(m.id, { start_date: e.target.value || null })} />
+                    <Input type="date" key={`s-${m.id}-${m.start_date}-${rev}`} defaultValue={m.start_date ?? ""} onBlur={(e) => update(m, { start_date: e.target.value || null })} />
                   </div>
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Hasta</Label>
-                    <Input type="date" value={m.end_date ?? ""} onChange={(e) => update(m.id, { end_date: e.target.value || null })} />
+                    <Input type="date" key={`e-${m.id}-${m.end_date}-${rev}`} defaultValue={m.end_date ?? ""} onBlur={(e) => update(m, { end_date: e.target.value || null })} />
                   </div>
                   <div className="w-40">
                     <Label className="smallcaps text-[10px] text-muted-foreground">Estado</Label>
-                    <Select value={st} onValueChange={(v) => update(m.id, { status: v })}>
+                    <Select value={st} onValueChange={(v) => update(m, { status: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {MILESTONE_STATUSES.map((s) => <SelectItem key={s} value={s}>{MILESTONE_STATUS_LABEL[s]}</SelectItem>)}
@@ -309,7 +386,7 @@ export function ProductionMilestonesEditor({
                     type="button"
                     size="sm"
                     variant={m.is_milestone ? "default" : "outline"}
-                    onClick={() => update(m.id, { is_milestone: !m.is_milestone })}
+                    onClick={() => update(m, { is_milestone: !m.is_milestone })}
                     title="Marcar como entrega destacada"
                   >
                     <Star className="mr-1 h-4 w-4" /> {m.is_milestone ? "Entrega destacada" : "Destacar"}
@@ -318,37 +395,40 @@ export function ProductionMilestonesEditor({
                     type="button"
                     size="sm"
                     variant={m.is_premiere ? "default" : "outline"}
-                    onClick={() => update(m.id, { is_premiere: !m.is_premiere })}
+                    onClick={() => update(m, { is_premiere: !m.is_premiere })}
                     title="Los estrenos pasan al calendario de marketing"
                   >
                     <PartyPopper className="mr-1 h-4 w-4" /> {m.is_premiere ? "Estreno" : "Marcar estreno"}
                   </Button>
-                  <ConfirmDeleteButton iconOnly title="¿Eliminar este proceso?" onConfirm={() => remove(m.id)} />
+                  <Button type="button" size="sm" variant="ghost" aria-label="Eliminar proceso" onClick={() => remove(m)}><Trash2 className="h-4 w-4" /></Button>
                 </div>
 
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Qué</Label>
                     <Input
-                      value={m.detail ?? ""}
+                      key={`detail-${m.id}-${m.detail ?? ""}-${rev}`}
+                      defaultValue={m.detail ?? ""}
                       placeholder="Qué se entrega, graba o estrena"
-                      onChange={(e) => update(m.id, { detail: e.target.value || null })}
+                      onBlur={(e) => update(m, { detail: e.target.value.trim() || null })}
                     />
                   </div>
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Dónde</Label>
                     <Input
-                      value={m.place ?? ""}
+                      key={`place-${m.id}-${m.place ?? ""}-${rev}`}
+                      defaultValue={m.place ?? ""}
                       placeholder="Estudio, sala, ciudad…"
-                      onChange={(e) => update(m.id, { place: e.target.value || null })}
+                      onBlur={(e) => update(m, { place: e.target.value.trim() || null })}
                     />
                   </div>
                   <div>
                     <Label className="smallcaps text-[10px] text-muted-foreground">Quién</Label>
                     <Input
-                      value={m.people ?? ""}
+                      key={`people-${m.id}-${m.people ?? ""}-${rev}`}
+                      defaultValue={m.people ?? ""}
                       placeholder="Ingeniero, orquesta, equipo…"
-                      onChange={(e) => update(m.id, { people: e.target.value || null })}
+                      onBlur={(e) => update(m, { people: e.target.value.trim() || null })}
                     />
                   </div>
                 </div>
@@ -378,6 +458,8 @@ export function ProductionMilestonesEditor({
         Cada subproceso con fechas marca el inicio y el fin de esa etapa en el calendario y en el Gantt. Los estrenos pasan
         además al calendario de marketing con la película y el cliente.
       </p>
+
+      <ChangeReasonDialog pending={pending} siblings={siblings} onConfirm={confirmPending} onCancel={cancelPending} />
 
       <AlertDialog open={!!askStandard} onOpenChange={(o) => { if (!o) setAskStandard(null); }}>
         <AlertDialogContent>
