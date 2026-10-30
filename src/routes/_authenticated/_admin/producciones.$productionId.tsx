@@ -785,7 +785,7 @@ function ProduccionDetalle() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Label>Precio negociado con la productora (€)</Label>
+                <Label>Precio de venta (€)</Label>
                 <Input
                   key={`fee-${form.fee_amount}`}
                   defaultValue={form.fee_amount !== "" ? formatNumberEs(Number(form.fee_amount)) : ""}
