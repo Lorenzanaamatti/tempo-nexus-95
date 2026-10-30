@@ -1,15 +1,19 @@
-const EUR = new Intl.NumberFormat("es-ES", {
-  style: "currency",
-  currency: "EUR",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-  useGrouping: "always" as any,
-});
-const NUM = new Intl.NumberFormat("es-ES", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-  useGrouping: "always" as any,
-});
+// Agrupación manual de miles: algunos navegadores no agrupan cifras de 4 dígitos
+// (3.160) aunque se pida useGrouping: "always", así que insertamos el punto a mano.
+function groupEs(intPart: string): string {
+  const sign = intPart.startsWith("-") ? "-" : "";
+  const digits = sign ? intPart.slice(1) : intPart;
+  return sign + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function decimalsEs(n: number, digits: number): string {
+  const fixed = Math.abs(n).toFixed(digits);
+  const [intPart, decPart] = fixed.split(".");
+  return `${n < 0 ? "-" : ""}${groupEs(intPart)}${digits > 0 ? `,${decPart}` : ""}`;
+}
+
+const EUR = { format: (n: number) => `${decimalsEs(n, 2)} €` };
+const NUM = { format: (n: number) => decimalsEs(n, 2) };
 // Todas las cifras: separador de miles siempre (también en 4 cifras: 3.000,00) y dos decimales.
 const EUR0 = EUR;
 
@@ -42,15 +46,10 @@ export function formatMoneyEs(
   const n = typeof amount === "string" ? Number(amount) : amount;
   if (!Number.isFinite(n)) return emptyLabel;
   const symbol = moneda === "EUR" ? "€" : moneda === "USD" ? "$" : moneda;
-  const withDecimals = true;
-  return `${new Intl.NumberFormat("es-ES", {
-    minimumFractionDigits: withDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
-    useGrouping: "always" as any,
-  }).format(n)} ${symbol}`;
+  return `${decimalsEs(n, 2)} ${symbol}`;
 }
 
-const INT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0, useGrouping: "always" as any });
+const INT = { format: (n: number) => decimalsEs(n, 0) };
 
 /** Número entero con separador de miles: "1.234". Para contadores y KPIs de unidades. */
 export function formatIntEs(value: number | string | null | undefined): string {

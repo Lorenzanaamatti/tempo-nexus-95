@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { EmptyState } from "@/components/list-states";
 import { Money } from "@/components/money";
+import { formatNumberEs } from "@/lib/money";
 import { toast } from "sonner";
 import { Plus, Receipt } from "lucide-react";
 import { computeAgencyCommission, type CommissionBasis } from "@/lib/commission";
@@ -76,7 +77,7 @@ const parseNum = (s: string) => {
   return Number.isFinite(n) ? n : NaN;
 };
 const devCls = (d: number) => (d > 0 ? "text-destructive" : d < 0 ? "text-success" : "text-muted-foreground");
-const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${Math.abs(d).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any })} €`;
+const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${formatNumberEs(Math.abs(d))} €`;
 const pct = (v: number, total: number) => (total ? `${((v / total) * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %` : "—");
 
 export function ProductionExpenses({
@@ -149,7 +150,7 @@ export function ProductionExpenses({
     invalidate();
   }
 
-  const fmt = (n: number | null) => (n == null ? "" : n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" as any }));
+  const fmt = (n: number | null) => (n == null ? "" : formatNumberEs(n));
 
   return (
     <div className="space-y-4">
@@ -201,14 +202,14 @@ export function ProductionExpenses({
                     <td className="px-3 py-2 font-medium">{r.concepto}</td>
                     <td className="px-3 py-2 text-muted-foreground">{r.provider_name ?? "—"}</td>
                     <td className="px-3 py-1 text-right">
-                      {readOnly ? <Money value={r.budget_amount} /> : (
-                        <Input key={`b-${r.id}-${r.budget_amount}`} className="ml-auto h-8 w-28 text-right" defaultValue={fmt(r.budget_amount)} onBlur={(e) => e.target.value !== fmt(r.budget_amount) && updateField(r.id, "budget_amount", e.target.value)} />
+                      {readOnly ? <Money value={r.budget_amount} className="text-destructive" /> : (
+                        <Input key={`b-${r.id}-${r.budget_amount}`} className="ml-auto h-8 w-28 text-right text-destructive" defaultValue={fmt(r.budget_amount)} onBlur={(e) => e.target.value !== fmt(r.budget_amount) && updateField(r.id, "budget_amount", e.target.value)} />
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(b, Number(feeAmount ?? 0))}</td>
                     <td className="px-3 py-1 text-right">
-                      {readOnly ? <Money value={r.amount} /> : (
-                        <Input key={`a-${r.id}-${r.amount}`} className="ml-auto h-8 w-28 text-right" defaultValue={fmt(r.amount)} onBlur={(e) => e.target.value !== fmt(r.amount) && updateField(r.id, "amount", e.target.value)} />
+                      {readOnly ? <Money value={r.amount} className="text-destructive" /> : (
+                        <Input key={`a-${r.id}-${r.amount}`} className="ml-auto h-8 w-28 text-right text-destructive" defaultValue={fmt(r.amount)} onBlur={(e) => e.target.value !== fmt(r.amount) && updateField(r.id, "amount", e.target.value)} />
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{pct(c, Number(feeAmount ?? 0))}</td>
@@ -223,9 +224,9 @@ export function ProductionExpenses({
               })}
               <tr className="border-t-2 border-border font-medium">
                 <td className="px-3 py-2" colSpan={2}>TOTAL</td>
-                <td className="px-3 py-2 text-right"><Money value={totalBudget} /></td>
+                <td className="px-3 py-2 text-right"><Money value={totalBudget} className="text-destructive" /></td>
                 <td className="px-3 py-2 text-right tabular-nums">{pct(totalBudget, Number(feeAmount ?? 0))}</td>
-                <td className="px-3 py-2 text-right"><Money value={totalReal} /></td>
+                <td className="px-3 py-2 text-right"><Money value={totalReal} className="text-destructive" /></td>
                 <td className="px-3 py-2 text-right tabular-nums">{pct(totalReal, Number(feeAmount ?? 0))}</td>
                 <td className={`px-3 py-2 text-right tabular-nums ${devCls(totalReal - totalBudget)}`}>{devTxt(totalReal - totalBudget)}</td>
                 {!readOnly && <td />}
@@ -244,16 +245,16 @@ export function ProductionExpenses({
         <div className="grid gap-3 sm:grid-cols-5">
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Precio negociado</Label>
-            <p className="font-display text-2xl"><Money value={feeAmount} /></p>
+            <p className="font-display text-2xl"><Money value={feeAmount} className="text-success" /></p>
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Total gastos</Label>
-            <p className="font-display text-2xl"><Money value={totalReal} /></p>
+            <p className="font-display text-2xl"><Money value={totalReal} className="text-destructive" /></p>
             <p className="text-xs text-muted-foreground">Coste real</p>
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Margen del compositor/a</Label>
-            <p className="font-display text-2xl"><Money value={margin} /></p>
+            <p className="font-display text-2xl"><Money value={margin} className="text-success" /></p>
             <p className="text-xs text-muted-foreground">Precio − coste real</p>
           </div>
           <div className="rounded-sm border border-border p-3">
@@ -265,7 +266,7 @@ export function ProductionExpenses({
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Le queda al compositor/a</Label>
-            <p className="font-display text-2xl"><Money value={margin != null ? margin - (commission ?? 0) : null} /></p>
+            <p className="font-display text-2xl"><Money value={margin != null ? margin - (commission ?? 0) : null} className="text-success" /></p>
           </div>
         </div>
       )}
