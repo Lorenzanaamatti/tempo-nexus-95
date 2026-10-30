@@ -26,7 +26,7 @@ export type FinanceLineRow = {
   kind: "ingreso" | "gasto";
   concept: string;
   counterparty_name: string | null;
-  counterparty_type: "partner" | "productora" | "cuenta" | "manual" | null;
+  counterparty_type: "partner" | "productora" | "cuenta" | "proveedor" | "manual" | null;
   counterparty_id: string | null;
   amount_initial: number | null;
   amount_final: number | null;
