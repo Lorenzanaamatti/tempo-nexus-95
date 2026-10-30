@@ -5685,6 +5685,52 @@ export type Database = {
         }
         Relationships: []
       }
+      production_directors: {
+        Row: {
+          created_at: string
+          director_id: string
+          id: string
+          is_primary: boolean
+          production_id: string
+        }
+        Insert: {
+          created_at?: string
+          director_id: string
+          id?: string
+          is_primary?: boolean
+          production_id: string
+        }
+        Update: {
+          created_at?: string
+          director_id?: string
+          id?: string
+          is_primary?: boolean
+          production_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_directors_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_directors_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_directors_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_documents: {
         Row: {
           created_at: string
