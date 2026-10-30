@@ -1,0 +1,1 @@
+ALTER TABLE public.productions ADD COLUMN IF NOT EXISTS delivery_delay_reason text;
