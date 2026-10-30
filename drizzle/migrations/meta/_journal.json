@@ -113,6 +113,13 @@
       "when": 1793377331551,
       "tag": "0015_production_directors",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793378591506,
+      "tag": "0016_sync_production_composer_assignment",
+      "breakpoints": true
     }
   ]
 }

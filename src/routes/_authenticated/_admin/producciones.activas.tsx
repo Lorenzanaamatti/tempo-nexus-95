@@ -119,6 +119,10 @@ function NewProductionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
     }).select("id").single();
     if (error) { setSaving(false); return toast.error(error.message); }
 
+    // El vínculo compositor ↔ ficha lo crea la base de datos al guardar.
+    qc.invalidateQueries({ queryKey: ["production-representados", created.id] });
+
+
     try {
       await seedProductionPhases(created.id, templateForKind(kind));
     } catch {
