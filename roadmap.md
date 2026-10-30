@@ -26,3 +26,6 @@
 - [x] Portal del artista: «Lo que hacemos por ti» con todas las gestiones de la agencia.
 - [x] Calendario: vistas de procesos, ventas, fichajes, facturación, contratos y subvenciones.
 - [x] Onboarding Plusmusic/IC editable (37 diapositivas, GIF, progreso, panel BIG C).
+
+- [ ] Importar el catálogo de DISCO a la app (formato de exportación por confirmar con la usuaria).
+- [ ] Reproducir los demos de compositor directamente en su ficha.
