@@ -79,7 +79,9 @@ export function ProductionLinksEditor({
         .select(`id, ${cfg.crmNameColumn}`)
         .order(cfg.crmNameColumn);
       if (error) throw error;
-      return (data ?? []).map((r: any) => ({ id: r.id, name: r[cfg.crmNameColumn] }));
+      const mapped = (data ?? []).map((r: any) => ({ id: r.id, name: r[cfg.crmNameColumn] }));
+      console.warn("CRM_DBG", cfg.label, "raw:", JSON.stringify((data ?? []).slice(0, 2)), "mapped:", JSON.stringify(mapped.slice(0, 2)));
+      return mapped;
     },
   });
 
