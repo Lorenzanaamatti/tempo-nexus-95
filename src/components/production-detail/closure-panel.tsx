@@ -62,8 +62,9 @@ function useClosureLookups(productionId: string) {
   });
   const docsQ = useQuery({
     queryKey: ["closure-production-documents", productionId],
+    refetchOnMount: "always",
     queryFn: async () => {
-      const { data, error } = await db.from("production_documents").select("id, title, kind").eq("production_id", productionId);
+      const { data, error } = await db.from("production_documents").select("id, title, kind").eq("production_id", productionId).order("created_at");
       if (error) throw error;
       return data ?? [];
     },
@@ -94,6 +95,45 @@ export function ProductionClosurePanel({
   useEffect(() => {
     setForm(closureQ.data ?? { production_id: productionId, cue_sheet_temas: [] });
   }, [closureQ.data, productionId]);
+
+  // Reconoce automáticamente el presupuesto vinculado en «Documentos vinculados».
+  useEffect(() => {
+    if (closureQ.isLoading || form.presupuesto_documento_id) return;
+    const budgets = (docsQ.data ?? []).filter((d: any) => String(d.kind ?? "").toLowerCase() === "presupuesto");
+    if (budgets.length > 0) setForm((p) => ({ ...p, presupuesto_documento_id: budgets[budgets.length - 1].id }));
+  }, [docsQ.data, closureQ.isLoading, form.presupuesto_documento_id]);
+
+  const [budgetUrl, setBudgetUrl] = useState("");
+  const [budgetBusy, setBudgetBusy] = useState(false);
+  async function addBudget({ url, file }: { url?: string; file?: File }) {
+    setBudgetBusy(true);
+    try {
+      let row: any = { production_id: productionId, kind: "Presupuesto" };
+      if (file) {
+        const safe = file.name.normalize("NFD").replace(/[^\w.-]+/g, "_");
+        const path = `${productionId}/${Date.now()}-${safe}`;
+        const up = await supabase.storage.from("production-docs").upload(path, file);
+        if (up.error) throw up.error;
+        row = { ...row, title: file.name, storage_path: path };
+      } else {
+        let u = (url ?? "").trim();
+        if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+        row = { ...row, title: u, url: u };
+      }
+      const { data, error } = await db.from("production_documents").insert(row).select("id").single();
+      if (error) throw error;
+      await persist({ presupuesto_documento_id: data.id });
+      setForm((p) => ({ ...p, presupuesto_documento_id: data.id }));
+      setBudgetUrl("");
+      qc.invalidateQueries({ queryKey: ["closure-production-documents", productionId] });
+      qc.invalidateQueries({ queryKey: ["production-linked-docs", productionId] });
+      toast.success("Presupuesto vinculado");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo vincular el presupuesto");
+    } finally {
+      setBudgetBusy(false);
+    }
+  }
 
   const temas: any[] = Array.isArray(form.cue_sheet_temas) ? form.cue_sheet_temas : [];
   const canGenerate = stage === "entrega" || stage === "revision" || stage === "finalizada";
@@ -218,10 +258,18 @@ export function ProductionClosurePanel({
           <SelectTrigger className="w-full"><SelectValue placeholder="Vincular presupuesto" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="__none">Sin vincular</SelectItem>
-            {(docsQ.data ?? []).map((d: any) => <SelectItem key={d.id} value={d.id}>{d.title || d.kind || "Documento"}</SelectItem>)}
+            {(docsQ.data ?? []).map((d: any) => <SelectItem key={d.id} value={d.id}>{d.title || d.kind || "Documento"}{d.kind ? ` · ${d.kind}` : ""}</SelectItem>)}
           </SelectContent>
         </Select>
         {!form.presupuesto_documento_id && hint("Sin presupuesto vinculado")}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Input className="h-8 min-w-[220px] flex-1" placeholder="Pegar enlace del presupuesto" value={budgetUrl} onChange={(e) => setBudgetUrl(e.target.value)} />
+          <Button type="button" size="sm" variant="outline" disabled={budgetBusy || !budgetUrl.trim()} onClick={() => addBudget({ url: budgetUrl })}>Vincular enlace</Button>
+          <label className="inline-flex">
+            <input type="file" className="hidden" disabled={budgetBusy} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) addBudget({ file: f }); }} />
+            <span className="inline-flex h-8 cursor-pointer items-center rounded-md border px-3 text-sm hover:bg-muted">Subir archivo</span>
+          </label>
+        </div>
       </Item>
 
       {/* 2 Deal memo */}
