@@ -216,6 +216,7 @@ function ProduccionDetalle() {
         .update({ is_primary: false })
         .eq("production_id", productionId);
     }
+  }
 
   async function applyStage(next: ProductionStage) {
     const { error } = await (supabase as any)

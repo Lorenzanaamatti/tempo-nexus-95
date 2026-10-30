@@ -23,7 +23,6 @@ export function additionalCompanies(links: CompanyLink[], primaryId?: string | n
   for (const l of links) {
     if (!l.company_id) continue;
     if (primaryId && l.company_id === primaryId) continue;
-    if (l.is_primary) continue;
     if (seen.has(l.company_id)) continue;
     seen.add(l.company_id);
     out.push(l);
