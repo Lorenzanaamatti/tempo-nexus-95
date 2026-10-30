@@ -5520,6 +5520,66 @@ export type Database = {
           },
         ]
       }
+      production_change_log: {
+        Row: {
+          also_applied_to: string | null
+          changed_at: string
+          changed_by: string | null
+          changed_by_initials: string | null
+          field: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          phase_id: string | null
+          production_id: string
+          reason: string
+          subject: string
+        }
+        Insert: {
+          also_applied_to?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_initials?: string | null
+          field: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          phase_id?: string | null
+          production_id: string
+          reason: string
+          subject: string
+        }
+        Update: {
+          also_applied_to?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_initials?: string | null
+          field?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          phase_id?: string | null
+          production_id?: string
+          reason?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_change_log_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_change_log_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions_roster_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_closures: {
         Row: {
           contrato_id: string | null
