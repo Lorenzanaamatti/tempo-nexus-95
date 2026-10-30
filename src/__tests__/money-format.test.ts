@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEUR, formatEUR0, formatNumberEs } from "./money";
+import { formatEUR, formatEUR0, formatNumberEs } from "@/lib/money";
 
 describe("formato de cifras", () => {
   it("separador de miles también con cuatro cifras", () => {
