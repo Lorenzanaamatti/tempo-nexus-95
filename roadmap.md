@@ -28,4 +28,5 @@
 - [x] Onboarding Plusmusic/IC editable (37 diapositivas, GIF, progreso, panel BIG C).
 
 - [ ] Importar el catálogo de DISCO a la app (formato de exportación por confirmar con la usuaria).
+- [x] Etiquetar pistas por estilo en su ficha: estilos del catálogo (Drama, Orquestal…) más set fino de ánimo, textura, tempo, tono y uso.
 - [x] Reproducir los demos de compositor directamente en su ficha.
