@@ -123,13 +123,14 @@ function feeConfig(p: FinanceProduction | undefined): IcFeeConfig {
 }
 
 /** Campo numérico que guarda al salir. */
-function NumCell({ value, onSave, readOnly, className = "" }: { value: number | null; onSave: (v: number | null) => void; readOnly?: boolean; className?: string }) {
+function NumCell({ value, onSave, readOnly, className = "", neg = false }: { value: number | null; onSave: (v: number | null) => void; readOnly?: boolean; className?: string; neg?: boolean }) {
   const [txt, setTxt] = useState<string | null>(null);
-  if (readOnly) return <span className={className}>{eur(value)}</span>;
+  const shown = value == null ? "" : `${neg && value ? "−" : ""}${formatNumberEs(value)}`;
+  if (readOnly) return <span className={className}>{value == null ? "" : `${shown} €`}</span>;
   return (
     <input
       className={`w-full bg-transparent text-right tabular-nums outline-none focus:ring-1 focus:ring-ring rounded-sm px-1 ${className}`}
-      value={txt ?? (value == null ? "" : formatNumberEs(value))}
+      value={txt ?? shown}
       placeholder="0,00"
       onFocus={() => setTxt(value == null ? "" : formatNumberEs(value))}
       onChange={(e) => setTxt(e.target.value)}
@@ -273,14 +274,14 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
       <tr key={l.id}>
         <td className={td}><TextCell value={l.concept} readOnly={readOnly} list={neg ? "finance-exp-concepts" : "finance-inc-concepts"} placeholder="Concepto" onSave={(v) => updateLine(l, { concept: v })} /></td>
         <td className={td}>{cpCell(l)}</td>
-        <td className={`${td} text-right`}>{neg && i ? "−" : ""}<NumCell value={l.amount_initial} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_initial", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
+        <td className={`${td} text-right`}><NumCell neg={neg} value={l.amount_initial} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_initial", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
         <td className={`${td} text-right`}>{pctTxt(pctOfIncome(i, fin.initial.ingresos))}</td>
-        <td className={`${td} text-right ${F}`}>{neg && f ? "−" : ""}<NumCell value={l.amount_final} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_final", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
+        <td className={`${td} text-right ${F}`}><NumCell neg={neg} value={l.amount_final} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_final", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
         <td className={`${td} text-right`}>{pctTxt(pctOfIncome(f, fin.final.ingresos))}</td>
         <td className={`${td} text-right`}>{diffTxt(neg ? -(f - i) : f - i)}</td>
         <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_issued} onCheckedChange={(v) => updateLine(l, { invoice_issued: v === true })} /></td>
         <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_settled} onCheckedChange={(v) => updateLine(l, { invoice_settled: v === true })} /></td>
-        {!readOnly && <td className={td}>{!l.is_sale_price && <ConfirmDeleteButton onConfirm={() => removeLine(l)} title="¿Eliminar esta línea?" />}</td>}
+        {!readOnly && <td className={td}>{!l.is_sale_price && <ConfirmDeleteButton onConfirm={() => removeLine(l)} title="¿Eliminar esta línea?" iconOnly />}</td>}
       </tr>
     );
   };
@@ -315,13 +316,13 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
         )}
       </td>
       <td className={`${td} text-right`}>{cfg.mode === "fijo"
-        ? <span className="inline-flex items-center">−<NumCell value={cfg.fixedInitial} readOnly={readOnly} onSave={(v) => updateProd({ ic_fee_fixed_initial: v })} className={readOnly ? "" : "inline-block w-28 border border-border bg-background"} /></span>
+        ? <span className="inline-flex items-center"><NumCell neg value={cfg.fixedInitial} readOnly={readOnly} onSave={(v) => updateProd({ ic_fee_fixed_initial: v })} className={readOnly ? "" : "inline-block w-28 border border-border bg-background"} /></span>
         : signed(fin.initial.fee, true)}</td>
       <td className={`${td} text-right`}>{cfg.mode === "pct" && !readOnly
         ? <PctInput value={cfg.pctInitial} onSave={(v) => updateProd({ ic_fee_pct_initial: v })} />
         : pctTxt(pctOfIncome(fin.initial.fee, fin.initial.ingresos))}</td>
       <td className={`${td} text-right font-semibold ${F}`}>{cfg.mode === "fijo"
-        ? <span className="inline-flex items-center">−<NumCell value={cfg.fixedFinal} readOnly={readOnly} onSave={(v) => updateProd({ ic_fee_fixed_final: v })} className={readOnly ? "font-semibold" : "inline-block w-28 border border-border bg-background font-semibold"} /></span>
+        ? <span className="inline-flex items-center"><NumCell neg value={cfg.fixedFinal} readOnly={readOnly} onSave={(v) => updateProd({ ic_fee_fixed_final: v })} className={readOnly ? "font-semibold" : "inline-block w-28 border border-border bg-background font-semibold"} /></span>
         : signed(fin.final.fee, true)}</td>
       <td className={`${td} text-right`}>{cfg.mode === "pct" && !readOnly
         ? <PctInput value={cfg.pctFinal} onSave={(v) => updateProd({ ic_commission_pct: v })} />
