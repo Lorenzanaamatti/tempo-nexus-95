@@ -17,6 +17,7 @@ import { Plus, Users } from "lucide-react";
 export type LinkedRepresentado = {
   id: string;
   composer_id: string | null;
+  production_id?: string;
   external_name?: string | null;
   role_in_project: string | null;
   composers?: { id: string; full_name: string | null; artistic_name: string | null; roster_role?: string | null } | null;
@@ -26,16 +27,26 @@ export function useProductionRepresentados(productionId: string) {
   return useQuery({
     queryKey: ["production-representados", productionId],
     queryFn: async () => {
+      const ids = await siblingIds(productionId);
       const { data, error } = await supabase
         .from("production_assignments")
-        .select("id, composer_id, external_name, role_in_project, composers(id, full_name, artistic_name, roster_role)")
-        .eq("production_id", productionId)
+        .select("id, production_id, composer_id, external_name, role_in_project, composers(id, full_name, artistic_name, roster_role)")
+        .in("production_id", ids)
         .or("composer_id.not.is.null,external_name.not.is.null")
         .order("created_at");
       if (error) throw error;
       return (data ?? []) as unknown as LinkedRepresentado[];
     },
   });
+}
+
+/** Todas las entradas de la misma película (una por representado). */
+export async function siblingIds(productionId: string): Promise<string[]> {
+  const db = supabase as any;
+  const { data } = await db.from("productions").select("sibling_group_id").eq("id", productionId).maybeSingle();
+  if (!data?.sibling_group_id) return [productionId];
+  const { data: rows } = await db.from("productions").select("id").eq("sibling_group_id", data.sibling_group_id);
+  return (rows ?? []).map((r: any) => r.id);
 }
 
 export function representadoName(r: LinkedRepresentado) {
@@ -87,6 +98,24 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
     if (represented ? !picked : !externalName.trim()) return;
     const finalRole = role === "otro" ? customRole.trim() : role;
     if (role === "otro" && !finalRole) return toast.error("Indica el rol");
+    if (represented) {
+      // Cada representado tiene su propia entrada de la producción.
+      const { data: newId, error: splitErr } = await (supabase as any).rpc("split_production_for_composer", {
+        _production_id: productionId,
+        _composer_id: picked,
+      });
+      if (splitErr) return toast.error(splitErr.message);
+      if (finalRole && finalRole !== "compositor_principal") {
+        await (supabase as any).from("production_assignments").update({ role_in_project: finalRole })
+          .eq("production_id", newId).eq("composer_id", picked);
+      }
+      toast.success(newId === productionId ? "Representado vinculado" : "Creada su propia ficha de esta producción");
+      setOpen(false); setPicked(""); setQ(""); setCustomRole("");
+      qc.invalidateQueries({ queryKey: ["production-representados"] });
+      qc.invalidateQueries({ queryKey: ["production-siblings"] });
+      qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
+      return;
+    }
     const { error } = await supabase.from("production_assignments").insert({
       production_id: productionId,
       composer_id: represented ? picked : null,
@@ -138,6 +167,11 @@ export function ProductionRepresentadosEditor({ productionId }: { productionId: 
                 <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
                   {ROSTER_ROLE_LABEL[r.composers.roster_role] ?? r.composers.roster_role}
                 </span>
+              )}
+              {r.composer_id && r.production_id && r.production_id !== productionId && (
+                <Link to="/producciones/$productionId" params={{ productionId: r.production_id }} className="text-xs text-primary hover:underline">
+                  su ficha de esta producción →
+                </Link>
               )}
               {r.composer_id && (
                 <Link to="/composers/$composerId" params={{ composerId: r.composer_id }} className="text-xs text-muted-foreground hover:underline">
