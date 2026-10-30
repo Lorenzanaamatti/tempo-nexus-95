@@ -46,7 +46,7 @@ export function invalidateProductionTimelines(qc: QueryClient) {
 export type PendingChange = {
   title: string;
   /** Líneas «antes → después» que se muestran y se guardan en el registro. */
-  changes: { field: string; label: string; old: string | null; next: string | null }[];
+  changes: { field: string; label: string; old: string | null; next: string | null; oldShown?: string | null; nextShown?: string | null }[];
   isDelete?: boolean;
 };
 
@@ -87,13 +87,13 @@ export function ChangeReasonDialog({
           {pending?.changes.map((c) => (
             <li key={c.field}>
               <span className="text-muted-foreground">{c.label}:</span>{" "}
-              <span className="line-through text-muted-foreground">{displayValue(c.old)}</span> →{" "}
-              <strong>{pending.isDelete ? "eliminado" : displayValue(c.next)}</strong>
+              <span className="line-through text-muted-foreground">{displayValue(c.oldShown ?? c.old)}</span> →{" "}
+              <strong>{pending.isDelete ? "eliminado" : displayValue(c.nextShown ?? c.next)}</strong>
             </li>
           ))}
         </ul>
         <div>
-          <Label>Motivo del cambio</Label>
+          <Label>Motivo del cambio (opcional)</Label>
           <Textarea autoFocus rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explica por qué" />
         </div>
         {siblings.length > 0 && (
@@ -109,8 +109,11 @@ export function ChangeReasonDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>Cancelar el cambio</Button>
+          <Button variant="secondary" onClick={() => onConfirm("Sin motivo indicado", siblings.filter((s) => picked[s.id]).map((s) => s.id))}>
+            Guardar sin motivo
+          </Button>
           <Button disabled={!reason.trim()} onClick={() => onConfirm(reason.trim(), siblings.filter((s) => picked[s.id]).map((s) => s.id))}>
-            Guardar cambio
+            Guardar con motivo
           </Button>
         </DialogFooter>
       </DialogContent>

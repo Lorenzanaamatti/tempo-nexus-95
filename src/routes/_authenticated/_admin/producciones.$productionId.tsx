@@ -28,6 +28,19 @@ import {
 } from "@/components/production-detail/change-reason-dialog";
 
 /** Fechas de la ficha cuyo cambio (no la primera vez) pide motivo y queda registrado. */
+/** Campos libres de escritura larga: no piden motivo (se autoguardan mientras se escribe). */
+const UNTRACKED = new Set(["notes", "delivery_delay_reason", "other_responsibles", "project_type_note"]);
+const ID_TABLE: Record<string, [string, string]> = {
+  partner_company_id: ["production_companies", "name"], platform_id: ["platforms", "name"], director_id: ["directors", "name"],
+  negotiator_person_id: ["people", "full_name"], production_director_person_id: ["people", "full_name"],
+  postproduction_supervisor_person_id: ["people", "full_name"], music_supervisor_person_id: ["people", "full_name"],
+};
+async function resolveName(field: string, v: string | null) {
+  const t = ID_TABLE[field];
+  if (!t || !v) return v;
+  const { data } = await (supabase as any).from(t[0]).select(t[1]).eq("id", v).maybeSingle();
+  return (data?.[t[1]] as string) ?? v;
+}
 const TRACKED_DATES: Record<string, string> = {
   start_date: "Fecha inicio rodaje", delivery_date: "Fecha de entrega estimada", actual_delivery_date: "Fecha de entrega real",
   premiere_date: "Fecha de estreno", nomination_date: "Fecha de nominación", award_date: "Fecha de premio",
@@ -241,8 +254,8 @@ function ProduccionDetalle() {
       }
       const also = applied.map((s) => s.label).join(", ") || null;
       await logProductionChanges([
-        ...p.changes.map((c) => ({ production_id: productionId, subject: "Ficha", field: c.label, old_value: c.old, new_value: c.next, reason, also_applied_to: also })),
-        ...applied.flatMap((s) => p.changes.map((c) => ({ production_id: s.id, subject: "Ficha", field: c.label, old_value: c.old, new_value: c.next, reason, also_applied_to: "Cambio hecho desde otra ficha de la película" }))),
+        ...p.changes.map((c) => ({ production_id: productionId, subject: "Ficha", field: c.label, old_value: c.oldShown ?? c.old, new_value: c.nextShown ?? c.next, reason, also_applied_to: also })),
+        ...applied.flatMap((s) => p.changes.map((c) => ({ production_id: s.id, subject: "Ficha", field: c.label, old_value: c.oldShown ?? c.old, new_value: c.nextShown ?? c.next, reason, also_applied_to: "Cambio hecho desde otra ficha de la película" }))),
       ]);
       toast.success(also ? `Cambio registrado y aplicado también en la ficha de ${also}` : "Cambio registrado");
     } catch (e: any) {
@@ -346,19 +359,19 @@ function ProduccionDetalle() {
     if (error) return toast.error(error.message);
     if (siblings.length && savedRef.current) {
       const prev = savedRef.current as Record<string, any>;
-      const changed = Object.keys(payload).filter((k) => (form as any)[k] !== prev[k] && !(k in TRACKED_DATES && prev[k]));
+      const changed = Object.keys(payload).filter((k) => (form as any)[k] !== prev[k] && !(!UNTRACKED.has(k) && prev[k]));
       if (changed.length) setPendingSync((cur) => ({ ...cur, ...Object.fromEntries(changed.map((k) => [k, payload[k]])) }));
     }
     if (savedRef.current) {
       const prev = savedRef.current as Record<string, any>;
-      const changes = Object.keys(TRACKED_DATES)
-        .filter((k) => prev[k] && (form as any)[k] !== prev[k])
-        .map((k) => ({ field: k, label: TRACKED_DATES[k], old: prev[k] || null, next: (form as any)[k] || null }));
+      const changes = await Promise.all(Object.keys(payload)
+        .filter((k) => k in prev && !UNTRACKED.has(k) && prev[k] && (form as any)[k] !== prev[k])
+        .map(async (k) => ({ field: k, label: TRACKED_DATES[k] ?? (SYNC_LABEL[k] ? SYNC_LABEL[k][0].toUpperCase() + SYNC_LABEL[k].slice(1) : k), old: prev[k] || null, next: (form as any)[k] || null, oldShown: await resolveName(k, prev[k] || null), nextShown: await resolveName(k, (form as any)[k] || null) })));
       if (changes.length) {
         setDateChange((cur) => {
           const merged = new Map((cur?.changes ?? []).map((c) => [c.field, c]));
           changes.forEach((c) => merged.set(c.field, { ...c, old: merged.get(c.field)?.old ?? c.old }));
-          return { title: "Fechas de la ficha", changes: [...merged.values()], prev: { ...(cur?.prev ?? {}), ...Object.fromEntries(changes.map((c) => [c.field, cur?.prev?.[c.field] ?? c.old])) } };
+          return { title: "Cambios en la ficha", changes: [...merged.values()], prev: { ...(cur?.prev ?? {}), ...Object.fromEntries(changes.map((c) => [c.field, cur?.prev?.[c.field] ?? c.old])) } };
         });
       }
     }
