@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,16 +13,84 @@ import { savedToast } from "@/lib/saved-feedback";
 export type FieldDef = {
   key: string;
   label: string;
-  type?: "text" | "number" | "textarea" | "url";
+  type?: "text" | "number" | "textarea" | "url" | "tags";
   placeholder?: string;
   className?: string;
   audio?: boolean;
+};
+
+/**
+ * Vínculo de cada fila con el catálogo de estilos de la app (music_styles).
+ * La tabla intermedia debe apuntar a la fila con `rowKey` y a `style_id`,
+ * y llevar `composer_id` para que RLS pueda validar el permiso.
+ */
+export type RowStyleLinks = {
+  table: string;
+  rowKey: string;
+  options: { id: string; label: string }[];
+  linkedByRow: Record<string, string[]>;
 };
 
 const AUDIO_EXT = /\.(mp3|wav|m4a|aac|ogg|oga|flac|webm|opus)(\?|$)/i;
 
 function isAudioUrl(value: unknown) {
   return typeof value === "string" && AUDIO_EXT.test(value.trim());
+}
+
+function TagsField({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: unknown;
+  placeholder?: string;
+  onChange: (next: string[]) => void;
+}) {
+  const tags = Array.isArray(value) ? (value as string[]) : [];
+  const [text, setText] = useState("");
+
+  function add() {
+    const t = text.trim();
+    setText("");
+    if (!t || tags.includes(t)) return;
+    onChange([...tags, t]);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1.5">
+        {tags.length === 0 ? (
+          <span className="text-xs text-muted-foreground">Sin etiquetas todavía.</span>
+        ) : (
+          tags.map((t) => (
+            <Badge key={t} variant="outline" className="rounded-sm font-normal">
+              {t}
+              <button
+                type="button"
+                onClick={() => onChange(tags.filter((x) => x !== t))}
+                className="ml-2 text-muted-foreground hover:text-foreground"
+                aria-label={`Quitar ${t}`}
+              >
+                ×
+              </button>
+            </Badge>
+          ))
+        )}
+      </div>
+      <Input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            add();
+          }
+        }}
+        onBlur={add}
+        placeholder={placeholder ?? "Escribe y pulsa Enter"}
+      />
+    </div>
+  );
 }
 
 export function RelationListEditor<T extends { id: string; position: number }>({
@@ -32,6 +101,7 @@ export function RelationListEditor<T extends { id: string; position: number }>({
   fields,
   newDefaults,
   onChange,
+  styles,
 }: {
   title: string;
   table: "composer_demos" | "composer_filmography" | "composer_awards" | "composer_documents";
@@ -40,8 +110,10 @@ export function RelationListEditor<T extends { id: string; position: number }>({
   fields: FieldDef[];
   newDefaults: Record<string, unknown>;
   onChange: (rows: T[]) => void;
+  styles?: RowStyleLinks;
 }) {
   const [busy, setBusy] = useState(false);
+  const [linked, setLinked] = useState<Record<string, string[]>>(styles?.linkedByRow ?? {});
 
   async function add() {
     setBusy(true);
@@ -77,6 +149,31 @@ export function RelationListEditor<T extends { id: string; position: number }>({
     }
   }
 
+  async function toggleStyle(rowId: string, styleId: string) {
+    if (!styles) return;
+    const current = linked[rowId] ?? [];
+    const has = current.includes(styleId);
+    setLinked((prev) => ({
+      ...prev,
+      [rowId]: has ? current.filter((x) => x !== styleId) : [...current, styleId],
+    }));
+    if (has) {
+      const { error } = await supabase
+        .from(styles.table)
+        .delete()
+        .eq(styles.rowKey, rowId)
+        .eq("style_id", styleId);
+      if (error) toast.error(error.message);
+    } else {
+      const { error } = await supabase.from(styles.table).insert({
+        [styles.rowKey]: rowId,
+        composer_id: composerId,
+        style_id: styleId,
+      });
+      if (error) toast.error(error.message);
+    }
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-baseline justify-between">
@@ -105,6 +202,14 @@ export function RelationListEditor<T extends { id: string; position: number }>({
                           update(r.id, { [f.key]: e.target.value || null })
                         }
                       />
+                    ) : f.type === "tags" ? (
+                      <div className="mt-1">
+                        <TagsField
+                          value={(r as any)[f.key]}
+                          placeholder={f.placeholder}
+                          onChange={(next) => update(r.id, { [f.key]: next })}
+                        />
+                      </div>
                     ) : (
                       <>
                         <Input
@@ -131,6 +236,37 @@ export function RelationListEditor<T extends { id: string; position: number }>({
                   </div>
                 ))}
               </div>
+
+              {styles && styles.options.length > 0 && (
+                <div className="mt-3">
+                  <Label className="text-xs text-muted-foreground">
+                    Estilos del catálogo
+                  </Label>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {styles.options.map((o) => {
+                      const on = (linked[r.id] ?? []).includes(o.id);
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          onClick={() => toggleStyle(r.id, o.id)}
+                          aria-pressed={on}
+                          className={
+                            "rounded-sm border px-2.5 py-1 text-xs transition-colors " +
+                            (on
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border text-muted-foreground hover:text-foreground")
+                          }
+                        >
+                          {on ? "✓ " : ""}
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="mt-3 flex justify-end">
                 <Button type="button" size="sm" variant="ghost" onClick={() => remove(r.id)}>
                   <Trash2 className="mr-1 h-3 w-3" /> Eliminar
