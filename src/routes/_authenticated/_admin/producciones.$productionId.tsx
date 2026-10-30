@@ -154,11 +154,16 @@ function ProduccionDetalle() {
     queryFn: async () => {
       const { data: rows, error } = await (supabase as any)
         .from("productions")
-        .select("id, composer:composers(full_name, artistic_name)")
+        .select("id, composer_id")
         .eq("sibling_group_id", (data as any).sibling_group_id)
         .neq("id", productionId);
       if (error) throw error;
-      return (rows ?? []) as { id: string; composer: { full_name: string | null; artistic_name: string | null } | null }[];
+      const cids = (rows ?? []).map((r: any) => r.composer_id).filter(Boolean);
+      const { data: cs } = cids.length
+        ? await supabase.from("composers").select("id, full_name, artistic_name").in("id", cids)
+        : { data: [] as any[] };
+      const byId = new Map((cs ?? []).map((c: any) => [c.id, c]));
+      return (rows ?? []).map((r: any) => ({ id: r.id, composer: byId.get(r.composer_id) ?? null })) as { id: string; composer: { full_name: string | null; artistic_name: string | null } | null }[];
     },
   });
   const siblings = siblingsQ.data ?? [];
