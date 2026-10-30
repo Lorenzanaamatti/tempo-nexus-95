@@ -87,6 +87,7 @@ export function ProductionLinksEditor({
   const fk = (l: LinkRow) => (l[cfg.linkFk] as string) ?? null;
   const extras = additionalEntities(links, fk, (l) => l.name, primaryId);
   const options = entitiesToAdd(crmQ.data ?? [], links, fk, primaryId).map((c) => ({ id: c.id, label: c.name }));
+  console.warn("LINKS_DBG", cfg.label, "|", cfg.crmNameColumn, "|", JSON.stringify((crmQ.data ?? []).slice(0, 2)));
 
   function refresh() {
     qc.invalidateQueries({ queryKey: [...cfg.linkQueryKey, productionId] });
