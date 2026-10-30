@@ -162,6 +162,13 @@
       "when": 1793380979525,
       "tag": "0022_production_change_log",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793381148976,
+      "tag": "0023_change_log_initials_by_user",
+      "breakpoints": true
     }
   ]
 }
