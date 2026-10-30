@@ -134,6 +134,13 @@
       "when": 1793378876528,
       "tag": "0018_assignments_allow_external_subject",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793378919604,
+      "tag": "0019_assignments_subject_chk_external",
+      "breakpoints": true
     }
   ]
 }
