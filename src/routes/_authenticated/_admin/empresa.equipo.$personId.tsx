@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -84,6 +85,7 @@ function EquipoDetail() {
     setPhotoPath(data.photo_path ?? null);
   }, [data]);
 
+  useAutosave([form, roles], save);
   async function save() {
     setSaving(true);
     const num = (v: string) => (v === "" ? null : Number(v));

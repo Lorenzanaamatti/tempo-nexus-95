@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -88,6 +89,7 @@ function PersonEdit() {
     }
   }, [data]);
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const { error } = await supabase

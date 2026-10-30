@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -58,6 +59,7 @@ function AgentDetail() {
     });
   }, [data?.agent]);
 
+  useAutosave(form, save);
   async function save() {
     if (!form.full_name.trim()) return toast.error("El nombre es obligatorio");
     setSaving(true);

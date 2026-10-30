@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
@@ -174,6 +175,7 @@ function Inner({
     setDirty(true);
   }
 
+  useAutosave(c, saveCore);
   async function saveCore() {
     setSaving(true);
     const { error } = await supabase

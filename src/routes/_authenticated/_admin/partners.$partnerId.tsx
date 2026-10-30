@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PartnerProductions } from "@/components/partner-productions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -48,6 +49,7 @@ function PartnerDetail() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const { data: updated, error } = await db.from("partners").update({

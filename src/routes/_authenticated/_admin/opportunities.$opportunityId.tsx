@@ -1,3 +1,4 @@
+import { useAutosave } from "@/hooks/use-autosave";
 import { PageCrumb } from "@/components/breadcrumbs";
 import { Money } from "@/components/money";
 import { EmptyState } from "@/components/list-states";
@@ -199,6 +200,7 @@ function OpportunityDetail() {
     }
   }, [oppQ.data, directorsQ.data]);
 
+  useAutosave(form, save);
   async function save() {
     setSaving(true);
     const range = parseBudgetRange(form.presupuesto_texto);
