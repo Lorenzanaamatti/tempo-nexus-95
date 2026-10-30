@@ -79,17 +79,16 @@ export function ProductionLinksEditor({
         .select(`id, ${cfg.crmNameColumn}`)
         .order(cfg.crmNameColumn);
       if (error) throw error;
-      const mapped = (data ?? []).map((r: any) => ({ id: r.id, name: r[cfg.crmNameColumn] }));
-      console.warn("CRM_DBG", cfg.label, "raw:", JSON.stringify((data ?? []).slice(0, 2)), "mapped:", JSON.stringify(mapped.slice(0, 2)));
-      return mapped;
+      // Se guardan las filas tal cual: otras pantallas comparten esta misma clave.
+      return data ?? [];
     },
   });
 
   const links = linksQ.data ?? [];
   const fk = (l: LinkRow) => (l[cfg.linkFk] as string) ?? null;
   const extras = additionalEntities(links, fk, (l) => l.name, primaryId);
-  const options = entitiesToAdd(crmQ.data ?? [], links, fk, primaryId).map((c) => ({ id: c.id, label: c.name }));
-  console.warn("LINKS_DBG", cfg.label, "|", cfg.crmNameColumn, "|", JSON.stringify((crmQ.data ?? []).slice(0, 2)));
+  const crmItems = (crmQ.data ?? []).map((r: any) => ({ id: r.id, name: (r[cfg.crmNameColumn] as string) ?? "" }));
+  const options = entitiesToAdd(crmItems, links, fk, primaryId).map((c) => ({ id: c.id, label: c.name }));
 
   function refresh() {
     qc.invalidateQueries({ queryKey: [...cfg.linkQueryKey, productionId] });

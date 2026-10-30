@@ -123,7 +123,6 @@ function ProduccionDetalle() {
     queryFn: async () => {
       const { data, error } = await supabase.from("directors").select("id, full_name").order("full_name");
       if (error) throw error;
-      console.warn("ROUTE_DBG", JSON.stringify((data ?? []).slice(0, 2)));
       return data ?? [];
     },
   });
