@@ -76,7 +76,9 @@ const parseNum = (s: string) => {
   const n = Number(t);
   return Number.isFinite(n) ? n : NaN;
 };
-const devCls = (d: number) => (d > 0 ? "text-destructive" : d < 0 ? "text-success" : "text-muted-foreground");
+// Todo lo que hay en esta tabla es un COSTE de la producción: siempre en rojo,
+// aunque el beneficiario sea la agencia. El signo (+/−) indica si sube o baja del presupuesto.
+const devCls = (d: number) => (d === 0 ? "text-muted-foreground" : "text-destructive");
 const devTxt = (d: number) => `${d > 0 ? "+" : d < 0 ? "−" : ""}${formatNumberEs(Math.abs(d))} €`;
 const pct = (v: number, total: number) => (total ? `${((v / total) * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %` : "—");
 
@@ -259,7 +261,7 @@ export function ProductionExpenses({
           </div>
           <div className="rounded-sm border border-border p-3">
             <Label className="smallcaps text-[10px] text-muted-foreground">Comisión agencia</Label>
-            <p className="font-display text-2xl">{commission == null ? "—" : <Money value={commission} />}</p>
+            <p className="font-display text-2xl">{commission == null ? "—" : <Money value={commission} className="text-destructive" />}</p>
             <p className="text-xs text-muted-foreground">
               {commissionPct == null ? "Falta el % en Datos económicos" : `${commissionPct} % sobre ${basis === "margen" ? "el margen" : "el precio negociado"}`}
             </p>
