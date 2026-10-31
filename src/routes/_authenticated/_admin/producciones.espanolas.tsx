@@ -101,7 +101,13 @@ function ProduccionesEspanolas() {
   });
 
   const all = rowsQ.data ?? [];
-  const years = useMemo(() => [...new Set(all.map((r) => r.year).filter(Boolean))].sort((a, b) => (b as number) - (a as number)), [all]);
+  // Los años 2020–año siguiente están disponibles desde el primer momento, aunque el listado aún esté cargando.
+  const years = useMemo(() => {
+    const set = new Set<number>();
+    for (let y = new Date().getFullYear() + 1; y >= 2020; y--) set.add(y);
+    for (const r of all) if (r.year) set.add(r.year as number);
+    return [...set].sort((a, b) => b - a);
+  }, [all]);
   const genres = useMemo(() => [...new Set(all.flatMap((r) => r.genres ?? []))].sort(), [all]);
   const platforms = useMemo(() => [...new Set(all.map((r) => r.platform).filter(Boolean))].sort() as string[], [all]);
 
