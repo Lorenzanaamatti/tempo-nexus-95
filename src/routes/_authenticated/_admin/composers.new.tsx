@@ -56,11 +56,11 @@ function NewComposerPage() {
     let slug = slugify(fullName) || crypto.randomUUID().slice(0, 8);
     const { data: taken } = await supabase.from("composers").select("id").eq("slug", slug).maybeSingle();
     if (taken) slug = `${slug}-${crypto.randomUUID().slice(0, 6)}`;
-    const { data, error } = await supabase
+    const insertWith = (sl: string) => supabase
       .from("composers")
       .insert({
         full_name: fullName.trim(),
-        slug,
+        slug: sl,
         roster_role: role,
         role_subtype: role === "other" ? professionalCategory.trim() : null,
         owner_email: ownerEmail.trim() || null,
@@ -68,6 +68,10 @@ function NewComposerPage() {
       })
       .select("id")
       .single();
+    let { data, error } = await insertWith(slug);
+    for (let i = 0; i < 3 && error && (error.code === "23505" || /slug/i.test(error.message)); i++) {
+      ({ data, error } = await insertWith(`${slugify(fullName) || "ficha"}-${crypto.randomUUID().slice(0, 6)}`));
+    }
     setBusy(false);
     if (error) {
       toast.error(error.message);
