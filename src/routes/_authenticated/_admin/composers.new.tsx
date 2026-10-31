@@ -45,11 +45,12 @@ function NewComposerPage() {
       .from("composers")
       .select("id, full_name, representation_status")
       .ilike("full_name", fullName.trim())
+      .eq("roster_role", role)
       .limit(1)
       .maybeSingle();
     if (same) {
       setBusy(false);
-      toast.info(`«${same.full_name}» ya tiene ficha en el roster. Te la abro.`);
+      toast.info(`«${same.full_name}» ya tiene ficha con este perfil. Te la abro.`);
       navigate({ to: "/composers/$composerId", params: { composerId: same.id } });
       return;
     }
