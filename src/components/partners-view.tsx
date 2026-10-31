@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Plus, Handshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateEs } from "@/lib/dates";
+import { moveProductoraToContactar } from "@/lib/espanolas-actions";
 import {
   PARTNER_TIPOS, PARTNER_SUBTIPOS, PARTNER_TIPO_APOYO, PARTNER_AMBITOS, PARTNER_TIPO_TONE,
   type PartnerAmbito, type PartnerRecord, type PartnerTipo,
@@ -22,7 +23,7 @@ import {
 const db = supabase as any;
 
 async function fetchPartners(tipo?: PartnerTipo): Promise<PartnerRecord[]> {
-  let query = db.from("partners").select("*").order("nombre");
+  let query = db.from("partners").select("*").is("archived_at", null).order("nombre");
   if (tipo) query = query.eq("tipo", tipo);
   const { data, error } = await query;
   if (error) throw error;
@@ -139,6 +140,7 @@ export function PartnersView({
                 <th className="px-3 py-2 smallcaps text-xs">Ubicación</th>
                 <th className="px-3 py-2 smallcaps text-xs">Contacto</th>
                 <th className="px-3 py-2 smallcaps text-xs">Actualizado</th>
+                {tipo === "Productora" && <th className="px-3 py-2" />}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -155,6 +157,13 @@ export function PartnersView({
                   <td className="px-3 py-2 text-muted-foreground">{[r.ciudad, r.pais].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{r.contacto_principal || r.contacto_email || "—"}</td>
                   <td className="px-3 py-2 tabular-nums text-muted-foreground">{formatDateEs(r.updated_at)}</td>
+                  {tipo === "Productora" && (
+                    <td className="px-3 py-2 text-right">
+                      <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => void moveProductoraToContactar(r.nombre).then(() => { qc.invalidateQueries({ queryKey: ["partners"] }); qc.invalidateQueries({ queryKey: ["opportunities"] }); })}>
+                        Mover a «A contactar»
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

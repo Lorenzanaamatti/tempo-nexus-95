@@ -19,7 +19,7 @@ import { OpportunityImportDialog } from "@/components/opportunity-import-dialog"
 import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { OpportunityToPitchButton } from "@/components/opportunity-to-pitch-button";
-import { ProductoraActionsMenu } from "@/components/productora-actions-menu";
+import { DirectorActionsMenu, ProductoraActionsMenu } from "@/components/productora-actions-menu";
 import { linkCompanies } from "@/lib/opportunity-intake";
 
 import {
@@ -388,14 +388,17 @@ export function OpportunitiesList({
                       if (!list.length) return "—";
                       return (
                         <div className="flex flex-col items-start gap-0.5">
-                          {list.map((n) => <ProductoraActionsMenu key={n} name={n} />)}
+                          {list.map((n) => <ProductoraActionsMenu key={n} name={n} hideTargetAccounts />)}
                         </div>
                       );
                     })()}
                   </td>
                   {productionMode ? (
                     <>
-                      <td className="px-3 py-2 text-muted-foreground">{o.director?.full_name || o.director_text || "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{(() => {
+                        const names = String(o.director?.full_name || o.director_text || "").split(/\s*(?:,|;|\/|\sy\s|&)\s*/).map((x) => x.trim()).filter(Boolean);
+                        return names.length ? <div className="flex flex-col items-start gap-0.5">{names.map((n) => <DirectorActionsMenu key={n} name={n} />)}</div> : "—";
+                      })()}</td>
                       <td className="px-3 py-2 text-muted-foreground">
                         {(o.paises ?? []).join(" / ") || "—"}
                         {o.es_coproduccion && <span className="ml-1 rounded-sm bg-muted px-1 text-[10px] smallcaps">Copro</span>}
