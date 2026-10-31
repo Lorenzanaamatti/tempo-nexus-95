@@ -250,6 +250,8 @@ function PitchDetail() {
     toast.success("Pitch guardado");
     qc.invalidateQueries({ queryKey: ["pitches"] });
     qc.invalidateQueries({ queryKey: ["pitch", pitchId] });
+    qc.invalidateQueries({ queryKey: ["agency-timeline"] });
+    qc.invalidateQueries({ queryKey: ["portal-pitches"] });
     qc.invalidateQueries({ queryKey: ["pitch-origen", oportunidadId] });
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
