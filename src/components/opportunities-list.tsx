@@ -19,8 +19,9 @@ import { OpportunityImportDialog } from "@/components/opportunity-import-dialog"
 import { OpportunityArchiveButton } from "@/components/opportunity-archive-button";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { OpportunityToPitchButton } from "@/components/opportunity-to-pitch-button";
-import { ProductoraActionsMenu } from "@/components/productora-actions-menu";
+import { DirectorActionsMenu, ProductoraActionsMenu } from "@/components/productora-actions-menu";
 import { linkCompanies } from "@/lib/opportunity-intake";
+import { moveProductoraToPartners } from "@/lib/espanolas-actions";
 
 import {
   OPP_PHASE_LABEL,
@@ -388,14 +389,17 @@ export function OpportunitiesList({
                       if (!list.length) return "—";
                       return (
                         <div className="flex flex-col items-start gap-0.5">
-                          {list.map((n) => <ProductoraActionsMenu key={n} name={n} />)}
+                          {list.map((n) => <ProductoraActionsMenu key={n} name={n} hideTargetAccounts />)}
                         </div>
                       );
                     })()}
                   </td>
                   {productionMode ? (
                     <>
-                      <td className="px-3 py-2 text-muted-foreground">{o.director?.full_name || o.director_text || "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{(() => {
+                        const names = String(o.director?.full_name || o.director_text || "").split(/\s*(?:,|;|\/|\sy\s|&)\s*/).map((x) => x.trim()).filter(Boolean);
+                        return names.length ? <div className="flex flex-col items-start gap-0.5">{names.map((n) => <DirectorActionsMenu key={n} name={n} />)}</div> : "—";
+                      })()}</td>
                       <td className="px-3 py-2 text-muted-foreground">
                         {(o.paises ?? []).join(" / ") || "—"}
                         {o.es_coproduccion && <span className="ml-1 rounded-sm bg-muted px-1 text-[10px] smallcaps">Copro</span>}
@@ -442,6 +446,11 @@ export function OpportunitiesList({
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center justify-end gap-1">
+                      {listKey === "oportunidades-partners" && !o.archived_at && (o.partner_company?.name || o.partner_name) && (
+                        <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => void moveProductoraToPartners(o.partner_company?.name || o.partner_name).then(() => { qc.invalidateQueries({ queryKey: ["opportunities"] }); qc.invalidateQueries({ queryKey: ["partners"] }); })}>
+                          Mover a Partners
+                        </Button>
+                      )}
                       {productionMode && (
                         <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-xs" onClick={() => void keep(o.id)} title={o.kept_at ? `Revisada ${formatDateEs(o.kept_at)}` : "Mantener en seguimiento"}>
                           <Check className="h-3.5 w-3.5" /> Mantener
