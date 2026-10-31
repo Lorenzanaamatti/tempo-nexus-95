@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { splitCompanyNames } from "@/lib/split-companies";
 
 describe("splitCompanyNames", () => {
