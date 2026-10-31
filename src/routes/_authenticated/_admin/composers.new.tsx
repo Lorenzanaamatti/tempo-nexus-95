@@ -41,7 +41,21 @@ function NewComposerPage() {
       return;
     }
     setBusy(true);
-    const slug = slugify(fullName) || crypto.randomUUID().slice(0, 8);
+    const { data: same } = await supabase
+      .from("composers")
+      .select("id, full_name, representation_status")
+      .ilike("full_name", fullName.trim())
+      .limit(1)
+      .maybeSingle();
+    if (same) {
+      setBusy(false);
+      toast.info(`«${same.full_name}» ya tiene ficha en el roster. Te la abro.`);
+      navigate({ to: "/composers/$composerId", params: { composerId: same.id } });
+      return;
+    }
+    let slug = slugify(fullName) || crypto.randomUUID().slice(0, 8);
+    const { data: taken } = await supabase.from("composers").select("id").eq("slug", slug).maybeSingle();
+    if (taken) slug = `${slug}-${crypto.randomUUID().slice(0, 6)}`;
     const { data, error } = await supabase
       .from("composers")
       .insert({
