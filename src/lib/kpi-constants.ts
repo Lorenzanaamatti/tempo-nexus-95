@@ -81,28 +81,37 @@ export const OBJETIVO_METRICAS: readonly ObjetivoMetricaDef[] = [
 export type ObjetivoMetrica = (typeof OBJETIVO_METRICAS)[number]["key"];
 
 export const ROSTER_PROSPECT_ESTADOS = [
+  "sin_contacto",
   "contactado",
   "reunion_mantenida",
+  "en_negociacion",
   "oferta_enviada",
   "aceptado",
+  "en_pausa",
   "rechazado_ic",
   "rechazado_compositor",
 ] as const;
 export type RosterProspectEstado = (typeof ROSTER_PROSPECT_ESTADOS)[number];
 export const ROSTER_PROSPECT_ESTADO_LABEL: Record<RosterProspectEstado, string> = {
+  sin_contacto: "Sin contactar",
   contactado: "Contactado",
   reunion_mantenida: "Reunión mantenida",
+  en_negociacion: "En negociación",
   oferta_enviada: "Oferta enviada",
   aceptado: "Aceptado",
+  en_pausa: "En pausa",
   rechazado_ic: "Rechazado por IC",
   rechazado_compositor: "Rechazado por compositor",
 };
 /** Orden del embudo: un estado cuenta para todos los escalones anteriores. */
 export const ROSTER_PROSPECT_FUNNEL_RANK: Record<RosterProspectEstado, number> = {
+  sin_contacto: 0,
   contactado: 1,
   reunion_mantenida: 2,
+  en_negociacion: 3,
   oferta_enviada: 3,
   aceptado: 4,
+  en_pausa: 1,
   rechazado_ic: 2,
   rechazado_compositor: 3,
 };
