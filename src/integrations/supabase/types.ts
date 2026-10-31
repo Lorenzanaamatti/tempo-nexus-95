@@ -4378,6 +4378,7 @@ export type Database = {
             | Database["public"]["Enums"]["opp_production_genre"]
             | null
           id: string
+          kept_at: string | null
           kind: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date: string | null
           notes: string | null
@@ -4424,6 +4425,7 @@ export type Database = {
             | Database["public"]["Enums"]["opp_production_genre"]
             | null
           id?: string
+          kept_at?: string | null
           kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
@@ -4470,6 +4472,7 @@ export type Database = {
             | Database["public"]["Enums"]["opp_production_genre"]
             | null
           id?: string
+          kept_at?: string | null
           kind?: Database["public"]["Enums"]["opportunity_kind"]
           last_contact_date?: string | null
           notes?: string | null
@@ -4624,6 +4627,45 @@ export type Database = {
           },
           {
             foreignKeyName: "opportunity_candidates_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_partner_companies: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          opportunity_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          opportunity_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          opportunity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_partner_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "production_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_partner_companies_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
@@ -5701,6 +5743,7 @@ export type Database = {
           contract_notes: string | null
           country: string | null
           created_at: string
+          deprecated_at: string | null
           email: string | null
           id: string
           legal_name: string | null
@@ -5719,6 +5762,7 @@ export type Database = {
           contract_notes?: string | null
           country?: string | null
           created_at?: string
+          deprecated_at?: string | null
           email?: string | null
           id?: string
           legal_name?: string | null
@@ -5737,6 +5781,7 @@ export type Database = {
           contract_notes?: string | null
           country?: string | null
           created_at?: string
+          deprecated_at?: string | null
           email?: string | null
           id?: string
           legal_name?: string | null

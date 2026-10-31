@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Target } from "lucide-react";
+import { Check, Plus, Target } from "lucide-react";
 import { formatEUR0 } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
@@ -20,6 +20,7 @@ import { OpportunityArchiveButton } from "@/components/opportunity-archive-butto
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { OpportunityToPitchButton } from "@/components/opportunity-to-pitch-button";
 import { ProductoraActionsMenu } from "@/components/productora-actions-menu";
+import { linkCompanies } from "@/lib/opportunity-intake";
 
 import {
   OPP_PHASE_LABEL,
@@ -81,7 +82,7 @@ export function OpportunitiesList({
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, partner_company:production_companies(name), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer_id, composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, created_at, kept_at, partner_company:production_companies!opportunities_partner_company_id_fkey(name), companies:opportunity_partner_companies(is_primary, company:production_companies(id, name)), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer_id, composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -112,7 +113,7 @@ export function OpportunitiesList({
   const companiesQ = useQuery({
     queryKey: ["production-companies-mini"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("production_companies").select("id, name").order("name");
+      const { data, error } = await (supabase as any).from("production_companies").select("id, name").is("deprecated_at", null).order("name");
       if (error) throw error;
       return data ?? [];
     },
@@ -130,21 +131,29 @@ export function OpportunitiesList({
   async function create() {
     if (!newTitle.trim()) return;
     setCreating(true);
-    const { error } = await (supabase as any).from("opportunities").insert({
+    const { data: inserted, error } = await (supabase as any).from("opportunities").insert({
       title: newTitle.trim(),
       kind: newKind,
       partner_company_id: newCompany || null,
       responsible_person_id: newResponsible || null,
       detected_date: newDetectedDate || null,
-    });
+    }).select("id").single();
     setCreating(false);
     if (error) return toast.error(error.message);
+    if (newCompany && inserted?.id) await linkCompanies(inserted.id, [newCompany]).catch(() => {});
     setNewTitle("");
     setNewKind(fixedKinds?.[0] ?? "pitch");
     setNewCompany("");
     setNewResponsible("");
     setNewDetectedDate("");
     toast.success("Oportunidad creada");
+    qc.invalidateQueries({ queryKey: ["opportunities"] });
+  }
+
+  async function keep(id: string) {
+    const { error } = await (supabase as any).from("opportunities").update({ kept_at: new Date().toISOString() }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Se mantiene en seguimiento");
     qc.invalidateQueries({ queryKey: ["opportunities"] });
   }
 
@@ -231,7 +240,7 @@ export function OpportunitiesList({
             fetchAll={async () => {
               let exportQuery = (supabase as any)
                 .from("opportunities")
-                .select("*, partner_company:production_companies(name), target_production:productions!opportunities_target_production_id_fkey(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
+                .select("*, partner_company:production_companies!opportunities_partner_company_id_fkey(name), target_production:productions!opportunities_target_production_id_fkey(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
                 .order("created_at", { ascending: false });
               if (fixedKinds) exportQuery = exportQuery.in("kind", fixedKinds);
               const { data, error } = await exportQuery;
@@ -252,7 +261,7 @@ export function OpportunitiesList({
               { key: "last_contact_date", label: "Último contacto", get: (r: any) => r.last_contact_date },
               { key: "responsible", label: "Responsable", get: (r: any) => r.responsible?.full_name },
               { key: "notes", label: "Notas", default: false, get: (r: any) => r.notes },
-              { key: "created_at", label: "Creado", default: false, get: (r: any) => r.created_at },
+              { key: "created_at", label: "Entrada", default: true, get: (r: any) => r.created_at },
             ]}
           />
         </div>
@@ -334,6 +343,7 @@ export function OpportunitiesList({
                 {productionMode && <th className="px-3 py-2 smallcaps text-xs">Prioridad</th>}
                 <Th k="probability_pct" className="text-right">Prob.</Th>
                 <Th k="estimated_value" className="text-right">Valor est.</Th>
+                <Th k="created_at">Entrada</Th>
                 <Th k="detected_date">Detectada</Th>
                 <Th k="expected_close_date">Cierre est.</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Responsable</th>
@@ -358,6 +368,9 @@ export function OpportunitiesList({
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
                     {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
+                    {productionMode && o.kept_at && (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">Mantenida {formatDateEs(o.kept_at)}</span>
+                    )}
                     {o.archived_at && (
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">
                         Archivada {formatDateEs(o.archived_at)}{o.archived_reason ? ` · ${o.archived_reason}` : ""}
@@ -366,9 +379,19 @@ export function OpportunitiesList({
 
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">
-                    {o.partner_company?.name || o.partner_name ? (
-                      <ProductoraActionsMenu name={o.partner_company?.name || o.partner_name} />
-                    ) : "—"}
+                    {(() => {
+                      const list: string[] = [...(o.companies ?? [])]
+                        .sort((a: any, b: any) => Number(b.is_primary) - Number(a.is_primary))
+                        .map((c: any) => c.company?.name)
+                        .filter(Boolean);
+                      if (!list.length && (o.partner_company?.name || o.partner_name)) list.push(o.partner_company?.name || o.partner_name);
+                      if (!list.length) return "—";
+                      return (
+                        <div className="flex flex-col items-start gap-0.5">
+                          {list.map((n) => <ProductoraActionsMenu key={n} name={n} />)}
+                        </div>
+                      );
+                    })()}
                   </td>
                   {productionMode ? (
                     <>
@@ -413,15 +436,21 @@ export function OpportunitiesList({
                   )}
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.created_at)}</td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                   <td className="px-3 py-2">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex flex-wrap items-center justify-end gap-1">
+                      {productionMode && (
+                        <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-xs" onClick={() => void keep(o.id)} title={o.kept_at ? `Revisada ${formatDateEs(o.kept_at)}` : "Mantener en seguimiento"}>
+                          <Check className="h-3.5 w-3.5" /> Mantener
+                        </Button>
+                      )}
                       {productionMode && <OpportunityToPitchButton opportunity={o} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />}
                       <OpportunityArchiveButton opportunityId={o.id} archivedAt={o.archived_at} onDone={() => qc.invalidateQueries({ queryKey: ["opportunities"] })} />
                       <ConfirmDeleteButton
-                        iconOnly
+                        iconOnly={!productionMode}
                         title={`Eliminar “${o.title}”`}
                         description="Elimina la oportunidad de forma permanente. Úsalo solo si la creaste por error; si simplemente ha expirado, archívala."
                         onConfirm={() => void remove(o.id)}

@@ -21,7 +21,7 @@ function Propuestas() {
     queryFn: async () => {
       const { data } = await supabase
         .from("opportunity_candidates")
-        .select("id, note, opportunity:opportunities(id, title, kind, statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies(name), partner_name, target_production:productions!opportunities_target_production_id_fkey(title, year), target_production_text)")
+        .select("id, note, opportunity:opportunities(id, title, kind, statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, partner_company:production_companies!opportunities_partner_company_id_fkey(name), partner_name, target_production:productions!opportunities_target_production_id_fkey(title, year), target_production_text)")
         .eq("composer_id", composerId!);
       return (data ?? []).filter((c: any) => c.opportunity);
     },

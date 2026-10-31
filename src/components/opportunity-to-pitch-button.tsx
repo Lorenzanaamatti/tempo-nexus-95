@@ -119,7 +119,7 @@ export function OpportunityToPitchButton({ opportunity, onDone }: OpportunityToP
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 gap-1 px-2 text-xs" title="Trasladar a Pitches">
-          <Send className="h-3.5 w-3.5" /> A pitch
+          <Send className="h-3.5 w-3.5" /> Bajar a Pitches
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">

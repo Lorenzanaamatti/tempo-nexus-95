@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { splitCompanyNames } from "@/lib/split-companies";
 import { normalizeTitle, type ParsedOpportunity } from "@/lib/opportunity-production";
 
 /** Busca una productora por nombre en el CRM; si no existe, la crea con el nombre. */
@@ -8,6 +9,7 @@ export async function findOrCreateCompany(name: string): Promise<string | null> 
   const { data: found } = await supabase
     .from("production_companies")
     .select("id, name")
+    .is("deprecated_at", null)
     .ilike("name", clean)
     .limit(1);
   if (found && found.length) return found[0].id;
@@ -36,7 +38,13 @@ export type IntakeOutcome = { title: string; action: "creada" | "actualizada" | 
 /** Alta o actualización (dedupe por título + director) de una oportunidad de producción. */
 export async function upsertProductionOpportunity(row: ParsedOpportunity): Promise<IntakeOutcome> {
   try {
-    const companyId = row.productoraName ? await findOrCreateCompany(row.productoraName) : null;
+    // Varias productoras en un mismo texto («A, B y C») se separan en fichas individuales.
+    const companyIds: string[] = [];
+    for (const n of splitCompanyNames(row.productoraName).companies) {
+      const id = await findOrCreateCompany(n);
+      if (id && !companyIds.includes(id)) companyIds.push(id);
+    }
+    const companyId = companyIds[0] ?? null;
     const directorId = row.directorName ? await findOrCreateDirector(row.directorName) : null;
 
     const payload: Record<string, unknown> = {
@@ -89,6 +97,7 @@ export async function upsertProductionOpportunity(row: ParsedOpportunity): Promi
         .update(cleaned as never)
         .eq("id", (match as any).id);
       if (error) throw error;
+      await linkCompanies((match as any).id, companyIds);
       return { title: row.title, action: "actualizada", id: (match as any).id };
     }
 
@@ -98,8 +107,19 @@ export async function upsertProductionOpportunity(row: ParsedOpportunity): Promi
       .select("id")
       .single();
     if (error) throw error;
+    await linkCompanies((data as any).id, companyIds);
     return { title: row.title, action: "creada", id: (data as any).id };
   } catch (e: any) {
     return { title: row.title, action: "error", message: e?.message ?? "Error desconocido" };
   }
+}
+
+/** Enlaza todas las productoras de una oportunidad (la primera queda como principal). */
+export async function linkCompanies(opportunityId: string, companyIds: string[]) {
+  if (!companyIds.length) return;
+  const rows = companyIds.map((company_id, i) => ({ opportunity_id: opportunityId, company_id, is_primary: i === 0 }));
+  const { error } = await (supabase as any)
+    .from("opportunity_partner_companies")
+    .upsert(rows, { onConflict: "opportunity_id,company_id" });
+  if (error) throw error;
 }
