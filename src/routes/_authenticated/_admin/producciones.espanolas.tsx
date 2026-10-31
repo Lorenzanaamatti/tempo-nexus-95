@@ -266,7 +266,7 @@ function ProduccionesEspanolas() {
           </Button>
         </div>
         <ExportRowsButton rows={rows} filename="producciones-espanolas" sheetName="Producciones ES" />
-        <span className="font-mono text-xs text-muted-foreground">{rowsQ.isLoading ? "Cargando…" : `${rows.length.toLocaleString("es-ES")} títulos`}
+        <span className="font-mono text-xs text-muted-foreground">{rowsQ.isLoading ? "Cargando…" : `${rows.length.toLocaleString("es-ES")} títulos`}</span>
       </div>
 
       {rowsQ.isLoading ? (
