@@ -71,7 +71,7 @@ export function DirectorActionsMenu({ name }: { name: string }) {
       <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuLabel className="truncate">{cleanName}</DropdownMenuLabel>
         <DropdownMenuItem onSelect={() => void addDirectorToCrm(cleanName)}>Añadir a CRM de directores</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void addDirectorToCrm(cleanName).then((id) => id && navigate({ to: "/directors/$directorId", params: { directorId: id } }))}>Abrir ficha de director</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => void addDirectorToCrm(cleanName).then((id) => { if (id) void navigate({ to: "/directors/$directorId", params: { directorId: id } }); })}>Abrir ficha de director</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
