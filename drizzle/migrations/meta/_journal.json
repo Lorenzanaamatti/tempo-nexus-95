@@ -211,6 +211,13 @@
       "when": 1793468458533,
       "tag": "0029_prospect_accepted_to_roster",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793470023174,
+      "tag": "0030_opportunity_partner_companies",
+      "breakpoints": true
     }
   ]
 }
