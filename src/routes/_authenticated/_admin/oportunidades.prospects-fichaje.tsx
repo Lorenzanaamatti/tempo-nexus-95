@@ -70,6 +70,7 @@ function ProspectsFichajePage() {
   const [q, setQ] = useState("");
   const [fEstado, setFEstado] = useState(ALL);
   const [preview, setPreview] = useState(false);
+  const [showRejected, setShowRejected] = useState(false);
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["roster-prospects"],
@@ -84,11 +85,13 @@ function ProspectsFichajePage() {
     const n = q.trim().toLowerCase();
     return (rows ?? []).filter((r) => {
       if (r.estado === "aceptado") return false;
+      const rejected = r.estado.startsWith("rechazado");
+      if (rejected !== showRejected) return false;
       if (fEstado !== ALL && r.estado !== fEstado) return false;
       if (!n) return true;
       return r.nombre.toLowerCase().includes(n) || (r.rol ?? "").toLowerCase().includes(n) || matchesLocation(q, r.ciudad, r.pais);
     });
-  }, [rows, q, fEstado]);
+  }, [rows, q, fEstado, showRejected]);
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["roster-prospects"] });
@@ -182,6 +185,12 @@ function ProspectsFichajePage() {
             {ROSTER_PROSPECT_ESTADOS.map((e) => <SelectItem key={e} value={e}>{ROSTER_PROSPECT_ESTADO_LABEL[e]}</SelectItem>)}
           </SelectContent>
         </Select>
+        <div className="flex rounded-sm border border-border p-0.5 text-xs">
+          <button type="button" onClick={() => setShowRejected(false)} className={`rounded-sm px-3 py-1.5 ${!showRejected ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>En seguimiento</button>
+          <button type="button" onClick={() => setShowRejected(true)} className={`rounded-sm px-3 py-1.5 ${showRejected ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+            Rechazados ({(rows ?? []).filter((r) => r.estado.startsWith("rechazado")).length})
+          </button>
+        </div>
         <span className="ml-auto font-mono text-xs text-muted-foreground">{filtered.length} personas</span>
       </div>
 
@@ -236,7 +245,7 @@ function ProspectsFichajePage() {
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{r.origen ?? "—"}</td>
                   <td className="px-3 py-2 text-right">
-                    <ConfirmDeleteButton iconOnly title={`¿Quitar a "${r.nombre}" de la lista?`}
+                    <ConfirmDeleteButton title={`¿Eliminar definitivamente a "${r.nombre}"?`}
                       onConfirm={async () => {
                         const { error } = await db.from("roster_prospects").delete().eq("id", r.id);
                         if (error) return toast.error(error.message);
