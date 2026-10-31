@@ -163,6 +163,19 @@ function Inner({
   const projects: any[] = initialRelations.projects ?? [];
   const agents: { id: string; full_name: string; email: string | null }[] = initialRelations.agents ?? [];
   const candidacies: any[] = initialRelations.candidacies ?? [];
+  const pitchesQ = useQuery({
+    queryKey: ["pitches", "composer", c?.id],
+    enabled: !!c?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("oportunidades_pitch_composers")
+        .select("pitch:oportunidades_pitches(id, titulo, estado, fecha_pitch, proyecto_vinculado, archivado_at, produccion_id)")
+        .eq("composer_id", c.id);
+      if (error) throw error;
+      return (data ?? []).map((r: any) => r.pitch).filter(Boolean)
+        .sort((a: any, b: any) => String(b.fecha_pitch ?? "").localeCompare(String(a.fecha_pitch ?? "")));
+    },
+  });
   const productionsRel: any[] = initialRelations.productions ?? [];
   const contractsRel: any[] = initialRelations.contracts ?? [];
   const spanishFilms: any[] = initialRelations.spanishFilms ?? [];
@@ -572,6 +585,23 @@ function Inner({
                 {p.fee_amount != null && (
                   <div className="text-sm text-muted-foreground"><Money value={Number(p.fee_amount)} compact /></div>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Pitches">
+        {(pitchesQ.data ?? []).length === 0 ? (
+          <EmptyState variant="inline" icon={Target} title="Sin pitches" description="Cuando se asigne esta ficha como candidata en un pitch aparecerá aquí." action={{ label: "Ver pitches", to: "/oportunidades/pitches" }} />
+        ) : (
+          <ul className="space-y-2">
+            {(pitchesQ.data ?? []).map((p: any) => (
+              <li key={p.id} className="flex items-baseline justify-between gap-3 rounded-sm border border-border bg-card/50 px-4 py-3">
+                <Link to="/oportunidades/pitches/$pitchId" params={{ pitchId: p.id }} className="text-sm hover:underline">{p.titulo}</Link>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {[p.archivado_at ? (p.produccion_id ? "Conseguido" : "Cerrado") : p.estado, p.proyecto_vinculado, p.fecha_pitch ? p.fecha_pitch.split("-").reverse().join("/") : null].filter(Boolean).join(" · ")}
+                </div>
               </li>
             ))}
           </ul>
