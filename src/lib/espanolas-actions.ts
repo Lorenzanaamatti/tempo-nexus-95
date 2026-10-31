@@ -107,7 +107,7 @@ export async function addProductoraAContactar(nombre: string) {
 
   const { data: candidates, error: searchError } = await db
     .from("opportunities")
-    .select("id, partner_company_id, partner_name, partner_company:production_companies(name)")
+    .select("id, partner_company_id, partner_name, partner_company:production_companies!opportunities_partner_company_id_fkey(name)")
     .in("kind", ["presentar_ic", "fichaje_productora"]);
   if (searchError) {
     toast.error(searchError.message);

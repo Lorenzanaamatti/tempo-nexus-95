@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Target } from "lucide-react";
+import { Check, Plus, Target } from "lucide-react";
 import { formatEUR0 } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { OPPORTUNITY_STATUS_LABEL, OPPORTUNITY_STATUS_TONE, OPPORTUNITY_KIND_LABEL, OPPORTUNITY_KIND_TONE, type OpportunityStatus, type OpportunityKind } from "@/lib/opportunity-constants";
@@ -82,7 +82,7 @@ export function OpportunitiesList({
       let query = (supabase as any)
         .from("opportunities")
         .select(
-          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, created_at, kept_at, partner_company:production_companies(name), companies:opportunity_partner_companies(is_primary, company:production_companies(id, name)), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer_id, composer:composers(full_name, artistic_name))",
+          "id, title, titulo_alt, kind, responsible_person_id, tipo_produccion, genero_produccion, paises, es_coproduccion, presupuesto_min, presupuesto_max, presupuesto_texto, fase, prioridad, director_text, director:directors(full_name), target_production_id, target_production_text, target_production:productions!opportunities_target_production_id_fkey(title, year), statuses, probability_pct, estimated_value, detected_date, expected_close_date, last_contact_date, archived_at, archived_reason, created_at, kept_at, partner_company:production_companies!opportunities_partner_company_id_fkey(name), companies:opportunity_partner_companies(is_primary, company:production_companies(id, name)), partner_name, responsible:people(full_name), candidates:opportunity_candidates(composer_id, composer:composers(full_name, artistic_name))",
           { count: "exact" },
         );
       if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
@@ -240,7 +240,7 @@ export function OpportunitiesList({
             fetchAll={async () => {
               let exportQuery = (supabase as any)
                 .from("opportunities")
-                .select("*, partner_company:production_companies(name), target_production:productions!opportunities_target_production_id_fkey(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
+                .select("*, partner_company:production_companies!opportunities_partner_company_id_fkey(name), target_production:productions!opportunities_target_production_id_fkey(title, year), responsible:people(full_name), candidates:opportunity_candidates(composer:composers(full_name, artistic_name))")
                 .order("created_at", { ascending: false });
               if (fixedKinds) exportQuery = exportQuery.in("kind", fixedKinds);
               const { data, error } = await exportQuery;
@@ -368,6 +368,9 @@ export function OpportunitiesList({
                   <td className="px-3 py-2">
                     <Link to="/opportunities/$opportunityId" params={{ opportunityId: o.id }} className="font-display hover:underline">{o.title}</Link>
                     {productionMode && o.titulo_alt && <span className="block text-xs text-muted-foreground">{o.titulo_alt}</span>}
+                    {productionMode && o.kept_at && (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">Mantenida {formatDateEs(o.kept_at)}</span>
+                    )}
                     {o.archived_at && (
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">
                         Archivada {formatDateEs(o.archived_at)}{o.archived_reason ? ` · ${o.archived_reason}` : ""}
