@@ -142,3 +142,90 @@ export async function addProductoraAContactar(nombre: string) {
   toast.success(`«${n}» añadida a Productoras a contactar`);
   return data.id as string;
 }
+
+/* ---------- Productora: Partners ⇄ A contactar (exclusivo) ---------- */
+
+/** Lleva una productora a «Productoras Partners» y la retira (archiva) de «Productoras a contactar». */
+export async function moveProductoraToPartners(nombre: string) {
+  const n = nombre.trim();
+  if (!n) return null;
+  const { data: prev } = await db.from("partners").select("id, archived_at").ilike("nombre", n).maybeSingle();
+  let partnerId: string | null = prev?.id ?? null;
+  if (prev?.archived_at) {
+    await db.from("partners").update({ archived_at: null, archived_reason: null, tipo: "Productora" }).eq("id", prev.id);
+    toast.success(`«${n}» vuelve a Productoras Partners`);
+  } else if (!prev) {
+    partnerId = await addPartner(n, "Productora");
+  } else {
+    toast.info(`«${n}» ya está en Productoras Partners`);
+  }
+  const normalized = normalizeName(n);
+  const { data: opps } = await db
+    .from("opportunities")
+    .select("id, partner_name, partner_company:production_companies!opportunities_partner_company_id_fkey(name)")
+    .in("kind", ["presentar_ic", "fichaje_productora"])
+    .is("archived_at", null);
+  const ids = (opps ?? [])
+    .filter((o: any) => normalizeName(o.partner_name) === normalized || normalizeName(o.partner_company?.name) === normalized)
+    .map((o: any) => o.id);
+  if (ids.length) {
+    await db.from("opportunities")
+      .update({ archived_at: new Date().toISOString(), archived_reason: "Movida a Productoras Partners" })
+      .in("id", ids);
+  }
+  return partnerId;
+}
+
+/** Lleva una productora a «Productoras a contactar» y la retira (archiva) de «Productoras Partners». */
+export async function moveProductoraToContactar(nombre: string) {
+  const n = nombre.trim();
+  if (!n) return null;
+  const normalized = normalizeName(n);
+  // Reactiva una entrada archivada si existía
+  const { data: archived } = await db
+    .from("opportunities")
+    .select("id, partner_name, partner_company:production_companies!opportunities_partner_company_id_fkey(name)")
+    .in("kind", ["presentar_ic", "fichaje_productora"])
+    .not("archived_at", "is", null);
+  const old = (archived ?? []).find((o: any) => normalizeName(o.partner_name) === normalized || normalizeName(o.partner_company?.name) === normalized);
+  let oppId: string | null = null;
+  const { data: active } = await db
+    .from("opportunities")
+    .select("id, partner_name, partner_company:production_companies!opportunities_partner_company_id_fkey(name)")
+    .in("kind", ["presentar_ic", "fichaje_productora"])
+    .is("archived_at", null);
+  const isActive = (active ?? []).some((o: any) => normalizeName(o.partner_name) === normalized || normalizeName(o.partner_company?.name) === normalized);
+  if (!isActive && old) {
+    await db.from("opportunities").update({ archived_at: null, archived_reason: null }).eq("id", old.id);
+    oppId = old.id;
+    toast.success(`«${n}» vuelve a Productoras a contactar`);
+  } else {
+    oppId = await addProductoraAContactar(n);
+  }
+  const { data: partners } = await db.from("partners").select("id").ilike("nombre", n).is("archived_at", null);
+  const ids = (partners ?? []).map((p: any) => p.id);
+  if (ids.length) {
+    await db.from("partners")
+      .update({ archived_at: new Date().toISOString(), archived_reason: "Movida a Productoras a contactar" })
+      .in("id", ids);
+  }
+  return oppId;
+}
+
+/** Crea (o reutiliza) un director en el CRM de directores. */
+export async function addDirectorToCrm(nombre: string) {
+  const n = nombre.trim();
+  if (!n) return null;
+  const { data: existing } = await db.from("directors").select("id").ilike("full_name", n).limit(1).maybeSingle();
+  if (existing) {
+    toast.info(`«${n}» ya está en el CRM de directores`);
+    return existing.id as string;
+  }
+  const { data, error } = await db.from("directors").insert({ full_name: n }).select("id").single();
+  if (error) {
+    toast.error(error.message);
+    return null;
+  }
+  toast.success(`«${n}» añadido al CRM de directores`);
+  return data.id as string;
+}
