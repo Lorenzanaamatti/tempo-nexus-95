@@ -83,6 +83,7 @@ function ProspectsFichajePage() {
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
     return (rows ?? []).filter((r) => {
+      if (r.estado === "aceptado") return false;
       if (fEstado !== ALL && r.estado !== fEstado) return false;
       if (!n) return true;
       return r.nombre.toLowerCase().includes(n) || (r.rol ?? "").toLowerCase().includes(n) || matchesLocation(q, r.ciudad, r.pais);
@@ -94,6 +95,12 @@ function ProspectsFichajePage() {
     qc.invalidateQueries({ queryKey: ["empresa-kpis"] });
   };
 
+  const accepted = (r: { nombre: string; rol: string | null }) => {
+    qc.invalidateQueries({ queryKey: ["composers"] });
+    const dest = /supervis/i.test(r.rol ?? "") ? "supervisores" : "compositores";
+    toast.success(`${r.nombre} añadido al roster de ${dest}`);
+  };
+
   const create = async () => {
     if (!nombre.trim()) return toast.error("Indica el nombre.");
     setSaving(true);
@@ -103,6 +110,7 @@ function ProspectsFichajePage() {
     });
     setSaving(false);
     if (error) return toast.error(error.message);
+    if (estado === "aceptado") accepted({ nombre: nombre.trim(), rol: rol.trim() || null });
     setNombre(""); setRol(""); setNotas(""); setCiudad(""); setPais(""); setEstado("sin_contacto"); setFecha(today());
     refresh();
     toast.success("Añadido a la lista");
@@ -111,6 +119,10 @@ function ProspectsFichajePage() {
   const patch = async (id: string, values: Record<string, unknown>) => {
     const { error } = await db.from("roster_prospects").update(values).eq("id", id);
     if (error) return toast.error(error.message);
+    if (values.estado === "aceptado") {
+      const r = (rows ?? []).find((x) => x.id === id);
+      if (r) accepted(r);
+    }
     refresh();
   };
 
