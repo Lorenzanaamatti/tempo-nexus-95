@@ -6672,6 +6672,7 @@ export type Database = {
       roster_prospects: {
         Row: {
           ciudad: string | null
+          composer_id: string | null
           created_at: string
           estado: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision: string | null
@@ -6679,12 +6680,15 @@ export type Database = {
           id: string
           nombre: string
           notas: string | null
+          origen: string | null
           pais: string | null
           rol: string | null
+          target_account_id: string | null
           updated_at: string
         }
         Insert: {
           ciudad?: string | null
+          composer_id?: string | null
           created_at?: string
           estado?: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision?: string | null
@@ -6692,12 +6696,15 @@ export type Database = {
           id?: string
           nombre: string
           notas?: string | null
+          origen?: string | null
           pais?: string | null
           rol?: string | null
+          target_account_id?: string | null
           updated_at?: string
         }
         Update: {
           ciudad?: string | null
+          composer_id?: string | null
           created_at?: string
           estado?: Database["public"]["Enums"]["roster_prospect_estado"]
           fecha_decision?: string | null
@@ -6705,11 +6712,28 @@ export type Database = {
           id?: string
           nombre?: string
           notas?: string | null
+          origen?: string | null
           pais?: string | null
           rol?: string | null
+          target_account_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "roster_prospects_composer_id_fkey"
+            columns: ["composer_id"]
+            isOneToOne: false
+            referencedRelation: "composers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_prospects_target_account_id_fkey"
+            columns: ["target_account_id"]
+            isOneToOne: false
+            referencedRelation: "target_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sales_document_composition_items: {
         Row: {
@@ -8861,12 +8885,15 @@ export type Database = {
         | "objetivo"
       representation_tier: "A" | "B" | "C" | "desarrollo" | "D" | "E"
       roster_prospect_estado:
+        | "sin_contacto"
         | "contactado"
         | "reunion_mantenida"
+        | "en_negociacion"
         | "oferta_enviada"
         | "aceptado"
         | "rechazado_ic"
         | "rechazado_compositor"
+        | "en_pausa"
       roster_role:
         | "composer"
         | "artist"
@@ -9518,12 +9545,15 @@ export const Constants = {
       ],
       representation_tier: ["A", "B", "C", "desarrollo", "D", "E"],
       roster_prospect_estado: [
+        "sin_contacto",
         "contactado",
         "reunion_mantenida",
+        "en_negociacion",
         "oferta_enviada",
         "aceptado",
         "rechazado_ic",
         "rechazado_compositor",
+        "en_pausa",
       ],
       roster_role: [
         "composer",
