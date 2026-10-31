@@ -25,12 +25,15 @@ export function splitCompanyNames(raw: string | null | undefined): SplitCompanie
     return " ";
   });
   text = text.replace(/\s+/g, " ");
-  const parts = text.split(/\s*(?:,|;|\/|\+|&|\s+y\s+|\s+and\s+)\s*/i);
+  const parts = text.split(/\s*(?:,|;|\/|\+|&|\s+y\s+|\s+and\s+|\s+con\s+|\s+para\s+)\s*/i);
   for (const part of parts) {
-    const name = part.trim().replace(/^[-–·]+|[-–·.]+$/g, "").trim();
+    const name = part.trim()
+      .replace(/^(?:con\s+)?(?:servicios\s+de|participación\s+de|animación|original|coprod\.?)\s+/i, "")
+      .replace(/^[-–·:]+|[-–·.:]+$/g, "").trim();
     if (!name) continue;
     if (isPlatform(name)) { if (!platforms.includes(name)) platforms.push(name); continue; }
     if (!companies.some((c) => c.toLowerCase() === name.toLowerCase())) companies.push(name);
   }
+  if (!companies.length && platforms.length) companies.push(platforms.shift()!);
   return { companies, platforms };
 }
