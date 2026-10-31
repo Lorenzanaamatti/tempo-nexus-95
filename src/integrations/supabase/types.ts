@@ -4715,6 +4715,8 @@ export type Database = {
       partners: {
         Row: {
           ambito: Database["public"]["Enums"]["partner_ambito"] | null
+          archived_at: string | null
+          archived_reason: string | null
           ciudad: string | null
           contacto_email: string | null
           contacto_principal: string | null
@@ -4736,6 +4738,8 @@ export type Database = {
         }
         Insert: {
           ambito?: Database["public"]["Enums"]["partner_ambito"] | null
+          archived_at?: string | null
+          archived_reason?: string | null
           ciudad?: string | null
           contacto_email?: string | null
           contacto_principal?: string | null
@@ -4757,6 +4761,8 @@ export type Database = {
         }
         Update: {
           ambito?: Database["public"]["Enums"]["partner_ambito"] | null
+          archived_at?: string | null
+          archived_reason?: string | null
           ciudad?: string | null
           contacto_email?: string | null
           contacto_principal?: string | null
