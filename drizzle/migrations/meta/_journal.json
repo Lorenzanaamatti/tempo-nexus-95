@@ -204,6 +204,13 @@
       "when": 1793467841891,
       "tag": "0028_roster_prospects_consolidation_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793468458533,
+      "tag": "0029_prospect_accepted_to_roster",
+      "breakpoints": true
     }
   ]
 }
