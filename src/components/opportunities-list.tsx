@@ -341,6 +341,7 @@ export function OpportunitiesList({
                 )}
                 <th className="px-3 py-2 smallcaps text-xs">Candidatos</th>
                 <th className="px-3 py-2 smallcaps text-xs">Estado</th>
+                <th className="px-3 py-2 smallcaps text-xs">Acciones</th>
                 {productionMode && <th className="px-3 py-2 smallcaps text-xs">Prioridad</th>}
                 <Th k="probability_pct" className="text-right">Prob.</Th>
                 <Th k="estimated_value" className="text-right">Valor est.</Th>
@@ -348,7 +349,6 @@ export function OpportunitiesList({
                 <Th k="detected_date">Detectada</Th>
                 <Th k="expected_close_date">Cierre est.</Th>
                 <th className="px-3 py-2 smallcaps text-xs">Responsable</th>
-                <th className="px-3 py-2 text-right smallcaps text-xs">Acciones</th>
 
               </tr>
             </thead>
@@ -433,19 +433,8 @@ export function OpportunitiesList({
                       ))}
                     </div>
                   </td>
-                  {productionMode && (
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {o.prioridad ? OPP_PRIORITY_LABEL[o.prioridad as OppPriority] : "—"}
-                    </td>
-                  )}
-                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
-                  <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.created_at)}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
-                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
                   <td className="px-3 py-2">
-                    <div className="flex flex-wrap items-center justify-end gap-1">
+                    <div className="flex flex-wrap items-center justify-start gap-1">
                       {listKey === "oportunidades-partners" && !o.archived_at && (o.partner_company?.name || o.partner_name) && (
                         <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => void moveProductoraToPartners(o.partner_company?.name || o.partner_name).then(() => { qc.invalidateQueries({ queryKey: ["opportunities"] }); qc.invalidateQueries({ queryKey: ["partners"] }); })}>
                           Mover a Partners
@@ -466,6 +455,17 @@ export function OpportunitiesList({
                       />
                     </div>
                   </td>
+                  {productionMode && (
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {o.prioridad ? OPP_PRIORITY_LABEL[o.prioridad as OppPriority] : "—"}
+                    </td>
+                  )}
+                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{o.probability_pct != null ? `${o.probability_pct}%` : "—"}</td>
+                  <td className="px-3 py-2 text-right tabular-nums"><Money value={o.estimated_value} /></td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.created_at)}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.detected_date)}</td>
+                  <td className="px-3 py-2 text-muted-foreground tabular-nums">{formatDateEs(o.expected_close_date)}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{o.responsible?.full_name ?? "—"}</td>
 
                 </tr>
               ))}
