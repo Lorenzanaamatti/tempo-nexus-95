@@ -261,7 +261,7 @@ export function OpportunitiesList({
               { key: "last_contact_date", label: "Último contacto", get: (r: any) => r.last_contact_date },
               { key: "responsible", label: "Responsable", get: (r: any) => r.responsible?.full_name },
               { key: "notes", label: "Notas", default: false, get: (r: any) => r.notes },
-              { key: "created_at", label: "Creado", default: false, get: (r: any) => r.created_at },
+              { key: "created_at", label: "Entrada", default: true, get: (r: any) => r.created_at },
             ]}
           />
         </div>
