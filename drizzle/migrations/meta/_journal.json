@@ -225,6 +225,13 @@
       "when": 1793470446307,
       "tag": "0031_partners_archived",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793706657937,
+      "tag": "0032_sprints_unlimited",
+      "breakpoints": true
     }
   ]
 }
