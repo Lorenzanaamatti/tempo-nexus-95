@@ -295,7 +295,7 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
         <td className={`${td} text-right`}>{diffTxt(neg ? -(f - i) : f - i)}</td>
         <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_issued} onCheckedChange={(v) => updateLine(l, { invoice_issued: v === true })} /></td>
         <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_settled} onCheckedChange={(v) => updateLine(l, { invoice_settled: v === true })} /></td>
-        {!readOnly && <td className={td}>{!l.is_sale_price && <ConfirmDeleteButton onConfirm={() => removeLine(l)} title="¿Eliminar esta línea?" iconOnly />}</td>}
+        {!readOnly && <td className={td}><ConfirmDeleteButton onConfirm={() => removeLine(l)} title="¿Eliminar esta línea?" iconOnly /></td>}
       </tr>
     );
   };

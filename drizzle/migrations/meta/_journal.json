@@ -232,6 +232,13 @@
       "when": 1793706657937,
       "tag": "0032_sprints_unlimited",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793707120442,
+      "tag": "0033_sale_price_equals_total_income",
+      "breakpoints": true
     }
   ]
 }
