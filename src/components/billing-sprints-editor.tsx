@@ -55,12 +55,11 @@ export function BillingSprintsEditor({
     .reduce((acc: number, r: any) => acc + (Number(r.amount) || 0), 0);
 
   async function add() {
-    if (rows.length >= 6) return toast.error("Máximo 6 sprints");
     const next = (rows.at(-1) as any)?.sprint_number ?? 0;
     const { error } = await (supabase as any).from("production_billing_sprints").insert({
       production_id: productionId,
       kind,
-      sprint_number: Math.min(next + 1, 6),
+      sprint_number: next + 1,
     });
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
@@ -94,7 +93,7 @@ export function BillingSprintsEditor({
             )}
           </p>
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={add} disabled={rows.length >= 6}>
+        <Button type="button" size="sm" variant="outline" onClick={add}>
           <Plus className="mr-1 h-3 w-3" /> Añadir sprint
         </Button>
       </div>
@@ -102,7 +101,7 @@ export function BillingSprintsEditor({
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !rows.length ? (
-        <EmptyState variant="inline" icon={CalendarClock} title="Sin sprints de facturación" description="Crea hasta 6 sprints para repartir los cobros de esta producción." />
+        <EmptyState variant="inline" icon={CalendarClock} title="Sin sprints de facturación" description="Crea los sprints que necesites para repartir los cobros de esta producción." />
       ) : (
         <ul className="space-y-2">
           {rows.map((r: any) => (
@@ -113,10 +112,9 @@ export function BillingSprintsEditor({
                   <Input
                     type="number"
                     min={1}
-                    max={6}
                     defaultValue={r.sprint_number}
                     onBlur={(e) => {
-                      const n = Math.max(1, Math.min(6, Number(e.target.value) || 1));
+                      const n = Math.max(1, Number(e.target.value) || 1);
                       if (n !== r.sprint_number) update(r.id, { sprint_number: n });
                     }}
                   />

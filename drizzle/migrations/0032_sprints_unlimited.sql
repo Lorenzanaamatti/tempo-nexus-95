@@ -1,0 +1,2 @@
+ALTER TABLE public.production_billing_sprints DROP CONSTRAINT production_billing_sprints_sprint_number_check;
+ALTER TABLE public.production_billing_sprints ADD CONSTRAINT production_billing_sprints_sprint_number_check CHECK (sprint_number >= 1);
