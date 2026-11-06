@@ -5630,6 +5630,7 @@ export type Database = {
       }
       production_closures: {
         Row: {
+          carpeta_drive_url: string | null
           contrato_id: string | null
           contrato_ok: boolean
           created_at: string
@@ -5654,6 +5655,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          carpeta_drive_url?: string | null
           contrato_id?: string | null
           contrato_ok?: boolean
           created_at?: string
@@ -5678,6 +5680,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          carpeta_drive_url?: string | null
           contrato_id?: string | null
           contrato_ok?: boolean
           created_at?: string

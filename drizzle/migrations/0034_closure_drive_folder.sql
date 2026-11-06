@@ -1,0 +1,1 @@
+ALTER TABLE public.production_closures ADD COLUMN IF NOT EXISTS carpeta_drive_url text;

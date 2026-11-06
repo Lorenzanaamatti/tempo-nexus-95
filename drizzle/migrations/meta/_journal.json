@@ -239,6 +239,13 @@
       "when": 1793707120442,
       "tag": "0033_sale_price_equals_total_income",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793964740237,
+      "tag": "0034_closure_drive_folder",
+      "breakpoints": true
     }
   ]
 }
