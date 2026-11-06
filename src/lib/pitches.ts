@@ -16,6 +16,7 @@ export const PITCH_ESTADOS = [
   "Propuesta formal",
   "Ganado",
   "Perdido",
+  "Descartado",
   "Pausado",
 ] as const;
 export type PitchEstado = (typeof PITCH_ESTADOS)[number];
@@ -27,6 +28,7 @@ export const PITCH_ESTADO_CLASS: Record<string, string> = {
   "Propuesta formal": "bg-indigo-100 text-indigo-900",
   Ganado: "bg-emerald-100 text-emerald-900",
   Perdido: "bg-destructive/10 text-destructive",
+  Descartado: "bg-stone-200 text-stone-700",
   Pausado: "bg-zinc-200 text-zinc-700",
 };
 
