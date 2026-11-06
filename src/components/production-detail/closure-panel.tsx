@@ -50,35 +50,6 @@ export function useClosure(productionId: string) {
   });
 }
 
-function useClosureLookups(productionId: string) {
-  const memosQ = useQuery({
-    queryKey: ["closure-deal-memos"],
-    queryFn: async () => {
-      const { data, error } = await db.from("deal_memos").select("id, referencia, obra, production_id").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-  const contractsQ = useQuery({
-    queryKey: ["closure-contracts"],
-    queryFn: async () => {
-      const { data, error } = await db.from("contracts").select("id, title, production_id, sign_status").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-  const docsQ = useQuery({
-    queryKey: ["closure-production-documents", productionId],
-    refetchOnMount: "always",
-    queryFn: async () => {
-      const { data, error } = await db.from("production_documents").select("id, title, kind").eq("production_id", productionId).order("created_at");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-  return { memosQ, contractsQ, docsQ };
-}
-
 export function ProductionClosurePanel({
   productionId,
   compact,
@@ -168,32 +139,3 @@ function Item({
   );
 }
 
-function CueSheetUpload({
-  productionId, path, onUploaded,
-}: { productionId: string; path: string | null; onUploaded: (path: string) => void }) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <div className="flex items-center gap-3">
-      <Input
-        type="file"
-        accept="application/pdf"
-        disabled={busy}
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          setBusy(true);
-          try {
-            const key = await uploadToBucket("production-docs", `${productionId}/cue-sheets`, file);
-            onUploaded(key);
-            toast.success("PDF subido");
-          } catch (err: any) {
-            toast.error(err?.message ?? "No se pudo subir el archivo");
-          } finally {
-            setBusy(false);
-          }
-        }}
-      />
-      {path && <span className="truncate text-xs text-muted-foreground">{path.split("/").pop()}</span>}
-    </div>
-  );
-}
