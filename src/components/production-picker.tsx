@@ -3,15 +3,9 @@ import { Check, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { filterProductionsByTitle, type SearchableProduction } from "@/lib/production-search";
 
-export type ProductionOption = { id: string; title: string };
-
-const collator = new Intl.Collator("es", { sensitivity: "base" });
-
-/** Quita tildes y mayúsculas para que «maleta» encuentre «La Maleta». */
-function normalize(s: string) {
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
+export type ProductionOption = SearchableProduction;
 
 /**
  * Desplegable de producciones en el que se puede escribir para buscarlas.
@@ -39,19 +33,10 @@ export function ProductionPicker({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const sorted = useMemo(
-    () => [...productions].sort((a, b) => collator.compare(a.title ?? "", b.title ?? "")),
-    [productions],
+  const results = useMemo(
+    () => filterProductionsByTitle(productions, query),
+    [productions, query],
   );
-
-  const results = useMemo(() => {
-    const words = normalize(query).split(/\s+/).filter(Boolean);
-    if (!words.length) return sorted;
-    return sorted.filter((p) => {
-      const hay = normalize(p.title ?? "");
-      return words.every((w) => hay.includes(w));
-    });
-  }, [sorted, query]);
 
   const selected = productions.find((p) => p.id === value) ?? null;
 
@@ -109,9 +94,9 @@ export function ProductionPicker({
           </CommandList>
           {results.length > 0 && (
             <p className="border-t px-3 py-1.5 text-[11px] text-muted-foreground">
-              {results.length === sorted.length
-                ? `${sorted.length} producciones`
-                : `${results.length} de ${sorted.length} producciones`}
+              {results.length === productions.length
+                ? `${productions.length} producciones`
+                : `${results.length} de ${productions.length} producciones`}
             </p>
           )}
         </Command>
