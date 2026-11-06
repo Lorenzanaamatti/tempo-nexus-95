@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProductionPicker } from "@/components/production-picker";
 import { TASK_AREAS, type TaskArea } from "@/lib/task-areas";
 import { TASK_STATUSES } from "@/lib/task-status";
 
@@ -110,7 +111,7 @@ function NewTaskDialog({
     enabled: isOpen,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
-        .from("productions").select("id, title").order("created_at", { ascending: false }).limit(300);
+        .from("productions").select("id, title").order("created_at", { ascending: false }).limit(1000);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; title: string }>;
     },
@@ -242,15 +243,12 @@ function NewTaskDialog({
           </div>
           <div>
             <Label className="text-xs">Producción vinculada <span className="text-muted-foreground">(opcional)</span></Label>
-            <Select value={productionId || "none"} onValueChange={(v) => setProductionId(v === "none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Sin producción" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin producción</SelectItem>
-                {(productionsQ.data ?? []).map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ProductionPicker
+              productions={productionsQ.data ?? []}
+              value={productionId}
+              onChange={setProductionId}
+              loading={productionsQ.isLoading}
+            />
           </div>
           <p className="text-[11px] text-muted-foreground">
             La fecha de entrada y el solicitante se rellenan automáticamente.

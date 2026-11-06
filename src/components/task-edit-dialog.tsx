@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProductionPicker } from "@/components/production-picker";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { TASK_AREAS } from "@/lib/task-areas";
 import { TASK_STATUSES } from "@/lib/task-status";
@@ -49,7 +50,7 @@ export function TaskEditDialog({ taskId, onClose }: { taskId: string | null; onC
   const prodQ = useQuery({
     queryKey: ["productions-for-tasks"],
     enabled: !!taskId,
-    queryFn: async () => ((await (supabase as any).from("productions").select("id, title").order("created_at", { ascending: false }).limit(300)).data ?? []) as Array<{ id: string; title: string }>,
+    queryFn: async () => ((await (supabase as any).from("productions").select("id, title").order("created_at", { ascending: false }).limit(1000)).data ?? []) as Array<{ id: string; title: string }>,
   });
 
   useEffect(() => {
@@ -102,13 +103,12 @@ export function TaskEditDialog({ taskId, onClose }: { taskId: string | null; onC
               <div><Label className="text-xs">Cliente</Label><Input value={form.client} onChange={(e) => set("client")(e.target.value)} placeholder="Ej. Filmax" /></div>
               <div>
                 <Label className="text-xs">Producción vinculada</Label>
-                <Select value={form.production_id || "none"} onValueChange={(v) => set("production_id")(v === "none" ? "" : v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin producción</SelectItem>
-                    {(prodQ.data ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <ProductionPicker
+                  productions={prodQ.data ?? []}
+                  value={form.production_id}
+                  onChange={set("production_id")}
+                  loading={prodQ.isLoading}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
