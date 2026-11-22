@@ -5238,6 +5238,7 @@ export type Database = {
           directors: string[]
           estado_prospeccion: Database["public"]["Enums"]["prospeccion_estado"]
           genres: string[]
+          ic_ficha_descartada: boolean
           ic_participo: boolean
           ic_personas: string[]
           id: string
@@ -5278,6 +5279,7 @@ export type Database = {
           directors?: string[]
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
+          ic_ficha_descartada?: boolean
           ic_participo?: boolean
           ic_personas?: string[]
           id?: string
@@ -5318,6 +5320,7 @@ export type Database = {
           directors?: string[]
           estado_prospeccion?: Database["public"]["Enums"]["prospeccion_estado"]
           genres?: string[]
+          ic_ficha_descartada?: boolean
           ic_participo?: boolean
           ic_personas?: string[]
           id?: string

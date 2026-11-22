@@ -448,6 +448,11 @@ function ProduccionDetalle() {
   }
 
   async function remove() {
+    // Evita que el CRM de producciones españolas vuelva a crear la ficha borrada.
+    await (supabase as any)
+      .from("producciones_espanolas")
+      .update({ ic_ficha_descartada: true })
+      .eq("produccion_ic_vinculada", productionId);
     const { error } = await (supabase as any).from("productions").delete().eq("id", productionId);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["productions-lifecycle"] });
@@ -536,7 +541,12 @@ function ProduccionDetalle() {
               </span>
             )}
             {data.is_historical && (
-              <span className="rounded-sm border border-border px-2 py-0.5 text-[10px] smallcaps text-muted-foreground">Histórico</span>
+              <span
+                className="rounded-sm border border-border px-2 py-0.5 text-[10px] smallcaps text-muted-foreground"
+                title="Ficha creada automáticamente desde el CRM de producciones españolas o la Filmografía IC. Se puede eliminar."
+              >
+                Histórico
+              </span>
             )}
             <Select
               value={stage}
@@ -558,13 +568,13 @@ function ProduccionDetalle() {
                 ))}
               </SelectContent>
             </Select>
+            <ConfirmDeleteButton
+              title="¿Eliminar esta producción?"
+              description="Se eliminará la producción y sus vínculos con hitos, tareas y documentos."
+              onConfirm={remove}
+            />
           </div>
         </div>
-        <ConfirmDeleteButton
-          title="¿Eliminar esta producción?"
-          description="Se eliminará la producción y sus vínculos con hitos, tareas y documentos."
-          onConfirm={remove}
-        />
       </div>
 
       <Section title="Datos principales">
