@@ -253,6 +253,13 @@
       "when": 1795370235713,
       "tag": "0035_deletable_historic_and_independent_ic_sprints",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795370363801,
+      "tag": "0036_billing_calendar_hide_due_after_invoice",
+      "breakpoints": true
     }
   ]
 }
