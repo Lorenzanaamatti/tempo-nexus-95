@@ -311,7 +311,17 @@ function ProduccionDetalle() {
       music_supervisor_person_id: (data as any).music_supervisor_person_id ?? "",
       other_responsibles: (data as any).other_responsibles ?? "",
     };
-    setForm(hydrated);
+    // Conserva lo que se ha escrito mientras se guardaba: solo se sustituyen
+    // los campos que no han cambiado desde el último guardado.
+    const base = savedRef.current as Record<string, any> | null;
+    setForm((prev) => {
+      if (!prev || !base) return hydrated;
+      const merged: Record<string, any> = { ...hydrated };
+      for (const k of Object.keys(prev)) {
+        if ((prev as any)[k] !== base[k]) merged[k] = (prev as any)[k];
+      }
+      return merged as Form;
+    });
     markClean(hydrated);
     savedRef.current = hydrated;
     // eslint-disable-next-line react-hooks/exhaustive-deps

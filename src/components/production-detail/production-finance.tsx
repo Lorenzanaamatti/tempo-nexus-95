@@ -191,13 +191,17 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
   }
 
   function saveAmount(line: FinanceLineRow, key: "amount_initial" | "amount_final", v: number | null) {
-    if (line.is_sale_price && key === "amount_final" && line.amount_final != null) {
+    // El precio de venta = suma de «Importe inicial» de los ingresos.
+    if (line.kind === "ingreso" && key === "amount_initial" && line.amount_initial != null && Number(line.amount_initial) !== Number(v ?? 0)) {
+      const oldTotal = lines.filter((l) => l.kind === "ingreso").reduce((s, l) => s + Number(l.amount_initial ?? 0), 0);
+      const newTotal = oldTotal - Number(line.amount_initial ?? 0) + Number(v ?? 0);
       setPending({
         title: "Precio de venta (se ve igual en Datos principales)",
-        changes: [{ field: "fee_amount", label: "Precio de venta", old: eur(line.amount_final), next: eur(v) }],
+        changes: [{ field: "fee_amount", label: "Precio de venta", old: eur(oldTotal), next: eur(newTotal) }],
         apply: async (reason) => {
-          await updateLine(line, { amount_final: v });
-          await logProductionChanges([{ production_id: productionId, subject: "Precio de venta", field: "fee_amount", old_value: eur(line.amount_final), new_value: eur(v), reason }]);
+          await updateLine(line, { amount_initial: v });
+          qc.invalidateQueries({ queryKey: ["produccion", productionId] });
+          await logProductionChanges([{ production_id: productionId, subject: "Precio de venta", field: "fee_amount", old_value: eur(oldTotal), new_value: eur(newTotal), reason }]);
           qc.invalidateQueries({ queryKey: ["production-change-log"] });
         },
       });
