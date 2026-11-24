@@ -260,6 +260,13 @@
       "when": 1795370363801,
       "tag": "0036_billing_calendar_hide_due_after_invoice",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795516045815,
+      "tag": "0037_restrict_marketing_reads_to_staff",
+      "breakpoints": true
     }
   ]
 }

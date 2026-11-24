@@ -1,0 +1,11 @@
+ALTER POLICY "Authenticated read spanish_films" ON public.spanish_films USING (public.current_user_is_staff());
+ALTER POLICY "identidad read" ON public.comunicacion_identidad USING (public.current_user_is_staff());
+ALTER POLICY "brand_asset_files read" ON public.brand_asset_files USING (public.current_user_is_staff());
+ALTER POLICY "templates read" ON public.templates USING (public.current_user_is_staff());
+ALTER POLICY "outreach_templates read" ON public.outreach_templates USING (public.current_user_is_staff());
+ALTER POLICY "brand_assets read" ON public.brand_assets USING (public.current_user_is_staff());
+ALTER POLICY "marketing_deck_files read" ON public.marketing_deck_files USING (public.current_user_is_staff());
+ALTER POLICY "social_copy_templates read" ON public.social_copy_templates USING (public.current_user_is_staff());
+ALTER POLICY "social_hashtag_sets read" ON public.social_hashtag_sets USING (public.current_user_is_staff());
+ALTER POLICY "marketing_decks read" ON public.marketing_decks USING (public.current_user_is_staff());
+ALTER POLICY "marketing-assets read authenticated" ON storage.objects USING (bucket_id = 'marketing-assets' AND public.current_user_is_staff());
