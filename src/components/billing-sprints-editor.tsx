@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, CalendarClock } from "lucide-react";
 import { formatEUR, formatNumberEs, parseAmount } from "@/lib/money";
 import { savedToast } from "@/lib/saved-feedback";
+import { invalidateProductionTimelines } from "@/components/production-detail/change-reason-dialog";
 
 const STATUS_LABEL = {
   pendiente: "Pendiente",
@@ -63,6 +64,8 @@ export function BillingSprintsEditor({
     });
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
+    invalidateProductionTimelines(qc);
+    qc.invalidateQueries({ queryKey: ["calendar-production-billing-sprints-min"] });
   }
 
   async function update(id: string, patch: Record<string, unknown>) {
@@ -70,6 +73,8 @@ export function BillingSprintsEditor({
     if (error) toast.error(error.message);
     else savedToast();
     qc.invalidateQueries({ queryKey: key });
+    invalidateProductionTimelines(qc);
+    qc.invalidateQueries({ queryKey: ["calendar-production-billing-sprints-min"] });
   }
 
   async function remove(id: string) {
@@ -77,6 +82,8 @@ export function BillingSprintsEditor({
     const { error } = await (supabase as any).from("production_billing_sprints").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: key });
+    invalidateProductionTimelines(qc);
+    qc.invalidateQueries({ queryKey: ["calendar-production-billing-sprints-min"] });
   }
 
   return (
