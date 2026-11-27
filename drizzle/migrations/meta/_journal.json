@@ -274,6 +274,13 @@
       "when": 1795785620772,
       "tag": "0038_app_page_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1795785891724,
+      "tag": "0039_portal_read_assigned_productions",
+      "breakpoints": true
     }
   ]
 }

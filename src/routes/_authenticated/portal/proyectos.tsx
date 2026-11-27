@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Clapperboard } from "lucide-react";
 import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchComposerProductions } from "@/lib/composer-productions";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { PRODUCTION_STATUS_LABEL, PRODUCTION_KIND_LABEL, type ProductionStatus, type ProductionKind } from "@/lib/production-constants";
 import { formatEUR } from "@/lib/money";
@@ -21,32 +21,16 @@ function Proyectos() {
     enabled: !!composerId,
     queryFn: async () => {
       const PROD_SELECT = "id, title, kind, status, year, director, production_company, platform, partner, notes, fee_amount, ic_commission_pct, delivery_date, premiere_date, nomination_date, award_date, updated_at";
-      const [direct, viaAssign, { data: history }] = await Promise.all([
-        supabase.from("productions").select(PROD_SELECT).eq("composer_id", composerId!),
-        supabase
-          .from("production_assignments")
-          .select(`production:productions(${PROD_SELECT})`)
-          .eq("composer_id", composerId!),
-        supabase
-          .from("composer_projects")
-          .select("id, production, year, director, production_company, platform, music_type, notes, production_type")
-          .eq("composer_id", composerId!)
-          .order("position"),
-      ]);
       const map = new Map<string, any>();
-      ((direct.data ?? []) as any[]).forEach((p) => map.set(p.id, p));
-      ((viaAssign.data ?? []) as any[]).forEach((row: any) => {
-        if (row.production) map.set(row.production.id, row.production);
-      });
+      (await fetchComposerProductions<any>(composerId!, PROD_SELECT)).forEach((p) => map.set(p.id, p));
       const prods = Array.from(map.values()).sort(
         (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
       );
-      return { productions: prods, history: history ?? [] };
+      return { productions: prods };
     },
   });
 
   const productions = data?.productions ?? [];
-  const history = data?.history ?? [];
 
   const ACTIVE_STATUSES = new Set<ProductionStatus>([
     "compositor_confirmado","presupuesto_enviado","presupuesto_confirmado",
@@ -80,25 +64,7 @@ function Proyectos() {
         <>
           <Section title="En marcha" items={activas} />
           <Section title="Otras producciones" items={otras} muted />
-          {history.length > 0 && (
-            <section className="space-y-3">
-              <h3 className="font-display text-xl">Histórico financiero registrado por IC</h3>
-              <ul className="space-y-2">
-                {history.map((p: any) => (
-                  <li key={p.id} className="rounded-sm border border-border p-3">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="font-display">{p.production}</p>
-                      <span className="smallcaps text-xs text-muted-foreground">{p.year || ""}</span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {[p.director, p.production_company, p.platform, p.production_type, p.music_type].filter(Boolean).join(" · ") || "—"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          {!productions.length && !history.length && (
+          {!productions.length && (
             <EmptyState icon={Clapperboard} title="Sin producciones asignadas" description="Cuando el equipo de Interesante Compañía te asigne una producción, aparecerá aquí con sus fases y entregas." />
           )}
         </>

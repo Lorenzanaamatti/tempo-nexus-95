@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatEUR0 } from "@/lib/money";
+import { fetchComposerProductions } from "@/lib/composer-productions";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
   component: Kpis,
@@ -20,18 +21,8 @@ function Kpis() {
     enabled: !!composerId,
     queryFn: async () => {
       // Datos reales: producciones del representado (titular o asignado) y su economía.
-      const { data: asg } = await supabase
-        .from("production_assignments")
-        .select("production_id")
-        .eq("composer_id", composerId!);
-      const asgIds = [...new Set((asg ?? []).map((r) => r.production_id))];
-      const orFilter = asgIds.length
-        ? `composer_id.eq.${composerId},id.in.(${asgIds.join(",")})`
-        : `composer_id.eq.${composerId}`;
-      const { data: prods } = await supabase
-        .from("productions")
-        .select("id, year, start_date, created_at, fee_amount, ic_commission, ic_commission_pct")
-        .or(orFilter);
+      const prods = await fetchComposerProductions<{ id: string; year: number | null; start_date: string | null; created_at: string; fee_amount: number | null; ic_commission: number | null; ic_commission_pct: number | null }>(
+        composerId!, "id, year, start_date, created_at, fee_amount, ic_commission, ic_commission_pct");
       const ids = (prods ?? []).map((p) => p.id);
       const { data: lines } = ids.length
         ? await supabase
@@ -87,7 +78,8 @@ function Kpis() {
       const thisYear = new Date().getFullYear();
       const cur = byYear.get(thisYear);
       const prev = byYear.get(thisYear - 1);
-      return { years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
+      const missingFee = (prods ?? []).filter((p) => !Number(p.fee_amount)).length;
+      return { missingFee, years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
     },
   });
 
@@ -109,6 +101,12 @@ function Kpis() {
           Indicadores acumulados desde el inicio de tu representación con IC.
         </p>
       </header>
+
+      {!!data?.missingFee && (
+        <p className="rounded-sm border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+          {data.missingFee} de {data.total} proyectos aún no tienen precio de venta registrado; no suman en facturación ni margen hasta que el equipo lo complete.
+        </p>
+      )}
 
       <section>
         <h3 className="mb-3 font-display text-xl">Acumulado histórico</h3>

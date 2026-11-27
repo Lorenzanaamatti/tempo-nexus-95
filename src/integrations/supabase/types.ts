@@ -8504,6 +8504,10 @@ export type Database = {
         }[]
       }
       can_access_composer: { Args: { _composer_id: string }; Returns: boolean }
+      can_access_production: {
+        Args: { _production_id: string }
+        Returns: boolean
+      }
       can_edit_composer_plan: {
         Args: { _composer_id: string }
         Returns: boolean

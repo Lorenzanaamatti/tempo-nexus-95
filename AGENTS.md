@@ -18,3 +18,4 @@
 - `useCurrentRole().role` is the effective role: a BIG C session view (TEAM/ROSTER) restricts it to that role, so every screen behaves as for a real account; use `realRole`/`isRealBigC` only for the view switcher and portal preview. Server checks and RLS keep using the real role (simulation only restricts).
 - Signed-in page activity is recorded in `app_page_visits` by `usePageVisitTracker` in the authenticated shell (own insert/update, BIG C read); built-in visitor analytics has no user identity, so this table is the source for the BIG C activity view.
 - Portal career KPIs read real `productions` (owner or assigned) plus `production_finance_lines` costs; `composer_projects` is legacy and must not feed them.
+- Portal screens read "productions of this artist" via `fetchComposerProductions` (owner or assigned); RLS `can_access_production` lets an assigned artist read the production and its finance lines, so co-written projects appear for every assigned artist.
