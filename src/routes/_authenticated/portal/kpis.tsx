@@ -44,7 +44,13 @@ function Kpis() {
           composer_profit: revenue - cost - commission,
         };
       });
-      const all = projects ?? [];
+      const nowYear = new Date().getFullYear();
+      // Proyectos con año futuro van aparte como «Previstos»; no se mezclan con lo ya hecho.
+      const all = (projects ?? []).filter((p) => (p.year ?? 0) <= nowYear);
+      const planned = (projects ?? []).filter((p) => (p.year ?? 0) > nowYear);
+      const plannedCount = planned.length;
+      const plannedRevenue = planned.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
+      const plannedYears = Array.from(new Set(planned.map((p) => p.year))).sort().join(", ");
       const byYear = new Map<number, { count: number; revenue: number; margin: number; profit: number; commission: number; cost: number }>();
       let totRevenue = 0, totMargin = 0, totProfit = 0, totCommission = 0, totCost = 0;
       for (const p of all) {
@@ -73,7 +79,7 @@ function Kpis() {
       const cur = byYear.get(thisYear);
       const prev = byYear.get(thisYear - 1);
       const missingFee = (prods ?? []).filter((p) => !Number(p.fee_amount)).length;
-      return { extraTotal, missingFee, years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
+      return { thisYear, plannedCount, plannedRevenue, plannedYears, extraTotal, missingFee, years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
     },
   });
 
@@ -81,11 +87,14 @@ function Kpis() {
 
   const cur = data?.cur;
   const prev = data?.prev;
-  const delta = (a?: number, b?: number) => {
+  const y = data?.thisYear ?? new Date().getFullYear();
+  const pctChange = (a?: number, b?: number) => {
     if (!a || !b) return null;
     const pct = ((a - b) / b) * 100;
-    return `${pct >= 0 ? "+" : ""}${pct.toFixed(0)}%`;
+    return `${pct >= 0 ? "+" : ""}${pct.toFixed(0)} %`;
   };
+  const vsPrev = (a: number | undefined, b: number | undefined, show: (v: number) => string) =>
+    !prev ? `${y - 1}: sin proyectos` : `${y - 1}: ${show(b ?? 0)}${pctChange(a, b) ? ` (${pctChange(a, b)})` : ""}`;
 
   return (
     <div className="space-y-8">
@@ -117,14 +126,25 @@ function Kpis() {
       </section>
 
       <section>
-        <h3 className="mb-3 font-display text-xl">Año en curso vs anterior</h3>
+        <h3 className="mb-3 font-display text-xl">{y} comparado con {y - 1}</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card label="Proyectos" value={String(cur?.count ?? 0)} hint={delta(cur?.count, prev?.count) ?? "—"} />
-          <Card label="Facturación" value={fmt(cur?.revenue ?? 0)} hint={delta(cur?.revenue, prev?.revenue) ?? "—"} />
-          <Card label="Margen" value={fmt(cur?.margin ?? 0)} hint={delta(cur?.margin, prev?.margin) ?? "—"} />
-          <Card label="Coste producción" value={fmt(cur?.cost ?? 0)} hint={delta(cur?.cost, prev?.cost) ?? "—"} />
+          <Card label={`Proyectos ${y}`} value={String(cur?.count ?? 0)} hint={vsPrev(cur?.count, prev?.count, String)} />
+          <Card label={`Facturación ${y}`} value={fmt(cur?.revenue ?? 0)} hint={vsPrev(cur?.revenue, prev?.revenue, fmt)} />
+          <Card label={`Margen ${y}`} value={fmt(cur?.margin ?? 0)} hint={vsPrev(cur?.margin, prev?.margin, fmt)} />
+          <Card label={`Coste producción ${y}`} value={fmt(cur?.cost ?? 0)} hint={vsPrev(cur?.cost, prev?.cost, fmt)} />
         </div>
       </section>
+
+      {!!data?.plannedCount && (
+      <section>
+        <h3 className="mb-3 font-display text-xl">Previstos ({data.plannedYears})</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card label="Proyectos previstos" value={String(data.plannedCount)} />
+          <Card label="Facturación prevista" value={fmt(data.plannedRevenue)} />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">Proyectos con fecha en años futuros. No cuentan en el acumulado ni en la comparación hasta que llegue su año.</p>
+      </section>
+      )}
 
       <section>
         <h3 className="mb-3 font-display text-xl">Evolución por año</h3>
@@ -168,7 +188,7 @@ function Card({ label, value, hint }: { label: string; value: string; hint?: str
     <div className="rounded-sm border border-border bg-card/40 p-4">
       <p className="smallcaps text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-display text-2xl">{value}</p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">vs año anterior · {hint}</p>}
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
