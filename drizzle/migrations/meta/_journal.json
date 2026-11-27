@@ -267,6 +267,13 @@
       "when": 1795516045815,
       "tag": "0037_restrict_marketing_reads_to_staff",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795785620772,
+      "tag": "0038_app_page_visits",
+      "breakpoints": true
     }
   ]
 }

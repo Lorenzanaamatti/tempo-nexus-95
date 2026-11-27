@@ -73,6 +73,7 @@ import { Route as AuthenticatedAdminDirectorsIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminDirectorsDirectorIdRouteImport } from './routes/_authenticated/_admin/directors.$directorId'
 import { Route as AuthenticatedAdminEmpresaIndexRouteImport } from './routes/_authenticated/_admin/empresa.index'
 import { Route as AuthenticatedAdminEmpresaActividadInternacionalRouteImport } from './routes/_authenticated/_admin/empresa.actividad-internacional'
+import { Route as AuthenticatedAdminEmpresaActividadUsuariosRouteImport } from './routes/_authenticated/_admin/empresa.actividad-usuarios'
 import { Route as AuthenticatedAdminEmpresaAgentesRouteImport } from './routes/_authenticated/_admin/empresa.agentes'
 import { Route as AuthenticatedAdminEmpresaAuditoriaRouteImport } from './routes/_authenticated/_admin/empresa/auditoria'
 import { Route as AuthenticatedAdminEmpresaFilmografiaRouteImport } from './routes/_authenticated/_admin/empresa.filmografia'
@@ -521,6 +522,12 @@ const AuthenticatedAdminEmpresaActividadInternacionalRoute =
   AuthenticatedAdminEmpresaActividadInternacionalRouteImport.update({
     id: '/empresa/actividad-internacional',
     path: '/empresa/actividad-internacional',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEmpresaActividadUsuariosRoute =
+  AuthenticatedAdminEmpresaActividadUsuariosRouteImport.update({
+    id: '/empresa/actividad-usuarios',
+    path: '/empresa/actividad-usuarios',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminEmpresaAgentesRoute =
@@ -1076,6 +1083,7 @@ export interface FileRoutesByFullPath {
   '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
+  '/empresa/actividad-usuarios': typeof AuthenticatedAdminEmpresaActividadUsuariosRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/empresa/auditoria': typeof AuthenticatedAdminEmpresaAuditoriaRoute
   '/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
@@ -1221,6 +1229,7 @@ export interface FileRoutesByTo {
   '/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
+  '/empresa/actividad-usuarios': typeof AuthenticatedAdminEmpresaActividadUsuariosRoute
   '/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/empresa/auditoria': typeof AuthenticatedAdminEmpresaAuditoriaRoute
   '/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
@@ -1371,6 +1380,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/departamentos/subvenciones': typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   '/_authenticated/_admin/directors/$directorId': typeof AuthenticatedAdminDirectorsDirectorIdRoute
   '/_authenticated/_admin/empresa/actividad-internacional': typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
+  '/_authenticated/_admin/empresa/actividad-usuarios': typeof AuthenticatedAdminEmpresaActividadUsuariosRoute
   '/_authenticated/_admin/empresa/agentes': typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   '/_authenticated/_admin/empresa/auditoria': typeof AuthenticatedAdminEmpresaAuditoriaRoute
   '/_authenticated/_admin/empresa/filmografia': typeof AuthenticatedAdminEmpresaFilmografiaRoute
@@ -1520,6 +1530,7 @@ export interface FileRouteTypes {
     | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
+    | '/empresa/actividad-usuarios'
     | '/empresa/agentes'
     | '/empresa/auditoria'
     | '/empresa/filmografia'
@@ -1665,6 +1676,7 @@ export interface FileRouteTypes {
     | '/departamentos/subvenciones'
     | '/directors/$directorId'
     | '/empresa/actividad-internacional'
+    | '/empresa/actividad-usuarios'
     | '/empresa/agentes'
     | '/empresa/auditoria'
     | '/empresa/filmografia'
@@ -1814,6 +1826,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/departamentos/subvenciones'
     | '/_authenticated/_admin/directors/$directorId'
     | '/_authenticated/_admin/empresa/actividad-internacional'
+    | '/_authenticated/_admin/empresa/actividad-usuarios'
     | '/_authenticated/_admin/empresa/agentes'
     | '/_authenticated/_admin/empresa/auditoria'
     | '/_authenticated/_admin/empresa/filmografia'
@@ -2370,6 +2383,13 @@ declare module '@tanstack/react-router' {
       path: '/empresa/actividad-internacional'
       fullPath: '/empresa/actividad-internacional'
       preLoaderRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/empresa/actividad-usuarios': {
+      id: '/_authenticated/_admin/empresa/actividad-usuarios'
+      path: '/empresa/actividad-usuarios'
+      fullPath: '/empresa/actividad-usuarios'
+      preLoaderRoute: typeof AuthenticatedAdminEmpresaActividadUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/empresa/agentes': {
@@ -3043,6 +3063,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDepartamentosSubvencionesRoute: typeof AuthenticatedAdminDepartamentosSubvencionesRoute
   AuthenticatedAdminDirectorsDirectorIdRoute: typeof AuthenticatedAdminDirectorsDirectorIdRoute
   AuthenticatedAdminEmpresaActividadInternacionalRoute: typeof AuthenticatedAdminEmpresaActividadInternacionalRoute
+  AuthenticatedAdminEmpresaActividadUsuariosRoute: typeof AuthenticatedAdminEmpresaActividadUsuariosRoute
   AuthenticatedAdminEmpresaAgentesRoute: typeof AuthenticatedAdminEmpresaAgentesRouteWithChildren
   AuthenticatedAdminEmpresaAuditoriaRoute: typeof AuthenticatedAdminEmpresaAuditoriaRoute
   AuthenticatedAdminEmpresaFilmografiaRoute: typeof AuthenticatedAdminEmpresaFilmografiaRoute
@@ -3171,6 +3192,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminDirectorsDirectorIdRoute,
   AuthenticatedAdminEmpresaActividadInternacionalRoute:
     AuthenticatedAdminEmpresaActividadInternacionalRoute,
+  AuthenticatedAdminEmpresaActividadUsuariosRoute:
+    AuthenticatedAdminEmpresaActividadUsuariosRoute,
   AuthenticatedAdminEmpresaAgentesRoute:
     AuthenticatedAdminEmpresaAgentesRouteWithChildren,
   AuthenticatedAdminEmpresaAuditoriaRoute:

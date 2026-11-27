@@ -238,6 +238,33 @@ export type Database = {
           },
         ]
       }
+      app_page_visits: {
+        Row: {
+          duration_seconds: number
+          email: string | null
+          id: string
+          path: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          duration_seconds?: number
+          email?: string | null
+          id?: string
+          path: string
+          started_at?: string
+          user_id?: string
+        }
+        Update: {
+          duration_seconds?: number
+          email?: string | null
+          id?: string
+          path?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string

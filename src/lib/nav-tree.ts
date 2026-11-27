@@ -173,6 +173,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "BI", to: "/recursos/bi", icon: BarChart3 },
       { title: "Agentes IA", to: "/empresa/agentes", icon: Sparkles, bigCOnly: true },
       { title: "Auditoría", to: "/empresa/auditoria", icon: ShieldCheck, bigCOnly: true },
+      { title: "Actividad de usuarios", to: "/empresa/actividad-usuarios", icon: ShieldCheck, bigCOnly: true },
     ],
   },
   {

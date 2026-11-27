@@ -9,6 +9,7 @@ import { useCurrentRole } from "@/lib/use-role";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView, setSessionView } from "@/lib/session-view";
+import { usePageVisitTracker } from "@/hooks/use-page-visit-tracker";
 import { SimulatedViewBar } from "@/components/simulated-view-bar";
 import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
@@ -21,6 +22,7 @@ function Shell() {
   const { role, loading: roleLoading, isRealBigC: isBigC, isSimulating } = useCurrentRole();
   const sessionView = useSessionView();
   const [ready, setReady] = useState(false);
+  usePageVisitTracker();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isPortal = pathname.startsWith("/portal");
   const isVistaPicker = pathname === "/vista";

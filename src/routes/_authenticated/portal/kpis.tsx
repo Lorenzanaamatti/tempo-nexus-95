@@ -19,10 +19,46 @@ function Kpis() {
     queryKey: ["portal-kpis", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data: projects } = await supabase
-        .from("composer_projects")
-        .select("year, price_charged, net_margin, composer_profit, agency_commission, production_cost, production_type")
+      // Datos reales: producciones del representado (titular o asignado) y su economía.
+      const { data: asg } = await supabase
+        .from("production_assignments")
+        .select("production_id")
         .eq("composer_id", composerId!);
+      const asgIds = [...new Set((asg ?? []).map((r) => r.production_id))];
+      const orFilter = asgIds.length
+        ? `composer_id.eq.${composerId},id.in.(${asgIds.join(",")})`
+        : `composer_id.eq.${composerId}`;
+      const { data: prods } = await supabase
+        .from("productions")
+        .select("id, year, start_date, created_at, fee_amount, ic_commission, ic_commission_pct")
+        .or(orFilter);
+      const ids = (prods ?? []).map((p) => p.id);
+      const { data: lines } = ids.length
+        ? await supabase
+            .from("production_finance_lines")
+            .select("production_id, kind, amount_initial, amount_final, composer_id")
+            .in("production_id", ids)
+            .eq("kind", "gasto")
+        : { data: [] as { production_id: string; amount_final: number | null; amount_initial: number | null; composer_id: string | null }[] };
+      const costBy = new Map<string, number>();
+      for (const l of lines ?? []) {
+        if (l.composer_id && l.composer_id !== composerId) continue;
+        costBy.set(l.production_id, (costBy.get(l.production_id) ?? 0) + Number(l.amount_final ?? l.amount_initial ?? 0));
+      }
+      const projects = (prods ?? []).map((p) => {
+        const revenue = Number(p.fee_amount ?? 0);
+        const commission = p.ic_commission != null ? Number(p.ic_commission) : (revenue * Number(p.ic_commission_pct ?? 0)) / 100;
+        const cost = costBy.get(p.id) ?? 0;
+        const y = p.year ?? (p.start_date ? Number(p.start_date.slice(0, 4)) : Number(p.created_at.slice(0, 4)));
+        return {
+          year: y,
+          price_charged: revenue,
+          production_cost: cost,
+          agency_commission: commission,
+          net_margin: revenue - cost,
+          composer_profit: revenue - cost - commission,
+        };
+      });
       const all = projects ?? [];
       const byYear = new Map<number, { count: number; revenue: number; margin: number; profit: number; commission: number; cost: number }>();
       let totRevenue = 0, totMargin = 0, totProfit = 0, totCommission = 0, totCost = 0;
