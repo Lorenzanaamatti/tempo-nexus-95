@@ -34,7 +34,8 @@ function Kpis() {
         const commission = c.fee;
         const cost = c.gastos;
         extraTotal += c.extraordinarios;
-        const y = p.year ?? (p.start_date ? Number(p.start_date.slice(0, 4)) : Number(p.created_at.slice(0, 4)));
+        // Año de trabajo: inicio real (start_date); el campo «año» suele ser el de estreno.
+        const y = p.start_date ? Number(p.start_date.slice(0, 4)) : (p.year ?? Number(p.created_at.slice(0, 4)));
         return {
           year: y,
           price_charged: revenue,
