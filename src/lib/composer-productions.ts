@@ -9,3 +9,10 @@ export async function fetchComposerProductions<T = Record<string, unknown>>(comp
   if (error) throw error;
   return (data ?? []) as T[];
 }
+
+/** Año de trabajo de una producción para KPIs: inicio real (start_date), si falta el campo «año» (suele ser estreno) y si no, la fecha de alta. */
+export function productionWorkYear(p: { start_date?: string | null; year?: number | null; created_at?: string | null }): number {
+  if (p.start_date) return Number(p.start_date.slice(0, 4));
+  if (p.year) return p.year;
+  return Number(String(p.created_at ?? new Date().toISOString()).slice(0, 4));
+}

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { KanbanSquare, CalendarDays, GanttChart } from "lucide-react";
+import { fetchComposerProductions } from "@/lib/composer-productions";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { CalendarKanban } from "@/components/calendar-kanban";
@@ -52,7 +53,7 @@ function Agenda() {
     queryFn: async () => {
       const [{ data: person }, { data: prods }] = await Promise.all([
         supabase.from("people").select("id").eq("composer_id", composerId!).maybeSingle(),
-        supabase.from("productions").select("id").eq("composer_id", composerId!),
+        fetchComposerProductions<{ id: string }>(composerId!, "id").then((d) => ({ data: d })),
       ]);
       const subjects: { type: string; id: string }[] = [
         { type: "composer", id: composerId! },

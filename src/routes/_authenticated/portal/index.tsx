@@ -3,8 +3,9 @@ import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
-import { fetchComposerProductions } from "@/lib/composer-productions";
+import { fetchComposerProductions, productionWorkYear } from "@/lib/composer-productions";
 import { PortalUpcoming } from "@/components/portal/portal-upcoming";
+import { currentColumn, feeConfigFromProduction, IC_FEE_SELECT } from "@/lib/production-finance";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR0 } from "@/lib/money";
 import { FolderKanban, Inbox, CalendarDays, FileSignature, User, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
@@ -21,14 +22,23 @@ function PortalHome() {
     queryFn: async () => {
       const year = new Date().getFullYear();
       const today = new Date().toISOString().slice(0, 10);
-      const [composer, projects, productions, candidates, contracts, nextEvent] = await Promise.all([
+      const [composer, productions, candidates, contracts, nextEvent] = await Promise.all([
         supabase
           .from("composers")
           .select("full_name, artistic_name, tier, representation_status, renewal_date")
           .eq("id", composerId!)
           .maybeSingle(),
-        Promise.resolve({ data: [] as { year: number | null; price_charged: number | null; net_margin: number | null }[] }),
-        fetchComposerProductions<any>(composerId!, "id, status, year, fee_amount").then((d) => ({ data: d })),
+        fetchComposerProductions<any>(composerId!, `id, status, year, start_date, created_at, fee_amount, ${IC_FEE_SELECT}`).then(async (d) => {
+          const ids = d.map((p) => p.id);
+          const { data: lines } = ids.length
+            ? await supabase.from("production_finance_lines").select("production_id, kind, amount_initial, amount_final, paid_by_agency").in("production_id", ids)
+            : { data: [] as any[] };
+          // Misma regla que KPIs y Facturación: ingresos del seguimiento económico; año = inicio de rodaje.
+          return { data: d.map((p) => {
+            const c = currentColumn(((lines ?? []) as any[]).filter((l) => l.production_id === p.id), feeConfigFromProduction(p));
+            return { ...p, work_year: productionWorkYear(p), revenue: c.ingresos || Number(p.fee_amount ?? 0) };
+          }) };
+        }),
         supabase
           .from("opportunity_candidates")
           .select("id, opportunity:opportunities(statuses)")
@@ -43,12 +53,15 @@ function PortalHome() {
             .select("id")
             .eq("composer_id", composerId!)
             .maybeSingle();
-          if (!person) return null;
+          const prodIds = (await fetchComposerProductions<{ id: string }>(composerId!, "id")).map((p) => p.id);
+          const ors = [`and(subject_type.eq.composer,subject_id.eq.${composerId})`];
+          if (person) ors.push(`and(subject_type.eq.person,subject_id.eq.${person.id})`);
+          if (prodIds.length) ors.push(`and(subject_type.eq.production,subject_id.in.(${prodIds.join(",")}))`);
           const { data: ev } = await supabase
             .from("calendar_events")
             .select("id, title, start_date, kind")
-            .eq("subject_type", "person")
-            .eq("subject_id", person.id)
+            .or(ors.join(","))
+            .eq("visible_to_composer" as any, true as any)
             .gte("start_date", today)
             .order("start_date")
             .limit(1)
@@ -56,13 +69,9 @@ function PortalHome() {
           return ev;
         })(),
       ]);
-      const all = projects.data ?? [];
-      const yearProjects = all.filter((p) => p.year === year);
-      const revenue = yearProjects.reduce((s, p) => s + Number(p.price_charged ?? 0), 0);
-      const margin = yearProjects.reduce((s, p) => s + Number(p.net_margin ?? 0), 0);
       const prods = (productions.data ?? []) as any[];
-      const yearProds = prods.filter((p) => p.year === year);
-      const facturacionYearProds = yearProds.reduce((s, p) => s + Number(p.fee_amount ?? 0), 0);
+      const doneProds = prods.filter((p) => p.work_year <= year);
+      const facturacionYearProds = prods.filter((p) => p.work_year === year).reduce((s, p) => s + p.revenue, 0);
       const ACTIVE = new Set(["compositor_confirmado","presupuesto_enviado","presupuesto_confirmado","contrato_enviado","contrato_negociacion","contrato_firmado","visuales_entregados","en_composicion","en_produccion","en_mezclas","entrega_parcial","entrega_total","entregables_completados"]);
       const activeProds = prods.filter((p) => ACTIVE.has(p.status)).length;
       const openCands = ((candidates.data ?? []) as any[]).filter((c) => {
@@ -74,9 +83,8 @@ function PortalHome() {
         composer: composer.data,
         kpis: {
           year,
-          revenueHist: prods.reduce((s, p) => s + Number(p.fee_amount ?? 0), 0),
-          marginHist: margin,
-          totalHist: prods.length,
+          revenueHist: doneProds.reduce((s, p) => s + p.revenue, 0),
+          totalHist: doneProds.length,
           facturacionYearProds,
           activeProds,
           totalProds: prods.length,

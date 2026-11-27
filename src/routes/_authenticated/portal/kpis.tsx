@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatEUR0 } from "@/lib/money";
-import { fetchComposerProductions } from "@/lib/composer-productions";
+import { fetchComposerProductions, productionWorkYear } from "@/lib/composer-productions";
 import { IC_FEE_SELECT, currentColumn, feeConfigFromProduction } from "@/lib/production-finance";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
@@ -35,7 +35,7 @@ function Kpis() {
         const cost = c.gastos;
         extraTotal += c.extraordinarios;
         // Año de trabajo: inicio real (start_date); el campo «año» suele ser el de estreno.
-        const y = p.start_date ? Number(p.start_date.slice(0, 4)) : (p.year ?? Number(p.created_at.slice(0, 4)));
+        const y = productionWorkYear(p);
         return {
           year: y,
           price_charged: revenue,
