@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/vista")({
 
 function VistaPicker() {
   const nav = useNavigate();
-  const { isBigC, status, loading } = useCurrentRole();
+  const { isRealBigC: isBigC, status, loading } = useCurrentRole();
 
   useEffect(() => {
     if (loading) return;

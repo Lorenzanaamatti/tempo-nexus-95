@@ -22,7 +22,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth-context";
-import type { AppRole } from "@/lib/use-role";
+import { useCurrentRole, type AppRole } from "@/lib/use-role";
 import { BrandLogo } from "@/components/brand-logo";
 import { useNewTaskDialog } from "@/components/new-task-dialog";
 import { useMyDueTaskCount } from "@/lib/use-my-tasks";
@@ -46,9 +46,12 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
 
   // For non-admin roles, the session view is irrelevant (they get their own tree).
   // For admin, default to "bigc" (full) if nothing has been chosen.
-  const effectiveView: SessionView = role === "admin" ? sessionView ?? "bigc" : "bigc";
-  const isRosterView = role === "admin" && effectiveView === "roster";
-  const isTeamView = role === "admin" && effectiveView === "team";
+  // `role` es el rol efectivo (la vista elegida por BIG C ya está aplicada).
+  const { realRole } = useCurrentRole();
+  const effectiveView: SessionView = realRole === "admin" ? sessionView ?? "bigc" : "team";
+  const isRosterView = role === "composer";
+  const isTeamView = role === "team";
+  const isStaffRole = role === "admin" || role === "team";
 
   const { data: myDueTasks } = useMyDueTaskCount();
   const tareasActive = pathname.startsWith("/tareas");
@@ -108,7 +111,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {role === "admin" && !isRosterView ? (
+        {isStaffRole ? (
           <>
             <SidebarGroup>
               {!collapsed && (
@@ -230,7 +233,7 @@ export function AppSidebar({ role, sessionView }: { role: AppRole | null; sessio
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
-          {role === "admin" && (
+          {realRole === "admin" && (
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => {

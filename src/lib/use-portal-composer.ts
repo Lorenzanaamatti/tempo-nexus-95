@@ -14,8 +14,9 @@ const KEY = "portal-preview-composer-id";
  *   localStorage para que se mantenga entre páginas.
  */
 export function usePortalComposer() {
-  const { role, composerId: ownId, loading } = useCurrentRole();
-  const isAdmin = role === "admin";
+  const { realRole, composerId: ownId, loading } = useCurrentRole();
+  // BIG C (también simulando ROSTER) previsualiza el portal de un representado concreto.
+  const isAdmin = realRole === "admin";
 
   // Permite forzar el composer a previsualizar vía ?as=<id> en la URL.
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });

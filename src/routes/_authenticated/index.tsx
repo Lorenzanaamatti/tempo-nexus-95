@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentRole } from "@/lib/use-role";
@@ -57,7 +57,8 @@ const ITEM_HINT: Record<string, string> = {
 
 function Bienvenida() {
   const { user } = useAuth();
-  const { role, status, isStaff, isBigC, loading } = useCurrentRole();
+  const { role, status, isStaff, isBigC, isRealBigC, loading } = useCurrentRole();
+  const nav = useNavigate();
   const sessionView = useSessionView();
 
   useEffect(() => {
@@ -66,8 +67,9 @@ function Bienvenida() {
       window.location.replace("/pending");
       return;
     }
-    if (!isStaff) window.location.replace("/me");
-  }, [role, status, isStaff, loading]);
+    if (!isStaff && role !== "composer") window.location.replace("/me");
+    else if (!isStaff) nav({ to: "/portal" });
+  }, [role, status, isStaff, loading, nav]);
 
   const { data: profile } = useQuery({
     queryKey: ["profile-name", user?.id],
@@ -94,7 +96,7 @@ function Bienvenida() {
   const nombre =
     profile?.display_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "hola";
 
-  const effectiveView: SessionView = isBigC ? sessionView ?? "bigc" : "team";
+  const effectiveView: SessionView = isRealBigC ? sessionView ?? "bigc" : "team";
 
   const dia: Door[] = [
     { title: "Mis tareas", description: "Revisa lo que necesita tu atención y organiza las prioridades de hoy.", to: "/tareas", search: { filter: "hoy" } },
@@ -123,7 +125,7 @@ function Bienvenida() {
       .map((i) => ({ title: i.title, description: ITEM_HINT[i.title] ?? i.hint, to: i.to, search: i.search, icon: i.icon }));
   }
 
-  const vistas: SessionView[] = isBigC ? ["bigc", "team", "roster"] : ["team"];
+  const vistas: SessionView[] = isRealBigC ? ["bigc", "team", "roster"] : ["team"];
 
   return (
     <main className="min-h-screen w-full overflow-hidden bg-background">
@@ -149,9 +151,12 @@ function Bienvenida() {
               type="button"
               variant={active ? "default" : "outline"}
               size="sm"
-              disabled={!isBigC}
-              onClick={() => setSessionView(v)}
-              className={`rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em] ${active ? "" : "text-aubergine hover:border-rust hover:bg-accent"} ${isBigC ? "" : "cursor-default"}`}
+              disabled={!isRealBigC}
+              onClick={() => {
+                setSessionView(v);
+                if (v === "roster") nav({ to: "/portal" });
+              }}
+              className={`rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em] ${active ? "" : "text-aubergine hover:border-rust hover:bg-accent"} ${isRealBigC ? "" : "cursor-default"}`}
             >
               Vista {SESSION_VIEW_LABEL[v]}
             </Button>

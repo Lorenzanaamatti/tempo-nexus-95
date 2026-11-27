@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useSessionView } from "@/lib/session-view";
 
 export type AppRole = "admin" | "team" | "composer";
 export type ProfileStatus = "pending" | "active" | "rejected";
@@ -46,13 +47,25 @@ export function useCurrentRole() {
       };
     },
   });
+  // Rol efectivo: BIG C puede simular TEAM o ROSTER; la vista elegida solo restringe, nunca amplía.
+  const sessionView = useSessionView();
+  const realRole = data?.role ?? null;
+  const role: AppRole | null =
+    realRole === "admin" && sessionView === "team"
+      ? "team"
+      : realRole === "admin" && sessionView === "roster"
+      ? "composer"
+      : realRole;
   return {
-    role: data?.role ?? null,
+    role,
+    realRole,
+    isRealBigC: realRole === "admin",
+    isSimulating: realRole === "admin" && role !== "admin",
     composerId: data?.composer_id ?? null,
     status: data?.status ?? "pending",
-    isBigC: data?.role === "admin",
-    isTeam: data?.role === "team",
-    isStaff: data?.role === "admin" || data?.role === "team",
+    isBigC: role === "admin",
+    isTeam: role === "team",
+    isStaff: role === "admin" || role === "team",
     loading: authLoading || isLoading,
   };
 }

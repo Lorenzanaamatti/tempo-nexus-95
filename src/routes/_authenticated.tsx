@@ -9,6 +9,7 @@ import { useCurrentRole } from "@/lib/use-role";
 import { TaskDialogProvider } from "@/components/new-task-dialog";
 import { TaskInboxBell } from "@/components/task-inbox-bell";
 import { useSessionView, setSessionView } from "@/lib/session-view";
+import { SimulatedViewBar } from "@/components/simulated-view-bar";
 import { Breadcrumbs, PageCrumbProvider } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function Shell() {
   const { loading, user } = useAuth();
-  const { role, loading: roleLoading, isBigC } = useCurrentRole();
+  const { role, loading: roleLoading, isRealBigC: isBigC, isSimulating } = useCurrentRole();
   const sessionView = useSessionView();
   const [ready, setReady] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -45,7 +46,13 @@ function Shell() {
     setSessionView("bigc");
   }, [ready, roleLoading, isBigC, sessionView]);
 
-  if (!ready) {
+  // Simulando ROSTER: solo existe el portal del artista.
+  const mustGoToPortal = isSimulating && role === "composer" && !isPortal && !isVistaPicker;
+  useEffect(() => {
+    if (mustGoToPortal) window.location.replace("/portal");
+  }, [mustGoToPortal]);
+
+  if (!ready || mustGoToPortal) {
     return (
       <div className="flex min-h-screen items-center justify-center font-display text-muted-foreground">
         Abriendo el archivo…
@@ -55,7 +62,12 @@ function Shell() {
 
   // Portal del representado: experiencia inmersiva sin chrome del back-office.
   if (isPortal) {
-    return <Outlet />;
+    return (
+      <>
+        <SimulatedViewBar />
+        <Outlet />
+      </>
+    );
   }
 
   // Vista picker: pantalla limpia sin sidebar.
@@ -68,6 +80,7 @@ function Shell() {
   if (pathname === "/") {
     return (
       <TaskDialogProvider>
+        <SimulatedViewBar />
         <Outlet />
       </TaskDialogProvider>
     );
@@ -80,6 +93,7 @@ function Shell() {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar role={role} sessionView={sessionView} />
         <div className="flex flex-1 flex-col">
+          <SimulatedViewBar />
           <header className="flex h-12 items-center gap-3 border-b border-border bg-background px-4">
             <SidebarTrigger />
             <div className="min-w-0 flex-1"><Breadcrumbs /></div>
