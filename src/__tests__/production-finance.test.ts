@@ -27,3 +27,17 @@ describe("seguimiento económico", () => {
     expect(pctOfIncome(5, 0)).toBeNull();
   });
 });
+
+describe("gastos abonados por la agencia", () => {
+  const cfg = { mode: "pct" as const, basis: "precio" as const, pctInitial: 10, pctFinal: 10, fixedInitial: null, fixedFinal: null };
+  test("no restan del resultado del artista y se informan aparte", () => {
+    const f = computeFinance([
+      { kind: "ingreso", amount_initial: 1000, amount_final: 1000 },
+      { kind: "gasto", amount_initial: 200, amount_final: 200 },
+      { kind: "gasto", amount_initial: 300, amount_final: 300, paid_by_agency: true },
+    ], cfg);
+    expect(f.initial.gastos).toBe(200);
+    expect(f.initial.extraordinarios).toBe(300);
+    expect(f.initial.resultado).toBe(700);
+  });
+});

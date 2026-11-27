@@ -4,7 +4,11 @@ import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
+import { fetchComposerProductions } from "@/lib/composer-productions";
+import { IC_FEE_SELECT, currentColumn, feeConfigFromProduction } from "@/lib/production-finance";
 import { useMemo, useState } from "react";
+import { useTableSort } from "@/lib/table-sort";
+import { SortTh } from "@/components/table/sort-th";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR } from "@/lib/money";
 
@@ -35,6 +39,11 @@ type Production = {
   year: number | null;
   fee_amount: number | null;
   ic_commission_pct: number | null;
+  /** Calculado con la misma regla que «Seguimiento económico y financiero». */
+  fin_ingresos: number;
+  fin_gastos: number;
+  fin_fee: number;
+  fin_resultado: number;
 };
 
 function Facturacion() {
@@ -45,11 +54,15 @@ function Facturacion() {
     queryKey: ["portal-facturacion", composerId],
     enabled: !!composerId,
     queryFn: async () => {
-      const { data: prods } = await supabase
-        .from("productions")
-        .select("id, title, year, fee_amount, ic_commission_pct")
-        .eq("composer_id", composerId!);
-      const productions: Production[] = (prods ?? []) as Production[];
+      const raw = await fetchComposerProductions<any>(composerId!, `id, title, year, fee_amount, ${IC_FEE_SELECT}`);
+      const rawIds = raw.map((p) => p.id);
+      const { data: flines } = rawIds.length
+        ? await supabase.from("production_finance_lines").select("production_id, kind, amount_initial, amount_final, paid_by_agency").in("production_id", rawIds)
+        : { data: [] as any[] };
+      const productions: Production[] = raw.map((p) => {
+        const c = currentColumn(((flines ?? []) as any[]).filter((l) => l.production_id === p.id), feeConfigFromProduction(p));
+        return { ...p, fin_ingresos: c.ingresos, fin_gastos: c.gastos, fin_fee: c.fee, fin_resultado: c.resultado };
+      });
       const productionIds = productions.map((p) => p.id);
       const prodMap = new Map(productions.map((p) => [p.id, p]));
       let sprints: Sprint[] = [];
@@ -61,10 +74,10 @@ function Facturacion() {
           .order("due_date", { ascending: true, nullsFirst: false });
         sprints = (s ?? []).map((x) => ({ ...x, production: prodMap.get(x.production_id) ?? null })) as Sprint[];
       }
-      const { data: projects } = await supabase
-        .from("composer_projects")
-        .select("id, production, year, price_charged, production_cost, agency_commission, composer_profit, net_margin")
-        .eq("composer_id", composerId!);
+      const projects = productions.map((p) => ({
+        id: p.id, production: p.title, year: p.year, price_charged: p.fin_ingresos, production_cost: p.fin_gastos,
+        agency_commission: p.fin_fee, composer_profit: p.fin_resultado, net_margin: p.fin_ingresos - p.fin_gastos,
+      }));
       return { sprints, projects: projects ?? [], productions };
     },
   });
@@ -76,11 +89,8 @@ function Facturacion() {
     const ic = s.filter((x) => x.kind === "comision");
     const sum = (arr: Sprint[]) => arr.reduce((acc, x) => acc + Number(x.amount ?? 0), 0);
     const sumWhere = (arr: Sprint[], f: (x: Sprint) => boolean) => sum(arr.filter(f));
-    const feeTotal = prods.reduce((a, p) => a + Number(p.fee_amount ?? 0), 0);
-    const icTotal = prods.reduce(
-      (a, p) => a + Number(p.fee_amount ?? 0) * Number(p.ic_commission_pct ?? 0) / 100,
-      0,
-    );
+    const feeTotal = prods.reduce((a, p) => a + p.fin_ingresos, 0);
+    const icTotal = prods.reduce((a, p) => a + p.fin_fee, 0);
     return {
       feeTotal,
       icTotal,
@@ -108,9 +118,9 @@ function Facturacion() {
     const ps = sprints.filter((s) => s.production_id === p.id);
     const workS = ps.filter((s) => s.kind === "trabajo");
     const icS = ps.filter((s) => s.kind === "comision");
-    const fee = Number(p.fee_amount ?? 0);
-    const pct = Number(p.ic_commission_pct ?? 0);
-    const icExpected = fee * pct / 100;
+    const fee = p.fin_ingresos;
+    const icExpected = p.fin_fee;
+    const pct = fee ? Math.round((icExpected / fee) * 1000) / 10 : 0;
     const workIssued = workS.filter((s) => s.invoiced_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
     const workPaid = workS.filter((s) => s.paid_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
     const icIssued = icS.filter((s) => s.invoiced_date).reduce((a, s) => a + Number(s.amount ?? 0), 0);
@@ -161,43 +171,12 @@ function Facturacion() {
           </section>
           <section>
             <h3 className="mb-3 font-display text-xl">Detalle por producción</h3>
-            <div className="overflow-x-auto rounded-sm border border-border">
-              <table className="w-full text-base">
-                <thead className="bg-muted/30 text-left">
-                  <tr>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Producción</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Año</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Facturación</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">% IC</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Comisión IC</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Emitido</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">Cobrado</th>
-                    <th className="px-3 py-2 smallcaps text-xs text-muted-foreground">IC emit./cobr.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!perProduction.length ? (
-                    <tr><td colSpan={8} className="px-3 py-4"><EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Cuando tengas producciones facturables aparecerán aquí." /></td></tr>
-                  ) : perProduction.map(({ p, fee, pct, icExpected, workIssued, workPaid, icIssued, icPaid }) => (
-                    <tr key={p.id} className="border-t border-border">
-                      <td className="px-3 py-2 font-display">{p.title ?? "—"}</td>
-                      <td className="px-3 py-2">{p.year ?? "—"}</td>
-                      <td className="px-3 py-2">{fmt(fee)}</td>
-                      <td className="px-3 py-2">{pct ? `${pct}%` : "—"}</td>
-                      <td className="px-3 py-2">{fmt(icExpected)}</td>
-                      <td className="px-3 py-2">{fmt(workIssued)}</td>
-                      <td className="px-3 py-2">{fmt(workPaid)}</td>
-                      <td className="px-3 py-2">{fmt(icIssued)} / {fmt(icPaid)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DetailTable rows={perProduction} />
           </section>
           <section>
-            <h3 className="mb-3 font-display text-xl">Histórico (proyectos anteriores)</h3>
+            <h3 className="mb-3 font-display text-xl">Acumulado de todas tus producciones</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card label="Facturación histórica" value={fmt(totals.historicRevenue)} />
+              <Card label="Facturación acumulada" value={fmt(totals.historicRevenue)} />
               <Card label="Coste producción" value={fmt(totals.historicCost)} />
               <Card label="Comisión IC" value={fmt(totals.historicCommission)} />
               <Card label="Beneficio compositor" value={fmt(totals.historicProfit)} />
@@ -396,6 +375,47 @@ function CalendarView({ sprints }: { sprints: Sprint[] }) {
     <div className="space-y-6">
       <Section title="Próximos vencimientos y cobros" list={upcoming} />
       <Section title="Histórico" list={past} />
+    </div>
+  );
+}
+type DetailRow = { p: Production; fee: number; pct: number; icExpected: number; workIssued: number; workPaid: number; icIssued: number; icPaid: number };
+type DetailKey = "title" | "year" | "fee" | "pct" | "ic" | "issued" | "paid";
+function DetailTable({ rows }: { rows: DetailRow[] }) {
+  const { sorted, sort, toggle } = useTableSort<DetailRow, DetailKey>(rows, (r, k) =>
+    k === "title" ? r.p.title : k === "year" ? r.p.year : k === "fee" ? r.fee : k === "pct" ? r.pct : k === "ic" ? r.icExpected : k === "issued" ? r.workIssued : r.workPaid);
+  const th = "px-3 py-2 smallcaps text-xs text-muted-foreground";
+  return (
+    <div className="overflow-x-auto rounded-sm border border-border">
+      <table className="w-full text-base">
+        <thead className="bg-muted/30 text-left">
+          <tr>
+            <SortTh className={th} label="Producción" k="title" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="Año" k="year" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="Facturación" k="fee" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="% IC" k="pct" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="Comisión IC" k="ic" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="Emitido" k="issued" sort={sort} onSort={toggle} />
+            <SortTh className={th} label="Cobrado" k="paid" sort={sort} onSort={toggle} />
+            <th className={th}>IC emit./cobr.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {!sorted.length ? (
+            <tr><td colSpan={8} className="px-3 py-4"><EmptyState variant="inline" icon={Clapperboard} title="Sin producciones" description="Cuando tengas producciones facturables aparecerán aquí." /></td></tr>
+          ) : sorted.map(({ p, fee, pct, icExpected, workIssued, workPaid, icIssued, icPaid }) => (
+            <tr key={p.id} className="border-t border-border">
+              <td className="px-3 py-2 font-display">{p.title ?? "—"}</td>
+              <td className="px-3 py-2">{p.year ?? "—"}</td>
+              <td className="px-3 py-2">{fmt(fee)}</td>
+              <td className="px-3 py-2">{pct ? `${pct.toLocaleString("es-ES")} %` : "—"}</td>
+              <td className="px-3 py-2">{fmt(icExpected)}</td>
+              <td className="px-3 py-2">{fmt(workIssued)}</td>
+              <td className="px-3 py-2">{fmt(workPaid)}</td>
+              <td className="px-3 py-2">{fmt(icIssued)} / {fmt(icPaid)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

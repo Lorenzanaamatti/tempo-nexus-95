@@ -6010,6 +6010,7 @@ export type Database = {
           kind: string
           legacy_expense_id: string | null
           notes: string | null
+          paid_by_agency: boolean
           period: string | null
           position: number
           production_id: string
@@ -6031,6 +6032,7 @@ export type Database = {
           kind: string
           legacy_expense_id?: string | null
           notes?: string | null
+          paid_by_agency?: boolean
           period?: string | null
           position?: number
           production_id: string
@@ -6052,6 +6054,7 @@ export type Database = {
           kind?: string
           legacy_expense_id?: string | null
           notes?: string | null
+          paid_by_agency?: boolean
           period?: string | null
           position?: number
           production_id?: string
@@ -8544,6 +8547,26 @@ export type Database = {
       }
       next_billing_order_number: { Args: never; Returns: string }
       notify_roster_income_gaps: { Args: never; Returns: number }
+      portal_my_tasks: {
+        Args: { _composer_id: string }
+        Returns: {
+          done: boolean
+          due_date: string
+          id: string
+          notes: string
+          production_id: string
+          production_title: string
+          title: string
+        }[]
+      }
+      portal_set_expense_invoice_flags: {
+        Args: { _issued: boolean; _line_id: string; _settled: boolean }
+        Returns: undefined
+      }
+      portal_set_task_done: {
+        Args: { _done: boolean; _task_id: string }
+        Returns: undefined
+      }
       roster_occupancy_months: {
         Args: { _months?: number }
         Returns: {

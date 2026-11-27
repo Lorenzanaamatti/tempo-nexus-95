@@ -1,5 +1,7 @@
 import type React from "react";
 import { useMemo, useState } from "react";
+import { sortRows, type SortState } from "@/lib/table-sort";
+import { SortTh } from "@/components/table/sort-th";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Download, FileUp, Pencil, Plus, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +29,7 @@ type Draft = {
   concept: string; amount: string; due_date: string; paid_date: string; notes: string;
 };
 
+type InvKey = "invoice_number" | "issue_date" | "production_title" | "client_name" | "representative_name" | "concept" | "amount" | "status" | "paid_date";
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const STATUS_LABEL: Record<string, string> = { emitida: "Emitida", cobrada: "Cobrada", anulada: "Anulada" };
 const today = () => new Date().toISOString().slice(0, 10);
@@ -42,6 +45,8 @@ export function InvoicesView({ productionFilter }: { productionFilter?: string |
   const qc = useQueryClient();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState<InvKey>>(null);
+  const toggleSort = (k: InvKey) => setSort((s) => (!s || s.key !== k ? { key: k, dir: "asc" } : s.dir === "asc" ? { key: k, dir: "desc" } : null));
   const [status, setStatus] = useState("all");
   const [year, setYear] = useState<string>("all");
   const [month, setMonth] = useState<string>("all");
@@ -233,11 +238,12 @@ export function InvoicesView({ productionFilter }: { productionFilter?: string |
             <div className="overflow-x-auto border border-border">
               <table className="min-w-[1200px] w-full text-sm">
                 <thead className="bg-muted/40 text-left"><tr>
-                  <th className="p-3">Nº</th><th className="p-3">Fecha</th><th className="p-3">Producción</th><th className="p-3">Cliente</th>
-                  <th className="p-3">Representado</th><th className="p-3">Concepto</th><th className="p-3 text-right">Importe</th>
-                  <th className="p-3">Estado</th><th className="p-3">Cobro</th><th className="p-3">PDF</th><th className="p-3"></th>
+                  {(["invoice_number:Nº","issue_date:Fecha","production_title:Producción","client_name:Cliente","representative_name:Representado","concept:Concepto","amount:Importe","status:Estado","paid_date:Cobro"] as const).map((c) => {
+                    const [k, l] = c.split(":") as [InvKey, string];
+                    return <SortTh key={k} className={`p-3 ${k === "amount" ? "text-right" : ""}`} label={l} k={k} sort={sort} onSort={toggleSort} />;
+                  })}<th className="p-3">PDF</th><th className="p-3"></th>
                 </tr></thead>
-                <tbody>{items.map(i => <tr key={i.id} className="border-t border-border">
+                <tbody>{sortRows(items, sort, (r, k) => (k === "amount" ? Number(r.amount ?? 0) : (r as any)[k])).map(i => <tr key={i.id} className="border-t border-border">
                   <td className="p-3 font-mono">{i.invoice_number || "Sin nº"}</td>
                   <td className="p-3">{formatDateEs(i.issue_date)}</td>
                   <td className="p-3 font-display">{i.production_title || "—"}</td>

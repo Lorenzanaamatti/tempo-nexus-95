@@ -41,7 +41,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CurrentLocationEditor } from "@/components/current-location-editor";
 import { SocialLinksEditor, SocialLinksBadges, type SocialLinks } from "@/components/social-links";
 import { Section, KPI, Field } from "@/components/composer-detail/primitives";
 import { ComposerCareerPlan } from "@/components/career-plan/composer-career-plan";
@@ -402,18 +401,12 @@ function Inner({
               placeholder="Nombre legal…"
               onChange={(e) => field("legal_name", e.target.value || null)}
             />
-            {[c.city, c.country].filter(Boolean).join(" · ") && (
+            {/* La ubicación se edita solo en «Datos y dirección»; aquí se muestra ciudad · provincia · país. */}
+            {[c.city, c.province, c.country].filter(Boolean).join(" · ") && (
               <p className="mt-1 text-sm text-muted-foreground">
-                {[c.city, c.country].filter(Boolean).join(" · ")}
+                {[c.city, c.province, c.country].filter(Boolean).join(" · ")}
               </p>
             )}
-            <div className="mt-3">
-              <div className="smallcaps mb-1 text-[10px] text-muted-foreground">Ubicación actual</div>
-              <CurrentLocationEditor
-                value={(c as { current_location?: string | null }).current_location ?? null}
-                onChange={(next) => field("current_location" as never, next as never)}
-              />
-            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {c.tier && <Badge variant="outline" className="rounded-sm">Tier {c.tier}</Badge>}

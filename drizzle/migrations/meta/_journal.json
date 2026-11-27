@@ -281,6 +281,13 @@
       "when": 1795785891724,
       "tag": "0039_portal_read_assigned_productions",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795786373637,
+      "tag": "0040_portal_roster_tasks_expenses",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,8 @@ import { EmptyState } from "@/components/list-states";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
+import { fetchComposerProductions } from "@/lib/composer-productions";
+import { PortalUpcoming } from "@/components/portal/portal-upcoming";
 import { formatDateEs } from "@/lib/dates";
 import { formatEUR0 } from "@/lib/money";
 import { FolderKanban, Inbox, CalendarDays, FileSignature, User, TrendingUp, Receipt, ArrowUpRight } from "lucide-react";
@@ -25,14 +27,8 @@ function PortalHome() {
           .select("full_name, artistic_name, tier, representation_status, renewal_date")
           .eq("id", composerId!)
           .maybeSingle(),
-        supabase
-          .from("composer_projects")
-          .select("id, production, year, price_charged, net_margin")
-          .eq("composer_id", composerId!),
-        supabase
-          .from("productions")
-          .select("id, status, year, fee_amount, ic_commission_pct")
-          .eq("composer_id", composerId!),
+        Promise.resolve({ data: [] as { year: number | null; price_charged: number | null; net_margin: number | null }[] }),
+        fetchComposerProductions<any>(composerId!, "id, status, year, fee_amount").then((d) => ({ data: d })),
         supabase
           .from("opportunity_candidates")
           .select("id, opportunity:opportunities(statuses)")
@@ -78,9 +74,9 @@ function PortalHome() {
         composer: composer.data,
         kpis: {
           year,
-          revenueHist: revenue,
+          revenueHist: prods.reduce((s, p) => s + Number(p.fee_amount ?? 0), 0),
           marginHist: margin,
-          totalHist: all.length,
+          totalHist: prods.length,
           facturacionYearProds,
           activeProds,
           totalProds: prods.length,
@@ -107,12 +103,7 @@ function PortalHome() {
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--portal-muted)]">
           Tu espacio privado en Interesante Compañía. Desde aquí gestionas tu carrera, proyectos, propuestas, contratos y la comunicación con el equipo.
         </p>
-        <div className="mt-8 grid gap-px bg-[color:var(--portal-border)] sm:grid-cols-3">
-          <Chip label="Estado" value={composer?.representation_status ?? "—"} />
-          <Chip label="Tier" value={composer?.tier ?? "—"} />
-          <Chip label="Renovación" value={formatDateEs(composer?.renewal_date) || "—"} />
-        </div>
-      </section>
+</section>
 
       {/* KPIs */}
       <section>
@@ -135,26 +126,8 @@ function PortalHome() {
         </p>
       </section>
 
-      {/* Next milestone */}
-      <section className="relative flex items-stretch border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]">
-        <div className="w-1 bg-[color:var(--accent-coral)]" />
-        <div className="flex flex-1 items-center gap-5 p-6">
-          <div className="grid h-12 w-12 shrink-0 place-items-center border border-[color:var(--portal-border)] text-[color:var(--portal-fg)]">
-            <CalendarDays className="h-5 w-5" strokeWidth={1.25} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="smallcaps text-[10px] text-[color:var(--accent-coral)]">Próximo hito</p>
-            {data?.nextEvent ? (
-              <div className="mt-0.5 flex flex-wrap items-baseline justify-between gap-3">
-                <p className="font-display text-2xl font-light text-[color:var(--portal-fg)]">{data.nextEvent.title || "Sin título"}</p>
-                <span className="font-mono text-xs text-[color:var(--portal-muted)]">{formatDateEs(data.nextEvent.start_date)}</span>
-              </div>
-            ) : (
-              <EmptyState variant="inline" icon={CalendarDays} title="Sin hitos próximos" description="Las fechas clave de tus producciones aparecerán aquí." />
-            )}
-          </div>
-        </div>
-      </section>
+      {/* Próximos hitos, retrasos y tareas */}
+      {composerId && <PortalUpcoming composerId={composerId} />}
 
       {/* Quick access */}
       <section>

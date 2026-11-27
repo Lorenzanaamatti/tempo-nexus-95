@@ -45,7 +45,7 @@ export function TaskEditDialog({ taskId, onClose }: { taskId: string | null; onC
   const peopleQ = useQuery({
     queryKey: ["people-ic-team"],
     enabled: !!taskId,
-    queryFn: async () => (await supabase.from("people").select("id, full_name").eq("role", "ic_team").order("full_name")).data ?? [],
+    queryFn: async () => (await supabase.from("people").select("id, full_name, composer_id").or("role.eq.ic_team,composer_id.not.is.null").order("full_name")).data ?? [],
   });
   const prodQ = useQuery({
     queryKey: ["productions-for-tasks"],
@@ -138,7 +138,7 @@ export function TaskEditDialog({ taskId, onClose }: { taskId: string | null; onC
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sin responsable</SelectItem>
-                  {(peopleQ.data ?? []).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
+                  {(peopleQ.data ?? []).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.full_name}{p.composer_id ? " · compositor" : ""}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

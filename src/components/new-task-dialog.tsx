@@ -81,8 +81,8 @@ function NewTaskDialog({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("people")
-        .select("id, full_name, role")
-        .eq("role", "ic_team")
+        .select("id, full_name, role, composer_id")
+        .or("role.eq.ic_team,composer_id.not.is.null")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -220,7 +220,7 @@ function NewTaskDialog({
                 <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
                 <SelectContent>
                   {(peopleQ.data ?? []).map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>{p.full_name}{p.composer_id ? " · compositor" : ""}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

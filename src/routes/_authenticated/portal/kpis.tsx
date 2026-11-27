@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePortalComposer } from "@/lib/use-portal-composer";
 import { formatEUR0 } from "@/lib/money";
 import { fetchComposerProductions } from "@/lib/composer-productions";
+import { IC_FEE_SELECT, currentColumn, feeConfigFromProduction } from "@/lib/production-finance";
 
 export const Route = createFileRoute("/_authenticated/portal/kpis")({
   component: Kpis,
@@ -21,25 +22,18 @@ function Kpis() {
     enabled: !!composerId,
     queryFn: async () => {
       // Datos reales: producciones del representado (titular o asignado) y su economía.
-      const prods = await fetchComposerProductions<{ id: string; year: number | null; start_date: string | null; created_at: string; fee_amount: number | null; ic_commission: number | null; ic_commission_pct: number | null }>(
-        composerId!, "id, year, start_date, created_at, fee_amount, ic_commission, ic_commission_pct");
+      const prods = await fetchComposerProductions<any>(composerId!, `id, year, start_date, created_at, fee_amount, ${IC_FEE_SELECT}`);
       const ids = (prods ?? []).map((p) => p.id);
       const { data: lines } = ids.length
-        ? await supabase
-            .from("production_finance_lines")
-            .select("production_id, kind, amount_initial, amount_final, composer_id")
-            .in("production_id", ids)
-            .eq("kind", "gasto")
-        : { data: [] as { production_id: string; amount_final: number | null; amount_initial: number | null; composer_id: string | null }[] };
-      const costBy = new Map<string, number>();
-      for (const l of lines ?? []) {
-        if (l.composer_id && l.composer_id !== composerId) continue;
-        costBy.set(l.production_id, (costBy.get(l.production_id) ?? 0) + Number(l.amount_final ?? l.amount_initial ?? 0));
-      }
+        ? await supabase.from("production_finance_lines").select("production_id, kind, amount_initial, amount_final, paid_by_agency").in("production_id", ids)
+        : { data: [] as any[] };
+      let extraTotal = 0;
       const projects = (prods ?? []).map((p) => {
-        const revenue = Number(p.fee_amount ?? 0);
-        const commission = p.ic_commission != null ? Number(p.ic_commission) : (revenue * Number(p.ic_commission_pct ?? 0)) / 100;
-        const cost = costBy.get(p.id) ?? 0;
+        const c = currentColumn(((lines ?? []) as any[]).filter((l) => l.production_id === p.id), feeConfigFromProduction(p));
+        const revenue = c.ingresos || Number(p.fee_amount ?? 0);
+        const commission = c.fee;
+        const cost = c.gastos;
+        extraTotal += c.extraordinarios;
         const y = p.year ?? (p.start_date ? Number(p.start_date.slice(0, 4)) : Number(p.created_at.slice(0, 4)));
         return {
           year: y,
@@ -79,7 +73,7 @@ function Kpis() {
       const cur = byYear.get(thisYear);
       const prev = byYear.get(thisYear - 1);
       const missingFee = (prods ?? []).filter((p) => !Number(p.fee_amount)).length;
-      return { missingFee, years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
+      return { extraTotal, missingFee, years, total: all.length, totRevenue, totMargin, totProfit, totCommission, totCost, cur, prev };
     },
   });
 
@@ -117,6 +111,9 @@ function Kpis() {
           <Card label="Beneficio compositor" value={fmt(data?.totProfit ?? 0)} />
           <Card label="Comisión IC" value={fmt(data?.totCommission ?? 0)} />
         </div>
+        {!!data?.extraTotal && (
+          <p className="mt-3 text-sm text-muted-foreground">Gastos extraordinarios asumidos por IC (no restan de tu beneficio): {fmt(data.extraTotal)}</p>
+        )}
       </section>
 
       <section>

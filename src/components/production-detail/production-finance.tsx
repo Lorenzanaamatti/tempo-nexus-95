@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { formatNumberEs } from "@/lib/money";
-import { computeFinance, liquidationText, pctOfIncome, type IcFeeConfig } from "@/lib/production-finance";
+import { computeFinance, feeConfigFromProduction, liquidationText, pctOfIncome, type IcFeeConfig } from "@/lib/production-finance";
 import { ChangeReasonDialog, logProductionChanges, type PendingChange } from "@/components/production-detail/change-reason-dialog";
 import { toast } from "sonner";
 import { Download, Mail, Maximize2, Plus, X } from "lucide-react";
@@ -34,6 +34,7 @@ export type FinanceLineRow = {
   invoice_issued: boolean;
   invoice_settled: boolean;
   is_sale_price: boolean;
+  paid_by_agency: boolean;
   position: number;
 };
 
@@ -113,16 +114,7 @@ const parseNum = (s: string) => {
 };
 const TYPE_LABEL: Record<string, string> = { partner: "Partner", productora: "Productora", cuenta: "Cuenta", proveedor: "Proveedor" };
 
-function feeConfig(p: FinanceProduction | undefined): IcFeeConfig {
-  return {
-    mode: p?.ic_fee_mode === "fijo" ? "fijo" : "pct",
-    basis: p?.commission_basis === "margen" ? "margen" : "precio",
-    pctInitial: p?.ic_fee_pct_initial ?? p?.ic_commission_pct ?? null,
-    pctFinal: p?.ic_commission_pct ?? null,
-    fixedInitial: p?.ic_fee_fixed_initial ?? null,
-    fixedFinal: p?.ic_fee_fixed_final ?? null,
-  };
-}
+const feeConfig = (p: FinanceProduction | undefined): IcFeeConfig => feeConfigFromProduction(p);
 
 /** Campo numérico que guarda al salir. */
 function NumCell({ value, onSave, readOnly, className = "", neg = false }: { value: number | null; onSave: (v: number | null) => void; readOnly?: boolean; className?: string; neg?: boolean }) {
@@ -161,7 +153,8 @@ function TextCell({ value, onSave, readOnly, list, placeholder }: { value: strin
   );
 }
 
-export function ProductionFinance({ productionId, readOnly = false }: { productionId: string; readOnly?: boolean }) {
+/** artistInvoices: el artista (portal) puede marcar solo «Fra. recibida» y «Fra. pagada» de los gastos. */
+export function ProductionFinance({ productionId, readOnly = false, artistInvoices = false }: { productionId: string; readOnly?: boolean; artistInvoices?: boolean }) {
   const qc = useQueryClient();
   const linesQ = useFinanceLines(productionId);
   const prodQ = useFinanceProduction(productionId);
@@ -182,6 +175,12 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
     for (const k of ["finance-lines", "finance-production", "produccion"]) qc.invalidateQueries({ queryKey: [k, productionId] });
     qc.invalidateQueries({ queryKey: ["finance-counterparties"] });
     qc.invalidateQueries({ queryKey: ["finance-summary"] });
+  }
+
+  async function setExpenseFlags(line: FinanceLineRow, patch: { invoice_issued?: boolean; invoice_settled?: boolean }) {
+    const { error } = await db.rpc("portal_set_expense_invoice_flags", { _line_id: line.id, _issued: patch.invoice_issued ?? null, _settled: patch.invoice_settled ?? null });
+    if (error) return toast.error(error.message);
+    invalidate();
   }
 
   async function updateLine(line: FinanceLineRow, patch: Partial<FinanceLineRow>) {
@@ -290,15 +289,20 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
     const i = Number(l.amount_initial ?? 0), f = Number(l.amount_final ?? 0);
     return (
       <tr key={l.id}>
-        <td className={td}><TextCell value={l.concept} readOnly={readOnly} list={neg ? "finance-exp-concepts" : "finance-inc-concepts"} placeholder="Concepto" onSave={(v) => updateLine(l, { concept: v })} /></td>
+        <td className={td}>
+          <TextCell value={l.concept} readOnly={readOnly} list={neg ? "finance-exp-concepts" : "finance-inc-concepts"} placeholder="Concepto" onSave={(v) => updateLine(l, { concept: v })} />
+          {neg && (readOnly
+            ? (l.paid_by_agency && <span className="ml-1 smallcaps text-[10px] text-muted-foreground">Extraordinario · abona IC</span>)
+            : <label className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><Checkbox checked={!!l.paid_by_agency} onCheckedChange={(v) => updateLine(l, { paid_by_agency: v === true })} />Lo abona la agencia (extraordinario)</label>)}
+        </td>
         <td className={td}>{cpCell(l)}</td>
         <td className={`${td} text-right`}><NumCell neg={neg} value={l.amount_initial} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_initial", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
         <td className={`${td} text-right`}>{pctTxt(pctOfIncome(i, fin.initial.ingresos))}</td>
         <td className={`${td} text-right ${F}`}><NumCell neg={neg} value={l.amount_final} readOnly={readOnly} onSave={(v) => saveAmount(l, "amount_final", v)} className={readOnly ? "" : "inline-block w-28"} /></td>
         <td className={`${td} text-right`}>{pctTxt(pctOfIncome(f, fin.final.ingresos))}</td>
         <td className={`${td} text-right`}>{diffTxt(neg ? -(f - i) : f - i)}</td>
-        <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_issued} onCheckedChange={(v) => updateLine(l, { invoice_issued: v === true })} /></td>
-        <td className={`${td} text-center`}><Checkbox disabled={readOnly} checked={l.invoice_settled} onCheckedChange={(v) => updateLine(l, { invoice_settled: v === true })} /></td>
+        <td className={`${td} text-center`}><Checkbox disabled={readOnly && !(artistInvoices && neg)} checked={l.invoice_issued} onCheckedChange={(v) => (readOnly ? setExpenseFlags(l, { invoice_issued: v === true }) : updateLine(l, { invoice_issued: v === true }))} /></td>
+        <td className={`${td} text-center`}><Checkbox disabled={readOnly && !(artistInvoices && neg)} checked={l.invoice_settled} onCheckedChange={(v) => (readOnly ? setExpenseFlags(l, { invoice_settled: v === true }) : updateLine(l, { invoice_settled: v === true }))} /></td>
         {!readOnly && <td className={td}><ConfirmDeleteButton onConfirm={() => removeLine(l)} title="¿Eliminar esta línea?" iconOnly /></td>}
       </tr>
     );
@@ -365,6 +369,7 @@ export function ProductionFinance({ productionId, readOnly = false }: { producti
           {expenses.map(lineRow)}
           {!readOnly && <tr><td colSpan={4} className={td}><button type="button" className="text-primary" onClick={() => addLine("gasto")}><Plus className="mr-1 inline h-3.5 w-3.5" />Añadir gasto</button></td><td className={`${td} ${F}`} /><td colSpan={5} className={td} /></tr>}
           {totalRow("Total gastos", fin.initial.gastos, fin.final.gastos, true)}
+          {(fin.initial.extraordinarios > 0 || fin.final.extraordinarios > 0) && totalRow("Gastos extraordinarios asumidos por IC (no restan)", fin.initial.extraordinarios, fin.final.extraordinarios, true)}
           {spacer}
           {bandRow("c. Margen operativo", fin.initial.margen, fin.final.margen)}
           {spacer}

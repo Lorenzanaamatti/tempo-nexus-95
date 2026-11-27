@@ -8,7 +8,7 @@ import { PRODUCTION_STATUS_LABEL, PRODUCTION_KIND_LABEL, type ProductionStatus, 
 import { formatEUR } from "@/lib/money";
 import { formatDateEs } from "@/lib/dates";
 import { ProductionFinance } from "@/components/production-detail/production-finance";
-import { ProductionGanttPanel } from "@/components/production-gantt-panel";
+import { PortalWorkCalendar } from "@/components/portal/portal-work-calendar";
 
 export const Route = createFileRoute("/_authenticated/portal/proyectos")({
   component: Proyectos,
@@ -52,10 +52,10 @@ function Proyectos() {
           <div>
             <h3 className="font-display text-xl">Calendario de trabajo</h3>
             <p className="text-sm text-muted-foreground">
-              Qué se espera de cada parte y cuándo: agencia, tú y la productora. En modo lineal ves si dos proyectos se solapan.
+              Qué se espera de cada parte y cuándo: agencia, tú y la productora. Elige día, semana, mes o año; las fases retrasadas se marcan en rojo.
             </p>
           </div>
-          <ProductionGanttPanel composerId={composerId} />
+          <PortalWorkCalendar composerId={composerId} />
         </section>
       )}
       {isLoading ? (
@@ -82,7 +82,11 @@ function Section({ title, items, muted }: { title: string; items: any[]; muted?:
         {items.map((p) => (
           <li key={p.id} className="rounded-sm border border-border p-4">
             <div className="flex items-baseline justify-between gap-4">
-              <p className="font-display text-lg">{p.title}</p>
+              <div className="min-w-0">
+                <p className="font-display text-lg">{p.title}</p>
+                <p className="text-sm text-muted-foreground">{p.production_company || p.partner || "Productora sin indicar"}</p>
+                <p className="text-sm text-muted-foreground">{p.director ? `Dirección: ${p.director}` : "Director sin indicar"}</p>
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 {p.kind && (
                   <span className="smallcaps rounded-sm border border-border px-2 py-0.5 text-xs text-muted-foreground">
@@ -98,7 +102,7 @@ function Section({ title, items, muted }: { title: string; items: any[]; muted?:
               </div>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {[p.director, p.production_company || p.partner, p.platform].filter(Boolean).join(" · ") || "—"}
+              {p.platform || ""}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Info label="Entrega" value={formatDateEs(p.delivery_date)} />
@@ -109,7 +113,7 @@ function Section({ title, items, muted }: { title: string; items: any[]; muted?:
             {!muted && (
               <div className="mt-4">
                 <p className="smallcaps mb-2 text-xs text-muted-foreground">Liquidación · seguimiento económico</p>
-                <ProductionFinance productionId={p.id} readOnly />
+                <ProductionFinance productionId={p.id} readOnly artistInvoices />
               </div>
             )}
             {p.notes && (

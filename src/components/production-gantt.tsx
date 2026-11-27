@@ -1,3 +1,4 @@
+import { normalizeMilestoneStatus } from "@/lib/production-milestones";
 import { useEffect, useMemo, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { addDays, format, getISOWeekYear, startOfWeek } from "date-fns";
@@ -173,7 +174,7 @@ export function ProductionGantt({
       const markerLeft = 6 + (Math.min(dayOffset, 4) / 4) * 88;
       return (
         <>
-          <div className="absolute inset-y-1 rounded-[3px]" style={{ left: `${weekLeft}%`, width: `${weekWidth}%`, background: bg }} title={title}>
+          <div className={`absolute inset-y-1 rounded-[3px] ${normalizeMilestoneStatus(p.status) === "retrasado" ? "ring-2 ring-destructive" : ""}`} style={{ left: `${weekLeft}%`, width: `${weekWidth}%`, background: bg }} title={normalizeMilestoneStatus(p.status) === "retrasado" ? `RETRASADO · ${title}` : title}>
             <span
               className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background shadow-sm"
               style={{ left: `${markerLeft}%` }}
@@ -193,11 +194,11 @@ export function ProductionGantt({
     return (
       <>
         <div
-          className="absolute inset-y-1 flex items-center overflow-hidden rounded-[3px] px-1.5"
+          className={`absolute inset-y-1 flex items-center overflow-hidden rounded-[3px] px-1.5 ${normalizeMilestoneStatus(p.status) === "retrasado" ? "ring-2 ring-destructive" : ""}`}
           style={{ left: `${left}%`, width: `${width}%`, background: bg, color: "var(--proj-fg)" }}
-          title={title}
+          title={normalizeMilestoneStatus(p.status) === "retrasado" ? `RETRASADO · ${title}` : title}
         >
-          {inside && <span className="truncate text-[11px] font-semibold">{p.name}</span>}
+          {inside && <span className="truncate text-[11px] font-semibold">{normalizeMilestoneStatus(p.status) === "retrasado" ? "⚠ " : ""}{p.name}</span>}
         </div>
         {!inside && (
           <span className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap pl-1.5 text-[11px] font-medium text-foreground" style={{ left: `${left + width}%` }}>

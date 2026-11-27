@@ -1,0 +1,3 @@
+- IC fee and composer result are computed only by `src/lib/production-finance.ts` (`feeConfigFromProduction` + `computeFinance`/`currentColumn`); portal Facturación/KPIs reuse it so numbers match «Seguimiento económico». Expenses with `paid_by_agency` are extraordinary: excluded from gastos/resultado and reported apart.
+- Artists never write tables directly: portal edits go through SECURITY DEFINER RPCs (`portal_set_expense_invoice_flags`, `portal_set_task_done`, read `portal_my_tasks`), keeping staff-only write policies intact. Tasks are created only by staff; composers can be assignees via `people.composer_id`.
+- Table sorting/period filters use `useTableSort`/`sortRows` + `SortTh`/`DateRangeFilter` (empty values always last).
